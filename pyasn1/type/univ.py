@@ -23,10 +23,6 @@ class Integer(base.AbstractSimpleAsn1Item):
             self, value, tagSet, subtypeSpec
             )
 
-#     def __getattr__(self, attr):
-#         print 33, attr
-#         return base.AbstractSimpleAsn1Item.__getattr__(self, attr)
-
 #XXX    def __coerce__(self, other): return long(self), long(other)
     def __and__(self, value): return self.clone(self._value & value)
     def __rand__(self, value): return self.clone(value & self._value)
@@ -238,10 +234,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
         else:
             return self._value[i]
     def __add__(self, value): return self.clone(self._value + value)
-    def __radd__(self, value):
-        print self.__class__
-        print repr(value), repr(self._value)
-        return self.clone(value + self._value)
+    def __radd__(self, value): return self.clone(value + self._value)
     def __mul__(self, value): return self.clone(self._value * value)
     def __rmul__(self, value): return self.__mul__(value)
 
