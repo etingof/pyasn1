@@ -1,9 +1,17 @@
-Wed Apr  6 18:48:40 MSD 2005
-----------------------------
+Revision 0.0.2a
+---------------
 
+* ConstraintsIntersection.isSuperTypeOf() and 
+  ConstraintsIntersection.hasConstraint() implemented
+* Bugfix to NamedValues initialization code
+* +/- operators added to NamedValues objects
+* Integer.__abs__() & Integer.subtype() added
+* ObjectIdentifier.prettyOut() fixes
+* Allow subclass components at SequenceAndSetBase
+* AbstractConstraint.__cmp__() dropped
 * error.Asn1Error replaced with error.PyAsn1Error
 
-Mon Apr  4 08:37:02 MSD 2005
-----------------------------
+Revision 0.0.1a
+---------------
 
 * Initial public alpha release
