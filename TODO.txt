@@ -1,0 +1,44 @@
+
+* Implement the rest of ASN.1 types (Real etc)
+* Support large tag numbers at codecs
+* Specialize ASN.1 character and useful types
+* Come up with simpler API for deeply nested constructed objects
+  addressing
+
+ber.decoder:
+* suspend codec on underrun error ?
+* class-static components map (in simple type classes)
+* verify error cases in test suite
+* present subtypes ?
+* component presence check wont work at innertypeconst
+* optimize en/decoders
+* add the rest of ASN1 types/codecs
+* type vs value, defaultValue
+
+ber.encoder:
+* Asn1Item.clone() / shallowcopy issue
+* large tags encoder
+* large length encoder?
+* codec restart
+* preserve compatible API whenever stateful codec gets implemented
+* restartable vs incremental
+* plan: make a stateless univeral decoder, then convert it to restartable
+       then to incremental
+
+type.useful:
+* may need to implement prettyIn/Out
+
+type.char:
+* may need to implement constraints
+
+type.univ:
+* simpler API to constructed objects: value init, recursive
+
+type.namedtypes
+* type vs tagset name convention
+
+general:
+
+* profile
+* windows
+* how untagged TagSet should be initialized?

@@ -1,0 +1,9 @@
+Wed Apr  6 18:48:40 MSD 2005
+----------------------------
+
+* error.Asn1Error replaced with error.PyAsn1Error
+
+Mon Apr  4 08:37:02 MSD 2005
+----------------------------
+
+* Initial public alpha release
