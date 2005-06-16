@@ -2,10 +2,11 @@ import type.suite
 import codec.ber.suite
 import codec.cer.suite
 import codec.der.suite
+from pyasn1.error import PyAsn1Error
 try:
     import unittest
 except ImportError:
-    raise error.PyAsn1Error(
+    raise PyAsn1Error(
         'PyUnit package\'s missing. See http://pyunit.sourceforge.net/'
         )
 
