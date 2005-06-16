@@ -68,7 +68,9 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
     def __cmp__(self, value): return cmp(self._value, value)
     def __hash__(self): return self.__hashedValue
 
-    def __nonzero__(self): return bool(self._value)
+    def __nonzero__(self):
+        if self._value: return 1
+        else: return 0
 
     def clone(self, value=None, tagSet=None, subtypeSpec=None):
         if value is None and tagSet is None and subtypeSpec is None:

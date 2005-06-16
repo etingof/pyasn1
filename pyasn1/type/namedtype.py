@@ -36,7 +36,9 @@ class NamedTypes:
     
     def __getitem__(self, idx): return self.__namedTypes[idx]
 
-    def __nonzero__(self): return bool(self.__namedTypes)
+    def __nonzero__(self):
+        if self.__namedTypes: return 1
+        else: return 0
     def __len__(self): return len(self.__namedTypes)
     
     def getTypeByPosition(self, idx):
