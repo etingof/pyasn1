@@ -56,9 +56,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
             value = self._prettyIn(value)
             self._verifySubtypeSpec(value)
             self._value = value
-        self.__hashedValue = hash(
-            (self._value, self._tagSet, self._subtypeSpec)
-            )
+        self.__hashedValue = hash(self._value)
 
     def __repr__(self):
         return self.__class__.__name__ + '(' + repr(
