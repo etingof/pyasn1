@@ -409,7 +409,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             t = componentType[idx].getType()
             if not t.isSuperTypeOf(value):
                 raise error.PyAsn1Error('Component type error %s vs %s' %
-                                        (t.getTagSet(), value.getTagSet()))
+                                        (repr(t), repr(value)))
 
     def getComponentByName(self, name):
         return self.getComponentByPosition(
