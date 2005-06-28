@@ -51,7 +51,7 @@ class Integer(base.AbstractSimpleAsn1Item):
     def __float__(self): return float(self._value)    
     def __abs__(self): return abs(self._value)
     
-    def _prettyIn(self, value):
+    def prettyIn(self, value):
         if type(value) != types.StringType:
             return long(value)
         r = self.__namedValues.getValue(value)
@@ -67,12 +67,12 @@ class Integer(base.AbstractSimpleAsn1Item):
                     'Can\'t coerce %s into integer' % value
                     )
 
-    def _prettyOut(self, value):
+    def prettyOut(self, value):
         r = self.__namedValues.getName(value)
         if r is not None:
             return '%s(%s)' % (r, value)
         else:
-            return value
+            return str(value)
 
     def getNamedValues(self): return self.__namedValues
 
@@ -180,7 +180,7 @@ class BitString(base.AbstractSimpleAsn1Item):
         def __getslice__(self, i, j):
             return self[max(0, i):max(0, j):]
 
-    def _prettyIn(self, value):
+    def prettyIn(self, value):
         r = []
         if not value:
             return ()
@@ -213,7 +213,7 @@ class BitString(base.AbstractSimpleAsn1Item):
                 r[i] = 1
         return tuple(r)
 
-    def _prettyOut(self, value):
+    def prettyOut(self, value):
         return '\'%s\'B' % string.join(map(str, value), '')
         
 class OctetString(base.AbstractSimpleAsn1Item):
@@ -222,8 +222,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
         )
     defaultValue = ''
 
-    def _prettyIn(self, value): return str(value)
-    def _prettyOut(self, value): return repr(value)
+    def prettyIn(self, value): return str(value)
     
     # Immutable sequence object protocol
     
@@ -285,7 +284,7 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
                 return 1
         return 0
 
-    def _prettyIn(self, value):
+    def prettyIn(self, value):
         """Dotted -> tuple of numerics OID converter"""
         if type(value) is types.TupleType:
             return value
@@ -305,7 +304,7 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
                         )
         return tuple(r)
 
-    def _prettyOut(self, value):
+    def prettyOut(self, value):
         """Tuple of numerics -> dotted string OID converter"""
         r = []
         for subOid in value:

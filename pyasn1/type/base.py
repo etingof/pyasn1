@@ -53,14 +53,14 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         if value is None:
             self._value = self.defaultValue
         else:
-            value = self._prettyIn(value)
+            value = self.prettyIn(value)
             self._verifySubtypeSpec(value)
             self._value = value
         self.__hashedValue = hash(self._value)
 
     def __repr__(self):
         return self.__class__.__name__ + '(' + repr(
-            self._prettyOut(self._value)
+            self.prettyOut(self._value)
             ) +')'
     def __str__(self): return str(self._value)
     def __cmp__(self, value): return cmp(self._value, value)
@@ -97,10 +97,10 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
             subtypeSpec = subtypeSpec + self._subtypeSpec
         return self.__class__(value, tagSet, subtypeSpec)
 
-    def _prettyIn(self, value): return value
-    def _prettyOut(self, value): return value
+    def prettyIn(self, value): return value
+    def prettyOut(self, value): return str(value)
 
-    def prettyPrinter(self, scope=0): return self._prettyOut(self._value)
+    def prettyPrinter(self, scope=0): return self.prettyOut(self._value)
     
 #
 # Constructed types:
