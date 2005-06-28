@@ -1,3 +1,11 @@
+Revision 0.0.3a
+---------------
+
+* Simple ASN1 objects now hash to their Python value and don't
+  depend upon tag/constraints/etc.
+* prettyIn & prettyOut methods of SimplleAsn1Object become public
+* many syntax fixes
+
 Revision 0.0.2a
 ---------------
 
