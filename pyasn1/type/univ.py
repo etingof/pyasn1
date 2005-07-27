@@ -222,6 +222,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
         )
     defaultValue = ''
 
+    def prettyOut(self, value): return repr(str(value))
     def prettyIn(self, value): return str(value)
     
     # Immutable sequence object protocol
