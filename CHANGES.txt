@@ -1,3 +1,8 @@
+Revision 0.0.4a
+---------------
+
+* Asn1ItemBase.prettyPrinter() -> *.prettyPrint()
+
 Revision 0.0.3a
 ---------------
 
