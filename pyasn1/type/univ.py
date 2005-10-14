@@ -376,11 +376,11 @@ class SetOf(base.AbstractConstructedAsn1Item):
         if self._componentType is not None:
             return self._componentType.getTypeMap()
 
-    def prettyPrinter(self, scope=0):
+    def prettyPrint(self, scope=0):
         scope = scope + 1
         r = self.__class__.__name__ + ':\n'        
         for idx in range(len(self._componentValues)):
-            r = r + ' '*scope + self._componentValues[idx].prettyPrinter(scope)
+            r = r + ' '*scope + self._componentValues[idx].prettyPrint(scope)
         return r
 
 class SequenceOf(SetOf):
@@ -468,7 +468,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                         'Uninitialized component #%s at %s' % (idx, repr(self))
                         )
 
-    def prettyPrinter(self, scope=0):
+    def prettyPrint(self, scope=0):
         scope = scope+1
         r = self.__class__.__name__ + ':\n'
         for idx in range(len(self._componentValues)):
@@ -480,7 +480,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                 else:
                     r = r + componentType.getNameByPosition(idx)
                 r = '%s=%s\n' % (
-                    r, self._componentValues[idx].prettyPrinter(scope)
+                    r, self._componentValues[idx].prettyPrint(scope)
                     )
         return r
 
