@@ -206,6 +206,7 @@ codecMap = {
     univ.OctetString.tagSet: OctetStringEncoder(),
     univ.Null.tagSet: NullEncoder(),
     univ.ObjectIdentifier.tagSet: ObjectIdentifierEncoder(),
+    univ.Enumerated.tagSet: IntegerEncoder(),
     # Sequence & Set have same tags as SequenceOf & SetOf
     univ.SequenceOf.tagSet: SequenceOfEncoder(),
     univ.SetOf.tagSet: SequenceOfEncoder(),

@@ -307,6 +307,7 @@ codecMap = {
     univ.OctetString.tagSet: OctetStringDecoder(),
     univ.Null.tagSet: NullDecoder(),
     univ.ObjectIdentifier.tagSet: ObjectIdentifierDecoder(),
+    univ.Enumerated.tagSet: IntegerDecoder(),
     univ.Sequence.tagSet: SequenceDecoder(),
     univ.Set.tagSet: SetDecoder(),
     univ.Choice.tagSet: ChoiceDecoder(),
