@@ -320,9 +320,9 @@ class Real(base.AbstractSimpleAsn1Item):
         )
     defaultValue = 0.0
 
-class Enumerated(base.AbstractSimpleAsn1Item):
+class Enumerated(Integer):
     tagSet = tag.initTagSet(
-        tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x10)
+        tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x0A)
         )
     defaultValue = 0
 
