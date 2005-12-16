@@ -36,8 +36,8 @@ class AbstractConstraint:
             self.__class__.__name__,
             string.join(map(lambda x: str(x), self._values), ', ')
         )
-#    def __cmp__(self, other):
-#        return cmp((self.__class__, self._values), other)
+    # __cmp__ must accompany __hash__
+    def __cmp__(self, other): return cmp(self.__hashedValues, other)
     def __eq__(self, other):
         return self is other or self.__hashedValues == other
     def __hash__(self): return self.__hashedValues
