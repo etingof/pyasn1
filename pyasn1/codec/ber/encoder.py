@@ -93,8 +93,7 @@ class IntegerEncoder(AbstractItemEncoder):
 
 class BitStringEncoder(AbstractItemEncoder):
     def _encodeValue(self, encodeFun, value, defMode, maxChunkSize):
-        maxChunkSize = maxChunkSize*8L  # count in octets
-        if len(value) <= maxChunkSize:
+        if not maxChunkSize or len(value) <= maxChunkSize*8:
             r = {}; l = len(value); p = j = 0
             while p < l:
                 i, j = divmod(p, 8)
@@ -107,7 +106,8 @@ class BitStringEncoder(AbstractItemEncoder):
         else:
             pos = 0; substrate = ''
             while 1:
-                v = value.clone(value=value[pos:pos+maxChunkSize])
+                # count in octets
+                v = value.clone(value=value[pos*8:pos*8+maxChunkSize*8])
                 if not v:
                     break
                 substrate = substrate + encodeFun(v, defMode, maxChunkSize)
@@ -116,7 +116,7 @@ class BitStringEncoder(AbstractItemEncoder):
 
 class OctetStringEncoder(AbstractItemEncoder):
     def _encodeValue(self, encodeFun, value, defMode, maxChunkSize):
-        if len(value) <= maxChunkSize:
+        if not maxChunkSize or len(value) <= maxChunkSize:
             return str(value), 0
         else:
             pos = 0; substrate = ''
@@ -224,7 +224,7 @@ class Encoder:
     def __init__(self, codecMap):
         self.__codecMap = codecMap
 
-    def __call__(self, value, defMode=1, maxChunkSize=0xffffffffl):
+    def __call__(self, value, defMode=1, maxChunkSize=0):
         tagSet = value.getTagSet()
         if len(tagSet) > 1:
             concreteEncoder = explicitlyTaggedItemEncoder

@@ -78,7 +78,7 @@ codecMap.update({
     })
         
 class Encoder(encoder.Encoder):
-    def __call__(self, client, defMode=0, maxChunkSize=0xffffffffl):
+    def __call__(self, client, defMode=0, maxChunkSize=0):
         return encoder.Encoder.__call__(self, client, defMode, maxChunkSize)
         
 encode = Encoder(codecMap)
