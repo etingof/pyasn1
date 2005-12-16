@@ -16,7 +16,7 @@ class AbstractItemEncoder:
 
     def _encodeLength(self, length, defMode):
         if not defMode and self.supportIndefLenMode:
-            return chr(0x80)
+            return '\x80'
         if length < 0x80:
             return chr(length)
         elif length < 0xFF:
@@ -76,28 +76,20 @@ explicitlyTaggedItemEncoder = ExplicitlyTaggedItemEncoder()
 class IntegerEncoder(AbstractItemEncoder):
     supportIndefLenMode = 0
     def _encodeValue(self, encodeFun, value, defMode, maxChunkSize):
-        substrate = ''
+        octets = []
         value = long(value) # to save on ops on asn1 type
-        # The 0 and -1 values need to be handled separately since
-        # they are the terminating cases of the positive and negative
-        # cases repectively.
-        if value == 0:
-            substrate = '\000'
-        elif value == -1:
-            substrate = '\377'
-        elif value < 0:
-            while value <> -1:
-                substrate = chr(value & 0xff) + substrate
-                value = value >> 8
-            if ord(substrate[0]) & 0x80 == 0:
-                substrate = chr(0xff) + substrate
-        else:
-            while value > 0:
-                substrate = chr(value & 0xff) + substrate
-                value = value >> 8
-            if ord(substrate[0]) & 0x80 <> 0:
-                substrate = chr(0x00) + substrate
-        return substrate, 0
+        while 1:
+            octets.insert(0, value & 0xff)
+            if value == 0 or value == -1:
+                break
+            value = value >> 8
+        if value == 0 and octets[0] & 0x80:
+            octets.insert(0, 0)
+        while len(octets) > 1 and \
+                  (octets[0] == 0 and octets[1] & 0x80 == 0 or \
+                   octets[0] == 0xff and octets[1] & 0x80 != 0):
+            del octets[0]
+        return string.join(map(chr, octets), ''), 0
 
 class BitStringEncoder(AbstractItemEncoder):
     def _encodeValue(self, encodeFun, value, defMode, maxChunkSize):

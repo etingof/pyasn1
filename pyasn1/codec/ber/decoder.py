@@ -27,12 +27,13 @@ class IntegerDecoder(AbstractDecoder):
                      state, decodeFun):
         if not substrate:
             raise error.PyAsn1Error('Empty substrate')
-        bytes = map(ord, substrate)
-        if bytes[0] & 0x80:
-            bytes.insert(0, -1L)
-        value = 0L
-        for byte in bytes:
-            value = value << 8 | byte
+        octets = map(ord, substrate)
+        if octets[0] & 0x80:
+            value = -1L
+        else:
+            value = 0L
+        for octet in octets:
+            value = value << 8 | octet
         try:
             value = int(value)
         except OverflowError:
