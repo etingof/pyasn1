@@ -2,6 +2,8 @@ Revision 0.0.5a
 ---------------
 
 - Integer BER codec at reworked fixing negative values encoding bug.
+- Adjustments to make it running on Python 1.5 (tests don't work
+  probably because of different repr() of binary string constants)
 
 Revision 0.0.4a
 ---------------
