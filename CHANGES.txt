@@ -1,3 +1,8 @@
+Revision 0.0.5a
+---------------
+
+- Integer BER codec at reworked fixing negative values encoding bug.
+
 Revision 0.0.4a
 ---------------
 
