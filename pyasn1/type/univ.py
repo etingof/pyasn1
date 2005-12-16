@@ -506,7 +506,7 @@ class Set(SequenceAndSetBase):
             )
         if innerFlag and hasattr(c, 'getComponent'):
             # get inner component by inner tagSet
-            return c.getComponent(True)
+            return c.getComponent(1)
         else:
             # get outer component by inner tagSet
             return c
