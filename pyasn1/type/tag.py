@@ -48,6 +48,8 @@ class TagSet:
         self.__baseTag = baseTag
         self.__superTags = superTags
         self.__hashedSuperTags = hash(superTags)
+        self.__lenOfSuperTags = len(superTags)
+        
     def __repr__(self):
         return '%s(%s)' % (
             self.__class__.__name__,
@@ -93,17 +95,15 @@ class TagSet:
     def __eq__(self, other):
         return self is other or self.__hashedSuperTags == other
     def __hash__(self): return self.__hashedSuperTags
-    def __len__(self): return len(self.__superTags)
+    def __len__(self): return self.__lenOfSuperTags
     def isSuperTagSetOf(self, tagSet):
-        # XXX optimization?
-        l = len(self.__superTags)
-        if len(tagSet) < l:
+        if len(tagSet) < self.__lenOfSuperTags:
             return
-        idx = 0
-        while idx < l:
+        idx = self.__lenOfSuperTags - 1
+        while idx >= 0:
             if self.__superTags[idx] != tagSet[idx]:
                 return
-            idx = idx + 1
+            idx = idx - 1
         return 1
     
 def initTagSet(tag): return TagSet(tag, tag)
