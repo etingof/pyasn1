@@ -6,6 +6,7 @@ Revision 0.0.5a
   probably because of different repr() of binary string constants)
 - Bugfix to Constraints use as mapping keys.
 - Bugfix to Integer & BitString clone() methods
+- Minor performance optimization of TagSet.isSuperTagSetOf() method
 
 Revision 0.0.4a
 ---------------
