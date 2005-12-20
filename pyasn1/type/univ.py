@@ -78,6 +78,9 @@ class Integer(base.AbstractSimpleAsn1Item):
 
     def clone(self, value=None, tagSet=None, subtypeSpec=None,
               namedValues=None):
+        if value is None and tagSet is None and subtypeSpec is None \
+               and namedValues is None:
+            return self       
         if value is None and self._value is not self.defaultValue:
             value = self._value
         if tagSet is None:
@@ -134,10 +137,17 @@ class BitString(base.AbstractSimpleAsn1Item):
 
     def clone(self, value=None, tagSet=None, subtypeSpec=None,
               namedValues=None):
-        if value is None: value = self._value
-        if tagSet is None: tagSet = self._tagSet
-        if subtypeSpec is None: subtypeSpec = self._subtypeSpec
-        if namedValues is None: namedValues = self.__namedValues
+        if value is None and tagSet is None and subtypeSpec is None \
+               and namedValues is None:
+            return self       
+        if value is None:
+            value = self._value
+        if tagSet is None:
+            tagSet = self._tagSet
+        if subtypeSpec is None:
+            subtypeSpec = self._subtypeSpec
+        if namedValues is None:
+            namedValues = self.__namedValues
         return self.__class__(value, tagSet, subtypeSpec, namedValues)
 
     def subtype(self, value=None, implicitTag=None, explicitTag=None,
