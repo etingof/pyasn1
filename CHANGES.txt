@@ -5,6 +5,7 @@ Revision 0.0.5a
 - Adjustments to make it running on Python 1.5 (tests don't work
   probably because of different repr() of binary string constants)
 - Bugfix to Constraints use as mapping keys.
+- Bugfix to Integer & BitString clone() methods
 
 Revision 0.0.4a
 ---------------
