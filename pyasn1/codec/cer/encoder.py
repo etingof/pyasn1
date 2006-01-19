@@ -39,11 +39,10 @@ class SetOfEncoder(encoder.SequenceOfEncoder):
         if hasattr(client, 'setDefaultComponents'):
             client.setDefaultComponents()
         client.verifySizeSpec()
-        # Guess client type basing on number of component types.
-        # This is certainly a hack but how do I distinguish one from
-        # another if they have the same tags&constraints?
         substrate = ''; idx = len(client)
-        if len(client) > 1:
+        # This is certainly a hack but how else do I distinguish SetOf
+        # from Set if they have the same tags&constraints?
+        if hasattr(client, 'getDefaultComponentByPosition'):
             # Set
             comps = []
             while idx > 0:
