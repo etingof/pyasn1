@@ -1,4 +1,3 @@
-
 * Implement the rest of ASN.1 types (Real etc)
 * Support large tag numbers at codecs
 * Specialize ASN.1 character and useful types
@@ -39,6 +38,4 @@ type.namedtypes
 
 general:
 
-* profile
-* windows
 * how untagged TagSet should be initialized?
