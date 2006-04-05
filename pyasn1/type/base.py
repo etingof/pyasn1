@@ -70,10 +70,11 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         if self._value: return 1
         else: return 0
 
-    def clone(self, value=None, tagSet=None, subtypeSpec=None):
+    def clone(self, value=None, tagSet=None, subtypeSpec=None,
+              cloneValueFlag=None):
         if value is None and tagSet is None and subtypeSpec is None:
             return self
-        if value is None and self._value is not self.defaultValue:
+        if cloneValueFlag:
             value = self._value
         if tagSet is None:
             tagSet = self._tagSet
@@ -82,8 +83,8 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         return self.__class__(value, tagSet, subtypeSpec)
 
     def subtype(self, value=None, implicitTag=None, explicitTag=None,
-                subtypeSpec=None):
-        if value is None and self._value is not self.defaultValue:
+                subtypeSpec=None, cloneValueFlag=None):
+        if cloneValueFlag:
             value = self._value
         if implicitTag is not None:
             tagSet = self._tagSet.tagImplicitly(implicitTag)
@@ -154,26 +155,21 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
     def getComponentTypeMap(self):
         raise error.PyAsn1Error('Method not implemented')
 
-    def clone(self, componentType=None, tagSet=None, subtypeSpec=None,
-              sizeSpec=None):
-        if componentType is None:
-            componentType = self._componentType
+    def clone(self, tagSet=None, subtypeSpec=None, sizeSpec=None, 
+              cloneValueFlag=None):
         if tagSet is None:
             tagSet = self._tagSet
         if subtypeSpec is None:
             subtypeSpec = self._subtypeSpec
         if sizeSpec is None:
             sizeSpec = self._sizeSpec
-        r = self.__class__(componentType, tagSet, subtypeSpec, sizeSpec)
-        if componentType is self._componentType and \
-               self.getComponentType() is not None:
-            self._cloneComponentValues(r)  # XXX when do we clone inner vals?
+        r = self.__class__(self._componentType, tagSet, subtypeSpec, sizeSpec)
+        if cloneValueFlag:
+            self._cloneComponentValues(r, cloneValueFlag)
         return r
 
-    def subtype(self, componentType=None, implicitTag=None, explicitTag=None,
-                subtypeSpec=None, sizeSpec=None):
-        if componentType is None:
-            componentType = self._componentType
+    def subtype(self, implicitTag=None, explicitTag=None, subtypeSpec=None,
+                sizeSpec=None, cloneValueFlag=None):
         if implicitTag is not None:
             tagSet = self._tagSet.tagImplicitly(implicitTag)
         elif explicitTag is not None:
@@ -188,10 +184,9 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
             sizeSpec = self._sizeSpec
         else:
             sizeSpec = sizeSpec + self._sizeSpec
-        r = self.__class__(componentType, tagSet, subtypeSpec, sizeSpec)
-        if componentType is self._componentType and \
-               self.getComponentType() is not None:
-            self._cloneComponentValues(r)  # XXX when do we clone inner vals?
+        r = self.__class__(self._componentType, tagSet, subtypeSpec, sizeSpec)
+        if cloneValueFlag:
+            self._cloneComponentValues(r, cloneValueFlag)
         return r
 
     def _verifyComponent(self, idx, value): pass

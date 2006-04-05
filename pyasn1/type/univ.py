@@ -77,11 +77,11 @@ class Integer(base.AbstractSimpleAsn1Item):
     def getNamedValues(self): return self.__namedValues
 
     def clone(self, value=None, tagSet=None, subtypeSpec=None,
-              namedValues=None):
+              namedValues=None, cloneValueFlag=None):
         if value is None and tagSet is None and subtypeSpec is None \
                and namedValues is None:
-            return self       
-        if value is None and self._value is not self.defaultValue:
+            return self
+        if cloneValueFlag:
             value = self._value
         if tagSet is None:
             tagSet = self._tagSet
@@ -92,8 +92,8 @@ class Integer(base.AbstractSimpleAsn1Item):
         return self.__class__(value, tagSet, subtypeSpec, namedValues)
 
     def subtype(self, value=None, implicitTag=None, explicitTag=None,
-                subtypeSpec=None, namedValues=None):
-        if value is None and self._value is not self.defaultValue:
+                subtypeSpec=None, namedValues=None, cloneValueFlag=None):
+        if cloneValueFlag:
             value = self._value
         if implicitTag is not None:
             tagSet = self._tagSet.tagImplicitly(implicitTag)
@@ -136,11 +136,11 @@ class BitString(base.AbstractSimpleAsn1Item):
             )
 
     def clone(self, value=None, tagSet=None, subtypeSpec=None,
-              namedValues=None):
+              namedValues=None, cloneValueFlag=None):
         if value is None and tagSet is None and subtypeSpec is None \
                and namedValues is None:
             return self       
-        if value is None:
+        if cloneValueFlag:
             value = self._value
         if tagSet is None:
             tagSet = self._tagSet
@@ -151,8 +151,8 @@ class BitString(base.AbstractSimpleAsn1Item):
         return self.__class__(value, tagSet, subtypeSpec, namedValues)
 
     def subtype(self, value=None, implicitTag=None, explicitTag=None,
-                subtypeSpec=None, namedValues=None):
-        if value is None and self._value is not self.defaultValue:
+                subtypeSpec=None, namedValues=None, cloneValueFlag=None):
+        if cloneValueFlag:
             value = self._value
         if implicitTag is not None:
             tagSet = self._tagSet.tagImplicitly(implicitTag)
@@ -344,12 +344,12 @@ class SetOf(base.AbstractConstructedAsn1Item):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x11)
         )    
 
-    def _cloneComponentValues(self, myClone):
+    def _cloneComponentValues(self, myClone, cloneValueFlag):
         idx = 0; l = len(self._componentValues)
         while idx < l:
             if self._componentValues[idx] is not None:
                 myClone.setComponentByPosition(
-                    idx, self._componentValues[idx].clone()
+                    idx, self._componentValues[idx].clone(cloneValueFlag=cloneValueFlag)
                     )
             idx = idx + 1
         
@@ -400,12 +400,12 @@ class SequenceOf(SetOf):
 
 class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
     componentType = namedtype.NamedTypes()
-    def _cloneComponentValues(self, myClone):
+    def _cloneComponentValues(self, myClone, cloneValueFlag):
         idx = 0; l = len(self._componentValues)
         while idx < l:
             if self._componentValues[idx] is not None:
                 myClone.setComponentByPosition(
-                    idx, self._componentValues[idx].clone()
+                    idx, self._componentValues[idx].clone(cloneValueFlag=cloneValueFlag)
                     )
             idx = idx + 1
 
@@ -553,14 +553,16 @@ class Choice(Set):
         ' '*int(self.getComponent() is not None)  # hackerish XXX
         )
 
-    def _cloneComponentValues(self, myClone):
+    def _cloneComponentValues(self, myClone, cloneValueFlag):
         try:
             c = self.getComponent()
         except error.PyAsn1Error:
             pass
         else:
             tagSet = getattr(c, 'getEffectiveTagSet', c.getTagSet)()
-            myClone.setComponentByType(tagSet, c.clone())
+            myClone.setComponentByType(
+                tagSet, c.clone(cloneValueFlag=cloneValueFlag)
+                )
 
     def setComponentByPosition(self, idx, value=None):
         l = len(self._componentValues)
