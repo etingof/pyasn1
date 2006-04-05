@@ -32,6 +32,8 @@ class Tag:
     def __cmp__(self, other): return cmp(self.__uniqTag, other)
     def __eq__(self, other):
         return self is other or self.__hashedUniqTag == other
+    def __ne__(self, other):
+        return not (self is other) and self.__hashedUniqTag != other
     def __hash__(self): return self.__hashedUniqTag
     def __getitem__(self, idx): return self.__tag[idx]
     def __and__(self, (tagClass, tagFormat, tagId)):
@@ -94,6 +96,8 @@ class TagSet:
     def __cmp__(self, other): return cmp(self.__superTags, other)
     def __eq__(self, other):
         return self is other or self.__hashedSuperTags == other
+    def __ne__(self, other):
+        return not (self is other) and self.__hashedSuperTags != other
     def __hash__(self): return self.__hashedSuperTags
     def __len__(self): return self.__lenOfSuperTags
     def isSuperTagSetOf(self, tagSet):
