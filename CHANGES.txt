@@ -5,11 +5,13 @@ Revision 0.0.5a
 - Adjustments to make it running on Python 1.5 (tests don't work
   probably because of different repr() of binary string constants)
 - clone() and subtype() methods of ASN.1 classes now accept optional
-  cloneValueFlag flag which controls original value inheritance. The
-  default is *not* to inherit original value for performance reasons
+  cloneValueFlag flag which controls original value inheritance. This
+  flag is regarded in constructed classes but ignored in scalar ones. 
+  The default is *not* to inherit original value for performance reasons
   (this may affect backward compatibility).
   Performance penalty may be huge on deeply nested Constructed objects
   re-creation.
+- Bugfix to BitString BER decoder (trailing bits not regarded).
 - Bugfix to Constraints use as mapping keys.
 - Bugfix to Integer & BitString clone() methods
 - Minor performance optimization of TagSet.isSuperTagSetOf() method
