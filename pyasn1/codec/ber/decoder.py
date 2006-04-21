@@ -57,14 +57,13 @@ class BitStringDecoder(AbstractDecoder):
                     'Trailing bits overflow %s' % trailingBits
                     )
             substrate = substrate[1:]
-            p = 0; l = len(substrate); b = []
-            while p < l:
+            lsb = p = 0; l = len(substrate)-1; b = []
+            while p <= l:
                 if p == l:
-                    j = 7-trailingBits
-                else:
-                    j = 7
+                    lsb = trailingBits
+                j = 7                    
                 o = ord(substrate[p])
-                while j >= 0:
+                while j >= lsb:
                     b.append((o>>j)&0x01)
                     j = j - 1
                 p = p + 1
