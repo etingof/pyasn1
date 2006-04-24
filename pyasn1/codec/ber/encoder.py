@@ -1,6 +1,6 @@
 # BER encoder
 import string
-from pyasn1.type import tag, univ, char, useful
+from pyasn1.type import base, tag, univ, char, useful
 from pyasn1.codec.ber import eoo
 from pyasn1 import error
 
@@ -68,8 +68,12 @@ class EndOfOctetsEncoder(AbstractItemEncoder):
 
 class ExplicitlyTaggedItemEncoder(AbstractItemEncoder):
     def _encodeValue(self, encodeFun, value, defMode, maxChunkSize):
-        return encodeFun(value.clone(tagSet=value.getTagSet()[:-1]),
-                         defMode, maxChunkSize), 1
+        if isinstance(value, base.AbstractConstructedAsn1Item):
+            value = value.clone(tagSet=value.getTagSet()[:-1],
+                                cloneValueFlag=1)
+        else:
+            value = value.clone(tagSet=value.getTagSet()[:-1])
+        return encodeFun(value, defMode, maxChunkSize), 1
 
 explicitlyTaggedItemEncoder = ExplicitlyTaggedItemEncoder()
 
@@ -107,7 +111,7 @@ class BitStringEncoder(AbstractItemEncoder):
             pos = 0; substrate = ''
             while 1:
                 # count in octets
-                v = value.clone(value=value[pos*8:pos*8+maxChunkSize*8])
+                v = value.clone(value[pos*8:pos*8+maxChunkSize*8])
                 if not v:
                     break
                 substrate = substrate + encodeFun(v, defMode, maxChunkSize)
@@ -121,7 +125,7 @@ class OctetStringEncoder(AbstractItemEncoder):
         else:
             pos = 0; substrate = ''
             while 1:
-                v = value.clone(value=value[pos:pos+maxChunkSize])
+                v = value.clone(value[pos:pos+maxChunkSize])
                 if not v:
                     break
                 substrate = substrate + encodeFun(v, defMode, maxChunkSize)
