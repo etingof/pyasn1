@@ -4,7 +4,7 @@ from pyasn1.codec.ber import decoder
 from pyasn1 import error
 
 class BooleanDecoder(decoder.AbstractDecoder):
-    protoComponent = univ.Boolean
+    protoComponent = univ.Boolean(0)
     def valueDecoder(self, substrate, asn1Spec, tagSet, length,
                      state, decodeFun):
         if not substrate:

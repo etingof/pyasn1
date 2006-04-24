@@ -8,7 +8,7 @@ class AbstractDecoder:
     protoComponent = None
     def _createComponent(self, tagSet, asn1Spec):
         if asn1Spec is None:
-            return self.protoComponent(tagSet=tagSet)
+            return self.protoComponent.clone(tagSet=tagSet)
         else:
             return asn1Spec.clone()
         
@@ -22,7 +22,7 @@ class EndOfOctetsDecoder(AbstractDecoder):
         return eoo.endOfOctets, substrate
 
 class IntegerDecoder(AbstractDecoder):
-    protoComponent = univ.Integer
+    protoComponent = univ.Integer(0)
     def valueDecoder(self, substrate, asn1Spec, tagSet, length,
                      state, decodeFun):
         if not substrate:
@@ -41,10 +41,10 @@ class IntegerDecoder(AbstractDecoder):
         return self._createComponent(tagSet, asn1Spec).clone(value), substrate
 
 class BooleanDecoder(IntegerDecoder):
-    protoComponent = univ.Boolean
+    protoComponent = univ.Boolean(0)
 
 class BitStringDecoder(AbstractDecoder):
-    protoComponent = univ.BitString
+    protoComponent = univ.BitString(())
     def valueDecoder(self, substrate, asn1Spec, tagSet, length,
                      state, decodeFun):
         r = self._createComponent(tagSet, asn1Spec) # XXX use default tagset
@@ -94,7 +94,7 @@ class BitStringDecoder(AbstractDecoder):
         return r, substrate
 
 class OctetStringDecoder(AbstractDecoder):
-    protoComponent = univ.OctetString
+    protoComponent = univ.OctetString('')
     def valueDecoder(self, substrate, asn1Spec, tagSet, length,
                      state, decodeFun):
         r = self._createComponent(tagSet, asn1Spec) # XXX use default tagset
@@ -126,7 +126,7 @@ class OctetStringDecoder(AbstractDecoder):
         return r, substrate
 
 class NullDecoder(AbstractDecoder):
-    protoComponent = univ.Null
+    protoComponent = univ.Null('')
     def valueDecoder(self, substrate, asn1Spec, tagSet,
                      length, state, decodeFun):
         r = self._createComponent(tagSet, asn1Spec) # XXX use default tagset
@@ -135,7 +135,7 @@ class NullDecoder(AbstractDecoder):
         return r, substrate
 
 class ObjectIdentifierDecoder(AbstractDecoder):
-    protoComponent = univ.ObjectIdentifier
+    protoComponent = univ.ObjectIdentifier(())
     def valueDecoder(self, substrate, asn1Spec, tagSet, length,
                      state, decodeFun):
         r = self._createComponent(tagSet, asn1Spec) # XXX use default tagset
@@ -173,7 +173,7 @@ class ObjectIdentifierDecoder(AbstractDecoder):
         return r.clone(tuple(oid)), substrate[index:]
 
 class SequenceDecoder(AbstractDecoder):
-    protoComponent = univ.Sequence
+    protoComponent = univ.Sequence()
     def _getAsn1SpecByPosition(self, t, idx):
         if t.getComponentType() is not None:
             if hasattr(t, 'getComponentTypeMapNearPosition'):
@@ -236,7 +236,7 @@ class SequenceDecoder(AbstractDecoder):
         return r, substrate
 
 class SetDecoder(SequenceDecoder):
-    protoComponent = univ.Set
+    protoComponent = univ.Set()
     def _getAsn1SpecByPosition(self, t, idx):
         if t.getComponentType() is not None:
             if hasattr(t, 'getComponentTypeMap'):
@@ -252,7 +252,7 @@ class SetDecoder(SequenceDecoder):
         return idx # SetOf or w/o asn1Specs
         
 class ChoiceDecoder(AbstractDecoder):
-    protoComponent = univ.Choice
+    protoComponent = univ.Choice()
     def valueDecoder(self, substrate, asn1Spec, tagSet,
                      length, state, decodeFun):
         r = self._createComponent(tagSet, asn1Spec)
@@ -271,33 +271,33 @@ class ChoiceDecoder(AbstractDecoder):
 
 # character string types
 class UTF8StringDecoder(OctetStringDecoder):
-    protoComponent = char.UTF8String
+    protoComponent = char.UTF8String()
 class NumericStringDecoder(OctetStringDecoder):
-    protoComponent = char.NumericString
+    protoComponent = char.NumericString()
 class PrintableStringDecoder(OctetStringDecoder):
-    protoComponent = char.PrintableString
+    protoComponent = char.PrintableString()
 class TeletexStringDecoder(OctetStringDecoder):
-    protoComponent = char.TeletexString
+    protoComponent = char.TeletexString()
 class VideotexStringDecoder(OctetStringDecoder):
-    protoComponent = char.VideotexString
+    protoComponent = char.VideotexString()
 class IA5StringDecoder(OctetStringDecoder):
-    protoComponent = char.IA5String
+    protoComponent = char.IA5String()
 class GraphicStringDecoder(OctetStringDecoder):
-    protoComponent = char.GraphicString
+    protoComponent = char.GraphicString()
 class VisibleStringDecoder(OctetStringDecoder):
-    protoComponent = char.VisibleString
+    protoComponent = char.VisibleString()
 class GeneralStringDecoder(OctetStringDecoder):
-    protoComponent = char.GeneralString
+    protoComponent = char.GeneralString()
 class UniversalStringDecoder(OctetStringDecoder):
-    protoComponent = char.UniversalString
+    protoComponent = char.UniversalString()
 class BMPStringDecoder(OctetStringDecoder):
-    protoComponent = char.BMPString
+    protoComponent = char.BMPString()
 
 # "useful" types
 class GeneralizedTimeDecoder(OctetStringDecoder):
-    protoComponent = useful.GeneralizedTime
+    protoComponent = useful.GeneralizedTime()
 class UTCTimeDecoder(OctetStringDecoder):
-    protoComponent = useful.UTCTime
+    protoComponent = useful.UTCTime()
 
 codecMap = {
     eoo.endOfOctets.tagSet: EndOfOctetsDecoder(),
