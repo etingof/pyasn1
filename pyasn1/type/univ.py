@@ -12,7 +12,6 @@ class Integer(base.AbstractSimpleAsn1Item):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x02)
         )
     namedValues = namedval.NamedValues()
-    defaultValue = 0
     def __init__(self, value=None, tagSet=None, subtypeSpec=None,
                  namedValues=None):
         if namedValues is None:
@@ -77,11 +76,11 @@ class Integer(base.AbstractSimpleAsn1Item):
     def getNamedValues(self): return self.__namedValues
 
     def clone(self, value=None, tagSet=None, subtypeSpec=None,
-              namedValues=None, cloneValueFlag=None):
+              namedValues=None):
         if value is None and tagSet is None and subtypeSpec is None \
                and namedValues is None:
             return self
-        if cloneValueFlag:
+        if value is None:
             value = self._value
         if tagSet is None:
             tagSet = self._tagSet
@@ -92,8 +91,8 @@ class Integer(base.AbstractSimpleAsn1Item):
         return self.__class__(value, tagSet, subtypeSpec, namedValues)
 
     def subtype(self, value=None, implicitTag=None, explicitTag=None,
-                subtypeSpec=None, namedValues=None, cloneValueFlag=None):
-        if cloneValueFlag:
+                subtypeSpec=None, namedValues=None):
+        if value is None:
             value = self._value
         if implicitTag is not None:
             tagSet = self._tagSet.tagImplicitly(implicitTag)
@@ -117,14 +116,12 @@ class Boolean(Integer):
         )
     subtypeSpec = Integer.subtypeSpec+constraint.SingleValueConstraint(0,1)
     namedValues = Integer.namedValues.clone(('False', 0), ('True', 1))
-    defaultValue = 0
 
 class BitString(base.AbstractSimpleAsn1Item):
     tagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x03)
         )
     namedValues = namedval.NamedValues()
-    defaultValue = ()
     def __init__(self, value=None, tagSet=None, subtypeSpec=None,
                  namedValues=None):
         if namedValues is None:
@@ -136,11 +133,11 @@ class BitString(base.AbstractSimpleAsn1Item):
             )
 
     def clone(self, value=None, tagSet=None, subtypeSpec=None,
-              namedValues=None, cloneValueFlag=None):
+              namedValues=None):
         if value is None and tagSet is None and subtypeSpec is None \
                and namedValues is None:
             return self       
-        if cloneValueFlag:
+        if value is None:
             value = self._value
         if tagSet is None:
             tagSet = self._tagSet
@@ -151,8 +148,8 @@ class BitString(base.AbstractSimpleAsn1Item):
         return self.__class__(value, tagSet, subtypeSpec, namedValues)
 
     def subtype(self, value=None, implicitTag=None, explicitTag=None,
-                subtypeSpec=None, namedValues=None, cloneValueFlag=None):
-        if cloneValueFlag:
+                subtypeSpec=None, namedValues=None):
+        if value is None:
             value = self._value
         if implicitTag is not None:
             tagSet = self._tagSet.tagImplicitly(implicitTag)
@@ -230,8 +227,6 @@ class OctetString(base.AbstractSimpleAsn1Item):
     tagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x04)
         )
-    defaultValue = ''
-
     def prettyOut(self, value): return repr(str(value))
     def prettyIn(self, value): return str(value)
     
@@ -254,18 +249,16 @@ class OctetString(base.AbstractSimpleAsn1Item):
             return self[max(0, i):max(0, j):]
 
 class Null(OctetString):
+    defaultValue = '' # This is tightly constrained
     tagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x05)
         )
     subtypeSpec = OctetString.subtypeSpec+constraint.SingleValueConstraint('')
-    defaultValue = ''
     
 class ObjectIdentifier(base.AbstractSimpleAsn1Item):
     tagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x06)
         )
-    defaultValue = ()
-
     def __add__(self, other): return self.clone(self._value + other)
     def __radd__(self, other): return self.clone(other + self._value)
     
@@ -328,13 +321,11 @@ class Real(base.AbstractSimpleAsn1Item):
     tagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x09)
         )
-    defaultValue = 0.0
 
 class Enumerated(Integer):
     tagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x0A)
         )
-    defaultValue = 0
 
 # "Structured" ASN.1 types
 
@@ -347,10 +338,14 @@ class SetOf(base.AbstractConstructedAsn1Item):
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         idx = 0; l = len(self._componentValues)
         while idx < l:
-            if self._componentValues[idx] is not None:
-                myClone.setComponentByPosition(
-                    idx, self._componentValues[idx].clone(cloneValueFlag=cloneValueFlag)
-                    )
+            c = self._componentValues[idx]
+            if c is not None:
+                if isinstance(c, base.AbstractConstructedAsn1Item):
+                    myClone.setComponentByPosition(
+                        idx, c.clone(cloneValueFlag=cloneValueFlag)
+                        )
+                else:
+                    myClone.setComponentByPosition(idx, c.clone())
             idx = idx + 1
         
     def _verifyComponent(self, idx, value):
@@ -403,10 +398,14 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         idx = 0; l = len(self._componentValues)
         while idx < l:
-            if self._componentValues[idx] is not None:
-                myClone.setComponentByPosition(
-                    idx, self._componentValues[idx].clone(cloneValueFlag=cloneValueFlag)
-                    )
+            c = self._componentValues[idx]
+            if c is not None:
+                if isinstance(c, base.AbstractConstructedAsn1Item):
+                    myClone.setComponentByPosition(
+                        idx, c.clone(cloneValueFlag=cloneValueFlag)
+                        )
+                else:
+                    myClone.setComponentByPosition(idx, c.clone())
             idx = idx + 1
 
     def _verifyComponent(self, idx, value):
@@ -560,9 +559,12 @@ class Choice(Set):
             pass
         else:
             tagSet = getattr(c, 'getEffectiveTagSet', c.getTagSet)()
-            myClone.setComponentByType(
-                tagSet, c.clone(cloneValueFlag=cloneValueFlag)
-                )
+            if isinstance(c, base.AbstractConstructedAsn1Item):
+                myClone.setComponentByType(
+                    tagSet, c.clone(cloneValueFlag=cloneValueFlag)
+                    )
+            else:
+                myClone.setComponentByType(tagSet, c.clone())
 
     def setComponentByPosition(self, idx, value=None):
         l = len(self._componentValues)

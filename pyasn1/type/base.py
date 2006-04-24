@@ -45,23 +45,33 @@ class Asn1ItemBase(Asn1Item):
         return self._tagSet.isSuperTagSetOf(other.getTagSet()) and \
                self._subtypeSpec.isSuperTypeOf(other.getSubtypeSpec())
 
+class __NoValue:
+    def __getattr__(self, attr):
+        raise error.PyAsn1Error('No value for %s()' % attr)
+noValue = __NoValue()
+
 # Base class for "simple" ASN.1 objects. These are immutable.
 class AbstractSimpleAsn1Item(Asn1ItemBase):    
-    defaultValue = None
+    defaultValue = noValue
     def __init__(self, value=None, tagSet=None, subtypeSpec=None):
         Asn1ItemBase.__init__(self, tagSet, subtypeSpec)
-        if value is None:
-            self._value = self.defaultValue
+        if value is None or value is noValue:
+            value = self.defaultValue
+        if value is None or value is noValue:
+            self.__hashedValue = value = noValue
         else:
             value = self.prettyIn(value)
             self._verifySubtypeSpec(value)
-            self._value = value
-        self.__hashedValue = hash(self._value)
+            self.__hashedValue = hash(value)
+        self._value = value
 
     def __repr__(self):
-        return self.__class__.__name__ + '(' + repr(
-            self.prettyOut(self._value)
-            ) +')'
+        if self._value is noValue:
+            return self.__class__.__name__ + '()'
+        else:
+            return self.__class__.__name__ + '(' + repr(
+                self.prettyOut(self._value)
+                ) + ')'
     def __str__(self): return str(self._value)
     def __cmp__(self, value): return cmp(self._value, value)
     def __hash__(self): return self.__hashedValue
@@ -70,11 +80,10 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         if self._value: return 1
         else: return 0
 
-    def clone(self, value=None, tagSet=None, subtypeSpec=None,
-              cloneValueFlag=None):
+    def clone(self, value=None, tagSet=None, subtypeSpec=None):
         if value is None and tagSet is None and subtypeSpec is None:
             return self
-        if cloneValueFlag:
+        if value is None:
             value = self._value
         if tagSet is None:
             tagSet = self._tagSet
@@ -83,8 +92,8 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         return self.__class__(value, tagSet, subtypeSpec)
 
     def subtype(self, value=None, implicitTag=None, explicitTag=None,
-                subtypeSpec=None, cloneValueFlag=None):
-        if cloneValueFlag:
+                subtypeSpec=None):
+        if value is None:
             value = self._value
         if implicitTag is not None:
             tagSet = self._tagSet.tagImplicitly(implicitTag)
