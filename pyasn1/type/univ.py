@@ -457,7 +457,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         return self
 
     def getDefaultComponentByPosition(self, idx):
-        if self._componentType[idx].isDefaulted:
+        if self._componentType and self._componentType[idx].isDefaulted:
             return self._componentType[idx].getType()
 
     def getComponentType(self):
