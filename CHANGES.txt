@@ -11,7 +11,7 @@ Revision 0.0.5a
   Performance penalty may be huge on deeply nested Constructed objects
   re-creation.
 - Base ASN.1 types (pyasn1.type.univ.*) do not have default values
-  anymore. They remain uninitialized acting as pure ASN.1 types. In 
+  anymore. They remain uninitialized acting as ASN.1 types. In 
   this model, initialized ASN.1 types represent either types with
   default value installed or a type instance.
 - Decoders' prototypes are now class instances rather than classes.
