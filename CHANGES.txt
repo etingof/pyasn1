@@ -22,6 +22,7 @@ Revision 0.0.5a
 - Bugfix to Integer & BitString clone() methods
 - Bugix to the way to distinguish Set from SetOf at CER/DER SetOfEncoder
 - Minor performance optimization of TagSet.isSuperTagSetOf() method
+- examples/sshkey.py added
 
 Revision 0.0.4a
 ---------------
