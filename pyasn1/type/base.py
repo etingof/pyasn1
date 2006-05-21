@@ -164,6 +164,8 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
     def getComponentTypeMap(self):
         raise error.PyAsn1Error('Method not implemented')
 
+    def _cloneComponentValues(self, myClone, cloneValueFlag): pass
+
     def clone(self, tagSet=None, subtypeSpec=None, sizeSpec=None, 
               cloneValueFlag=None):
         if tagSet is None:
