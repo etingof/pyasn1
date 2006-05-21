@@ -225,8 +225,8 @@ codecMap = {
     }
 
 class Encoder:
-    def __init__(self, codecMap):
-        self.__codecMap = codecMap
+    def __init__(self, __codecMap):
+        self.__codecMap = __codecMap
 
     def __call__(self, value, defMode=1, maxChunkSize=0):
         tagSet = value.getTagSet()
