@@ -41,8 +41,7 @@ class Integer(base.AbstractSimpleAsn1Item):
     def __rmod__(self, value): return self.clone(value % self._value)
     def __pow__(self, value, modulo=None):
         return self.clone(pow(self._value, value, modulo))
-    def __rpow__(self, value, modulo=None):
-        return self.clone(pow(value, self._value, modulo))
+    def __rpow__(self, value): return self.clone(pow(value, self._value))
     def __lshift__(self, value): return self.clone(self._value << value)
     def __rshift__(self, value): return self.clone(self._value >> value)
     def __int__(self): return int(self._value)
