@@ -2,8 +2,6 @@ Revision 0.0.5a
 ---------------
 
 - Integer BER codec at reworked fixing negative values encoding bug.
-- Adjustments to make it running on Python 1.5 (tests don't work
-  probably because of different repr() of binary string constants)
 - clone() and subtype() methods of Constructed ASN.1 classes now 
   accept optional cloneValueFlag flag which controls original value
   inheritance. The default is *not* to inherit original value for 
@@ -21,6 +19,9 @@ Revision 0.0.5a
 - Bugfix to Constraints use as mapping keys.
 - Bugfix to Integer & BitString clone() methods
 - Bugix to the way to distinguish Set from SetOf at CER/DER SetOfEncoder
+- Adjustments to make it running on Python 1.5.
+- In tests, substrate constants converted from hex escaped literals into
+  octals to overcome indefinite hex width issue occuring in young Python.
 - Minor performance optimization of TagSet.isSuperTagSetOf() method
 - examples/sshkey.py added
 

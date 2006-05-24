@@ -6,12 +6,10 @@
 * Re-work type<->codec mapping. Tags are unambiguous. Some unique
   internal ID is needed
 * Implement ANY type as an OctetString-based substrate eater
-* Use SSH keys in examples
 
 ber.decoder:
 * suspend codec on underrun error ?
 * class-static components map (in simple type classes)
-* verify error cases in test suite
 * present subtypes ?
 * component presence check wont work at innertypeconst
 * optimize en/decoders
