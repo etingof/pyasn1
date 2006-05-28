@@ -1,7 +1,7 @@
 Revision 0.0.5a
 ---------------
 
-- Integer BER codec at reworked fixing negative values encoding bug.
+- Integer BER codec reworked fixing negative values encoding bug.
 - clone() and subtype() methods of Constructed ASN.1 classes now 
   accept optional cloneValueFlag flag which controls original value
   inheritance. The default is *not* to inherit original value for 

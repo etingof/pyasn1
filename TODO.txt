@@ -3,8 +3,8 @@
 * Specialize ASN.1 character and useful types
 * Come up with simpler API for deeply nested constructed objects
   addressing
-* Re-work type<->codec mapping. Tags are unambiguous. Some unique
-  internal ID is needed
+* Re-work type<->codec mapping. Tags appears ambiguous. Some unique
+  internal ID is needed therefore.
 * Implement ANY type as an OctetString-based substrate eater
 
 ber.decoder:
