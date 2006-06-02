@@ -1,3 +1,8 @@
+Revision 0.0.6a
+---------------
+
+- Make use of setuptools.
+
 Revision 0.0.5a
 ---------------
 

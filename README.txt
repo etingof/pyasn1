@@ -32,8 +32,8 @@ INSTALLATION
 
 The pyasn1 package uses distutils for installation:
 
-$ tar zxf pyasn1-0.0.5a.tar.gz
-$ cd pyasn1-0.0.5a
+$ tar zxf pyasn1-0.0.6a.tar.gz
+$ cd pyasn1-0.0.6a
 $ python setup.py install
 $ cd test
 $ python suite.py   # to make sure everything works alright
