@@ -352,7 +352,7 @@ class Decoder:
                     tagId=t&0x1F
                     )
                 if tagSet is None:
-                    tagSet = tag.TagSet((), lastTag)  # base tag is not recovered
+                    tagSet = tag.TagSet((), lastTag) # base tag not recovered
                 else:
                     tagSet = lastTag + tagSet
                 substrate = substrate[1:]
@@ -394,16 +394,18 @@ class Decoder:
             #
             # There're two ways of creating subtypes in ASN.1 what influences
             # decoder operation. These methods are:
-            # 1) Either base types used in or no IMPLICIT tagging has been applied
-            #    on subtyping.
-            # 2) Subtype syntax drops base type information (by means of IMPLICIT
-            #    tagging.
-            # The first case allows for complete tag recovery from substrate while
-            # the second one requires original ASN.1 type spec for decoding.
+            # 1) Either base types used in or no IMPLICIT tagging has been
+            #    applied on subtyping.
+            # 2) Subtype syntax drops base type information (by means of
+            #    IMPLICIT tagging.
+            # The first case allows for complete tag recovery from substrate
+            # while the second one requires original ASN.1 type spec for
+            # decoding.
             #
-            # In either case a set of tags (tagSet) is coming from substrate in
-            # an incremental, tag-by-tag fashion (this is the case of EXPLICIT tag
-            # which is most basic). Outermost tag comes first from wire.
+            # In either case a set of tags (tagSet) is coming from substrate
+            # in an incremental, tag-by-tag fashion (this is the case of
+            # EXPLICIT tag which is most basic). Outermost tag comes first
+            # from the wire.
             #            
             if state == stGetValueDecoderByTag:
                 concreteDecoder = self.__codecMap.get(tagSet)
