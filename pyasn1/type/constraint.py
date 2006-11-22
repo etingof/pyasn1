@@ -22,8 +22,9 @@ class AbstractConstraint:
        namespace of their client Asn1Item sub-classes.
     """
     def __init__(self, *values):
+        self._valueMap = {}
         self._setValues(values)
-        self.__hashedValues = hash((self.__class__, self._values))
+        self.__hashedValues = None
     def __call__(self, value, idx=None):
         try:
             self._testValue(value, idx)
@@ -37,14 +38,31 @@ class AbstractConstraint:
             string.join(map(lambda x: str(x), self._values), ', ')
         )
     # __cmp__ must accompany __hash__
-    def __cmp__(self, other): return cmp(self.__hashedValues, other)
+    def __cmp__(self, other):
+        return self is other and 0 or cmp(
+            (self.__class__, self._values), other
+            )
     def __eq__(self, other):
-        return self is other or self.__hashedValues == other
-    def __hash__(self): return self.__hashedValues
+        return self is other or not cmp(
+            (self.__class__, self._values), other
+            )
+    def __hash__(self):
+        if self.__hashedValues is None:
+            self.__hashedValues = hash((self.__class__, self._values))
+        return self.__hashedValues
     def _setValues(self, values): self._values = values
     def _testValue(self, value, idx):
         raise error.ValueConstraintError(value)
-    
+
+    # Constraints derivation logic
+    def getValueMap(self): return self._valueMap
+    def isSuperTypeOf(self, otherConstraint):
+        return otherConstraint.getValueMap().has_key(self) or \
+               otherConstraint is self or otherConstraint == self
+    def isSubTypeOf(self, otherConstraint):
+        return self._valueMap.has_key(otherConstraint) or \
+               otherConstraint is self or otherConstraint == self
+
 class SingleValueConstraint(AbstractConstraint):
     """Value must be part of defined values constraint"""
     def _testValue(self, value, idx):
@@ -132,40 +150,25 @@ class ConstraintsExclusion(AbstractConstraint):
 class AbstractConstraintSet(AbstractConstraint):
     """Value must not satisfy the single constraint"""
     def __getitem__(self, idx): return self._values[idx]
-    
-    def __add__(self, value):
-        return apply(self.__class__, (value,) + self._values)
-    def __radd__(self, value):
-        return apply(self.__class__, self._values + (value,))
+
+    def __add__(self, value): return self.__class__(self, value)
+    def __radd__(self, value): return self.__class__(self, value)
 
     def __len__(self): return len(self._values)
+
+    # Constraints inclusion in sets
+    
+    def _setValues(self, values):
+        self._values = values
+        for v in values:
+            self._valueMap[v] = 1
+            self._valueMap.update(v.getValueMap())
 
 class ConstraintsIntersection(AbstractConstraintSet):
     """Value must satisfy all constraints"""
     def _testValue(self, value, idx):
         for v in self._values:
             v(value, idx)
-
-    # Constraints inclusion in sets
-    
-    def _setValues(self, values):
-        self._values = values
-        self.__valuesMap = {}
-        for v in values: self.__valuesMap[v] = 1
-        
-    def hasConstraint(self, constraint):
-        if self.__valuesMap.has_key(constraint):
-            return 1
-        else:
-            return 0
-     
-    def isSuperTypeOf(self, constraintSet):
-        if self is constraintSet:
-            return 1
-        for c in self._values:
-            if not constraintSet.hasConstraint(c): # super type must have all
-                return 0                           # its component constraints
-        return 1                                   # included by subtype
 
 class ConstraintsUnion(AbstractConstraintSet):
     """Value must satisfy at least one constraint"""
