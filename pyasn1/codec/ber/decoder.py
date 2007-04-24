@@ -340,25 +340,41 @@ class Decoder:
         while state != stStop:
             if state == stDecodeTag:
                 # Decode tag
-                lenOfStream = len(substrate)
-                if lenOfStream < 2:
+                if not substrate:
                     raise error.SubstrateUnderrunError(
-                        'Short octet stream (%d octets)' % lenOfStream
+                        'Short octet stream on tag decoding'
                         )
                 t = ord(substrate[0])
+                tagClass = t&0xC0
+                tagFormat = t&0x20
+                tagId = t&0x1F
+                substrate = substrate[1:]
+                if tagId == 0x1F:
+                    tagId = 0L
+                    while 1:
+                        if not substrate:
+                            raise error.SubstrateUnderrunError(
+                                'Short octet stream on long tag decoding'
+                                )
+                        t = ord(substrate[0])
+                        tagId = tagId << 7 | (t&0x7F)
+                        substrate = substrate[1:]
+                        if not t&0x80:
+                            break
                 lastTag = tag.Tag(
-                    tagClass=(t&0xC0),
-                    tagFormat=(t&0x20),
-                    tagId=t&0x1F
+                    tagClass=tagClass, tagFormat=tagFormat, tagId=tagId
                     )
                 if tagSet is None:
                     tagSet = tag.TagSet((), lastTag) # base tag not recovered
                 else:
                     tagSet = lastTag + tagSet
-                substrate = substrate[1:]
                 state = stDecodeLength
             if state == stDecodeLength:
-                # Decode length (we know there's at least 2 bytes from above)
+                # Decode length
+                if not substrate:
+                     raise error.SubstrateUnderrunError(
+                         'Short octet stream on length decoding'
+                         )
                 firstOctet  = ord(substrate[0])
                 if firstOctet == 128:
                     size = 1

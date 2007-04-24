@@ -9,10 +9,19 @@ class Error(Exception): pass
 class AbstractItemEncoder:
     supportIndefLenMode = 1
     def _encodeTag(self, t, isConstructed):
+        v = t[0]|t[1]
         if isConstructed:
-            return chr(t[0]|t[1]|t[2]|tag.tagFormatConstructed)
+            v = v|tag.tagFormatConstructed
+        if t[2] < 31:
+            return chr(v|t[2])
         else:
-            return chr(t[0]|t[1]|t[2])
+            longTag = t[2]
+            s = chr(longTag&0x7f)
+            longTag = longTag >> 7
+            while longTag:
+                s = chr(0x80|(longTag&0x7f)) + s
+                longTag = longTag >> 7
+            return chr(v|0x1F) + s
 
     def _encodeLength(self, length, defMode):
         if not defMode and self.supportIndefLenMode:
