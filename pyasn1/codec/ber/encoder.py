@@ -28,23 +28,14 @@ class AbstractItemEncoder:
             return '\x80'
         if length < 0x80:
             return chr(length)
-        elif length < 0xFF:
-            return '\x81%c' % length
-        elif length < 0xFFFF:
-            return '\x82%c%c' % (
-                (length >> 8) & 0xFF, length & 0xFF
-                )
-        elif length < 0xFFFFFF:
-            return '\x83%c%c%c' % (
-                (length >> 16) & 0xFF,
-                (length >> 8) & 0xFF,
-                length & 0xFF
-                )
-        #...more octets may be added
         else:
-            raise Error(
-                'Too large length (%d)' % length
-                )
+            substrate = ''
+            while length:
+                substrate = chr(length&0xff) + substrate
+                length = length >> 8
+            if len(substrate) > 126:
+                raise Error('Length octets overflow (%d)' % len(substrate))
+            return chr(0x80 | len(substrate)) + substrate
 
     def _encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         raise Error('Not implemented')
