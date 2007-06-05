@@ -370,7 +370,7 @@ class SetOf(base.AbstractConstructedAsn1Item):
                 value = self._componentType.clone(value=value)
             else:
                 raise error.PyAsn1Error('Instance value required')
-        if self._componentType:
+        if self._componentType is not None:
             self._verifyComponent(idx, value)
         self._verifySubtypeSpec(value, idx)            
         self._componentValues[idx] = value
