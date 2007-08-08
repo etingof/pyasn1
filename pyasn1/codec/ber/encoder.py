@@ -235,8 +235,15 @@ class Encoder:
         else:
             concreteEncoder = self.__codecMap.get(tagSet)
             if not concreteEncoder:
-                concreteEncoder = self.__codecMap.get(
-                    tag.TagSet(tagSet.getBaseTag(), tagSet.getBaseTag()) # XXX
+                # XXX
+                baseTagSet = tagSet.getBaseTag()
+                if baseTagSet:
+                    concreteEncoder = self.__codecMap.get(
+                        tag.TagSet(baseTagSet, baseTagSet)
+                    )
+                else:
+                    concreteEncoder = self.__codecMap.get(
+                        tag.TagSet()
                     )
         if concreteEncoder:
             return concreteEncoder.encode(
