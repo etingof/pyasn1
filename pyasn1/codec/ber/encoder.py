@@ -227,6 +227,7 @@ codecMap = {
 class Encoder:
     def __init__(self, _codecMap):
         self.__codecMap = _codecMap
+        self.__emptyTagSet = tag.TagSet()
 
     def __call__(self, value, defMode=1, maxChunkSize=0):
         tagSet = value.getTagSet()
@@ -243,7 +244,7 @@ class Encoder:
                     )
                 else:
                     concreteEncoder = self.__codecMap.get(
-                        tag.TagSet()
+                        self.__emptyTagSet
                     )
         if concreteEncoder:
             return concreteEncoder.encode(
