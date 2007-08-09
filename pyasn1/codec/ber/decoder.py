@@ -463,8 +463,9 @@ class Decoder:
                     else:
                         state = stTryAsExplicitTag
             if state == stTryAsExplicitTag:
-                if lastTag[1] == tag.tagFormatConstructed and \
-                       lastTag[0] != tag.tagClassUniversal:
+                if tagSet and \
+                       tagSet[0][1] == tag.tagFormatConstructed and \
+                       tagSet[0][0] != tag.tagClassUniversal:
                     # Assume explicit tagging
                     state = stDecodeTag
                 else:
