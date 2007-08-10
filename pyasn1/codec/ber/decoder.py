@@ -258,9 +258,14 @@ class ChoiceDecoder(AbstractDecoder):
         r = self._createComponent(tagSet, asn1Spec)
         if not decodeFun:
             return r, substrate
-        component, substrate = decodeFun(
-            substrate, r.getComponentTypeMap(), tagSet, length, state
-            )
+        if r.getTagSet() == tagSet: # explicitly tagged Choice
+            component, substrate = decodeFun(
+                substrate, r.getComponentTypeMap()
+                )
+        else:
+            component, substrate = decodeFun(
+                substrate, r.getComponentTypeMap(), tagSet, length, state
+                )
         effectiveTagSet = getattr(
             component, 'getEffectiveTagSet', component.getTagSet
             )()
