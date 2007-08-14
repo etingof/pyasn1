@@ -4,6 +4,7 @@ Revision 0.0.7a
 - Large tags (>31) now supported by codecs.
 - Fix to encoder to properly handle explicitly tagged untagged items.
 - All possible value lengths (up to 256^126) now supported by encoders.
+- Fix to Tag class constructor to prevent negative IDs.
 
 Revision 0.0.6a
 ---------------
