@@ -22,6 +22,10 @@ tagCategoryUntagged = 0x04
 
 class Tag:
     def __init__(self, tagClass, tagFormat, tagId):
+        if tagId < 0:
+            raise error.PyAsn1Error(
+                'Negative tag ID (%s) not allowed' % tagId
+                )
         self.__tag = (tagClass, tagFormat, tagId)
         self.__uniqTag = (tagClass, tagId)
         self.__hashedUniqTag = hash(self.__uniqTag)
@@ -70,7 +74,7 @@ class TagSet:
     def tagExplicitly(self, superTag):
         tagClass, tagFormat, tagId = superTag
         if tagClass == tagClassUniversal:
-            raise error.BadArgumentError(
+            raise error.PyAsn1Error(
                 'Can\'t tag with UNIVERSAL-class tag'
                 )
         if tagFormat != tagFormatConstructed:
