@@ -48,6 +48,7 @@ class Integer(base.AbstractSimpleAsn1Item):
     def __long__(self): return long(self._value)
     def __float__(self): return float(self._value)    
     def __abs__(self): return abs(self._value)
+    def __index__(self): return int(self._value)
     
     def prettyIn(self, value):
         if type(value) != types.StringType:
