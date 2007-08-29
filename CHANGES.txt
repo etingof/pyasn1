@@ -1,3 +1,8 @@
+Revision 0.0.8a
+---------------
+
+- Integer.__index__() now supported (for Python 2.5+).
+
 Revision 0.0.7a
 ---------------
 
