@@ -98,7 +98,7 @@ class IntegerEncoder(AbstractItemEncoder):
 class BitStringEncoder(AbstractItemEncoder):
     def _encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         if not maxChunkSize or len(value) <= maxChunkSize*8:
-            r = {}; l = len(value); p = j = 0
+            r = {}; l = len(value); p = 0; j = 7
             while p < l:
                 i, j = divmod(p, 8)
                 r[i] = r.get(i,0) | value[p]<<(7-j)
