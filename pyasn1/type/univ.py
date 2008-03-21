@@ -227,7 +227,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
     tagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x04)
         )
-    def prettyOut(self, value): return repr(str(value))
+    def prettyOut(self, value): return str(value)
     def prettyIn(self, value): return str(value)
     
     # Immutable sequence object protocol
