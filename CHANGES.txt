@@ -3,6 +3,8 @@ Revision 0.0.8a
 
 - Integer.__index__() now supported (for Python 2.5+).
 - Fix to empty value encoding in BitString encoder, test case added.
+- OctetsString.prettyPrint() does a single str() against its value
+  eliminating an extra quotes.
 
 Revision 0.0.7a
 ---------------
