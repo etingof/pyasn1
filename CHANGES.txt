@@ -3,6 +3,8 @@ Revision 0.0.8a
 
 - Integer.__index__() now supported (for Python 2.5+).
 - Fix to empty value encoding in BitString encoder, test case added.
+- Choice.getName() method added for getting currently set component
+  name.
 - OctetsString.prettyPrint() does a single str() against its value
   eliminating an extra quotes.
 
