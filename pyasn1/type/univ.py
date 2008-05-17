@@ -617,6 +617,16 @@ class Choice(Set):
         else:
             raise error.PyAsn1Error('Component not chosen')
 
+    def getName(self, innerFlag=0):
+        if hasattr(self, '_currentIdx'):
+            if innerFlag:
+                c = self._componentValues[self._currentIdx]
+                if hasattr(c, 'getComponent'):
+                    return c.getName(innerFlag)
+            return self._componentType.getNameByPosition(self._currentIdx)
+        else:
+            raise error.PyAsn1Error('Component not chosen')
+
     def setDefaultComponents(self): pass
 
 # XXX
