@@ -178,8 +178,8 @@ class SequenceDecoder(AbstractDecoder):
         if t.getComponentType() is not None:
             if hasattr(t, 'getComponentTypeMapNearPosition'):
                 return t.getComponentTypeMapNearPosition(idx) # Sequence
-            elif hasattr(t, 'getComponentTypeMap'):  # XXX
-                return t.getComponentTypeMap() # SequenceOf
+            elif hasattr(t, 'getComponentType'):  # XXX
+                return t.getComponentType() # SequenceOf
         # or no asn1Specs
     def _getPositionByType(self, t, c, idx):
         if t.getComponentType() is not None:
