@@ -7,12 +7,6 @@ language. It has been first written to support particular protocol (SNMP)
 but then generalized to be suitable for a wide range of protocols
 based on ASN.1 specification.
 
-WARNING! WARNING! WARNING!
---------------------------
-
-This is an alpha release. The code is not too reliable and API is not 
-quite stable. Though, dramatic changes to the API are not expected.
-
 FEATURES
 --------
 

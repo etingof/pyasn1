@@ -1,5 +1,4 @@
 * Implement the rest of ASN.1 types (Real etc)
-* Support large tag numbers at codecs
 * Specialize ASN.1 character and useful types
 * Come up with simpler API for deeply nested constructed objects
   addressing
@@ -18,7 +17,6 @@ ber.decoder:
 
 ber.encoder:
 * Asn1Item.clone() / shallowcopy issue
-* large tags encoder
 * large length encoder?
 * codec restart
 * preserve compatible API whenever stateful codec gets implemented
