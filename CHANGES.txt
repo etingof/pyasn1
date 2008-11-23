@@ -1,6 +1,9 @@
 Revision 0.0.9a
 ---------------
 
+- Allow any non-zero values in Boolean type BER decoder, as it's in
+  accordnance with the standard.
+
 Revision 0.0.8a
 ---------------
 
