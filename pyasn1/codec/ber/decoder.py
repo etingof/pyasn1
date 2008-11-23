@@ -23,6 +23,12 @@ class EndOfOctetsDecoder(AbstractDecoder):
 
 class IntegerDecoder(AbstractDecoder):
     protoComponent = univ.Integer(0)
+    def _valueFilter(self, value):
+        try:
+            return int(value)
+        except OverflowError:
+            return value
+        
     def valueDecoder(self, substrate, asn1Spec, tagSet, length,
                      state, decodeFun):
         if not substrate:
@@ -34,14 +40,16 @@ class IntegerDecoder(AbstractDecoder):
             value = 0L
         for octet in octets:
             value = value << 8 | octet
-        try:
-            value = int(value)
-        except OverflowError:
-            pass
+        value = self._valueFilter(value)
         return self._createComponent(tagSet, asn1Spec).clone(value), substrate
 
 class BooleanDecoder(IntegerDecoder):
     protoComponent = univ.Boolean(0)
+    def _valueFilter(self, value):
+        if value:
+            return 1
+        else:
+            return 0
 
 class BitStringDecoder(AbstractDecoder):
     protoComponent = univ.BitString(())
