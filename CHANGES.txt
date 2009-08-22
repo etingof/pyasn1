@@ -1,3 +1,8 @@
+Revision 0.0.10a
+----------------
+
+- API versioning mechanics retired (pyasn1.v1 -> pyasn1).
+
 Revision 0.0.9a
 ---------------
 
