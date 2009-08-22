@@ -1,7 +1,8 @@
 Revision 0.0.10a
 ----------------
 
-- API versioning mechanics retired (pyasn1.v1 -> pyasn1).
+- API versioning mechanics retired (pyasn1.v1 -> pyasn1) what makes
+  it possible to zip-import pyasn1 sources (used by egg and py2exe).
 
 Revision 0.0.9a
 ---------------
