@@ -19,7 +19,7 @@ except ImportError:
     from distutils.core import setup
 
 setup(name="pyasn1",
-      version="0.0.10a",
+      version="0.0.11",
       description="ASN.1 library for Python",
       author="Ilya Etingof",
       author_email="ilya@glas.net ",
