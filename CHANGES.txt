@@ -1,3 +1,8 @@
+Revision 0.0.11
+---------------
+
+- Decoder can now treat values of unknown types as opaque OctetString.
+
 Revision 0.0.10a
 ----------------
 

@@ -16,6 +16,10 @@ class AbstractDecoder:
                      length, state, decodeFun):
         raise error.PyAsn1Error('Decoder not implemented for %s' % tagSet)
 
+    def indefLenValueDecoder(self, substrate, asn1Spec, tagSet,
+                     length, state, decodeFun):
+        raise error.PyAsn1Error('Indefinite length mode decoder not implemented for %s' % tagSet)
+
 class EndOfOctetsDecoder(AbstractDecoder):
     def valueDecoder(self, substrate, asn1Spec, tagSet,
                      length, state, decodeFun):
@@ -342,9 +346,12 @@ codecMap = {
     }
 
 ( stDecodeTag, stDecodeLength, stGetValueDecoder, stGetValueDecoderByAsn1Spec,
-  stGetValueDecoderByTag, stTryAsExplicitTag, stDecodeValue, stStop ) = range(8)
+  stGetValueDecoderByTag, stTryAsExplicitTag, stDecodeValue, stDumpRawValue,
+  stErrorCondition, stStop ) = range(10)
 
 class Decoder:
+    defaultErrorState = stErrorCondition
+    defaultRawDecoder = OctetStringDecoder()
     def __init__(self, codecMap):
         self.__codecMap = codecMap
     def __call__(self, substrate, asn1Spec=None, tagSet=None,
@@ -482,9 +489,7 @@ class Decoder:
                     # Assume explicit tagging
                     state = stDecodeTag
                 else:
-                    raise error.PyAsn1Error(
-                        '%s not in asn1Spec: %s' % (tagSet, asn1Spec)
-                        )
+                    state = self.defaultErrorState
             if state == stDecodeValue:
                 if recursiveFlag:
                     decodeFun = self
@@ -505,6 +510,13 @@ class Decoder:
                     else:
                         substrate = _substrate
                 state = stStop
+            if state == stDumpRawValue:
+                concreteDecoder = self.defaultRawDecoder
+                state = stDecodeValue
+            if state == stErrorCondition:
+                raise error.PyAsn1Error(
+                    '%s not in asn1Spec: %s' % (tagSet, asn1Spec)
+                    )
         return value, substrate
             
 decode = Decoder(codecMap)
