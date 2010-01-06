@@ -1,3 +1,9 @@
+Revision 0.0.12
+---------------
+
+- Fix to Set/SetOf type decoder to handle uninitialized scalar SetOf 
+  components correctly.
+
 Revision 0.0.11
 ---------------
 

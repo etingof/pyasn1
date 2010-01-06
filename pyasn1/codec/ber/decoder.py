@@ -256,7 +256,7 @@ class SetDecoder(SequenceDecoder):
         # or no asn1Specs
     def _getPositionByType(self, t, c, idx):
         if t.getComponentType() is not None:
-            if t.getComponentType() and hasattr(t, 'getComponentPositionByType'):
+            if hasattr(t,'getComponentPositionByType') and t.getComponentType():
                 effectiveTagSet = getattr(
                     c, 'getEffectiveTagSet', c.getTagSet
                     )()
