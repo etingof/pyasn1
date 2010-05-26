@@ -4,6 +4,10 @@ Revision 0.0.11a
 - Decoder can now treat values of unknown types as opaque OctetString.
 - Fix to Set/SetOf type decoder to handle uninitialized scalar SetOf 
   components correctly.
+- The individual tag/length/value processing methods of 
+  encoder.AbstractItemEncoder renamed (leading underscore stripped)
+  to promote overloading in cases where partial substrate processing
+  is required.
 
 Revision 0.0.10a
 ----------------
