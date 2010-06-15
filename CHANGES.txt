@@ -8,6 +8,7 @@ Revision 0.0.11a
   encoder.AbstractItemEncoder renamed (leading underscore stripped)
   to promote overloading in cases where partial substrate processing
   is required.
+- The ocsp.py, ldap.py example scripts added.
 
 Revision 0.0.10a
 ----------------
