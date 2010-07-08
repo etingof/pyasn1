@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+import string
 
 def howto_install_setuptools():
     print """Error: You need setuptools Python package!
@@ -13,22 +14,22 @@ try:
     from setuptools import setup
 except ImportError:
     for arg in sys.argv:
-        if "egg" in arg:
+        if string.find(arg, 'egg') == -1:
             howto_install_setuptools()
             sys.exit(1)
     from distutils.core import setup
 
-setup(name="pyasn1",
-      version="0.0.11a",
-      description="ASN.1 library for Python",
-      author="Ilya Etingof",
-      author_email="ilya@glas.net ",
-      url="http://sourceforge.net/projects/pyasn1/",
+setup(name = 'pyasn1',
+      version = '0.0.11a',
+      description = 'ASN.1 types and codecs',
+      author = 'Ilya Etingof',
+      author_email = 'ilya@glas.net',
+      url = 'http://sourceforge.net/projects/pyasn1/',
+      license = 'BSD',
       packages = [ 'pyasn1',
                    'pyasn1.type',
                    'pyasn1.codec',
                    'pyasn1.codec.ber',
                    'pyasn1.codec.cer',
-                   'pyasn1.codec.der' ],
-      license="BSD"
+                   'pyasn1.codec.der' ]
       )
