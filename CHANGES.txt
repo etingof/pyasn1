@@ -9,6 +9,8 @@ Revision 0.0.11a
   to promote overloading in cases where partial substrate processing
   is required.
 - The ocsp.py, ldap.py example scripts added.
+- Fix to univ.ObjectIdentifier input value handler to disallow negative
+  sub-IDs.
 
 Revision 0.0.10a
 ----------------

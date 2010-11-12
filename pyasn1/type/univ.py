@@ -290,23 +290,33 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
 
     def prettyIn(self, value):
         """Dotted -> tuple of numerics OID converter"""
-        if type(value) is types.TupleType:
-            return value
-        if type(value) is not types.StringType:
-            return tuple(value)
-        r = []
-        for element in filter(None, string.split(value, '.')):
-            try:
-                r.append(string.atoi(element, 0))
-            except string.atoi_error:
+        if isinstance(value, self.__class__):
+            return tuple(value)        
+        elif type(value) is types.StringType:
+            r = []
+            for element in filter(None, string.split(value, '.')):
                 try:
-                    r.append(string.atol(element, 0))
-                except string.atol_error, why:                        
-                    raise error.PyAsn1Error(
-                        'Malformed Object ID %s at %s: %s' %
-                        (str(value), self.__class__.__name__, why)
-                        )
-        return tuple(r)
+                    r.append(string.atoi(element, 0))
+                except string.atoi_error:
+                    try:
+                        r.append(string.atol(element, 0))
+                    except string.atol_error, why:                        
+                        raise error.PyAsn1Error(
+                            'Malformed Object ID %s at %s: %s' %
+                            (str(value), self.__class__.__name__, why)
+                            )
+            value = tuple(r)
+        elif type(value) is types.TupleType:
+            pass
+        else:
+            value = tuple(value)
+
+        if filter(lambda x: x < 0, value):
+            raise error.PyAsn1Error(
+                'Negative sub-ID in %s at %s' % (value, self.__class__.__name__)
+                )
+    
+        return value
 
     def prettyOut(self, value):
         """Tuple of numerics -> dotted string OID converter"""
