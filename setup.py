@@ -12,24 +12,31 @@ It's very easy to install it, just type (as root on Linux):
 
 try:
     from setuptools import setup
+    params = {
+        'zip_safe': True
+        }    
 except ImportError:
     for arg in sys.argv:
         if string.find(arg, 'egg') != -1:
             howto_install_setuptools()
             sys.exit(1)
     from distutils.core import setup
+    params = {}
 
-setup(name = 'pyasn1',
-      version = '0.0.11a',
-      description = 'ASN.1 types and codecs',
-      author = 'Ilya Etingof',
-      author_email = 'ilya@glas.net',
-      url = 'http://sourceforge.net/projects/pyasn1/',
-      license = 'BSD',
-      packages = [ 'pyasn1',
-                   'pyasn1.type',
-                   'pyasn1.codec',
-                   'pyasn1.codec.ber',
-                   'pyasn1.codec.cer',
-                   'pyasn1.codec.der' ]
-      )
+params.update( {
+    'name': 'pyasn1',
+    'version': '0.0.12a',
+    'description': 'ASN.1 types and codecs',
+    'author': 'Ilya Etingof',
+    'author_email': 'ilya@glas.net',
+    'url': 'http://sourceforge.net/projects/pyasn1/',
+    'license': 'BSD',
+    'packages': [ 'pyasn1',
+                  'pyasn1.type',
+                  'pyasn1.codec',
+                  'pyasn1.codec.ber',
+                  'pyasn1.codec.cer',
+                  'pyasn1.codec.der' ]
+      } )
+
+apply(setup, (), params)
