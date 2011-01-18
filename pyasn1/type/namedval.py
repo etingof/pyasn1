@@ -15,18 +15,23 @@ class NamedValues:
             else:
                 name = namedValue
                 val = automaticVal
-            if self.nameToValIdx.has_key(name):
+            if name in self.nameToValIdx:
                 raise error.PyAsn1Error('Duplicate name %s' % name)
             self.nameToValIdx[name] = val
-            if self.valToNameIdx.has_key(val):
+            if val in self.valToNameIdx:
                 raise error.PyAsn1Error('Duplicate value %s' % name)
             self.valToNameIdx[val] = name
             self.namedValues = self.namedValues + ((name, val),)
             automaticVal = automaticVal + 1
     def __str__(self): return str(self.namedValues)
     
-    def getName(self, value): return self.valToNameIdx.get(value)
-    def getValue(self, name): return self.nameToValIdx.get(name)
+    def getName(self, value):
+        if value in self.valToNameIdx:
+            return self.valToNameIdx[value]
+
+    def getValue(self, name):
+        if name in self.nameToValIdx:
+            return self.nameToValIdx[name]
     
     def __getitem__(self, i): return self.namedValues[i]
     def __len__(self): return len(self.namedValues)

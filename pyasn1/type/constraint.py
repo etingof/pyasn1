@@ -57,10 +57,10 @@ class AbstractConstraint:
     # Constraints derivation logic
     def getValueMap(self): return self._valueMap
     def isSuperTypeOf(self, otherConstraint):
-        return otherConstraint.getValueMap().has_key(self) or \
+        return self in otherConstraint.getValueMap() or \
                otherConstraint is self or otherConstraint == self
     def isSubTypeOf(self, otherConstraint):
-        return self._valueMap.has_key(otherConstraint) or \
+        return otherConstraint in self._valueMap or \
                otherConstraint is self or otherConstraint == self
 
 class SingleValueConstraint(AbstractConstraint):
@@ -113,7 +113,7 @@ class InnerTypeConstraint(AbstractConstraint):
         if self.__singleTypeConstraint:
             self.__singleTypeConstraint(value)
         elif self.__multipleTypeConstraint:
-            if not self.__multipleTypeConstraint.has_key(idx):
+            if idx not in self.__multipleTypeConstraint:
                 raise error.ValueConstraintError(value)
             constraint, status = self.__multipleTypeConstraint[idx]
             if status == 'ABSENT':   # XXX presense is not checked!

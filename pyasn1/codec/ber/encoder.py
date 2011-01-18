@@ -234,18 +234,24 @@ class Encoder:
         if len(tagSet) > 1:
             concreteEncoder = explicitlyTaggedItemEncoder
         else:
-            concreteEncoder = self.__codecMap.get(tagSet)
+            if tagSet in self.__codecMap:
+                concreteEncoder = self.__codecMap[tagSet]
+            else:
+                concreteEncoder = None
             if not concreteEncoder:
                 # XXX
                 baseTagSet = tagSet.getBaseTag()
                 if baseTagSet:
-                    concreteEncoder = self.__codecMap.get(
-                        tag.TagSet(baseTagSet, baseTagSet)
-                    )
+                    candidate = tag.TagSet(baseTagSet, baseTagSet)
+                    if candidate in self.__codecMap:
+                        concreteEncoder = self.__codecMap[candidate]
+                    else:
+                        concreteEncoder = None
                 else:
-                    concreteEncoder = self.__codecMap.get(
-                        self.__emptyTagSet
-                    )
+                    if self.__emptyTagSet in self.__codecMap:
+                        concreteEncoder = self.__codecMap[self.__emptyTagSet]
+                    else:
+                        concreteEncoder = None
         if concreteEncoder:
             return concreteEncoder.encode(
                 self, value, defMode, maxChunkSize

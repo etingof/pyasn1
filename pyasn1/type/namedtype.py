@@ -52,7 +52,7 @@ class NamedTypes:
             while idx > 0:
                 idx = idx - 1
                 for t in self.__namedTypes[idx].getType().getTypeMap().keys():
-                    if self.__tagMap.has_key(t):
+                    if t in self.__tagMap:
                         raise error.PyAsn1Error('Duplicate type %s' % t)
                     self.__tagMap[t] = idx
         try:
@@ -71,7 +71,7 @@ class NamedTypes:
             while idx > 0:
                 idx = idx - 1
                 n = self.__namedTypes[idx].getName()
-                if self.__nameMap.has_key(n):
+                if n in self.__nameMap:
                     raise error.PyAsn1Error('Duplicate name %s' % n)
                 self.__nameMap[n] = idx
         try:
@@ -121,7 +121,7 @@ class NamedTypes:
                 typeMap = __type.getTypeMap()
                 if uniq:
                     for k in typeMap.keys():
-                        if self.__typeMap.has_key(k):
+                        if k in self.__typeMap:
                             raise error.PyAsn1Error(
                                'Duplicate type %s in map %s'%(k,self.__typeMap)
                                 )

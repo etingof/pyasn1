@@ -444,11 +444,18 @@ class Decoder:
             # from the wire.
             #            
             if state == stGetValueDecoderByTag:
-                concreteDecoder = self.__codecMap.get(tagSet)
+                if tagSet in self.__codecMap:
+                    concreteDecoder = self.__codecMap[tagSet]
+                else:
+                    concreteDecoder = None
                 if concreteDecoder:
                     state = stDecodeValue
                 else:
-                    concreteDecoder = self.__codecMap.get(tagSet[:1])
+                    _k = tagSet[:1]
+                    if _k in self.__codecMap:
+                        concreteDecoder = self.__codecMap[_k]
+                    else:
+                        concreteDecoder = None
                     if concreteDecoder:
                         state = stDecodeValue
                     else:
@@ -459,13 +466,16 @@ class Decoder:
                     state = stDecodeValue
                     continue
                 if type(asn1Spec) == types.DictType:
-                    __chosenSpec = asn1Spec.get(tagSet)
+                    if tagSet in asn1Spec:
+                        __chosenSpec = asn1Spec[tagSet]
+                    else:
+                        __chosenSpec = None
                 elif asn1Spec is not None:
                     __chosenSpec = asn1Spec
                 else:
                     __chosenSpec = None
-                if __chosenSpec is None or not\
-                       __chosenSpec.getTypeMap().has_key(tagSet):
+                if __chosenSpec is None or \
+                       tagSet not in __chosenSpec.getTypeMap():
                     state = stTryAsExplicitTag
                 else:
                     # use base type for codec lookup to recover untagged types
@@ -474,9 +484,11 @@ class Decoder:
                         baseTagSet = tag.TagSet(baseTag, baseTag)
                     else:
                         baseTagSet = tag.TagSet()
-                    concreteDecoder = self.__codecMap.get( # tagged subtype
-                        baseTagSet
-                        )
+                    if baseTagSet in self.__codecMap:
+                        # tagged subtype                        
+                        concreteDecoder = self.__codecMap[baseTagSet]
+                    else:
+                        concreteDecoder = None
                     if concreteDecoder:
                         asn1Spec = __chosenSpec
                         state = stDecodeValue
