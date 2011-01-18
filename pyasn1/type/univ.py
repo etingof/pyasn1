@@ -405,6 +405,13 @@ class SequenceOf(SetOf):
 
 class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
     componentType = namedtype.NamedTypes()
+    def __init__(self, componentType=None, tagSet=None,
+                 subtypeSpec=None, sizeSpec=None):
+        base.AbstractConstructedAsn1Item.__init__(
+            self, componentType, tagSet, subtypeSpec, sizeSpec
+            )
+        self._componentTypeLen = len(self._componentType)
+
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         idx = 0; l = len(self._componentValues)
         while idx < l:
@@ -419,16 +426,14 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             idx = idx + 1
 
     def _verifyComponent(self, idx, value):
-        componentType = self._componentType
-        if componentType:
-            if idx >= len(componentType):
-                raise error.PyAsn1Error(
-                    'Component type error out of range'
-                    )
-            t = componentType[idx].getType()
-            if not t.isSuperTypeOf(value):
-                raise error.PyAsn1Error('Component type error %s vs %s' %
-                                        (repr(t), repr(value)))
+        if idx >= self._componentTypeLen:
+            raise error.PyAsn1Error(
+                'Component type error out of range'
+                )
+        t = self._componentType[idx].getType()
+        if not t.isSuperTypeOf(value):
+            raise error.PyAsn1Error('Component type error %s vs %s' %
+                                    (repr(t), repr(value)))
 
     def getComponentByName(self, name):
         return self.getComponentByPosition(
@@ -443,7 +448,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         try:
             return self._componentValues[idx]
         except IndexError:
-            if idx < len(self._componentType):
+            if idx < self._componentTypeLen:
                 return
             raise
     def setComponentByPosition(self, idx, value=None):
@@ -460,22 +465,22 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                 value = t.clone(value=value)
             else:
                 raise error.PyAsn1Error('Instance value required')
-        if self._componentType:
+        if self._componentTypeLen:
             self._verifyComponent(idx, value)
         self._verifySubtypeSpec(value, idx)            
         self._componentValues[idx] = value
         return self
 
     def getDefaultComponentByPosition(self, idx):
-        if self._componentType and self._componentType[idx].isDefaulted:
+        if self._componentTypeLen and self._componentType[idx].isDefaulted:
             return self._componentType[idx].getType()
 
     def getComponentType(self):
-        if self._componentType:
+        if self._componentTypeLen:
             return self._componentType
     
     def setDefaultComponents(self):
-        idx = len(self._componentType)
+        idx = self._componentTypeLen
         while idx:
             idx = idx - 1
             if self._componentType[idx].isDefaulted:
@@ -591,7 +596,7 @@ class Choice(Set):
             value = self._componentType.getTypeByPosition(idx).clone(
                 value=value
                 )
-        if self._componentType:
+        if self._componentTypeLen:
             self._verifyComponent(idx, value)
         self._verifySubtypeSpec(value, idx)            
         self._componentValues[idx] = value
