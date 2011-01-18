@@ -24,6 +24,7 @@ class DefaultedNamedType(NamedType):
 class NamedTypes:
     def __init__(self, *namedTypes):
         self.__namedTypes = namedTypes
+        self.__namedTypesLen = len(self.__namedTypes)
         self.__minTagSet = None
         self.__typeMap = {}; self.__tagMap = {}; self.__nameMap = {}
         self.__ambigiousTypes = {}
@@ -36,19 +37,18 @@ class NamedTypes:
     
     def __getitem__(self, idx): return self.__namedTypes[idx]
 
-    def __nonzero__(self):
-        if self.__namedTypes: return 1
-        else: return 0
-    def __len__(self): return len(self.__namedTypes)
+    def __nonzero__(self): return self.__namedTypesLen and 1 or 0
+    def __len__(self): return self.__namedTypesLen
     
     def getTypeByPosition(self, idx):
-        try:
-            return self.__namedTypes[idx].getType()
-        except IndexError:
+        if idx < 0 or idx >= self.__namedTypesLen:
             raise error.PyAsn1Error('Type position out of range')
+        else:
+            return self.__namedTypes[idx].getType()
+
     def getPositionByType(self, tagSet):
         if not self.__tagMap:
-            idx = len(self.__namedTypes)
+            idx = self.__namedTypesLen
             while idx > 0:
                 idx = idx - 1
                 for t in self.__namedTypes[idx].getType().getTypeMap().keys():
@@ -67,7 +67,7 @@ class NamedTypes:
             raise error.PyAsn1Error('Type position out of range')
     def getPositionByName(self, name):
         if not self.__nameMap:
-            idx = len(self.__namedTypes)
+            idx = self.__namedTypesLen
             while idx > 0:
                 idx = idx - 1
                 n = self.__namedTypes[idx].getName()
@@ -81,7 +81,7 @@ class NamedTypes:
 
     def __buildAmbigiousTagMap(self):
         ambigiousTypes = ()
-        idx = len(self.__namedTypes)
+        idx = self.__namedTypesLen
         while idx > 0:
             idx = idx - 1
             t = self.__namedTypes[idx]
