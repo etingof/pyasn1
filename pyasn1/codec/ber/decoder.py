@@ -422,7 +422,7 @@ class Decoder:
                     lastTag = tag.Tag(
                         tagClass=tagClass, tagFormat=tagFormat, tagId=tagId
                         )
-                    if tagId < 32:
+                    if tagId < 31:
                         # cache short tags
                         self.__tagCache[firstOctet] = lastTag
                 if tagSet is None:
