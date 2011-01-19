@@ -35,6 +35,24 @@ class EndOfOctetsDecoder(AbstractSimpleDecoder):
 
 class IntegerDecoder(AbstractSimpleDecoder):
     protoComponent = univ.Integer(0)
+    precomputedValues = {
+        '\x00': 0,
+        '\x01': 1,
+        '\x02': 2,
+        '\x03': 3,
+        '\x04': 4,
+        '\x05': 5,
+        '\x06': 6,
+        '\x07': 7,
+        '\x08': 8,
+        '\x09': 9,
+        'xff': -1,
+        'xfe': -2,
+        'xfd': -3,
+        'xfc': -4,
+        'xfb': -5
+        }
+    
     def _valueFilter(self, value):
         try:
             return int(value)
@@ -45,14 +63,19 @@ class IntegerDecoder(AbstractSimpleDecoder):
                      state, decodeFun):
         if not substrate:
             raise error.PyAsn1Error('Empty substrate')
-        octets = map(ord, substrate)
-        if octets[0] & 0x80:
-            value = -1L
+        if substrate in self.precomputedValues:
+            value = self.precomputedValues[substrate]
         else:
-            value = 0L
-        for octet in octets:
-            value = value << 8 | octet
-        value = self._valueFilter(value)
+            firstOctet = ord(substrate[0])
+            if firstOctet & 0x80:
+                value = -1L
+            else:
+                value = 0L
+            for octet in substrate:
+                value = value << 8 | ord(octet)
+            value = self._valueFilter(value)
+            if value == -1:
+                print repr(substrate)
         return self._createComponent(asn1Spec, tagSet, value), substrate
 
 class BooleanDecoder(IntegerDecoder):
