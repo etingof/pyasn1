@@ -1,3 +1,16 @@
+Revision 0.0.13a
+----------------
+
+- changes towards performance improvement:
+  + all dict.has_key() & dict.get() invocations replaced with modern syntax
+    (this breaks compatibility with Python 2.1 and older).
+  + tag and tagset caches introduced to decoder
+  + decoder code improved to prevent unnecessary pyasn1 objects creation
+  + allow disabling components verification when setting components to
+    structured types, this is used by decoder whilst running in guided mode.
+  + BER decoder for integer values now looks up a small set of pre-computed
+    substrate values to save on decoding.
+
 Revision 0.0.12a
 ----------------
 
