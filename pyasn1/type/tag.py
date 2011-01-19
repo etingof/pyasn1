@@ -27,17 +27,18 @@ class Tag:
                 'Negative tag ID (%s) not allowed' % tagId
                 )
         self.__tag = (tagClass, tagFormat, tagId)
-        self.__uniqTag = (tagClass, tagId)
-        self.__hashedUniqTag = hash(self.__uniqTag)
+        self.uniq = (tagClass, tagId)
+        self.__hashedUniqTag = hash(self.uniq)
+
     def __repr__(self):
         return '%s(tagClass=%s, tagFormat=%s, tagId=%s)' % (
             (self.__class__.__name__,) + self.__tag
             )
-    def __cmp__(self, other): return cmp(self.__uniqTag, other)
-    def __eq__(self, other):
-        return self is other or self.__hashedUniqTag == other
-    def __ne__(self, other):
-        return not (self is other) and self.__hashedUniqTag != other
+    # These is really a hotspot -- expose public "uniq" attribute to save on
+    # function calls
+    def __cmp__(self, other): return cmp(self.uniq, other.uniq)
+    def __eq__(self, other): return self.uniq == other.uniq
+    def __ne__(self, other): return self.uniq != other.uniq
     def __hash__(self): return self.__hashedUniqTag
     def __getitem__(self, idx): return self.__tag[idx]
     def __and__(self, (tagClass, tagFormat, tagId)):
@@ -46,7 +47,9 @@ class Tag:
             )
     def __or__(self, (tagClass, tagFormat, tagId)):
         return self.__class__(
-            self.__tag[0]|tagClass, self.__tag[1]|tagFormat, self.__tag[2]|tagId
+            self.__tag[0]|tagClass,
+            self.__tag[1]|tagFormat,
+            self.__tag[2]|tagId
             )
 
 class TagSet:
@@ -54,6 +57,10 @@ class TagSet:
         self.__baseTag = baseTag
         self.__superTags = superTags
         self.__hashedSuperTags = hash(superTags)
+        _uniq = ()
+        for t in superTags:
+            _uniq = _uniq + t.uniq
+        self.uniq = _uniq
         self.__lenOfSuperTags = len(superTags)
         
     def __repr__(self):
@@ -97,11 +104,9 @@ class TagSet:
     if version_info < (2, 0):
         def __getslice__(self, i, j):
             return self[max(0, i):max(0, j):]
-    def __cmp__(self, other): return cmp(self.__superTags, other)
-    def __eq__(self, other):
-        return self is other or self.__hashedSuperTags == other
-    def __ne__(self, other):
-        return not (self is other) and self.__hashedSuperTags != other
+    def __cmp__(self, other): return cmp(self.uniq, other.uniq)
+    def __eq__(self, other): return self.uniq == other.uniq
+    def __ne__(self, other): return self.uniq != other.uniq
     def __hash__(self): return self.__hashedSuperTags
     def __len__(self): return self.__lenOfSuperTags
     def isSuperTagSetOf(self, tagSet):
