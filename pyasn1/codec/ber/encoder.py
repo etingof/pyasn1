@@ -33,9 +33,10 @@ class AbstractItemEncoder:
             while length:
                 substrate = chr(length&0xff) + substrate
                 length = length >> 8
-            if len(substrate) > 126:
-                raise Error('Length octets overflow (%d)' % len(substrate))
-            return chr(0x80 | len(substrate)) + substrate
+            substrateLen = len(substrate)
+            if substrateLen > 126:
+                raise Error('Length octets overflow (%d)' % substrateLen)
+            return chr(0x80 | substrateLen) + substrate
 
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         raise Error('Not implemented')
