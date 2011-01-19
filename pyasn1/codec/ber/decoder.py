@@ -354,6 +354,11 @@ class Decoder:
     defaultRawDecoder = OctetStringDecoder()
     def __init__(self, codecMap):
         self.__codecMap = codecMap
+        self.__emptyTagSet = tag.TagSet()
+        self.__endOfOctetsTagSet = eoo.endOfOctets.getTagSet()
+        # Tag & TagSet objects caches
+        self.__tagCache = {}
+        self.__tagSetCache = {}
     def __call__(self, substrate, asn1Spec=None, tagSet=None,
                  length=None, state=stDecodeTag, recursiveFlag=1):
         # Decode tag & length
@@ -364,28 +369,42 @@ class Decoder:
                     raise error.SubstrateUnderrunError(
                         'Short octet stream on tag decoding'
                         )
-                t = ord(substrate[0])
-                tagClass = t&0xC0
-                tagFormat = t&0x20
-                tagId = t&0x1F
+                
+                firstOctet = substrate[0]
                 substrate = substrate[1:]
-                if tagId == 0x1F:
-                    tagId = 0L
-                    while 1:
-                        if not substrate:
-                            raise error.SubstrateUnderrunError(
-                                'Short octet stream on long tag decoding'
-                                )
-                        t = ord(substrate[0])
-                        tagId = tagId << 7 | (t&0x7F)
-                        substrate = substrate[1:]
-                        if not t&0x80:
-                            break
-                lastTag = tag.Tag(
-                    tagClass=tagClass, tagFormat=tagFormat, tagId=tagId
-                    )
+                if firstOctet in self.__tagCache:
+                    lastTag = self.__tagCache[firstOctet]
+                else:
+                    t = ord(firstOctet)
+                    tagClass = t&0xC0
+                    tagFormat = t&0x20
+                    tagId = t&0x1F
+                    if tagId == 0x1F:
+                        tagId = 0L
+                        while 1:
+                            if not substrate:
+                                raise error.SubstrateUnderrunError(
+                                    'Short octet stream on long tag decoding'
+                                    )
+                            t = ord(substrate[0])
+                            tagId = tagId << 7 | (t&0x7F)
+                            substrate = substrate[1:]
+                            if not t&0x80:
+                                break
+                    lastTag = tag.Tag(
+                        tagClass=tagClass, tagFormat=tagFormat, tagId=tagId
+                        )
+                    if tagId < 32:
+                        # cache short tags
+                        self.__tagCache[firstOctet] = lastTag
                 if tagSet is None:
-                    tagSet = tag.TagSet((), lastTag) # base tag not recovered
+                    if firstOctet in self.__tagSetCache:
+                        tagSet = self.__tagSetCache[firstOctet]
+                    else:
+                        # base tag not recovered
+                        tagSet = tag.TagSet((), lastTag)
+                        if firstOctet in self.__tagCache:
+                            self.__tagSetCache[firstOctet] = tagSet
                 else:
                     tagSet = lastTag + tagSet
                 state = stDecodeLength
@@ -461,7 +480,7 @@ class Decoder:
                     else:
                         state = stTryAsExplicitTag
             if state == stGetValueDecoderByAsn1Spec:
-                if tagSet == eoo.endOfOctets.getTagSet():
+                if tagSet == self.__endOfOctetsTagSet:
                     concreteDecoder = self.__codecMap[tagSet]
                     state = stDecodeValue
                     continue
@@ -483,9 +502,9 @@ class Decoder:
                     if baseTag: # XXX ugly
                         baseTagSet = tag.TagSet(baseTag, baseTag)
                     else:
-                        baseTagSet = tag.TagSet()
+                        baseTagSet = self.__emptyTagSet
                     if baseTagSet in self.__codecMap:
-                        # tagged subtype                        
+                        # tagged subtype
                         concreteDecoder = self.__codecMap[baseTagSet]
                     else:
                         concreteDecoder = None
