@@ -6,12 +6,6 @@ from pyasn1 import error
 
 class AbstractDecoder:
     protoComponent = None
-    def _createComponent(self, asn1Spec, tagSet, value=None):
-        if asn1Spec is None:
-            return self.protoComponent.clone(value, tagSet)
-        else:
-            return asn1Spec.clone(value)
-        
     def valueDecoder(self, substrate, asn1Spec, tagSet,
                      length, state, decodeFun):
         raise error.PyAsn1Error('Decoder not implemented for %s' % tagSet)
@@ -20,12 +14,26 @@ class AbstractDecoder:
                      length, state, decodeFun):
         raise error.PyAsn1Error('Indefinite length mode decoder not implemented for %s' % tagSet)
 
-class EndOfOctetsDecoder(AbstractDecoder):
+class AbstractSimpleDecoder(AbstractDecoder):
+    def _createComponent(self, asn1Spec, tagSet, value=None):
+        if asn1Spec is None:
+            return self.protoComponent.clone(value, tagSet)
+        else:
+            return asn1Spec.clone(value)
+        
+class AbstractConstructedDecoder(AbstractDecoder):
+    def _createComponent(self, asn1Spec, tagSet, value=None):
+        if asn1Spec is None:
+            return self.protoComponent.clone(tagSet)
+        else:
+            return asn1Spec.clone()
+                                
+class EndOfOctetsDecoder(AbstractSimpleDecoder):
     def valueDecoder(self, substrate, asn1Spec, tagSet,
                      length, state, decodeFun):
         return eoo.endOfOctets, substrate
 
-class IntegerDecoder(AbstractDecoder):
+class IntegerDecoder(AbstractSimpleDecoder):
     protoComponent = univ.Integer(0)
     def _valueFilter(self, value):
         try:
@@ -55,7 +63,7 @@ class BooleanDecoder(IntegerDecoder):
         else:
             return 0
 
-class BitStringDecoder(AbstractDecoder):
+class BitStringDecoder(AbstractSimpleDecoder):
     protoComponent = univ.BitString(())
     def valueDecoder(self, substrate, asn1Spec, tagSet, length,
                      state, decodeFun):
@@ -103,7 +111,7 @@ class BitStringDecoder(AbstractDecoder):
                 )
         return r, substrate
 
-class OctetStringDecoder(AbstractDecoder):
+class OctetStringDecoder(AbstractSimpleDecoder):
     protoComponent = univ.OctetString('')
     def valueDecoder(self, substrate, asn1Spec, tagSet, length,
                      state, decodeFun):
@@ -133,7 +141,7 @@ class OctetStringDecoder(AbstractDecoder):
                 )
         return r, substrate
 
-class NullDecoder(AbstractDecoder):
+class NullDecoder(AbstractSimpleDecoder):
     protoComponent = univ.Null('')
     def valueDecoder(self, substrate, asn1Spec, tagSet,
                      length, state, decodeFun):
@@ -142,7 +150,7 @@ class NullDecoder(AbstractDecoder):
             raise error.PyAsn1Error('Unexpected substrate for Null')
         return r, substrate
 
-class ObjectIdentifierDecoder(AbstractDecoder):
+class ObjectIdentifierDecoder(AbstractSimpleDecoder):
     protoComponent = univ.ObjectIdentifier(())
     def valueDecoder(self, substrate, asn1Spec, tagSet, length,
                      state, decodeFun):
@@ -179,7 +187,7 @@ class ObjectIdentifierDecoder(AbstractDecoder):
                 index = index + 1
         return self._createComponent(asn1Spec, tagSet, tuple(oid)), substrate[index:]
 
-class SequenceDecoder(AbstractDecoder):
+class SequenceDecoder(AbstractConstructedDecoder):
     protoComponent = univ.Sequence()
     def _getAsn1SpecByPosition(self, t, idx):
         if t.getComponentType() is not None:
@@ -194,7 +202,9 @@ class SequenceDecoder(AbstractDecoder):
                 effectiveTagSet = getattr(
                     c, 'getEffectiveTagSet', c.getTagSet
                     )()
-                return t.getComponentPositionNearType(effectiveTagSet, idx) # Sequence
+                # Sequence
+                return t.getComponentPositionNearType(effectiveTagSet, idx)
+            
         return idx # SequenceOf or w/o asn1Specs
 
     def valueDecoder(self, substrate, asn1Spec, tagSet,
@@ -258,7 +268,7 @@ class SetDecoder(SequenceDecoder):
                 return t.getComponentPositionByType(effectiveTagSet) # Set
         return idx # SetOf or w/o asn1Specs
         
-class ChoiceDecoder(AbstractDecoder):
+class ChoiceDecoder(AbstractConstructedDecoder):
     protoComponent = univ.Choice()
     def valueDecoder(self, substrate, asn1Spec, tagSet,
                      length, state, decodeFun):
