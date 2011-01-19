@@ -364,7 +364,7 @@ class SetOf(base.AbstractConstructedAsn1Item):
             raise error.PyAsn1Error('Component type error %s' % value)
 
     def getComponentByPosition(self, idx): return self._componentValues[idx]
-    def setComponentByPosition(self, idx, value=None):
+    def setComponentByPosition(self, idx, value=None, verifyConstraints=True):
         l = len(self._componentValues)
         if idx >= l:
             self._componentValues = self._componentValues + (idx-l+1)*[None]
@@ -381,9 +381,10 @@ class SetOf(base.AbstractConstructedAsn1Item):
                 value = self._componentType.clone(value=value)
             else:
                 raise error.PyAsn1Error('Instance value required')
-        if self._componentType is not None:
-            self._verifyComponent(idx, value)
-        self._verifySubtypeSpec(value, idx)            
+        if verifyConstraints:
+            if self._componentType is not None:
+                self._verifyComponent(idx, value)
+            self._verifySubtypeSpec(value, idx)            
         self._componentValues[idx] = value
         return self
 
@@ -439,9 +440,10 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         return self.getComponentByPosition(
             self._componentType.getPositionByName(name)
             )
-    def setComponentByName(self, name, value=None):
+    def setComponentByName(self, name, value=None, verifyConstraints=True):
         return self.setComponentByPosition(
-            self._componentType.getPositionByName(name), value
+            self._componentType.getPositionByName(name), value,
+            verifyConstraints
             )
 
     def getComponentByPosition(self, idx):
@@ -451,7 +453,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             if idx < self._componentTypeLen:
                 return
             raise
-    def setComponentByPosition(self, idx, value=None):
+    def setComponentByPosition(self, idx, value=None, verifyConstraints=True):
         l = len(self._componentValues)
         if idx >= l:
             self._componentValues = self._componentValues + (idx-l+1)*[None]
@@ -465,9 +467,10 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                 value = t.clone(value=value)
             else:
                 raise error.PyAsn1Error('Instance value required')
-        if self._componentTypeLen:
-            self._verifyComponent(idx, value)
-        self._verifySubtypeSpec(value, idx)            
+        if verifyConstraints:
+            if self._componentTypeLen:
+                self._verifyComponent(idx, value)
+            self._verifySubtypeSpec(value, idx)            
         self._componentValues[idx] = value
         return self
 
@@ -535,17 +538,20 @@ class Set(SequenceAndSetBase):
             # get outer component by inner tagSet
             return c
         
-    def setComponentByType(self, tagSet, value=None, innerFlag=0):
+    def setComponentByType(self, tagSet, value=None, innerFlag=0,
+                           verifyConstraints=True):
         idx = self._componentType.getPositionByType(tagSet)
         t = self._componentType.getTypeByPosition(idx)
         if innerFlag:  # set inner component by inner tagSet
             if t.getTagSet():
-                self.setComponentByPosition(idx, value)
+                self.setComponentByPosition(idx, value, verifyConstraints)
             else:
                 t = self.setComponentByPosition(idx).getComponentByPosition(idx)
-                t.setComponentByType(tagSet, value, innerFlag)
+                t.setComponentByType(
+                    tagSet, value, innerFlag, verifyConstraints
+                    )
         else:  # set outer component by inner tagSet
-            self.setComponentByPosition(idx, value)
+            self.setComponentByPosition(idx, value, verifyConstraints)
             
     def getComponentTypeMap(self): return self._componentType.getTypeMap(1)
 
@@ -581,7 +587,7 @@ class Choice(Set):
             else:
                 myClone.setComponentByType(tagSet, c.clone())
 
-    def setComponentByPosition(self, idx, value=None):
+    def setComponentByPosition(self, idx, value=None, verifyConstraints=True):
         l = len(self._componentValues)
         if idx >= l:
             self._componentValues = self._componentValues + (idx-l+1)*[None]
@@ -596,9 +602,10 @@ class Choice(Set):
             value = self._componentType.getTypeByPosition(idx).clone(
                 value=value
                 )
-        if self._componentTypeLen:
-            self._verifyComponent(idx, value)
-        self._verifySubtypeSpec(value, idx)            
+        if verifyConstraints:
+            if self._componentTypeLen:
+                self._verifyComponent(idx, value)
+            self._verifySubtypeSpec(value, idx)            
         self._componentValues[idx] = value
         self._currentIdx = idx
         return self

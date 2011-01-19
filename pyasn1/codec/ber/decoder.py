@@ -209,7 +209,7 @@ class SequenceDecoder(AbstractDecoder):
                 substrate, asn1Spec
                 )
             idx = self._getPositionByType(r, component, idx)
-            r.setComponentByPosition(idx, component)
+            r.setComponentByPosition(idx, component, asn1Spec is None)
             idx = idx + 1
         if hasattr(r, 'setDefaultComponents'):
             r.setDefaultComponents()
@@ -231,7 +231,7 @@ class SequenceDecoder(AbstractDecoder):
             if component == eoo.endOfOctets:
                 break
             idx = self._getPositionByType(r, component, idx)
-            r.setComponentByPosition(idx, component)
+            r.setComponentByPosition(idx, component, asn1Spec is None)
             idx = idx + 1                
         else:
             raise error.SubstrateUnderrunError(
@@ -276,7 +276,7 @@ class ChoiceDecoder(AbstractDecoder):
         effectiveTagSet = getattr(
             component, 'getEffectiveTagSet', component.getTagSet
             )()
-        r.setComponentByType(effectiveTagSet, component)
+        r.setComponentByType(effectiveTagSet, component, 0, asn1Spec is None)
         return r, substrate
 
     indefLenValueDecoder = valueDecoder
