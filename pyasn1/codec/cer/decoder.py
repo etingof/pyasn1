@@ -14,9 +14,7 @@ class BooleanDecoder(decoder.AbstractDecoder):
             value = 1
         elif byte == 0x00:
             value = 0
-        return self._createComponent(
-            tagSet, asn1Spec
-            ).clone(value), substrate[1:]
+        return self._createComponent(asn1Spec, tagSet, value), substrate[1:]
 
 codecMap = decoder.codecMap.copy()
 codecMap.update({

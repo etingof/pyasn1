@@ -6,11 +6,11 @@ from pyasn1 import error
 
 class AbstractDecoder:
     protoComponent = None
-    def _createComponent(self, tagSet, asn1Spec):
+    def _createComponent(self, asn1Spec, tagSet, value=None):
         if asn1Spec is None:
-            return self.protoComponent.clone(tagSet=tagSet)
+            return self.protoComponent.clone(value, tagSet)
         else:
-            return asn1Spec.clone()
+            return asn1Spec.clone(value)
         
     def valueDecoder(self, substrate, asn1Spec, tagSet,
                      length, state, decodeFun):
@@ -45,7 +45,7 @@ class IntegerDecoder(AbstractDecoder):
         for octet in octets:
             value = value << 8 | octet
         value = self._valueFilter(value)
-        return self._createComponent(tagSet, asn1Spec).clone(value), substrate
+        return self._createComponent(asn1Spec, tagSet, value), substrate
 
 class BooleanDecoder(IntegerDecoder):
     protoComponent = univ.Boolean(0)
@@ -59,7 +59,6 @@ class BitStringDecoder(AbstractDecoder):
     protoComponent = univ.BitString(())
     def valueDecoder(self, substrate, asn1Spec, tagSet, length,
                      state, decodeFun):
-        r = self._createComponent(tagSet, asn1Spec) # XXX use default tagset
         if tagSet[0][1] == tag.tagFormatSimple:    # XXX what tag to check?
             if not substrate:
                 raise error.PyAsn1Error('Missing initial octet')
@@ -79,8 +78,8 @@ class BitStringDecoder(AbstractDecoder):
                     b.append((o>>j)&0x01)
                     j = j - 1
                 p = p + 1
-            return r.clone(tuple(b)), ''
-        if r: r = r.clone(value=())
+            return self._createComponent(asn1Spec, tagSet, tuple(b)), ''
+        r = self._createComponent(asn1Spec, tagSet, ())
         if not decodeFun:
             return r, substrate
         while substrate:
@@ -90,8 +89,7 @@ class BitStringDecoder(AbstractDecoder):
 
     def indefLenValueDecoder(self, substrate, asn1Spec, tagSet,
                              length, state, decodeFun):
-        r = self._createComponent(tagSet, asn1Spec) # XXX use default tagset
-        if r: r = r.clone(value='')
+        r = self._createComponent(asn1Spec, tagSet, '')
         if not decodeFun:
             return r, substrate
         while substrate:
@@ -109,10 +107,9 @@ class OctetStringDecoder(AbstractDecoder):
     protoComponent = univ.OctetString('')
     def valueDecoder(self, substrate, asn1Spec, tagSet, length,
                      state, decodeFun):
-        r = self._createComponent(tagSet, asn1Spec) # XXX use default tagset
         if tagSet[0][1] == tag.tagFormatSimple:    # XXX what tag to check?
-            return r.clone(str(substrate)), ''
-        if r: r = r.clone(value='')
+            return self._createComponent(asn1Spec, tagSet, substrate), ''
+        r = self._createComponent(asn1Spec, tagSet, '')
         if not decodeFun:
             return r, substrate
         while substrate:
@@ -122,8 +119,7 @@ class OctetStringDecoder(AbstractDecoder):
 
     def indefLenValueDecoder(self, substrate, asn1Spec, tagSet,
                              length, state, decodeFun):
-        r = self._createComponent(tagSet, asn1Spec) # XXX use default tagset
-        if r: r = r.clone(value='')
+        r = self._createComponent(asn1Spec, tagSet, '')
         if not decodeFun:
             return r, substrate        
         while substrate:
@@ -141,7 +137,7 @@ class NullDecoder(AbstractDecoder):
     protoComponent = univ.Null('')
     def valueDecoder(self, substrate, asn1Spec, tagSet,
                      length, state, decodeFun):
-        r = self._createComponent(tagSet, asn1Spec) # XXX use default tagset
+        r = self._createComponent(asn1Spec, tagSet)
         if substrate:
             raise error.PyAsn1Error('Unexpected substrate for Null')
         return r, substrate
@@ -150,7 +146,6 @@ class ObjectIdentifierDecoder(AbstractDecoder):
     protoComponent = univ.ObjectIdentifier(())
     def valueDecoder(self, substrate, asn1Spec, tagSet, length,
                      state, decodeFun):
-        r = self._createComponent(tagSet, asn1Spec) # XXX use default tagset
         if not substrate:
             raise error.PyAsn1Error('Empty substrate')
         oid = []; index = 0        
@@ -182,7 +177,7 @@ class ObjectIdentifierDecoder(AbstractDecoder):
                 subId = (subId << 7) + nextSubId
                 oid.append(subId)
                 index = index + 1
-        return r.clone(tuple(oid)), substrate[index:]
+        return self._createComponent(asn1Spec, tagSet, tuple(oid)), substrate[index:]
 
 class SequenceDecoder(AbstractDecoder):
     protoComponent = univ.Sequence()
@@ -204,7 +199,7 @@ class SequenceDecoder(AbstractDecoder):
 
     def valueDecoder(self, substrate, asn1Spec, tagSet,
                      length, state, decodeFun):
-        r = self._createComponent(tagSet, asn1Spec)
+        r = self._createComponent(asn1Spec, tagSet)
         idx = 0
         if not decodeFun:
             return r, substrate
@@ -223,7 +218,7 @@ class SequenceDecoder(AbstractDecoder):
 
     def indefLenValueDecoder(self, substrate, asn1Spec, tagSet,
                              length, state, decodeFun):
-        r = self._createComponent(tagSet, asn1Spec)
+        r = self._createComponent(asn1Spec, tagSet)
         idx = 0
         while substrate:
             try:
@@ -267,7 +262,7 @@ class ChoiceDecoder(AbstractDecoder):
     protoComponent = univ.Choice()
     def valueDecoder(self, substrate, asn1Spec, tagSet,
                      length, state, decodeFun):
-        r = self._createComponent(tagSet, asn1Spec)
+        r = self._createComponent(asn1Spec, tagSet)
         if not decodeFun:
             return r, substrate
         if r.getTagSet() == tagSet: # explicitly tagged Choice
