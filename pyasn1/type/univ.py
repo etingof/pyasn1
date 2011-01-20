@@ -182,11 +182,6 @@ class BitString(base.AbstractSimpleAsn1Item):
     def __mul__(self, value): return self.clone(self._value * value)
     def __rmul__(self, value): return self.__mul__(value)
 
-    # They won't be defined if version is at least 2.0 final
-    if base.version_info < (2, 0):
-        def __getslice__(self, i, j):
-            return self[max(0, i):max(0, j):]
-
     def prettyIn(self, value):
         r = []
         if not value:
@@ -243,11 +238,6 @@ class OctetString(base.AbstractSimpleAsn1Item):
     def __mul__(self, value): return self.clone(self._value * value)
     def __rmul__(self, value): return self.__mul__(value)
 
-    # They won't be defined if version is at least 2.0 final
-    if base.version_info < (2, 0):
-        def __getslice__(self, i, j):
-            return self[max(0, i):max(0, j):]
-
 class Null(OctetString):
     defaultValue = '' # This is tightly constrained
     tagSet = tag.initTagSet(
@@ -272,11 +262,6 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
                 )
         else:
             return self._value[i]
-
-    # They won't be defined if version is at least 2.0 final
-    if base.version_info < (2, 0):
-        def __getslice__(self, i, j):
-            return self[max(0, i):max(0, j):]
 
     def index(self, suboid): return self._value.index(suboid)
 

@@ -1,8 +1,4 @@
 # Base classes for ASN.1 types
-try:
-    from sys import version_info
-except ImportError:
-    version_info = (0, 0)   # a really early version
 from operator import getslice, setslice, delslice
 from string import join
 from types import SliceType

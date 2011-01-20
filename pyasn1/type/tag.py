@@ -1,8 +1,4 @@
 # ASN.1 types tags
-try:
-    from sys import version_info
-except ImportError:
-    version_info = (0, 0)   # a really early version
 from operator import getslice
 from types import SliceType
 from string import join
@@ -101,9 +97,6 @@ class TagSet:
                          (self.__baseTag,) + getslice(self.__superTags,
                                                       idx.start, idx.stop))
         return self.__superTags[idx]
-    if version_info < (2, 0):
-        def __getslice__(self, i, j):
-            return self[max(0, i):max(0, j):]
     def __cmp__(self, other): return cmp(self.uniq, other.uniq)
     def __eq__(self, other): return self.uniq == other.uniq
     def __ne__(self, other): return self.uniq != other.uniq
