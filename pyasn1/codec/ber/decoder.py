@@ -74,8 +74,6 @@ class IntegerDecoder(AbstractSimpleDecoder):
             for octet in substrate:
                 value = value << 8 | ord(octet)
             value = self._valueFilter(value)
-            if value == -1:
-                print repr(substrate)
         return self._createComponent(asn1Spec, tagSet, value), substrate
 
 class BooleanDecoder(IntegerDecoder):
