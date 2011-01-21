@@ -18,6 +18,8 @@ class AbstractSimpleDecoder(AbstractDecoder):
     def _createComponent(self, asn1Spec, tagSet, value=None):
         if asn1Spec is None:
             return self.protoComponent.clone(value, tagSet)
+        elif value is None:
+            return asn1Spec
         else:
             return asn1Spec.clone(value)
         
@@ -97,17 +99,17 @@ class BitStringDecoder(AbstractSimpleDecoder):
                     'Trailing bits overflow %s' % trailingBits
                     )
             substrate = substrate[1:]
-            lsb = p = 0; l = len(substrate)-1; b = []
+            lsb = p = 0; l = len(substrate)-1; b = ()
             while p <= l:
                 if p == l:
                     lsb = trailingBits
                 j = 7                    
                 o = ord(substrate[p])
                 while j >= lsb:
-                    b.append((o>>j)&0x01)
+                    b = b + ((o>>j)&0x01,)
                     j = j - 1
                 p = p + 1
-            return self._createComponent(asn1Spec, tagSet, tuple(b)), ''
+            return self._createComponent(asn1Spec, tagSet, b), ''
         r = self._createComponent(asn1Spec, tagSet, ())
         if not decodeFun:
             return r, substrate
@@ -177,11 +179,10 @@ class ObjectIdentifierDecoder(AbstractSimpleDecoder):
                      state, decodeFun):
         if not substrate:
             raise error.PyAsn1Error('Empty substrate')
-        oid = []; index = 0        
+        oid = (); index = 0        
         # Get the first subid
         subId = ord(substrate[index])
-        oid.append(int(subId / 40))
-        oid.append(int(subId % 40))
+        oid = oid + divmod(subId, 40)
 
         index = index + 1
         substrateLen = len(substrate)
@@ -189,7 +190,7 @@ class ObjectIdentifierDecoder(AbstractSimpleDecoder):
         while index < substrateLen:
             subId = ord(substrate[index])
             if subId < 128:
-                oid.append(subId)
+                oid = oid + (subId,)
                 index = index + 1
             else:
                 # Construct subid from a number of octets
@@ -204,9 +205,9 @@ class ObjectIdentifierDecoder(AbstractSimpleDecoder):
                         'Short substrate for OID %s' % oid
                         )
                 subId = (subId << 7) + nextSubId
-                oid.append(subId)
+                oid = oid + (subId,)
                 index = index + 1
-        return self._createComponent(asn1Spec, tagSet, tuple(oid)), substrate[index:]
+        return self._createComponent(asn1Spec, tagSet, oid), substrate[index:]
 
 class SequenceDecoder(AbstractConstructedDecoder):
     protoComponent = univ.Sequence()

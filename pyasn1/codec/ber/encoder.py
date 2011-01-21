@@ -153,28 +153,28 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
             raise error.PyAsn1Error(
                 'Initial sub-ID overflow %s in OID %s' % (oid[index:], value)
             )
-        octets = [ chr(subid) ]
+        octets = (chr(subid),)
         index = index + 2
 
         # Cycle through subids
         for subid in oid[index:]:
             if subid > -1 and subid < 128:
                 # Optimize for the common case
-                octets.append(chr(subid & 0x7f))
+                octets = octets + (chr(subid & 0x7f),)
             elif subid < 0 or subid > 0xFFFFFFFFL:
                 raise error.PyAsn1Error(
                     'SubId overflow %s in %s' % (subid, value)
                     )
             else:
                 # Pack large Sub-Object IDs
-                res = [ chr(subid & 0x7f) ]
+                res = (chr(subid & 0x7f),)
                 subid = subid >> 7
                 while subid > 0:
-                    res.insert(0, chr(0x80 | (subid & 0x7f)))
+                    res = (chr(0x80 | (subid & 0x7f)),) + res
                     subid = subid >> 7 
                 # Convert packed Sub-Object ID to string and add packed
                 # it to resulted Object ID
-                octets.append(string.join(res, ''))
+                octets = octets + (string.join(res, ''),)
         return string.join(octets, ''), 0
     
 class SequenceOfEncoder(AbstractItemEncoder):
