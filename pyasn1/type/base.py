@@ -139,6 +139,10 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
             self._componentType = self.componentType
         else:
             self._componentType = componentType
+        if self._componentType is None:
+            self._componentTypeLen = 0
+        else:
+            self._componentTypeLen = len(self._componentType)            
         if sizeSpec is None:
             self._sizeSpec = self.sizeSpec
         else:

@@ -391,13 +391,6 @@ class SequenceOf(SetOf):
 
 class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
     componentType = namedtype.NamedTypes()
-    def __init__(self, componentType=None, tagSet=None,
-                 subtypeSpec=None, sizeSpec=None):
-        base.AbstractConstructedAsn1Item.__init__(
-            self, componentType, tagSet, subtypeSpec, sizeSpec
-            )
-        self._componentTypeLen = len(self._componentType)
-
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         idx = 0; l = len(self._componentValues)
         while idx < l:
