@@ -10,6 +10,9 @@ Revision 0.0.13a
     structured types, this is used by decoder whilst running in guided mode.
   + BER decoder for integer values now looks up a small set of pre-computed
     substrate values to save on decoding.
+  + replace slow hasattr()/getattr() calls with isinstance() introspection.
+  + track the number of initialized components of Constructed types to save
+    on default/optional components initialization.
 
 Revision 0.0.12a
 ----------------
