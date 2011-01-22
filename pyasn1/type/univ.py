@@ -505,11 +505,13 @@ class Set(SequenceAndSetBase):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x11)
         )
 
+    def getComponent(self, innerFlag=0): return self
+    
     def getComponentByType(self, tagSet, innerFlag=0):
         c = self.getComponentByPosition(
             self._componentType.getPositionByType(tagSet)
             )
-        if innerFlag and hasattr(c, 'getComponent'):
+        if innerFlag and isinstance(c, Set):
             # get inner component by inner tagSet
             return c.getComponent(1)
         else:
@@ -541,6 +543,7 @@ class Choice(Set):
     sizeSpec = constraint.ConstraintsIntersection(
         constraint.ValueSizeConstraint(1, 1)
         )
+    _currentIdx = None
 
     def __cmp__(self, other):
         if self._componentValues:
@@ -557,7 +560,10 @@ class Choice(Set):
         except error.PyAsn1Error:
             pass
         else:
-            tagSet = getattr(c, 'getEffectiveTagSet', c.getTagSet)()
+            if isinstance(c, Choice):
+                tagSet = c.getEffectiveTagSet()
+            else:
+                tagSet = c.getTagSet()
             if isinstance(c, base.AbstractConstructedAsn1Item):
                 myClone.setComponentByType(
                     tagSet, c.clone(cloneValueFlag=cloneValueFlag)
@@ -569,7 +575,7 @@ class Choice(Set):
         l = len(self._componentValues)
         if idx >= l:
             self._componentValues = self._componentValues + (idx-l+1)*[None]
-        if hasattr(self, '_currentIdx'):
+        if self._currentIdx is not None:
             self._componentValues[self._currentIdx] = None
         if value is None:
             if self._componentValues[idx] is None:
@@ -599,7 +605,10 @@ class Choice(Set):
             return self._tagSet
         else:
             c = self.getComponent()
-            return getattr(c, 'getEffectiveTagSet', c.getTagSet)()
+            if isinstance(c, Choice):
+                return c.getEffectiveTagSet()
+            else:
+                return c.getTagSet()
 
     def getTypeMap(self):
         if self._tagSet:
@@ -608,9 +617,9 @@ class Choice(Set):
             return Set.getComponentTypeMap(self)
 
     def getComponent(self, innerFlag=0):
-        if hasattr(self, '_currentIdx'):
+        if self._currentIdx is not None:
             c = self._componentValues[self._currentIdx]
-            if innerFlag and hasattr(c, 'getComponent'):
+            if innerFlag and isinstance(c, Choice):
                 return c.getComponent(innerFlag)
             else:
                 return c
@@ -618,10 +627,10 @@ class Choice(Set):
             raise error.PyAsn1Error('Component not chosen')
 
     def getName(self, innerFlag=0):
-        if hasattr(self, '_currentIdx'):
+        if self._currentIdx is not None:
             if innerFlag:
                 c = self._componentValues[self._currentIdx]
-                if hasattr(c, 'getComponent'):
+                if isinstance(c, Choice):
                     return c.getName(innerFlag)
             return self._componentType.getNameByPosition(self._currentIdx)
         else:

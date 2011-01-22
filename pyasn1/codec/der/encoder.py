@@ -4,10 +4,11 @@ from pyasn1.codec.cer import encoder
 
 class SetOfEncoder(encoder.SetOfEncoder):
     def _cmpSetComponents(self, c1, c2):
-        return cmp(
-            getattr(c1, 'getEffectiveTagSet', c1.getTagSet)(),
-            getattr(c2, 'getEffectiveTagSet', c2.getTagSet)()
-            )
+        tagSet1 = isinstance(c1, univ.Choice) and \
+                  c1.getEffectiveTagSet() or c1.getTagSet()
+        tagSet2 = isinstance(c2, univ.Choice) and \
+                  c2.getEffectiveTagSet() or c2.getTagSet()        
+        return cmp(tagSet1, tagSet2)
 
 codecMap = encoder.codecMap.copy()
 codecMap.update({

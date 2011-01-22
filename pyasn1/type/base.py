@@ -216,3 +216,5 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
     def __len__(self): return len(self._componentValues)
     
     def clear(self): self._componentValues = []
+
+    def setDefaultComponents(self): pass

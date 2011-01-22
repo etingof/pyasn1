@@ -179,15 +179,14 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
     
 class SequenceOfEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
-        if hasattr(value, 'setDefaultComponents'):
-            value.setDefaultComponents()
+        value.setDefaultComponents()
         value.verifySizeSpec()
         substrate = ''; idx = len(value)
         while idx > 0:
             idx = idx - 1
             if value[idx] is None:  # Optional component
                 continue
-            if hasattr(value, 'getDefaultComponentByPosition'):
+            if isinstance(value, univ.SequenceAndSetBase):
                 if value.getDefaultComponentByPosition(idx) == value[idx]:
                     continue
             substrate = encodeFun(

@@ -30,19 +30,20 @@ class OctetStringEncoder(encoder.OctetStringEncoder):
 
 class SetOfEncoder(encoder.SequenceOfEncoder):
     def _cmpSetComponents(self, c1, c2):
-        return cmp(
-            getattr(c1, 'getMinimalTagSet', c1.getTagSet)(),
-            getattr(c2, 'getMinimalTagSet', c2.getTagSet)()
-            )
+        tagSet1 = isinstance(c1, univ.Choice) and \
+                  c1.getMinTagSet() or c1.getTagSet()
+        tagSet2 = isinstance(c2, univ.Choice) and \
+                  c2.getMinTagSet() or c2.getTagSet()        
+        return cmp(tagSet1, tagSet2)
     
     def encodeValue(self, encodeFun, client, defMode, maxChunkSize):
-        if hasattr(client, 'setDefaultComponents'):
+        if isinstance(client, univ.SequenceAndSetBase):
             client.setDefaultComponents()
         client.verifySizeSpec()
         substrate = ''; idx = len(client)
         # This is certainly a hack but how else do I distinguish SetOf
         # from Set if they have the same tags&constraints?
-        if hasattr(client, 'getDefaultComponentByPosition'):
+        if isinstance(client, univ.SequenceAndSetBase):
             # Set
             comps = []
             while idx > 0:

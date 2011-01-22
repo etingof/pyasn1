@@ -1,6 +1,6 @@
 # BER decoder
 import types
-from pyasn1.type import tag, univ, char, useful
+from pyasn1.type import tag, base, univ, char, useful
 from pyasn1.codec.ber import eoo
 from pyasn1 import error
 
@@ -213,17 +213,18 @@ class SequenceDecoder(AbstractConstructedDecoder):
     protoComponent = univ.Sequence()
     def _getAsn1SpecByPosition(self, t, idx):
         if t.getComponentType() is not None:
-            if hasattr(t, 'getComponentTypeMapNearPosition'):
+            if isinstance(t, univ.Sequence):
                 return t.getComponentTypeMapNearPosition(idx) # Sequence
-            elif hasattr(t, 'getComponentType'):  # XXX
+            elif isinstance(t, base.AbstractConstructedAsn1Item):
                 return t.getComponentType() # SequenceOf
         # or no asn1Specs
     def _getPositionByType(self, t, c, idx):
         if t.getComponentType() is not None:
-            if hasattr(t, 'getComponentPositionNearType'):
-                effectiveTagSet = getattr(
-                    c, 'getEffectiveTagSet', c.getTagSet
-                    )()
+            if isinstance(t, univ.Sequence):
+                if isinstance(c, univ.Choice):
+                    effectiveTagSet = c.getEffectiveTagSet()
+                else:
+                    effectiveTagSet = c.getTagSet()
                 # Sequence
                 return t.getComponentPositionNearType(effectiveTagSet, idx)
             
@@ -243,8 +244,7 @@ class SequenceDecoder(AbstractConstructedDecoder):
             idx = self._getPositionByType(r, component, idx)
             r.setComponentByPosition(idx, component, asn1Spec is None)
             idx = idx + 1
-        if hasattr(r, 'setDefaultComponents'):
-            r.setDefaultComponents()
+        r.setDefaultComponents()
         r.verifySizeSpec()
         return r, substrate
 
@@ -269,8 +269,7 @@ class SequenceDecoder(AbstractConstructedDecoder):
             raise error.SubstrateUnderrunError(
                 'No EOO seen before substrate ends'
                 )
-        if hasattr(r, 'setDefaultComponents'):
-            r.setDefaultComponents()
+        r.setDefaultComponents()
         r.verifySizeSpec()
         return r, substrate
 
@@ -278,15 +277,16 @@ class SetDecoder(SequenceDecoder):
     protoComponent = univ.Set()
     def _getAsn1SpecByPosition(self, t, idx):
         if t.getComponentType() is not None:
-            if hasattr(t, 'getComponentTypeMap'):
+            if isinstance(t, base.AbstractConstructedAsn1Item):            
                 return t.getComponentTypeMap() # Set/SetOf
         # or no asn1Specs
     def _getPositionByType(self, t, c, idx):
         if t.getComponentType() is not None:
-            if hasattr(t,'getComponentPositionByType') and t.getComponentType():
-                effectiveTagSet = getattr(
-                    c, 'getEffectiveTagSet', c.getTagSet
-                    )()
+            if isinstance(t, univ.Set) and t.getComponentType():
+                if isinstance(c, univ.Choice):
+                    effectiveTagSet = c.getEffectiveTagSet()
+                else:
+                    effectiveTagSet = c.getTagSet()
                 return t.getComponentPositionByType(effectiveTagSet) # Set
         return idx # SetOf or w/o asn1Specs
         
@@ -305,9 +305,10 @@ class ChoiceDecoder(AbstractConstructedDecoder):
             component, substrate = decodeFun(
                 substrate, r.getComponentTypeMap(), tagSet, length, state
                 )
-        effectiveTagSet = getattr(
-            component, 'getEffectiveTagSet', component.getTagSet
-            )()
+        if isinstance(component, univ.Choice):
+            effectiveTagSet = component.getEffectiveTagSet()
+        else:
+            effectiveTagSet = component.getTagSet()
         r.setComponentByType(effectiveTagSet, component, 0, asn1Spec is None)
         return r, substrate
 
@@ -575,6 +576,7 @@ class Decoder:
                 raise error.PyAsn1Error(
                     '%s not in asn1Spec: %s' % (tagSet, asn1Spec)
                     )
+
         return value, substrate
             
 decode = Decoder(codecMap)
