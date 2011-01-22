@@ -275,7 +275,9 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
 
     def prettyIn(self, value):
         """Dotted -> tuple of numerics OID converter"""
-        if isinstance(value, self.__class__):
+        if type(value) is types.TupleType:
+            pass
+        elif isinstance(value, ObjectIdentifier):
             return tuple(value)        
         elif type(value) is types.StringType:
             r = []
@@ -291,15 +293,16 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
                             (str(value), self.__class__.__name__, why)
                             )
             value = tuple(r)
-        elif type(value) is types.TupleType:
+
             pass
         else:
             value = tuple(value)
 
-        if filter(lambda x: x < 0, value):
-            raise error.PyAsn1Error(
-                'Negative sub-ID in %s at %s' % (value, self.__class__.__name__)
-                )
+        for x in value:
+            if x < 0:
+                raise error.PyAsn1Error(
+                    'Negative sub-ID in %s at %s' % (value, self.__class__.__name__)
+                    )
     
         return value
 
