@@ -142,12 +142,13 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         if self._componentType is None:
             self._componentTypeLen = 0
         else:
-            self._componentTypeLen = len(self._componentType)            
+            self._componentTypeLen = len(self._componentType)
         if sizeSpec is None:
             self._sizeSpec = self.sizeSpec
         else:
             self._sizeSpec = sizeSpec
         self._componentValues = []
+        self._componentValuesSet = 0
 
     def __repr__(self):
         r = self.__class__.__name__ + '()'
@@ -215,6 +216,8 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
 
     def __len__(self): return len(self._componentValues)
     
-    def clear(self): self._componentValues = []
+    def clear(self):
+        self._componentValues = []
+        self._componentValuesSet = 0
 
     def setDefaultComponents(self): pass

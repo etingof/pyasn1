@@ -358,6 +358,7 @@ class SetOf(base.AbstractConstructedAsn1Item):
                 if self._componentType is None:
                     raise error.PyAsn1Error('Component type not defined')
                 self._componentValues[idx] = self._componentType.clone()
+                self._componentValuesSet = self._componentValuesSet + 1
             return self
         elif type(value) != types.InstanceType:
             if self._componentType is None:
@@ -370,6 +371,8 @@ class SetOf(base.AbstractConstructedAsn1Item):
             if self._componentType is not None:
                 self._verifyComponent(idx, value)
             self._verifySubtypeSpec(value, idx)            
+        if self._componentValues[idx] is None:
+            self._componentValuesSet = self._componentValuesSet + 1
         self._componentValues[idx] = value
         return self
 
@@ -438,6 +441,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         if value is None:
             if self._componentValues[idx] is None:
                 self._componentValues[idx] = self._componentType.getTypeByPosition(idx).clone()
+                self._componentValuesSet = self._componentValuesSet + 1
             return self
         elif type(value) != types.InstanceType:
             t = self._componentType.getTypeByPosition(idx)
@@ -449,6 +453,8 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             if self._componentTypeLen:
                 self._verifyComponent(idx, value)
             self._verifySubtypeSpec(value, idx)            
+        if self._componentValues[idx] is None:
+            self._componentValuesSet = self._componentValuesSet + 1
         self._componentValues[idx] = value
         return self
 
@@ -461,6 +467,8 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             return self._componentType
     
     def setDefaultComponents(self):
+        if self._componentTypeLen == self._componentValuesSet:
+            return
         idx = self._componentTypeLen
         while idx:
             idx = idx - 1
@@ -582,6 +590,7 @@ class Choice(Set):
         if value is None:
             if self._componentValues[idx] is None:
                 self._componentValues[idx] = self._componentType.getTypeByPosition(idx).clone()
+                self._componentValuesSet = 1
                 self._currentIdx = idx
             return self
         elif type(value) != types.InstanceType:
@@ -594,6 +603,7 @@ class Choice(Set):
             self._verifySubtypeSpec(value, idx)            
         self._componentValues[idx] = value
         self._currentIdx = idx
+        self._componentValuesSet = 1
         return self
 
     def getMinTagSet(self):
