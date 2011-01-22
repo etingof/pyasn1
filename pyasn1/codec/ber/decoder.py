@@ -218,17 +218,17 @@ class SequenceDecoder(AbstractConstructedDecoder):
             elif isinstance(t, base.AbstractConstructedAsn1Item):
                 return t.getComponentType() # SequenceOf
         # or no asn1Specs
+
     def _getPositionByType(self, t, c, idx):
-        if t.getComponentType() is not None:
-            if isinstance(t, univ.Sequence):
-                if isinstance(c, univ.Choice):
-                    effectiveTagSet = c.getEffectiveTagSet()
-                else:
-                    effectiveTagSet = c.getTagSet()
-                # Sequence
-                return t.getComponentPositionNearType(effectiveTagSet, idx)
-            
-        return idx # SequenceOf or w/o asn1Specs
+        if isinstance(t, univ.Sequence) and t.getComponentType() is not None:
+            if isinstance(c, univ.Choice):
+                effectiveTagSet = c.getEffectiveTagSet()
+            else:
+                effectiveTagSet = c.getTagSet()
+            # Sequence
+            return t.getComponentPositionNearType(effectiveTagSet, idx)
+        else:
+            return idx # SequenceOf or w/o asn1Specs
 
     def valueDecoder(self, substrate, asn1Spec, tagSet,
                      length, state, decodeFun):
@@ -280,6 +280,7 @@ class SetDecoder(SequenceDecoder):
             if isinstance(t, base.AbstractConstructedAsn1Item):            
                 return t.getComponentTypeMap() # Set/SetOf
         # or no asn1Specs
+
     def _getPositionByType(self, t, c, idx):
         if t.getComponentType() is not None:
             if isinstance(t, univ.Set) and t.getComponentType():
