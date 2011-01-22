@@ -550,9 +550,11 @@ class Choice(Set):
             return cmp(self._componentValues[self._currentIdx], other)
         return -1
 
-    def verifySizeSpec(self): self._sizeSpec(
-        ' '*int(self.getComponent() is not None)  # hackerish XXX
-        )
+    def verifySizeSpec(self):
+        if self._currentIdx is None:
+            raise error.PyAsn1Error('Component not chosen')
+        else:
+            self._sizeSpec(' ')
 
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         try:
@@ -617,24 +619,24 @@ class Choice(Set):
             return Set.getComponentTypeMap(self)
 
     def getComponent(self, innerFlag=0):
-        if self._currentIdx is not None:
+        if self._currentIdx is None:
+            raise error.PyAsn1Error('Component not chosen')
+        else:
             c = self._componentValues[self._currentIdx]
             if innerFlag and isinstance(c, Choice):
                 return c.getComponent(innerFlag)
             else:
                 return c
-        else:
-            raise error.PyAsn1Error('Component not chosen')
 
     def getName(self, innerFlag=0):
-        if self._currentIdx is not None:
+        if self._currentIdx is None:
+            raise error.PyAsn1Error('Component not chosen')
+        else:
             if innerFlag:
                 c = self._componentValues[self._currentIdx]
                 if isinstance(c, Choice):
                     return c.getName(innerFlag)
             return self._componentType.getNameByPosition(self._currentIdx)
-        else:
-            raise error.PyAsn1Error('Component not chosen')
 
     def setDefaultComponents(self): pass
 
