@@ -196,12 +196,17 @@ class SequenceOfEncoder(AbstractItemEncoder):
             if value[idx] is None:  # Optional component
                 continue
             if isinstance(value, univ.SequenceAndSetBase):
-                if value.getDefaultComponentByPosition(idx) == value[idx]:
+                component = value.getDefaultComponentByPosition(idx)
+                if component is not None and component == value[idx]:
                     continue
             substrate = encodeFun(
                 value[idx], defMode, maxChunkSize
                 ) + substrate
         return substrate, 1
+
+class ChoiceEncoder(AbstractItemEncoder):
+    def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
+        return encodeFun(value.getComponent(), defMode, maxChunkSize), 1
 
 codecMap = {
     eoo.endOfOctets.tagSet: EndOfOctetsEncoder(),
@@ -215,7 +220,7 @@ codecMap = {
     # Sequence & Set have same tags as SequenceOf & SetOf
     univ.SequenceOf.tagSet: SequenceOfEncoder(),
     univ.SetOf.tagSet: SequenceOfEncoder(),
-    univ.Choice.tagSet: SequenceOfEncoder(),
+    univ.Choice.tagSet: ChoiceEncoder(),
     # character string types
     char.UTF8String.tagSet: OctetStringEncoder(),
     char.NumericString.tagSet: OctetStringEncoder(),
