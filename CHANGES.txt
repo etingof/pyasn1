@@ -10,9 +10,14 @@ Revision 0.0.13a
     structured types, this is used by decoder whilst running in guided mode.
   + BER decoder for integer values now looks up a small set of pre-computed
     substrate values to save on decoding.
+  + a few pre-computed values configured to ObjectIdentifier BER encoder.
+  + ChoiceDecoder split-off SequenceOf one to save on unnecessary checks.
   + replace slow hasattr()/getattr() calls with isinstance() introspection.
   + track the number of initialized components of Constructed types to save
     on default/optional components initialization.
+  + added a shortcut ObjectIdentifier.asTuple() to be used instead of
+    __getitem__() in hotspots.
+  + use Tag.asTuple() and pure integers at tag encoder.
 
 Revision 0.0.12a
 ----------------
