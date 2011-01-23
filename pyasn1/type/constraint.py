@@ -39,13 +39,9 @@ class AbstractConstraint:
         )
     # __cmp__ must accompany __hash__
     def __cmp__(self, other):
-        return self is other and 0 or cmp(
-            (self.__class__, self._values), other
-            )
+        return cmp((self.__class__, self._values), other)
     def __eq__(self, other):
-        return self is other or not cmp(
-            (self.__class__, self._values), other
-            )
+        return  self is other and 1 or (self.__class__, self._values) == other
     def __hash__(self):
         if self.__hashedValues is None:
             self.__hashedValues = hash((self.__class__, self._values))
