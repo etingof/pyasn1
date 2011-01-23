@@ -141,7 +141,7 @@ class NullEncoder(AbstractItemEncoder):
 class ObjectIdentifierEncoder(AbstractItemEncoder):
     supportIndefLenMode = 0
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):    
-        oid = tuple(value)
+        oid = value.asTuple()
         if len(oid) < 2:
             raise error.PyAsn1Error('Short OID %s' % value)
 

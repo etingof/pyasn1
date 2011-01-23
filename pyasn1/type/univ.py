@@ -257,6 +257,8 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
         )
     def __add__(self, other): return self.clone(self._value + other)
     def __radd__(self, other): return self.clone(other + self._value)
+
+    def asTuple(self): return self._value
     
     # Sequence object protocol
     
