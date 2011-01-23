@@ -136,7 +136,7 @@ class BitString(base.AbstractSimpleAsn1Item):
               namedValues=None):
         if value is None and tagSet is None and subtypeSpec is None \
                and namedValues is None:
-            return self       
+            return self
         if value is None:
             value = self._value
         if tagSet is None:
@@ -171,7 +171,10 @@ class BitString(base.AbstractSimpleAsn1Item):
 
     # Immutable sequence object protocol
 
-    def __len__(self): return len(self._value)
+    def __len__(self):
+        if self._len is None:
+            self._len = len(self._value)
+        return self._len
     def __getitem__(self, i):
         if type(i) == types.SliceType:
             return self.clone(operator.getslice(self._value, i.start, i.stop))
@@ -227,7 +230,10 @@ class OctetString(base.AbstractSimpleAsn1Item):
     
     # Immutable sequence object protocol
     
-    def __len__(self): return len(self._value)
+    def __len__(self):
+        if self._len is None:
+            self._len = len(self._value)
+        return self._len
     def __getitem__(self, i):
         if type(i) == types.SliceType:
             return self.clone(operator.getslice(self._value, i.start, i.stop))
@@ -254,7 +260,10 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
     
     # Sequence object protocol
     
-    def __len__(self): return len(self._value)
+    def __len__(self):
+        if self._len is None:
+            self._len = len(self._value)
+        return self._len
     def __getitem__(self, i):
         if type(i) == types.SliceType:
             return self.clone(
@@ -267,7 +276,7 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
 
     def isPrefixOf(self, value):
         """Returns true if argument OID resides deeper in the OID tree"""
-        l = len(self._value)
+        l = len(self)
         if l <= len(value):
             if self._value[:l] == value[:l]:
                 return 1

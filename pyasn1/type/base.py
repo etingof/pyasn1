@@ -60,7 +60,8 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
             self._verifySubtypeSpec(value)
             self.__hashedValue = hash(value)
         self._value = value
-
+        self._len = None
+        
     def __repr__(self):
         if self._value is noValue:
             return self.__class__.__name__ + '()'
