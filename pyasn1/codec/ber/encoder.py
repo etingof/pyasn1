@@ -9,18 +9,18 @@ class Error(Exception): pass
 class AbstractItemEncoder:
     supportIndefLenMode = 1
     def encodeTag(self, t, isConstructed):
-        v = t[0]|t[1]
+        tagClass, tagFormat, tagId = t.asTuple()  # this is a hotspot
+        v = tagClass | tagFormat
         if isConstructed:
             v = v|tag.tagFormatConstructed
-        if t[2] < 31:
-            return chr(v|t[2])
+        if tagId < 31:
+            return chr(v|tagId)
         else:
-            longTag = t[2]
-            s = chr(longTag&0x7f)
-            longTag = longTag >> 7
-            while longTag:
-                s = chr(0x80|(longTag&0x7f)) + s
-                longTag = longTag >> 7
+            s = chr(tagId&0x7f)
+            tagId = tagId >> 7
+            while tagId:
+                s = chr(0x80|(tagId&0x7f)) + s
+                tagId = tagId >> 7
             return chr(v|0x1F) + s
 
     def encodeLength(self, length, defMode):

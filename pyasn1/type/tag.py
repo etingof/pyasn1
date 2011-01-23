@@ -47,7 +47,8 @@ class Tag:
             self.__tag[1]|tagFormat,
             self.__tag[2]|tagId
             )
-
+    def asTuple(self): return self.__tag  # __getitem__() is slow
+    
 class TagSet:
     def __init__(self, baseTag=(), *superTags):
         self.__baseTag = baseTag
