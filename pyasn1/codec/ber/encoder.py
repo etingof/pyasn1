@@ -140,21 +140,29 @@ class NullEncoder(AbstractItemEncoder):
 
 class ObjectIdentifierEncoder(AbstractItemEncoder):
     supportIndefLenMode = 0
+    precomputedValues = {
+        (1, 3, 6, 1, 2): ('+', '\x06', '\x01', '\x02'),        
+        (1, 3, 6, 1, 4): ('+', '\x06', '\x01', '\x04')
+        }
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):    
         oid = value.asTuple()
-        if len(oid) < 2:
-            raise error.PyAsn1Error('Short OID %s' % value)
+        if oid[:5] in self.precomputedValues:
+            octets = self.precomputedValues[oid[:5]]
+            index = 5
+        else:
+            if len(oid) < 2:
+                raise error.PyAsn1Error('Short OID %s' % value)
 
-        # Build the first twos
-        index = 0
-        subid = oid[index] * 40
-        subid = subid + oid[index+1]
-        if 0 > subid > 0xff:
-            raise error.PyAsn1Error(
-                'Initial sub-ID overflow %s in OID %s' % (oid[index:], value)
-            )
-        octets = (chr(subid),)
-        index = index + 2
+            # Build the first twos
+            index = 0
+            subid = oid[index] * 40
+            subid = subid + oid[index+1]
+            if 0 > subid > 0xff:
+                raise error.PyAsn1Error(
+                    'Initial sub-ID overflow %s in OID %s' % (oid[index:], value)
+                    )
+            octets = (chr(subid),)
+            index = index + 2
 
         # Cycle through subids
         for subid in oid[index:]:
@@ -175,6 +183,7 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
                 # Convert packed Sub-Object ID to string and add packed
                 # it to resulted Object ID
                 octets = octets + (string.join(res, ''),)
+                
         return string.join(octets, ''), 0
     
 class SequenceOfEncoder(AbstractItemEncoder):
