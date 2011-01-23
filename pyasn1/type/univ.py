@@ -572,6 +572,8 @@ class Choice(Set):
             return cmp(self._componentValues[self._currentIdx], other)
         return -1
 
+    def __len__(self): return self._currentIdx is not None and 1 or 0
+    
     def verifySizeSpec(self):
         if self._currentIdx is None:
             raise error.PyAsn1Error('Component not chosen')
