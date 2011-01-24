@@ -509,10 +509,6 @@ class Decoder:
                     else:
                         state = stTryAsExplicitTag
             if state == stGetValueDecoderByAsn1Spec:
-                if tagSet == self.__endOfOctetsTagSet:
-                    concreteDecoder = self.__codecMap[tagSet]
-                    state = stDecodeValue
-                    continue
                 if type(asn1Spec) == types.DictType:
                     if tagSet in asn1Spec:
                         __chosenSpec = asn1Spec[tagSet]
@@ -522,10 +518,8 @@ class Decoder:
                     __chosenSpec = asn1Spec
                 else:
                     __chosenSpec = None
-                if __chosenSpec is None or \
-                       tagSet not in __chosenSpec.getTypeMap():
-                    state = stTryAsExplicitTag
-                else:
+                if __chosenSpec is not None and \
+                       tagSet in __chosenSpec.getTypeMap():
                     # use base type for codec lookup to recover untagged types
                     baseTag = __chosenSpec.getTagSet().getBaseTag()
                     if baseTag: # XXX ugly
@@ -542,6 +536,11 @@ class Decoder:
                         state = stDecodeValue
                     else:
                         state = stTryAsExplicitTag
+                elif tagSet == self.__endOfOctetsTagSet:
+                    concreteDecoder = self.__codecMap[tagSet]
+                    state = stDecodeValue
+                else:
+                    state = stTryAsExplicitTag
             if state == stTryAsExplicitTag:
                 if tagSet and \
                        tagSet[0][1] == tag.tagFormatConstructed and \
