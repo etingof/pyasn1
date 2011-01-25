@@ -241,7 +241,6 @@ codecMap = {
 class Encoder:
     def __init__(self, _codecMap):
         self.__codecMap = _codecMap
-        self.__emptyTagSet = tag.TagSet()
 
     def __call__(self, value, defMode=1, maxChunkSize=0):
         tagSet = value.getTagSet()
@@ -251,26 +250,13 @@ class Encoder:
             if tagSet in self.__codecMap:
                 concreteEncoder = self.__codecMap[tagSet]
             else:
-                concreteEncoder = None
-            if not concreteEncoder:
-                # XXX
-                baseTagSet = tagSet.getBaseTag()
-                if baseTagSet:
-                    candidate = tag.TagSet(baseTagSet, baseTagSet)
-                    if candidate in self.__codecMap:
-                        concreteEncoder = self.__codecMap[candidate]
-                    else:
-                        concreteEncoder = None
+                baseTagSet = value.baseTagSet
+                if baseTagSet in self.__codecMap:
+                    concreteEncoder = self.__codecMap[baseTagSet]
                 else:
-                    if self.__emptyTagSet in self.__codecMap:
-                        concreteEncoder = self.__codecMap[self.__emptyTagSet]
-                    else:
-                        concreteEncoder = None
-        if concreteEncoder:
-            return concreteEncoder.encode(
-                self, value, defMode, maxChunkSize
-                )
-        else:
-            raise Error('No encoder for %s' % value)
+                    raise Error('No encoder for %s' % value)
+        return concreteEncoder.encode(
+            self, value, defMode, maxChunkSize
+            )
 
 encode = Encoder(codecMap)
