@@ -18,6 +18,8 @@ Revision 0.0.13a
   + added a shortcut ObjectIdentifier.asTuple() to be used instead of
     __getitem__() in hotspots.
   + use Tag.asTuple() and pure integers at tag encoder.
+  + introduce and use in decoder the baseTagSet attribute of the built-in
+    ASN.1 types.
 
 Revision 0.0.12a
 ----------------

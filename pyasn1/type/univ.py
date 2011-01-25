@@ -8,7 +8,7 @@ from pyasn1 import error
 # "Simple" ASN.1 types (yet incomplete)
 
 class Integer(base.AbstractSimpleAsn1Item):
-    tagSet = tag.initTagSet(
+    tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x02)
         )
     namedValues = namedval.NamedValues()
@@ -111,14 +111,14 @@ class Integer(base.AbstractSimpleAsn1Item):
         return self.__class__(value, tagSet, subtypeSpec, namedValues)
 
 class Boolean(Integer):
-    tagSet = tag.initTagSet(
+    tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x01),
         )
     subtypeSpec = Integer.subtypeSpec+constraint.SingleValueConstraint(0,1)
     namedValues = Integer.namedValues.clone(('False', 0), ('True', 1))
 
 class BitString(base.AbstractSimpleAsn1Item):
-    tagSet = tag.initTagSet(
+    tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x03)
         )
     namedValues = namedval.NamedValues()
@@ -222,7 +222,7 @@ class BitString(base.AbstractSimpleAsn1Item):
         return '\'%s\'B' % string.join(map(str, value), '')
         
 class OctetString(base.AbstractSimpleAsn1Item):
-    tagSet = tag.initTagSet(
+    tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x04)
         )
     def prettyOut(self, value): return str(value)
@@ -246,13 +246,13 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
 class Null(OctetString):
     defaultValue = '' # This is tightly constrained
-    tagSet = tag.initTagSet(
+    tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x05)
         )
     subtypeSpec = OctetString.subtypeSpec+constraint.SingleValueConstraint('')
     
 class ObjectIdentifier(base.AbstractSimpleAsn1Item):
-    tagSet = tag.initTagSet(
+    tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x06)
         )
     def __add__(self, other): return self.clone(self._value + other)
@@ -327,12 +327,12 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
         return string.join(r, '.')
 
 class Real(base.AbstractSimpleAsn1Item):
-    tagSet = tag.initTagSet(
+    tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x09)
         )
 
 class Enumerated(Integer):
-    tagSet = tag.initTagSet(
+    tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x0A)
         )
 
@@ -340,7 +340,7 @@ class Enumerated(Integer):
 
 class SetOf(base.AbstractConstructedAsn1Item):
     componentType = None
-    tagSet = tag.initTagSet(
+    tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x11)
         )    
 
@@ -402,7 +402,7 @@ class SetOf(base.AbstractConstructedAsn1Item):
         return r
 
 class SequenceOf(SetOf):
-    tagSet = tag.initTagSet(
+    tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x10)
         )
 
@@ -512,7 +512,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         return r
 
 class Sequence(SequenceAndSetBase):
-    tagSet = tag.initTagSet(
+    tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x10)
         )
 
@@ -523,7 +523,7 @@ class Sequence(SequenceAndSetBase):
         return self._componentType.getPositionNearType(tagSet, idx)
     
 class Set(SequenceAndSetBase):
-    tagSet = tag.initTagSet(
+    tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x11)
         )
 
@@ -561,7 +561,7 @@ class Set(SequenceAndSetBase):
         return self._componentType.getPositionByType(tagSet)
 
 class Choice(Set):
-    tagSet = tag.TagSet()  # untagged
+    tagSet = baseTagSet = tag.TagSet()  # untagged
     sizeSpec = constraint.ConstraintsIntersection(
         constraint.ValueSizeConstraint(1, 1)
         )

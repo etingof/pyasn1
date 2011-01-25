@@ -521,11 +521,7 @@ class Decoder:
                 if __chosenSpec is not None and \
                        tagSet in __chosenSpec.getTypeMap():
                     # use base type for codec lookup to recover untagged types
-                    baseTag = __chosenSpec.getTagSet().getBaseTag()
-                    if baseTag: # XXX ugly
-                        baseTagSet = tag.TagSet(baseTag, baseTag)
-                    else:
-                        baseTagSet = self.__emptyTagSet
+                    baseTagSet = __chosenSpec.baseTagSet
                     if baseTagSet in self.__codecMap:
                         # tagged subtype
                         concreteDecoder = self.__codecMap[baseTagSet]
