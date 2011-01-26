@@ -342,7 +342,8 @@ class SetOf(base.AbstractConstructedAsn1Item):
     componentType = None
     tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x11)
-        )    
+        )
+    typeId = 1
 
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         idx = 0; l = len(self._componentValues)
@@ -405,6 +406,7 @@ class SequenceOf(SetOf):
     tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x10)
         )
+    typeId = 2
 
 class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
     componentType = namedtype.NamedTypes()
@@ -515,17 +517,23 @@ class Sequence(SequenceAndSetBase):
     tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x10)
         )
+    typeId = 3
 
     def getComponentTypeMapNearPosition(self, idx):
-        return self._componentType.getTypeMapNearPosition(idx)
+        if self._componentType:
+            return self._componentType.getTypeMapNearPosition(idx)
     
     def getComponentPositionNearType(self, tagSet, idx):
-        return self._componentType.getPositionNearType(tagSet, idx)
+        if self._componentType:
+            return self._componentType.getPositionNearType(tagSet, idx)
+        else:
+            return idx
     
 class Set(SequenceAndSetBase):
     tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x11)
         )
+    typeId = 4
 
     def getComponent(self, innerFlag=0): return self
     
@@ -565,6 +573,7 @@ class Choice(Set):
     sizeSpec = constraint.ConstraintsIntersection(
         constraint.ValueSizeConstraint(1, 1)
         )
+    typeId = 5
     _currentIdx = None
 
     def __cmp__(self, other):
@@ -666,5 +675,17 @@ class Choice(Set):
 
     def setDefaultComponents(self): pass
 
+class ContainsAnyTag:
+    def __contains__(self, key): return 1
+
+containsAnyTag = ContainsAnyTag()
+
+class Any(OctetString):
+    tagSet = baseTagSet = tag.TagSet()  # untagged
+    typeId = 6
+
+    def getTypeMap(self):
+        return self._tagSet and { self._tagSet: self } or containsAnyTag
+    
 # XXX
 # coercion rules?

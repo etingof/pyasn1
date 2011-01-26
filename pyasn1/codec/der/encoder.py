@@ -10,8 +10,8 @@ class SetOfEncoder(encoder.SetOfEncoder):
                   c2.getEffectiveTagSet() or c2.getTagSet()        
         return cmp(tagSet1, tagSet2)
 
-codecMap = encoder.codecMap.copy()
-codecMap.update({
+tagMap = encoder.tagMap.copy()
+tagMap.update({
     # Overload CER encodrs with BER ones (a bit hackerish XXX)
     univ.BitString.tagSet: encoder.encoder.BitStringEncoder(),
     univ.OctetString.tagSet: encoder.encoder.OctetStringEncoder(),
@@ -19,8 +19,10 @@ codecMap.update({
     univ.SetOf().tagSet: SetOfEncoder()
     })
 
+typeMap = encoder.typeMap
+
 class Encoder(encoder.Encoder):
     def __call__(self, client, defMode=1, maxChunkSize=0):
         return encoder.Encoder.__call__(self, client, defMode, maxChunkSize)
         
-encode = Encoder(codecMap)
+encode = Encoder(tagMap, typeMap)

@@ -186,7 +186,7 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
                 
         return string.join(octets, ''), 0
     
-class SequenceOfEncoder(AbstractItemEncoder):
+class SequenceEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         value.setDefaultComponents()
         value.verifySizeSpec()
@@ -195,10 +195,20 @@ class SequenceOfEncoder(AbstractItemEncoder):
             idx = idx - 1
             if value[idx] is None:  # Optional component
                 continue
-            if isinstance(value, univ.SequenceAndSetBase):
-                component = value.getDefaultComponentByPosition(idx)
-                if component is not None and component == value[idx]:
-                    continue
+            component = value.getDefaultComponentByPosition(idx)
+            if component is not None and component == value[idx]:
+                continue
+            substrate = encodeFun(
+                value[idx], defMode, maxChunkSize
+                ) + substrate
+        return substrate, 1
+
+class SequenceOfEncoder(AbstractItemEncoder):
+    def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
+        value.verifySizeSpec()
+        substrate = ''; idx = len(value)
+        while idx > 0:
+            idx = idx - 1
             substrate = encodeFun(
                 value[idx], defMode, maxChunkSize
                 ) + substrate
@@ -208,7 +218,9 @@ class ChoiceEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         return encodeFun(value.getComponent(), defMode, maxChunkSize), 1
 
-codecMap = {
+class AnyEncoder(OctetStringEncoder): pass
+
+tagMap = {
     eoo.endOfOctets.tagSet: EndOfOctetsEncoder(),
     univ.Boolean.tagSet: IntegerEncoder(),
     univ.Integer.tagSet: IntegerEncoder(),
@@ -238,25 +250,38 @@ codecMap = {
     useful.UTCTime.tagSet: OctetStringEncoder()        
     }
 
+# Type-to-codec map for ambiguous ASN.1 types
+typeMap = {
+    univ.Set.typeId: SequenceEncoder(),
+    univ.SetOf.typeId: SequenceOfEncoder(),
+    univ.Sequence.typeId: SequenceEncoder(),
+    univ.SequenceOf.typeId: SequenceOfEncoder(),
+    univ.Choice.typeId: ChoiceEncoder(),
+    univ.Any.typeId: AnyEncoder()
+    }
+
 class Encoder:
-    def __init__(self, _codecMap):
-        self.__codecMap = _codecMap
+    def __init__(self, tagMap, typeMap={}):
+        self.__tagMap = tagMap
+        self.__typeMap = typeMap
 
     def __call__(self, value, defMode=1, maxChunkSize=0):
         tagSet = value.getTagSet()
         if len(tagSet) > 1:
             concreteEncoder = explicitlyTaggedItemEncoder
         else:
-            if tagSet in self.__codecMap:
-                concreteEncoder = self.__codecMap[tagSet]
+            if value.typeId is not None and value.typeId in self.__typeMap:
+                concreteEncoder = self.__typeMap[value.typeId]
+            elif tagSet in self.__tagMap:
+                concreteEncoder = self.__tagMap[tagSet]
             else:
                 baseTagSet = value.baseTagSet
-                if baseTagSet in self.__codecMap:
-                    concreteEncoder = self.__codecMap[baseTagSet]
+                if baseTagSet in self.__tagMap:
+                    concreteEncoder = self.__tagMap[baseTagSet]
                 else:
                     raise Error('No encoder for %s' % value)
         return concreteEncoder.encode(
             self, value, defMode, maxChunkSize
             )
 
-encode = Encoder(codecMap)
+encode = Encoder(tagMap, typeMap)

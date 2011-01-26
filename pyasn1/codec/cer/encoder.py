@@ -68,19 +68,24 @@ class SetOfEncoder(encoder.SequenceOfEncoder):
             substrate = string.join(compSubs, '')
         return substrate, 1
 
-codecMap = encoder.codecMap.copy()
-codecMap.update({
+tagMap = encoder.tagMap.copy()
+tagMap.update({
     univ.Boolean.tagSet: BooleanEncoder(),
     univ.BitString.tagSet: BitStringEncoder(),
     univ.OctetString.tagSet: OctetStringEncoder(),
-    # Set & SetOf have same tags
-    univ.SetOf().tagSet: SetOfEncoder()
+    univ.SetOf().tagSet: SetOfEncoder()  # conflcts with Set
     })
-        
+
+typeMap = encoder.typeMap.copy()
+typeMap.update({
+    univ.Set.typeId: SetOfEncoder(),
+    univ.SetOf.typeId: SetOfEncoder()
+    })
+
 class Encoder(encoder.Encoder):
     def __call__(self, client, defMode=0, maxChunkSize=0):
         return encoder.Encoder.__call__(self, client, defMode, maxChunkSize)
-        
-encode = Encoder(codecMap)
+
+encode = Encoder(tagMap, typeMap)
 
 # EncoderFactory queries class instance and builds a map of tags -> encoders

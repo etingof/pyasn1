@@ -1,6 +1,9 @@
 Revision 0.0.13a
 ----------------
 
+- Major codec re-design.
+- ASN.1 Any type is now supported.
+- PKCS#7 example added
 - changes towards performance improvement:
   + all dict.has_key() & dict.get() invocations replaced with modern syntax
     (this breaks compatibility with Python 2.1 and older).

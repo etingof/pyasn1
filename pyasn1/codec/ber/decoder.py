@@ -6,7 +6,7 @@ from pyasn1 import error
 
 class AbstractDecoder:
     protoComponent = None
-    def valueDecoder(self, substrate, asn1Spec, tagSet,
+    def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                      length, state, decodeFun):
         raise error.PyAsn1Error('Decoder not implemented for %s' % tagSet)
 
@@ -31,7 +31,7 @@ class AbstractConstructedDecoder(AbstractDecoder):
             return asn1Spec.clone()
                                 
 class EndOfOctetsDecoder(AbstractSimpleDecoder):
-    def valueDecoder(self, substrate, asn1Spec, tagSet,
+    def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                      length, state, decodeFun):
         return eoo.endOfOctets, substrate
 
@@ -61,7 +61,7 @@ class IntegerDecoder(AbstractSimpleDecoder):
         except OverflowError:
             return value
         
-    def valueDecoder(self, substrate, asn1Spec, tagSet, length,
+    def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet, length,
                      state, decodeFun):
         if not substrate:
             raise error.PyAsn1Error('Empty substrate')
@@ -88,7 +88,7 @@ class BooleanDecoder(IntegerDecoder):
 
 class BitStringDecoder(AbstractSimpleDecoder):
     protoComponent = univ.BitString(())
-    def valueDecoder(self, substrate, asn1Spec, tagSet, length,
+    def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet, length,
                      state, decodeFun):
         if tagSet[0][1] == tag.tagFormatSimple:    # XXX what tag to check?
             if not substrate:
@@ -136,7 +136,7 @@ class BitStringDecoder(AbstractSimpleDecoder):
 
 class OctetStringDecoder(AbstractSimpleDecoder):
     protoComponent = univ.OctetString('')
-    def valueDecoder(self, substrate, asn1Spec, tagSet, length,
+    def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet, length,
                      state, decodeFun):
         if tagSet[0][1] == tag.tagFormatSimple:    # XXX what tag to check?
             return self._createComponent(asn1Spec, tagSet, substrate), ''
@@ -166,7 +166,7 @@ class OctetStringDecoder(AbstractSimpleDecoder):
 
 class NullDecoder(AbstractSimpleDecoder):
     protoComponent = univ.Null('')
-    def valueDecoder(self, substrate, asn1Spec, tagSet,
+    def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                      length, state, decodeFun):
         r = self._createComponent(asn1Spec, tagSet)
         if substrate:
@@ -175,7 +175,7 @@ class NullDecoder(AbstractSimpleDecoder):
 
 class ObjectIdentifierDecoder(AbstractSimpleDecoder):
     protoComponent = univ.ObjectIdentifier(())
-    def valueDecoder(self, substrate, asn1Spec, tagSet, length,
+    def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet, length,
                      state, decodeFun):
         if not substrate:
             raise error.PyAsn1Error('Empty substrate')
@@ -211,37 +211,29 @@ class ObjectIdentifierDecoder(AbstractSimpleDecoder):
 
 class SequenceDecoder(AbstractConstructedDecoder):
     protoComponent = univ.Sequence()
-    def _getAsn1SpecByPosition(self, t, idx):
-        if t.getComponentType() is not None:
-            if isinstance(t, univ.Sequence):
-                return t.getComponentTypeMapNearPosition(idx) # Sequence
-            elif isinstance(t, base.AbstractConstructedAsn1Item):
-                return t.getComponentType() # SequenceOf
-        # or no asn1Specs
+    def _getComponentTypeMap(self, r, idx):
+        try:
+            return r.getComponentTypeMapNearPosition(idx)
+        except error.PyAsn1Error:
+            return
 
-    def _getPositionByType(self, t, c, idx):
-        if isinstance(t, univ.Sequence) and t.getComponentType() is not None:
-            if isinstance(c, univ.Choice):
-                effectiveTagSet = c.getEffectiveTagSet()
-            else:
-                effectiveTagSet = c.getTagSet()
-            # Sequence
-            return t.getComponentPositionNearType(effectiveTagSet, idx)
-        else:
-            return idx # SequenceOf or w/o asn1Specs
-
-    def valueDecoder(self, substrate, asn1Spec, tagSet,
+    def _getComponentPositionByType(self, r, t, idx):
+        return r.getComponentPositionNearType(t, idx)
+    
+    def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                      length, state, decodeFun):
         r = self._createComponent(asn1Spec, tagSet)
         idx = 0
         if not decodeFun:
             return r, substrate
         while substrate:
-            asn1Spec = self._getAsn1SpecByPosition(r, idx)
+            asn1Spec = self._getComponentTypeMap(r, idx)
             component, substrate = decodeFun(
                 substrate, asn1Spec
                 )
-            idx = self._getPositionByType(r, component, idx)
+            idx = self._getComponentPositionByType(
+                r, component.getEffectiveTagSet(), idx
+                )
             r.setComponentByPosition(idx, component, asn1Spec is None)
             idx = idx + 1
         r.setDefaultComponents()
@@ -253,16 +245,15 @@ class SequenceDecoder(AbstractConstructedDecoder):
         r = self._createComponent(asn1Spec, tagSet)
         idx = 0
         while substrate:
-            try:
-                asn1Spec = self._getAsn1SpecByPosition(r, idx)
-            except error.PyAsn1Error:
-                asn1Spec = None # XXX
+            asn1Spec = self._getComponentTypeMap(r, idx)
             if not decodeFun:
                 return r, substrate
             component, substrate = decodeFun(substrate, asn1Spec)
             if component == eoo.endOfOctets:
                 break
-            idx = self._getPositionByType(r, component, idx)
+            idx = self._getComponentPositionByType(
+                r, component.getEffectiveTagSet(), idx
+                )            
             r.setComponentByPosition(idx, component, asn1Spec is None)
             idx = idx + 1                
         else:
@@ -273,27 +264,58 @@ class SequenceDecoder(AbstractConstructedDecoder):
         r.verifySizeSpec()
         return r, substrate
 
+class SequenceOfDecoder(AbstractConstructedDecoder):
+    protoComponent = univ.SequenceOf()    
+    def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
+                     length, state, decodeFun):
+        r = self._createComponent(asn1Spec, tagSet)
+        asn1Spec = r.getComponentType()
+        idx = 0
+        if not decodeFun:
+            return r, substrate
+        while substrate:
+            component, substrate = decodeFun(
+                substrate, asn1Spec
+                )
+            r.setComponentByPosition(idx, component, asn1Spec is None)
+            idx = idx + 1
+        r.verifySizeSpec()
+        return r, substrate
+
+    def indefLenValueDecoder(self, substrate, asn1Spec, tagSet,
+                             length, state, decodeFun):
+        r = self._createComponent(asn1Spec, tagSet)
+        asn1Spec = r.getComponentType()
+        idx = 0
+        while substrate:
+            if not decodeFun:
+                return r, substrate
+            component, substrate = decodeFun(substrate, asn1Spec)
+            if component == eoo.endOfOctets:
+                break
+            r.setComponentByPosition(idx, component, asn1Spec is None)
+            idx = idx + 1                
+        else:
+            raise error.SubstrateUnderrunError(
+                'No EOO seen before substrate ends'
+                )
+        r.verifySizeSpec()
+        return r, substrate
+
 class SetDecoder(SequenceDecoder):
     protoComponent = univ.Set()
-    def _getAsn1SpecByPosition(self, t, idx):
-        if t.getComponentType() is not None:
-            if isinstance(t, base.AbstractConstructedAsn1Item):            
-                return t.getComponentTypeMap() # Set/SetOf
-        # or no asn1Specs
+    def _getComponentTypeMap(self, r, idx):
+        return r.getComponentTypeMap()
 
-    def _getPositionByType(self, t, c, idx):
-        if t.getComponentType() is not None:
-            if isinstance(t, univ.Set) and t.getComponentType():
-                if isinstance(c, univ.Choice):
-                    effectiveTagSet = c.getEffectiveTagSet()
-                else:
-                    effectiveTagSet = c.getTagSet()
-                return t.getComponentPositionByType(effectiveTagSet) # Set
-        return idx # SetOf or w/o asn1Specs
-        
+    def _getComponentPositionByType(self, r, t, idx):
+        return r.getComponentPositionByType(t)
+    
+class SetOfDecoder(SequenceOfDecoder):
+    protoComponent = univ.SetOf()
+    
 class ChoiceDecoder(AbstractConstructedDecoder):
     protoComponent = univ.Choice()
-    def valueDecoder(self, substrate, asn1Spec, tagSet,
+    def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                      length, state, decodeFun):
         r = self._createComponent(asn1Spec, tagSet)
         if not decodeFun:
@@ -312,6 +334,16 @@ class ChoiceDecoder(AbstractConstructedDecoder):
             effectiveTagSet = component.getTagSet()
         r.setComponentByType(effectiveTagSet, component, 0, asn1Spec is None)
         return r, substrate
+
+    indefLenValueDecoder = valueDecoder
+
+class AnyDecoder(AbstractSimpleDecoder):
+    protoComponent = univ.Any
+    def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
+                     length, state, decodeFun):
+        if asn1Spec is not None and tagSet == asn1Spec.getTagSet():
+            fullSubstrate = substrate  # tagged Any type -- skip tags
+        return self._createComponent(asn1Spec, tagSet, value=fullSubstrate), ''
 
     indefLenValueDecoder = valueDecoder
 
@@ -345,7 +377,7 @@ class GeneralizedTimeDecoder(OctetStringDecoder):
 class UTCTimeDecoder(OctetStringDecoder):
     protoComponent = useful.UTCTime()
 
-codecMap = {
+tagMap = {
     eoo.endOfOctets.tagSet: EndOfOctetsDecoder(),
     univ.Integer.tagSet: IntegerDecoder(),
     univ.Boolean.tagSet: BooleanDecoder(),
@@ -354,9 +386,9 @@ codecMap = {
     univ.Null.tagSet: NullDecoder(),
     univ.ObjectIdentifier.tagSet: ObjectIdentifierDecoder(),
     univ.Enumerated.tagSet: IntegerDecoder(),
-    univ.Sequence.tagSet: SequenceDecoder(),
-    univ.Set.tagSet: SetDecoder(),
-    univ.Choice.tagSet: ChoiceDecoder(),
+    univ.Sequence.tagSet: SequenceDecoder(),  # conflicts with SequenceOf
+    univ.Set.tagSet: SetDecoder(),            # conflicts with SetOf
+    univ.Choice.tagSet: ChoiceDecoder(),      # conflicts with Any
     # character string types
     char.UTF8String.tagSet: UTF8StringDecoder(),
     char.NumericString.tagSet: NumericStringDecoder(),
@@ -374,24 +406,34 @@ codecMap = {
     useful.UTCTime.tagSet: UTCTimeDecoder()
     }
 
+# Type-to-codec map for ambiguous ASN.1 types
+typeMap = {
+    univ.Set.typeId: SetDecoder(),
+    univ.SetOf.typeId: SetOfDecoder(),
+    univ.Sequence.typeId: SequenceDecoder(),
+    univ.SequenceOf.typeId: SequenceOfDecoder(),
+    univ.Choice.typeId: ChoiceDecoder(),
+    univ.Any.typeId: AnyDecoder()
+    }
+
 ( stDecodeTag, stDecodeLength, stGetValueDecoder, stGetValueDecoderByAsn1Spec,
-  stGetValueDecoderByTag, stTryAsExplicitTag, stDecodeValue, stDumpRawValue,
-  stErrorCondition, stStop ) = range(10)
+  stGetValueDecoderByTag, stTryAsExplicitTag, stDecodeValue,
+  stErrorCondition, stStop ) = range(9)
 
 class Decoder:
     defaultErrorState = stErrorCondition
-    defaultRawDecoder = OctetStringDecoder()
-    def __init__(self, codecMap):
-        self.__codecMap = codecMap
-        self.__emptyTagSet = tag.TagSet()
+    def __init__(self, tagMap, typeMap={}):
+        self.__tagMap = tagMap
+        self.__typeMap = typeMap
         self.__endOfOctetsTagSet = eoo.endOfOctets.getTagSet()
         # Tag & TagSet objects caches
         self.__tagCache = {}
         self.__tagSetCache = {}
+        
     def __call__(self, substrate, asn1Spec=None, tagSet=None,
                  length=None, state=stDecodeTag, recursiveFlag=1):
-        # Decode tag & length
         while state != stStop:
+            fullSubstrate = substrate
             if state == stDecodeTag:
                 # Decode tag
                 if not substrate:
@@ -492,16 +534,16 @@ class Decoder:
             # from the wire.
             #            
             if state == stGetValueDecoderByTag:
-                if tagSet in self.__codecMap:
-                    concreteDecoder = self.__codecMap[tagSet]
+                if tagSet in self.__tagMap:
+                    concreteDecoder = self.__tagMap[tagSet]
                 else:
                     concreteDecoder = None
                 if concreteDecoder:
                     state = stDecodeValue
                 else:
                     _k = tagSet[:1]
-                    if _k in self.__codecMap:
-                        concreteDecoder = self.__codecMap[_k]
+                    if _k in self.__tagMap:
+                        concreteDecoder = self.__tagMap[_k]
                     else:
                         concreteDecoder = None
                     if concreteDecoder:
@@ -514,17 +556,19 @@ class Decoder:
                         __chosenSpec = asn1Spec[tagSet]
                     else:
                         __chosenSpec = None
-                elif asn1Spec is not None:
-                    __chosenSpec = asn1Spec
                 else:
-                    __chosenSpec = None
+                    __chosenSpec = asn1Spec
                 if __chosenSpec is not None and \
                        tagSet in __chosenSpec.getTypeMap():
                     # use base type for codec lookup to recover untagged types
                     baseTagSet = __chosenSpec.baseTagSet
-                    if baseTagSet in self.__codecMap:
-                        # tagged subtype
-                        concreteDecoder = self.__codecMap[baseTagSet]
+                    if __chosenSpec.typeId is not None and \
+                           __chosenSpec.typeId in self.__typeMap:
+                        # ambiguous type
+                        concreteDecoder = self.__typeMap[__chosenSpec.typeId]
+                    elif baseTagSet in self.__tagMap:
+                        # base type or tagged subtype
+                        concreteDecoder = self.__tagMap[baseTagSet]
                     else:
                         concreteDecoder = None
                     if concreteDecoder:
@@ -533,7 +577,7 @@ class Decoder:
                     else:
                         state = stTryAsExplicitTag
                 elif tagSet == self.__endOfOctetsTagSet:
-                    concreteDecoder = self.__codecMap[tagSet]
+                    concreteDecoder = self.__tagMap[tagSet]
                     state = stDecodeValue
                 else:
                     state = stTryAsExplicitTag
@@ -543,7 +587,7 @@ class Decoder:
                        tagSet[0][0] != tag.tagClassUniversal:
                     # Assume explicit tagging
                     state = stDecodeTag
-                else:
+                else:                    
                     state = self.defaultErrorState
             if state == stDecodeValue:
                 if recursiveFlag:
@@ -557,7 +601,7 @@ class Decoder:
                         )
                 else:
                     value, _substrate = concreteDecoder.valueDecoder(
-                        substrate[:length], asn1Spec, tagSet,
+                        fullSubstrate, substrate[:length], asn1Spec, tagSet,
                         length, stGetValueDecoder, decodeFun
                         )
                     if recursiveFlag:
@@ -565,17 +609,14 @@ class Decoder:
                     else:
                         substrate = _substrate
                 state = stStop
-            if state == stDumpRawValue:
-                concreteDecoder = self.defaultRawDecoder
-                state = stDecodeValue
             if state == stErrorCondition:
                 raise error.PyAsn1Error(
-                    '%s not in asn1Spec: %s' % (tagSet, asn1Spec)
+                    '%s not in asn1Spec: %s' % (tagSet, repr(asn1Spec))
                     )
 
         return value, substrate
             
-decode = Decoder(codecMap)
+decode = Decoder(tagMap, typeMap)
 
 # XXX
 # non-recursive decoding; return position rather than substrate

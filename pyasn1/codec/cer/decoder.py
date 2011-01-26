@@ -5,7 +5,7 @@ from pyasn1 import error
 
 class BooleanDecoder(decoder.AbstractSimpleDecoder):
     protoComponent = univ.Boolean(0)
-    def valueDecoder(self, substrate, asn1Spec, tagSet, length,
+    def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet, length,
                      state, decodeFun):
         if not substrate:
             raise error.PyAsn1Error('Empty substrate')
@@ -16,11 +16,13 @@ class BooleanDecoder(decoder.AbstractSimpleDecoder):
             value = 0
         return self._createComponent(asn1Spec, tagSet, value), substrate[1:]
 
-codecMap = decoder.codecMap.copy()
-codecMap.update({
+tagMap = decoder.tagMap.copy()
+tagMap.update({
     univ.Boolean.tagSet: BooleanDecoder(),
     })
 
+typeMap = decoder.typeMap
+
 class Decoder(decoder.Decoder): pass
 
-decode = Decoder(codecMap)
+decode = Decoder(tagMap, decoder.typeMap)

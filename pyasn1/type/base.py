@@ -14,6 +14,9 @@ class Asn1ItemBase(Asn1Item):
     # A list of constraint.Constraint instances for checking values
     subtypeSpec = constraint.ConstraintsIntersection()
 
+    # Used for ambiguous ASN.1 types identification
+    typeId = None
+    
     def __init__(self, tagSet=None, subtypeSpec=None):
         if tagSet is None:
             self._tagSet = self.tagSet
@@ -30,6 +33,7 @@ class Asn1ItemBase(Asn1Item):
     def getSubtypeSpec(self): return self._subtypeSpec
     
     def getTagSet(self): return self._tagSet
+    def getEffectiveTagSet(self): return self._tagSet  # used by untagged types
     def getTypeMap(self): return { self._tagSet: self }
     
     def isSameTypeWith(self, other):
