@@ -2,7 +2,7 @@
 from operator import getslice, setslice, delslice
 from string import join
 from types import SliceType
-from pyasn1.type import constraint
+from pyasn1.type import constraint, tagmap
 from pyasn1 import error
 
 class Asn1Item: pass
@@ -26,7 +26,7 @@ class Asn1ItemBase(Asn1Item):
             self._subtypeSpec = self.subtypeSpec
         else:
             self._subtypeSpec = subtypeSpec
-        
+
     def _verifySubtypeSpec(self, value, idx=None):
         self._subtypeSpec(value, idx)
         
@@ -34,7 +34,7 @@ class Asn1ItemBase(Asn1Item):
     
     def getTagSet(self): return self._tagSet
     def getEffectiveTagSet(self): return self._tagSet  # used by untagged types
-    def getTypeMap(self): return { self._tagSet: self }
+    def getTagMap(self): return tagmap.TagMap({self._tagSet: self})
     
     def isSameTypeWith(self, other):
         return self is other or \
@@ -144,10 +144,6 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
             self._componentType = self.componentType
         else:
             self._componentType = componentType
-        if self._componentType is None:
-            self._componentTypeLen = 0
-        else:
-            self._componentTypeLen = len(self._componentType)
         if sizeSpec is None:
             self._sizeSpec = self.sizeSpec
         else:
@@ -167,7 +163,7 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
 
     def __cmp__(self, other): return cmp(self._componentValues, other)
 
-    def getComponentTypeMap(self):
+    def getComponentTagMap(self):
         raise error.PyAsn1Error('Method not implemented')
 
     def _cloneComponentValues(self, myClone, cloneValueFlag): pass

@@ -157,7 +157,7 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
             index = 0
             subid = oid[index] * 40
             subid = subid + oid[index+1]
-            if 0 > subid > 0xff:
+            if subid < 0 or subid > 0xff:
                 raise error.PyAsn1Error(
                     'Initial sub-ID overflow %s in OID %s' % (oid[index:], value)
                     )
@@ -218,7 +218,9 @@ class ChoiceEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         return encodeFun(value.getComponent(), defMode, maxChunkSize), 1
 
-class AnyEncoder(OctetStringEncoder): pass
+class AnyEncoder(OctetStringEncoder):
+    def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
+        return str(value), defMode == 0
 
 tagMap = {
     eoo.endOfOctets.tagSet: EndOfOctetsEncoder(),

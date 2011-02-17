@@ -7,6 +7,7 @@ class BooleanDecoder(decoder.AbstractSimpleDecoder):
     protoComponent = univ.Boolean(0)
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet, length,
                      state, decodeFun):
+        substrate = substrate[:length]
         if not substrate:
             raise error.PyAsn1Error('Empty substrate')
         byte = ord(substrate[0])

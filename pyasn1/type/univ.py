@@ -2,7 +2,8 @@
 import string
 import types
 import operator
-from pyasn1.type import base, tag, constraint, namedtype, namedval
+from pyasn1.type import base, tag, constraint, namedtype, namedval, tagmap
+from pyasn1.codec.ber import eoo
 from pyasn1 import error
 
 # "Simple" ASN.1 types (yet incomplete)
@@ -391,9 +392,9 @@ class SetOf(base.AbstractConstructedAsn1Item):
         self._componentValues[idx] = value
         return self
 
-    def getComponentTypeMap(self):
+    def getComponentTagMap(self):
         if self._componentType is not None:
-            return self._componentType.getTypeMap()
+            return self._componentType.getTagMap()
 
     def prettyPrint(self, scope=0):
         scope = scope + 1
@@ -410,6 +411,16 @@ class SequenceOf(SetOf):
 
 class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
     componentType = namedtype.NamedTypes()
+    def __init__(self, componentType=None, tagSet=None,
+                 subtypeSpec=None, sizeSpec=None):
+        base.AbstractConstructedAsn1Item.__init__(
+            self, componentType, tagSet, subtypeSpec, sizeSpec
+            )
+        if self._componentType is None:
+            self._componentTypeLen = 0
+        else:
+            self._componentTypeLen = len(self._componentType)
+        
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         idx = 0; l = len(self._componentValues)
         while idx < l:
@@ -519,9 +530,9 @@ class Sequence(SequenceAndSetBase):
         )
     typeId = 3
 
-    def getComponentTypeMapNearPosition(self, idx):
+    def getComponentTagMapNearPosition(self, idx):
         if self._componentType:
-            return self._componentType.getTypeMapNearPosition(idx)
+            return self._componentType.getTagMapNearPosition(idx)
     
     def getComponentPositionNearType(self, tagSet, idx):
         if self._componentType:
@@ -563,7 +574,7 @@ class Set(SequenceAndSetBase):
         else:  # set outer component by inner tagSet
             self.setComponentByPosition(idx, value, verifyConstraints)
             
-    def getComponentTypeMap(self): return self._componentType.getTypeMap(1)
+    def getComponentTagMap(self): return self._componentType.getTagMap(True)
 
     def getComponentPositionByType(self, tagSet):
         return self._componentType.getPositionByType(tagSet)
@@ -647,11 +658,11 @@ class Choice(Set):
             else:
                 return c.getTagSet()
 
-    def getTypeMap(self):
+    def getTagMap(self):
         if self._tagSet:
-            return Set.getTypeMap(self)
+            return Set.getTagMap(self)
         else:
-            return Set.getComponentTypeMap(self)
+            return Set.getComponentTagMap(self)
 
     def getComponent(self, innerFlag=0):
         if self._currentIdx is None:
@@ -675,17 +686,18 @@ class Choice(Set):
 
     def setDefaultComponents(self): pass
 
-class ContainsAnyTag:
-    def __contains__(self, key): return 1
-
-containsAnyTag = ContainsAnyTag()
-
 class Any(OctetString):
     tagSet = baseTagSet = tag.TagSet()  # untagged
     typeId = 6
 
-    def getTypeMap(self):
-        return self._tagSet and { self._tagSet: self } or containsAnyTag
+    def getTagMap(self):
+        return tagmap.TagMap(
+            { self.getTagSet(): self },
+            { eoo.endOfOctets.getTagSet(): eoo.endOfOctets },
+            self
+            )
+
+    def prettyOut(self, value): return repr(value)
     
 # XXX
 # coercion rules?
