@@ -3,7 +3,8 @@ Revision 0.0.13a
 
 - Major codec re-design.
 - ASN.1 Any type is now supported.
-- PKCS#7 example added
+- All example ASN.1 modules moved to separate pyasn1-modules package.
+- Fix to initial sub-OID overflow condition detection an encoder.
 - changes towards performance improvement:
   + all dict.has_key() & dict.get() invocations replaced with modern syntax
     (this breaks compatibility with Python 2.1 and older).

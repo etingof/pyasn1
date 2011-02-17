@@ -24,10 +24,15 @@ MISFEATURES
 INSTALLATION
 ------------
 
-The pyasn1 package uses distutils for installation:
+The pyasn1 package uses setuptools/distutils for installation. Thus do
+either:
 
-$ tar zxf pyasn1-0.0.12a.tar.gz
-$ cd pyasn1-0.0.12a
+$ easy_install pyasn1
+
+or
+
+$ tar zxf pyasn1-0.0.13a.tar.gz
+$ cd pyasn1-0.0.13a
 $ python setup.py install
 $ cd test
 $ python suite.py   # to make sure everything works alright
@@ -41,8 +46,8 @@ specification into pyasn1-backed Python code at your application.
 For more information on pyasn1 APIs, please, refer to the doc/notes.html
 file in the distribution.
 
-Also refer to example modules -- one of them (x509.py) handles SSL 
-certificate format.
+Also refer to example modules. Take a look at pyasn1-modules package -- maybe
+it already holds something useful to you.
 
 AVAILABILITY
 ------------
