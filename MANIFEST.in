@@ -1,4 +1,4 @@
 include CHANGES README LICENSE THANKS TODO
 recursive-include examples *.py
 recursive-include test *.py
-recursive-include docs *.txt *.html
+recursive-include doc *.txt *.html
