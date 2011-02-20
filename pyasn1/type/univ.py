@@ -190,34 +190,47 @@ class BitString(base.AbstractSimpleAsn1Item):
         r = []
         if not value:
             return ()
-        elif type(value) != types.StringType:
-            return value
-        elif value[0] == '\'':
-            if value[-2:] == '\'B':
-                for v in value[1:-2]:
-                    r.append(int(v))
-            elif value[-2:] == '\'H':
-                for v in value[1:-2]:
-                    i = 4
-                    v = string.atoi(v, 16)
-                    while i:
-                        i = i - 1
-                        r.append((v>>i)&0x01)
-            else:
-                raise error.PyAsn1Error(
-                    'Bad bitstring value notation %s' % value
-                    )                
-        else:
-            for i in string.split(value, ','):
-                i = self.__namedValues.getValue(i)
-                if i is None:
+        elif type(value) == types.StringType:
+            if value[0] == '\'':
+                if value[-2:] == '\'B':
+                    for v in value[1:-2]:
+                        r.append(int(v))
+                elif value[-2:] == '\'H':
+                    for v in value[1:-2]:
+                        i = 4
+                        v = string.atoi(v, 16)
+                        while i:
+                            i = i - 1
+                            r.append((v>>i)&0x01)
+                else:
                     raise error.PyAsn1Error(
-                        'Unknown identifier \'%s\'' % i
-                        )
-                if i >= len(r):
-                    r.extend([0]*(i-len(r)+1))
-                r[i] = 1
-        return tuple(r)
+                        'Bad bitstring value notation %s' % value
+                        )                
+            else:
+                for i in string.split(value, ','):
+                    j = self.__namedValues.getValue(i)
+                    if j is None:
+                        raise error.PyAsn1Error(
+                            'Unknown bit identifier \'%s\'' % i
+                            )
+                    if j >= len(r):
+                        r.extend([0]*(j-len(r)+1))
+                    r[j] = 1
+        elif type(value) == types.TupleType or type(value) == types.ListType:
+            r = value
+        elif isinstance(value, BitString):
+            return tuple(value)
+        else:
+            raise error.PyAsn1Error(
+                'Bad BitString initializer type \'%s\'' % (value,)
+                )
+        r = tuple(r)
+        for b in r:
+            if b and b != 1:
+                raise error.PyAsn1Error(
+                    'Non-binary BitString initializer \'%s\'' % (r,)
+                    )
+        return r
 
     def prettyOut(self, value):
         return '\'%s\'B' % string.join(map(str, value), '')

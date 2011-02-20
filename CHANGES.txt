@@ -5,7 +5,8 @@ Revision 0.0.13a
 - ASN.1 Any type is now supported.
 - All example ASN.1 modules moved to separate pyasn1-modules package.
 - Fix to initial sub-OID overflow condition detection an encoder.
-- changes towards performance improvement:
+- BitString initialization value verification improved.
+- Changes towards performance improvement:
   + all dict.has_key() & dict.get() invocations replaced with modern syntax
     (this breaks compatibility with Python 2.1 and older).
   + tag and tagset caches introduced to decoder
