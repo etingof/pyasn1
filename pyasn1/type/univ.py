@@ -194,7 +194,15 @@ class BitString(base.AbstractSimpleAsn1Item):
             if value[0] == '\'':
                 if value[-2:] == '\'B':
                     for v in value[1:-2]:
-                        r.append(int(v))
+                        if v == '0':
+                            r.append(0)
+                        elif v == '1':
+                            r.append(1)
+                        else:
+                            raise error.PyAsn1Error(
+                                'Non-binary BIT STRING initializer %s' % (v,)
+                                )
+                    return tuple(r)
                 elif value[-2:] == '\'H':
                     for v in value[1:-2]:
                         i = 4
@@ -202,9 +210,10 @@ class BitString(base.AbstractSimpleAsn1Item):
                         while i:
                             i = i - 1
                             r.append((v>>i)&0x01)
+                    return tuple(r)
                 else:
                     raise error.PyAsn1Error(
-                        'Bad bitstring value notation %s' % value
+                        'Bad BIT STRING value notation %s' % value
                         )                
             else:
                 for i in string.split(value, ','):
@@ -216,31 +225,79 @@ class BitString(base.AbstractSimpleAsn1Item):
                     if j >= len(r):
                         r.extend([0]*(j-len(r)+1))
                     r[j] = 1
+                return tuple(r)
         elif type(value) == types.TupleType or type(value) == types.ListType:
-            r = value
+            r = tuple(value)
+            for b in r:
+                if b and b != 1:
+                    raise error.PyAsn1Error(
+                        'Non-binary BitString initializer \'%s\'' % (r,)
+                        )
+            return r
         elif isinstance(value, BitString):
             return tuple(value)
         else:
             raise error.PyAsn1Error(
                 'Bad BitString initializer type \'%s\'' % (value,)
                 )
-        r = tuple(r)
-        for b in r:
-            if b and b != 1:
-                raise error.PyAsn1Error(
-                    'Non-binary BitString initializer \'%s\'' % (r,)
-                    )
-        return r
 
     def prettyOut(self, value):
         return '\'%s\'B' % string.join(map(str, value), '')
-        
+
 class OctetString(base.AbstractSimpleAsn1Item):
     tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x04)
         )
     def prettyOut(self, value): return str(value)
-    def prettyIn(self, value): return str(value)
+    def prettyIn(self, value):
+        if type(value) == types.StringType:
+            return value
+        else:
+            return str(value)
+
+    def purePrettyIn(self, value):
+        if type(value) != types.StringType:
+            return str(value)
+        elif not value:
+            return value
+        elif value[0] == '\'':
+            r = ''
+            if value[-2:] == '\'B':
+                bitNo = 8; byte = 0
+                for v in value[1:-2]:
+                    if bitNo:
+                        bitNo = bitNo - 1
+                    else:
+                        bitNo = 7
+                        r = r + chr(byte)
+                        byte = 0
+                    if v == '0':
+                        v = 0
+                    elif v == '1':
+                        v = 1
+                    else:
+                        raise error.PyAsn1Error(
+                            'Non-binary OCTET STRING initializer %s' % (v,)
+                            )
+                    byte = byte | (v << bitNo)
+                r = r + chr(byte)
+            elif value[-2:] == '\'H':
+                p = ''
+                for v in value[1:-2]:
+                    if p:
+                        r = r + chr(string.atoi(p+v, 16))
+                        p = ''
+                    else:
+                        p = v
+                if p:
+                    r = r + chr(string.atoi(p+'0', 16))
+            else:
+                raise error.PyAsn1Error(
+                    'Bad OCTET STRING value notation %s' % value
+                    )
+            return r
+        else:
+            return value
     
     # Immutable sequence object protocol
     
