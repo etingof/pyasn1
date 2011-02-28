@@ -635,14 +635,18 @@ class Set(SequenceAndSetBase):
         t = self._componentType.getTypeByPosition(idx)
         if innerFlag:  # set inner component by inner tagSet
             if t.getTagSet():
-                self.setComponentByPosition(idx, value, verifyConstraints)
+                return self.setComponentByPosition(
+                    idx, value, verifyConstraints
+                    )
             else:
                 t = self.setComponentByPosition(idx).getComponentByPosition(idx)
-                t.setComponentByType(
+                return t.setComponentByType(
                     tagSet, value, innerFlag, verifyConstraints
                     )
         else:  # set outer component by inner tagSet
-            self.setComponentByPosition(idx, value, verifyConstraints)
+            return self.setComponentByPosition(
+                idx, value, verifyConstraints
+                )
             
     def getComponentTagMap(self): return self._componentType.getTagMap(True)
 
