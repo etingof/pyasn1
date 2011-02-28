@@ -470,7 +470,11 @@ class SetOf(base.AbstractConstructedAsn1Item):
         scope = scope + 1
         r = self.__class__.__name__ + ':\n'        
         for idx in range(len(self._componentValues)):
-            r = r + ' '*scope + self._componentValues[idx].prettyPrint(scope)
+            r = r + ' '*scope
+            if self._componentValues[idx] is None:
+                r = r + '<empty>'
+            else:
+                r = r + self._componentValues[idx].prettyPrint(scope)
         return r
 
 class SequenceOf(SetOf):
@@ -586,7 +590,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                 r = r + ' '*scope
                 componentType = self.getComponentType()
                 if componentType is None:
-                    r = r + '??'
+                    r = r + '<no-name>'
                 else:
                     r = r + componentType.getNameByPosition(idx)
                 r = '%s=%s\n' % (
