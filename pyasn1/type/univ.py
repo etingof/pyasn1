@@ -652,10 +652,13 @@ class Set(SequenceAndSetBase):
                 idx, value, verifyConstraints
                 )
             
-    def getComponentTagMap(self): return self._componentType.getTagMap(True)
+    def getComponentTagMap(self):
+        if self._componentType:
+            return self._componentType.getTagMap(True)
 
     def getComponentPositionByType(self, tagSet):
-        return self._componentType.getPositionByType(tagSet)
+        if self._componentType:
+            return self._componentType.getPositionByType(tagSet)
 
 class Choice(Set):
     tagSet = baseTagSet = tag.TagSet()  # untagged
