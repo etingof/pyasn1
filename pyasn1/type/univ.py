@@ -559,6 +559,10 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         self._componentValues[idx] = value
         return self
 
+    def getNameByPosition(self, idx):
+        if self._componentTypeLen:
+            return self._componentType.getNameByPosition(idx)
+
     def getDefaultComponentByPosition(self, idx):
         if self._componentTypeLen and self._componentType[idx].isDefaulted:
             return self._componentType[idx].getType()
