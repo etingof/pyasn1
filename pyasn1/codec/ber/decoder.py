@@ -315,7 +315,11 @@ class SetDecoder(SequenceDecoder):
         return r.getComponentTagMap()
 
     def _getComponentPositionByType(self, r, t, idx):
-        return r.getComponentPositionByType(t)
+        nextIdx = r.getComponentPositionByType(t)
+        if nextIdx is None:
+            return idx
+        else:
+            nextIdx
     
 class SetOfDecoder(SequenceOfDecoder):
     protoComponent = univ.SetOf()
@@ -454,10 +458,12 @@ typeMap = {
 
 ( stDecodeTag, stDecodeLength, stGetValueDecoder, stGetValueDecoderByAsn1Spec,
   stGetValueDecoderByTag, stTryAsExplicitTag, stDecodeValue,
-  stErrorCondition, stStop ) = range(9)
+  stDumpRawValue, stErrorCondition, stStop ) = range(10)
 
 class Decoder:
     defaultErrorState = stErrorCondition
+#    defaultErrorState = stDumpRawValue
+    defaultRawDecoder = AnyDecoder()
     def __init__(self, tagMap, typeMap={}):
         self.__tagMap = tagMap
         self.__typeMap = typeMap
@@ -628,6 +634,9 @@ class Decoder:
                     state = stDecodeTag
                 else:                    
                     state = self.defaultErrorState
+            if state == stDumpRawValue:
+                concreteDecoder = self.defaultRawDecoder
+                state = stDecodeValue
             if state == stDecodeValue:
                 if recursiveFlag:
                     decodeFun = self
@@ -651,7 +660,7 @@ class Decoder:
             if state == stErrorCondition:
                 raise error.PyAsn1Error(
                     '%s not in asn1Spec: %s' % (tagSet, repr(asn1Spec))
-                    )
+                    )                    
         return value, substrate
             
 decode = Decoder(tagMap, typeMap)
