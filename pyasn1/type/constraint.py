@@ -29,13 +29,13 @@ class AbstractConstraint:
         try:
             self._testValue(value, idx)
         except error.ValueConstraintError, why:
-            raise error.ValueConstraintError('%s failed at: %s' % (
+            raise error.ValueConstraintError('%s failed at: \"%s\"' % (
                 self, why
                 ))
     def __repr__(self):
         return '%s(%s)' % (
             self.__class__.__name__,
-            string.join(map(lambda x: str(x), self._values), ', ')
+            string.join(map(lambda x: repr(x), self._values), ', ')
         )
     # __cmp__ must accompany __hash__
     def __cmp__(self, other):
@@ -177,7 +177,7 @@ class ConstraintsUnion(AbstractConstraintSet):
             else:
                 return
         raise error.ValueConstraintError(
-            'all of %s failed for %s' % (self._values, value)
+            'all of %s failed for \"%s\"' % (self._values, value)
             )
 
 # XXX
