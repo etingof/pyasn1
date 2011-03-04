@@ -6,6 +6,8 @@ Revision 0.0.13a
 - All example ASN.1 modules moved to separate pyasn1-modules package.
 - Fix to initial sub-OID overflow condition detection an encoder.
 - BitString initialization value verification improved.
+- The Set/Sequence.getNameByPosition() method implemented.
+- Fix to proper behaviour of PermittedAlphabetConstraint object.
 - Changes towards performance improvement:
   + all dict.has_key() & dict.get() invocations replaced with modern syntax
     (this breaks compatibility with Python 2.1 and older).

@@ -100,7 +100,16 @@ class ValueSizeConstraint(ValueRangeConstraint):
         if l < self.start or l > self.stop:
             raise error.ValueConstraintError(value)
 
-class PermittedAlphabetConstraint(SingleValueConstraint): pass
+class PermittedAlphabetConstraint(SingleValueConstraint):
+    def _setValues(self, values):
+        self._values = ()
+        for v in values:
+            self._values = self._values + tuple(v)
+
+    def _testValue(self, value, idx):
+        for v in value:
+            if v not in self._values:
+                raise error.ValueConstraintError(value)
 
 # This is a bit kludgy, meaning two op modes within a single constraing
 class InnerTypeConstraint(AbstractConstraint):
