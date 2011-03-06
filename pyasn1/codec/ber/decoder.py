@@ -475,8 +475,8 @@ class Decoder:
         
     def __call__(self, substrate, asn1Spec=None, tagSet=None,
                  length=None, state=stDecodeTag, recursiveFlag=1):
+        fullSubstrate = substrate
         while state != stStop:
-            fullSubstrate = substrate
             if state == stDecodeTag:
                 # Decode tag
                 if not substrate:
