@@ -8,6 +8,7 @@ Revision 0.0.13a
 - BitString initialization value verification improved.
 - The Set/Sequence.getNameByPosition() method implemented.
 - Fix to proper behaviour of PermittedAlphabetConstraint object.
+- Fix to improper Boolean substrate handling at CER/DER decoders.
 - Changes towards performance improvement:
   + all dict.has_key() & dict.get() invocations replaced with modern syntax
     (this breaks compatibility with Python 2.1 and older).

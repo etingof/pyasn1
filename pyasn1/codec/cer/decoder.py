@@ -15,6 +15,8 @@ class BooleanDecoder(decoder.AbstractSimpleDecoder):
             value = 1
         elif byte == 0x00:
             value = 0
+        else:
+            raise error.PyAsn1Error('Boolean CER violation: %s' % byte)
         return self._createComponent(asn1Spec, tagSet, value), substrate[1:]
 
 tagMap = decoder.tagMap.copy()
