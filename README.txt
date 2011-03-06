@@ -43,8 +43,8 @@ OPERATION
 Perhaps a typical use would involve [by-hand] compilation of your ASN.1
 specification into pyasn1-backed Python code at your application.
 
-For more information on pyasn1 APIs, please, refer to the doc/notes.html
-file in the distribution.
+For more information on pyasn1 APIs, please, refer to the 
+doc/pyasn1-tutorial.html file in the distribution.
 
 Also refer to example modules. Take a look at pyasn1-modules package -- maybe
 it already holds something useful to you.
