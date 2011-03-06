@@ -353,7 +353,8 @@ class AnyDecoder(AbstractSimpleDecoder):
     protoComponent = univ.Any()
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                      length, state, decodeFun):
-        if asn1Spec is not None and tagSet != asn1Spec.getTagSet():
+        if asn1Spec is None or \
+               asn1Spec is not None and tagSet != asn1Spec.getTagSet():
             # untagged Any container, recover inner header substrate
             length = length + len(fullSubstrate) - len(substrate)
             substrate = fullSubstrate
