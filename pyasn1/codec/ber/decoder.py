@@ -319,7 +319,7 @@ class SetDecoder(SequenceDecoder):
         if nextIdx is None:
             return idx
         else:
-            nextIdx
+            return nextIdx
     
 class SetOfDecoder(SequenceOfDecoder):
     protoComponent = univ.SetOf()
