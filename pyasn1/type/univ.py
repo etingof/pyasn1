@@ -494,7 +494,19 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             self._componentTypeLen = 0
         else:
             self._componentTypeLen = len(self._componentType)
-        
+
+    def __getitem__(self, idx):
+        if type(idx) == types.StringType:
+            return self.getComponentByName(idx)
+        else:
+            return base.AbstractConstructedAsn1Item.__getitem__(self, idx)
+
+    def __setitem__(self, idx, value):
+        if type(idx) == types.StringType:
+            self.setComponentByName(idx, value)
+        else:
+            base.AbstractConstructedAsn1Item.__setitem__(self, idx, value)
+
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         idx = 0; l = len(self._componentValues)
         while idx < l:

@@ -208,12 +208,13 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
 
     def getComponentByPosition(self, idx):
         raise error.PyAsn1Error('Method not implemented')
-    def setComponentByPosition(self, idx, value):
+    def setComponentByPosition(self, idx, value, verifyConstraints=True):
         raise error.PyAsn1Error('Method not implemented')
 
     def getComponentType(self): return self._componentType
 
-    def __getitem__(self, idx): return self._componentValues[idx]
+    def __getitem__(self, idx): return self.getComponentByPosition(idx)
+    def __setitem__(self, idx, value): self.setComponentByPosition(idx, value)
 
     def __len__(self): return len(self._componentValues)
     

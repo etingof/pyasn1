@@ -1,6 +1,9 @@
 Revision 0.0.13b
 ----------------
 
+- Objects of Constructed types now support __setitem__()
+- Set/Sequence objects can now be addressed by their field names (string index)
+  and position (integer index).
 - Typo fix to ber.SetDecoder code that prevented guided decoding operation.
 - Fix to explicitly tagged items decoding support.
 
