@@ -35,6 +35,22 @@ class EndOfOctetsDecoder(AbstractSimpleDecoder):
                      length, state, decodeFun):
         return eoo.endOfOctets, substrate[:length]
 
+class ExplicitTagDecoder(AbstractSimpleDecoder):
+    def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
+                     length, state, decodeFun):
+        return decodeFun(substrate[:length], asn1Spec, tagSet, length)
+
+    def indefLenValueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
+                             length, state, decodeFun):
+        value, substrate = decodeFun(substrate, asn1Spec, tagSet, length)
+        terminator, substrate = decodeFun(substrate)
+        if terminator == eoo.endOfOctets:
+            return value, substrate
+        else:
+            raise error.PyAsn1Error('Missing end-of-octets terminator')
+
+explicitTagDecoder = ExplicitTagDecoder()
+
 class IntegerDecoder(AbstractSimpleDecoder):
     protoComponent = univ.Integer(0)
     precomputedValues = {
@@ -632,7 +648,8 @@ class Decoder:
                        tagSet[0][1] == tag.tagFormatConstructed and \
                        tagSet[0][0] != tag.tagClassUniversal:
                     # Assume explicit tagging
-                    state = stDecodeTag
+                    concreteDecoder = explicitTagDecoder
+                    state = stDecodeValue
                 else:                    
                     state = self.defaultErrorState
             if state == stDumpRawValue:
@@ -650,8 +667,8 @@ class Decoder:
                         )
                 else:
                     value, _substrate = concreteDecoder.valueDecoder(
-                        fullSubstrate, substrate, asn1Spec, tagSet,
-                        length, stGetValueDecoder, decodeFun
+                        fullSubstrate, substrate, asn1Spec, tagSet, length,
+                        stGetValueDecoder, decodeFun
                         )
                     if recursiveFlag:
                         substrate = substrate[length:]
@@ -661,7 +678,7 @@ class Decoder:
             if state == stErrorCondition:
                 raise error.PyAsn1Error(
                     '%s not in asn1Spec: %s' % (tagSet, repr(asn1Spec))
-                    )                    
+                    )
         return value, substrate
             
 decode = Decoder(tagMap, typeMap)

@@ -1,3 +1,9 @@
+Revision 0.0.13b
+----------------
+
+- Typo fix to ber.SetDecoder code that prevented guided decoding operation.
+- Fix to explicitly tagged items decoding support.
+
 Revision 0.0.13a
 ----------------
 
