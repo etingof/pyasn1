@@ -411,6 +411,13 @@ class Real(base.AbstractSimpleAsn1Item):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x09)
         )
 
+    def __normalizeBase10(self, value):
+        m, b, e = value
+        while m % 10 == 0:
+            m = m / 10
+            e = e + 1
+        return m, b, e
+
     def prettyIn(self, value):
         if type(value) == types.TupleType and len(value) == 3:
             for d in value:
@@ -422,15 +429,17 @@ class Real(base.AbstractSimpleAsn1Item):
                 raise error.PyAsn1Error(
                     'Prohibited base for Real value: %s' % value[1]
                     )
+            if value[1] == 10:
+                value = self.__normalizeBase10(value)
             return value
         elif type(value) in (types.IntType, types.LongType):
-            return (value, 10, 0)
+            return self.__normalizeBase10((value, 10, 0))
         elif type(value) == types.FloatType:
             e = 0
             while long(value) != value:
                 value = value * 10
                 e = e - 1
-            return (long(value), 10, e)
+            return self.__normalizeBase10((long(value), 10, e))
         elif isinstance(value, Real):
             return tuple(value)
         else:
