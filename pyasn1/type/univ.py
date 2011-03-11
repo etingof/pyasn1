@@ -416,8 +416,12 @@ class Real(base.AbstractSimpleAsn1Item):
             for d in value:
                 if type(d) not in (types.IntType, types.LongType):
                     raise error.PyAsn1Error(
-                        'Bad real value syntax: %s' % (value,)
+                        'Lame Real value syntax: %s' % (value,)
                         )
+            if value[1] not in (2, 10):
+                raise error.PyAsn1Error(
+                    'Prohibited base for Real value: %s' % value[1]
+                    )
             return value
         elif type(value) in (types.IntType, types.LongType):
             return (value, 10, 0)
