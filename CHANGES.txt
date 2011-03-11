@@ -1,6 +1,7 @@
 Revision 0.0.13b
 ----------------
 
+- ASN.1 Real type is now supported properly.
 - Objects of Constructed types now support __setitem__()
 - Set/Sequence objects can now be addressed by their field names (string index)
   and position (integer index).

@@ -433,12 +433,12 @@ tuple or a Python float.
 <table bgcolor="lightgray" border=0 width=100%><TR><TD>
 <pre>
 >>> from pyasn1.type import univ
->>> pi = univ.Real(314159, 10, -5)
+>>> pi = univ.Real((314159, 10, -5))
 >>> pi
-Real(314159, 10,-5)
+Real((314159, 10,-5))
 >>> float(pi)
 3.14159
->>> pi == Real(3.14159)
+>>> pi == univ.Real(3.14159)
 True
 >>>
 </pre>
