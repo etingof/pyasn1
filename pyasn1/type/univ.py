@@ -23,13 +23,15 @@ class Integer(base.AbstractSimpleAsn1Item):
             self, value, tagSet, subtypeSpec
             )
 
-#XXX    def __coerce__(self, other): return long(self), long(other)
     def __and__(self, value): return self.clone(self._value & value)
     def __rand__(self, value): return self.clone(value & self._value)
     def __or__(self, value): return self.clone(self._value | value)
     def __ror__(self, value): return self.clone(value | self._value)
     def __xor__(self, value): return self.clone(self._value ^ value)
     def __rxor__(self, value): return self.clone(value ^ self._value)
+    def __lshift__(self, value): return self.clone(self._value << value)
+    def __rshift__(self, value): return self.clone(self._value >> value)
+
     def __add__(self, value): return self.clone(self._value + value)
     def __radd__(self, value): return self.clone(value + self._value)
     def __sub__(self, value): return self.clone(self._value - value)
@@ -40,17 +42,22 @@ class Integer(base.AbstractSimpleAsn1Item):
     def __rdiv__(self, value):  return self.clone(value / self._value)
     def __mod__(self, value): return self.clone(self._value % value)
     def __rmod__(self, value): return self.clone(value % self._value)
-    def __pow__(self, value, modulo=None):
-        return self.clone(pow(self._value, value, modulo))
+    def __pow__(self, value, modulo=None): return self.clone(pow(self._value, value, modulo))
     def __rpow__(self, value): return self.clone(pow(value, self._value))
-    def __lshift__(self, value): return self.clone(self._value << value)
-    def __rshift__(self, value): return self.clone(self._value >> value)
+
     def __int__(self): return int(self._value)
     def __long__(self): return long(self._value)
     def __float__(self): return float(self._value)    
     def __abs__(self): return abs(self._value)
     def __index__(self): return int(self._value)
-    
+
+    def __lt__(self, value): return self._value < value
+    def __le__(self, value): return self._value <= value
+    def __eq__(self, value): return self._value == value
+    def __ne__(self, value): return self._value != value
+    def __gt__(self, value): return self._value > value
+    def __ge__(self, value): return self._value >= value
+
     def prettyIn(self, value):
         if type(value) != types.StringType:
             return long(value)
@@ -181,10 +188,11 @@ class BitString(base.AbstractSimpleAsn1Item):
             return self.clone(operator.getslice(self._value, i.start, i.stop))
         else:
             return self._value[i]
+
     def __add__(self, value): return self.clone(self._value + value)
     def __radd__(self, value): return self.clone(value + self._value)
     def __mul__(self, value): return self.clone(self._value * value)
-    def __rmul__(self, value): return self.__mul__(value)
+    def __rmul__(self, value): return self * value
 
     def prettyIn(self, value):
         r = []
@@ -242,7 +250,7 @@ class BitString(base.AbstractSimpleAsn1Item):
                 )
 
     def prettyOut(self, value):
-        return '\'%s\'B' % string.join(map(str, value), '')
+        return '\"\'%s\'B\"' % string.join(map(str, value), '')
 
 class OctetString(base.AbstractSimpleAsn1Item):
     tagSet = baseTagSet = tag.initTagSet(
@@ -310,10 +318,11 @@ class OctetString(base.AbstractSimpleAsn1Item):
             return self.clone(operator.getslice(self._value, i.start, i.stop))
         else:
             return self._value[i]
+
     def __add__(self, value): return self.clone(self._value + value)
     def __radd__(self, value): return self.clone(value + self._value)
     def __mul__(self, value): return self.clone(self._value * value)
-    def __rmul__(self, value): return self.__mul__(value)
+    def __rmul__(self, value): return self * value
 
 class Null(OctetString):
     defaultValue = '' # This is tightly constrained
@@ -402,6 +411,64 @@ class Real(base.AbstractSimpleAsn1Item):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x09)
         )
 
+    def prettyIn(self, value):
+        if type(value) == types.TupleType and len(value) == 3:
+            for d in value:
+                if type(d) not in (types.IntType, types.LongType):
+                    raise error.PyAsn1Error(
+                        'Bad real value syntax: %s' % (value,)
+                        )
+            return value
+        elif type(value) in (types.IntType, types.LongType):
+            return (value, 10, 0)
+        elif type(value) == types.FloatType:
+            e = 0
+            while long(value) != value:
+                value = value * 10
+                e = e - 1
+            return (long(value), 10, e)
+        elif isinstance(value, Real):
+            return tuple(value)
+        else:
+            raise error.PyAsn1Error(
+                'Bad real value syntax: %s' % (value,)
+                )
+        
+    def prettyOut(self, value): return str(value)
+
+    def __str__(self): return str(float(self))
+    
+    def __add__(self, value): return self.clone(float(self) + value)
+    def __radd__(self, value): return self + value
+    def __mul__(self, value): return self.clone(float(self) * value)
+    def __rmul__(self, value): return self * value
+    def __sub__(self, value): return self.clone(float(self) - value)
+    def __rsub__(self, value): return self.clone(value - float(self))
+    def __div__(self, value): return self.clone(float(self) / value)
+    def __rdiv__(self, value): return self.clone(value / float(self))
+    def __mod__(self, value): return self.clone(float(self) % value)
+    def __rmod__(self, value): return self.clone(value % float(self))
+    def __pow__(self, value, modulo=None): return self.clone(pow(float(self), value, modulo))
+    def __rpow__(self, value): return self.clone(pow(value, float(self)))
+
+    def __int__(self): return int(float(self))
+    def __long__(self): return long(float(self))
+    def __float__(self): return float(
+        self._value[0] * pow(self._value[1], self._value[2])
+        )
+    def __abs__(self): return abs(float(self))
+
+    def __lt__(self, value): return float(self) < value
+    def __le__(self, value): return float(self) <= value
+    def __eq__(self, value): return float(self) == value
+    def __ne__(self, value): return float(self) != value
+    def __gt__(self, value): return float(self) > value
+    def __ge__(self, value): return float(self) >= value
+
+    def __nonzero__(self): return float(self) and 1 or 0
+
+    def __getitem__(self, idx): return self._value[idx]
+    
 class Enumerated(Integer):
     tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x0A)
@@ -506,7 +573,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             self.setComponentByName(idx, value)
         else:
             base.AbstractConstructedAsn1Item.__setitem__(self, idx, value)
-
+        
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         idx = 0; l = len(self._componentValues)
         while idx < l:
