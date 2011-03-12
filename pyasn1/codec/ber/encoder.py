@@ -185,7 +185,17 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
                 octets = octets + (string.join(res, ''),)
                 
         return string.join(octets, ''), 0
-    
+
+class RealEncoder(AbstractItemEncoder):
+    def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
+        m, b, e = value
+        if not m:
+            return '', 0
+        if b == 10:
+            return '\x03%dE%s%d' % (m, e == 0 and '+' or '', e), 0
+        elif b == 2:
+            pass
+
 class SequenceEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         value.setDefaultComponents()
@@ -231,6 +241,7 @@ tagMap = {
     univ.Null.tagSet: NullEncoder(),
     univ.ObjectIdentifier.tagSet: ObjectIdentifierEncoder(),
     univ.Enumerated.tagSet: IntegerEncoder(),
+    univ.Real.tagSet: RealEncoder(),
     # Sequence & Set have same tags as SequenceOf & SetOf
     univ.SequenceOf.tagSet: SequenceOfEncoder(),
     univ.SetOf.tagSet: SequenceOfEncoder(),

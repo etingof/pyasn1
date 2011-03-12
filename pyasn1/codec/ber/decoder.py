@@ -230,6 +230,40 @@ class ObjectIdentifierDecoder(AbstractSimpleDecoder):
                 index = index + 1
         return self._createComponent(asn1Spec, tagSet, oid), substrate[index:]
 
+class RealDecoder(AbstractSimpleDecoder):
+    protoComponent = univ.Real()
+    def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
+                     length, state, decodeFun):
+        substrate = substrate[:length]
+        if not length:
+            raise error.SubstrateUnderrunError('Short substrate for Real')
+        nr = ord(substrate[0]); substrate = substrate[1:]
+        if nr & 0x80:  # binary enoding
+            pass
+        elif nr & 0xc0 == 0:  # character encoding
+            try:
+                if nr & 0x3 == 0x1:  # NR1
+                    value = (long(substrate), 10, 0)
+                elif nr & 0x3 == 0x2:  # NR2
+                    value = float(substrate)
+                elif nr & 0x3 == 0x3:  # NR3
+                    value = float(substrate)
+                else:
+                    raise error.SubstrateUnderrunError(
+                        'Unknown NR (tag %s)' % nr
+                        )
+            except ValueError:
+                raise error.SubstrateUnderrunError(
+                    'Bad character Real syntax'
+                    )
+        elif nr & 0xc0 == 0x40:  # special real value
+            pass
+        else:
+            raise error.SubstrateUnderrunError(
+                'Unknown encoding (tag %s)' % nr
+                )
+        return self._createComponent(asn1Spec, tagSet, value), substrate
+        
 class SequenceDecoder(AbstractConstructedDecoder):
     protoComponent = univ.Sequence()
     def _getComponentTagMap(self, r, idx):
@@ -443,6 +477,7 @@ tagMap = {
     univ.Null.tagSet: NullDecoder(),
     univ.ObjectIdentifier.tagSet: ObjectIdentifierDecoder(),
     univ.Enumerated.tagSet: IntegerDecoder(),
+    univ.Real.tagSet: RealDecoder(),
     univ.Sequence.tagSet: SequenceDecoder(),  # conflicts with SequenceOf
     univ.Set.tagSet: SetDecoder(),            # conflicts with SetOf
     univ.Choice.tagSet: ChoiceDecoder(),      # conflicts with Any
