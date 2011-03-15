@@ -237,30 +237,53 @@ class RealDecoder(AbstractSimpleDecoder):
         substrate = substrate[:length]
         if not length:
             raise error.SubstrateUnderrunError('Short substrate for Real')
-        nr = ord(substrate[0]); substrate = substrate[1:]
-        if nr & 0x80:  # binary enoding
-            pass
-        elif nr & 0xc0 == 0:  # character encoding
+        fo = ord(substrate[0]); substrate = substrate[1:]
+        if fo & 0x80:  # binary enoding
+            if fo & 0x11 == 0:
+                n = 1
+            elif fo & 0x01:
+                n = 2
+            elif fo & 0x02:
+                n = 3
+            else:
+                n = ord(substrate[0])
+            eo, substrate = substrate[:n], substrate[n:]
+            if not eo or not substrate:
+                raise error.PyAsn1Error('Real exponent screwed')
+            e = 0
+            while eo:         # exponent
+                e <<= 8
+                e |= ord(eo[0])
+                eo = eo[1:]
+            p = 0
+            while substrate:  # value
+                p <<= 8
+                p |= ord(substrate[0])
+                substrate = substrate[1:]
+            if fo & 0x40:    # sign bit
+                p = -p
+            value = (p, 2, e)
+        elif fo & 0xc0 == 0:  # character encoding
             try:
-                if nr & 0x3 == 0x1:  # NR1
+                if fo & 0x3 == 0x1:  # NR1
                     value = (long(substrate), 10, 0)
-                elif nr & 0x3 == 0x2:  # NR2
+                elif fo & 0x3 == 0x2:  # NR2
                     value = float(substrate)
-                elif nr & 0x3 == 0x3:  # NR3
+                elif fo & 0x3 == 0x3:  # NR3
                     value = float(substrate)
                 else:
                     raise error.SubstrateUnderrunError(
-                        'Unknown NR (tag %s)' % nr
+                        'Unknown NR (tag %s)' % fo
                         )
             except ValueError:
                 raise error.SubstrateUnderrunError(
                     'Bad character Real syntax'
                     )
-        elif nr & 0xc0 == 0x40:  # special real value
+        elif fo & 0xc0 == 0x40:  # special real value
             pass
         else:
             raise error.SubstrateUnderrunError(
-                'Unknown encoding (tag %s)' % nr
+                'Unknown encoding (tag %s)' % fo
                 )
         return self._createComponent(asn1Spec, tagSet, value), substrate
         

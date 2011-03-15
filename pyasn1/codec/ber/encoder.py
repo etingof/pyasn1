@@ -194,7 +194,40 @@ class RealEncoder(AbstractItemEncoder):
         if b == 10:
             return '\x03%dE%s%d' % (m, e == 0 and '+' or '', e), 0
         elif b == 2:
-            pass
+            fo = 0x80                 # binary enoding
+            if m < 0:
+                fo = fo | 0x40  # sign bit
+                m = -m
+            while long(m) != m: # drop floating point
+                m *= 2
+                e -= 1
+            while m & 0x1 == 0: # mantissa normalization
+                m >>= 1
+                e += 1
+            eo = ''
+            while e:
+                eo = chr(e&0xff) + eo
+                e >>= 8
+            n = len(eo)
+            if n > 0xff:
+                raise error.PyAsn1Error('Real exponent overflow')
+            if n == 1:
+                pass
+            elif n == 2:
+                fo |= 1
+            elif n == 3:
+                fo |= 2
+            else:
+                fo |= 3
+                eo = chr(n//0xff+1) + eo
+            po = ''
+            while m:
+                po = chr(m&0xff) + po
+                m >>= 8
+            substrate = chr(fo) + eo + po
+            return substrate, 0
+        else:
+            raise error.PyAsn1Error('Prohibited Real base %s' % b)
 
 class SequenceEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
