@@ -238,7 +238,9 @@ class RealDecoder(AbstractSimpleDecoder):
         if not length:
             raise error.SubstrateUnderrunError('Short substrate for Real')
         fo = ord(substrate[0]); substrate = substrate[1:]
-        if fo & 0x80:  # binary enoding
+        if fo & 0x40:  # infinite value
+            value = fo & 0x01 and float('-inf') or float('inf')
+        elif fo & 0x80:  # binary enoding
             if fo & 0x11 == 0:
                 n = 1
             elif fo & 0x01:

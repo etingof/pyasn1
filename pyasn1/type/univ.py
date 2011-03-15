@@ -407,6 +407,9 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
         return string.join(r, '.')
 
 class Real(base.AbstractSimpleAsn1Item):
+    _plusInf = float('inf')
+    _minusInf = float('-inf')
+    _inf = (_plusInf, _minusInf)
     tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x09)
         )
@@ -435,20 +438,39 @@ class Real(base.AbstractSimpleAsn1Item):
         elif type(value) in (types.IntType, types.LongType):
             return self.__normalizeBase10((value, 10, 0))
         elif type(value) == types.FloatType:
-            e = 0
-            while long(value) != value:
-                value = value * 10
-                e = e - 1
-            return self.__normalizeBase10((long(value), 10, e))
+            if value in self._inf:
+                return value
+            else:
+                e = 0
+                while long(value) != value:
+                    value = value * 10
+                    e = e - 1
+                return self.__normalizeBase10((long(value), 10, e))
+        
         elif isinstance(value, Real):
             return tuple(value)
-        else:
-            raise error.PyAsn1Error(
-                'Bad real value syntax: %s' % (value,)
-                )
+        elif type(value) == types.StringType:  # handle infinite literal
+            try:
+                inf = float(value)
+            except ValueError:
+                pass
+            else:
+                if inf in self._inf:
+                    return inf
+        raise error.PyAsn1Error(
+            'Bad real value syntax: %s' % (value,)
+            )
         
-    def prettyOut(self, value): return str(value)
+    def prettyOut(self, value):
+        if value in self._inf:
+            return '\'%s\'' % value
+        else:
+            return str(value)
 
+    def isPlusInfinity(self): return self._value == self._plusInf
+    def isMinusInfinity(self): return self._value == self._minusInf
+    def isInfinity(self): return self._value in self._inf
+    
     def __str__(self): return str(float(self))
     
     def __add__(self, value): return self.clone(float(self) + value)
@@ -466,9 +488,13 @@ class Real(base.AbstractSimpleAsn1Item):
 
     def __int__(self): return int(float(self))
     def __long__(self): return long(float(self))
-    def __float__(self): return float(
-        self._value[0] * pow(self._value[1], self._value[2])
-        )
+    def __float__(self):
+        if self._value in self._inf:
+            return self._value
+        else:
+            return float(
+                self._value[0] * pow(self._value[1], self._value[2])
+                )
     def __abs__(self): return abs(float(self))
 
     def __lt__(self, value): return float(self) < value
@@ -480,7 +506,11 @@ class Real(base.AbstractSimpleAsn1Item):
 
     def __nonzero__(self): return float(self) and 1 or 0
 
-    def __getitem__(self, idx): return self._value[idx]
+    def __getitem__(self, idx):
+        if self._value in self._inf:
+            raise error.PyAsn1Error('Invalid infinite value operation')
+        else:
+            return self._value[idx]
     
 class Enumerated(Integer):
     tagSet = baseTagSet = tag.initTagSet(

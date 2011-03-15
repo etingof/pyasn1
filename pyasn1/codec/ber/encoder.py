@@ -188,6 +188,10 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
 
 class RealEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
+        if value.isPlusInfinity():
+            return '\x40', 0
+        if value.isMinusInfinity():
+            return '\x41', 0
         m, b, e = value
         if not m:
             return '', 0

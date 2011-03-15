@@ -427,7 +427,9 @@ pi ::= REAL { mantissa 314159, base 10, exponent -5 }
 
 <p>
 Corresponding pyasn1 objects can be initialized with either a three-component
-tuple or a Python float.
+tuple or a Python float. Infinite values could be expressed in a way, 
+compatible with Python float type.
+
 </p>
 
 <table bgcolor="lightgray" border=0 width=100%><TR><TD>
@@ -439,6 +441,10 @@ Real((314159, 10,-5))
 >>> float(pi)
 3.14159
 >>> pi == univ.Real(3.14159)
+True
+>>> univ.Real('inf')
+Real('inf')
+>>> univ.Real('-inf') == float('-inf')
 True
 >>>
 </pre>
