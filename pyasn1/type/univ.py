@@ -709,7 +709,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                         )
 
     def prettyPrint(self, scope=0):
-        scope = scope+1
+        scope = scope + 1
         r = self.__class__.__name__ + ':\n'
         for idx in range(len(self._componentValues)):
             if self._componentValues[idx] is not None:

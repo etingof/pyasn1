@@ -149,7 +149,7 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
 
     def __repr__(self):
         r = self.__class__.__name__ + '()'
-        for idx in range(len(self)):
+        for idx in range(len(self._componentValues)):
             if self._componentValues[idx] is None:
                 continue
             r = r + '.setComponentByPosition(%s, %s)' % (
