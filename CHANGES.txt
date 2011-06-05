@@ -1,3 +1,8 @@
+Revision 0.0.13
+---------------
+
+- Fix to base10 normalization function that loops on univ.Real(0)
+
 Revision 0.0.13b
 ----------------
 

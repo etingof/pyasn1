@@ -416,7 +416,7 @@ class Real(base.AbstractSimpleAsn1Item):
 
     def __normalizeBase10(self, value):
         m, b, e = value
-        while m % 10 == 0:
+        while m and m % 10 == 0:
             m = m / 10
             e = e + 1
         return m, b, e
