@@ -786,10 +786,31 @@ class Choice(Set):
     typeId = 5
     _currentIdx = None
 
-    def __cmp__(self, other):
+    def __eq__(self, other):
         if self._componentValues:
-            return cmp(self._componentValues[self._currentIdx], other)
-        return -1
+            return self._componentValues[self._currentIdx] == other
+        return NotImplemented
+    def __ne__(self, other):
+        if self._componentValues:
+            return self._componentValues[self._currentIdx] != other
+        return NotImplemented
+    def __lt__(self, other):
+        if self._componentValues:
+            return self._componentValues[self._currentIdx] < other
+        return NotImplemented
+    def __le__(self, other):
+        if self._componentValues:
+            return self._componentValues[self._currentIdx] <= other
+        return NotImplemented
+    def __gt__(self, other):
+        if self._componentValues:
+            return self._componentValues[self._currentIdx] > other
+        return NotImplemented
+    def __ge__(self, other):
+        if self._componentValues:
+            return self._componentValues[self._currentIdx] >= other
+        return NotImplemented
+    def __nonzero__(self, other): return bool(self._componentValues)
 
     def __len__(self): return self._currentIdx is not None and 1 or 0
     

@@ -4,6 +4,7 @@ Revision 0.0.14
 - Major overhawl for Python 2K/3K compatibility:
   + Get rid of old-style types
   + Drop string module usage
+  + Switched to rich comparation
 
 Revision 0.0.13
 ---------------

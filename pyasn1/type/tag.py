@@ -30,9 +30,12 @@ class Tag:
             )
     # These is really a hotspot -- expose public "uniq" attribute to save on
     # function calls
-    def __cmp__(self, other): return cmp(self.uniq, other.uniq)
     def __eq__(self, other): return self.uniq == other.uniq
     def __ne__(self, other): return self.uniq != other.uniq
+    def __lt__(self, other): return self.uniq < other.uniq
+    def __le__(self, other): return self.uniq <= other.uniq
+    def __gt__(self, other): return self.uniq > other.uniq
+    def __ge__(self, other): return self.uniq >= other.uniq
     def __hash__(self): return self.__hashedUniqTag
     def __getitem__(self, idx): return self.__tag[idx]
     def __and__(self, (tagClass, tagFormat, tagId)):
@@ -96,9 +99,12 @@ class TagSet:
                          (self.__baseTag,) + getslice(self.__superTags,
                                                       idx.start, idx.stop))
         return self.__superTags[idx]
-    def __cmp__(self, other): return cmp(self.uniq, other.uniq)
     def __eq__(self, other): return self.uniq == other.uniq
     def __ne__(self, other): return self.uniq != other.uniq
+    def __lt__(self, other): return self.uniq < other.uniq
+    def __le__(self, other): return self.uniq <= other.uniq
+    def __gt__(self, other): return self.uniq > other.uniq
+    def __ge__(self, other): return self.uniq >= other.uniq
     def __hash__(self): return self.__hashedSuperTags
     def __len__(self): return self.__lenOfSuperTags
     def isSuperTagSetOf(self, tagSet):

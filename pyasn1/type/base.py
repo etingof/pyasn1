@@ -70,7 +70,14 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         else:
             return self.__class__.__name__ + '(' + self.prettyOut(self._value) + ')'
     def __str__(self): return str(self._value)
-    def __cmp__(self, value): return cmp(self._value, value)
+    def __eq__(self, other):
+        return self is other and True or self._value == other
+    def __ne__(self, other): return self._value != other
+    def __lt__(self, other): return self._value < other
+    def __le__(self, other): return self._value <= other
+    def __gt__(self, other): return self._value > other
+    def __ge__(self, other): return self._value >= other
+    def __nonzero__(self): return bool(self._value)
     def __hash__(self): return self.__hashedValue
 
     def __nonzero__(self): return self._value and 1 or 0
@@ -155,7 +162,14 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
                 )
         return r
 
-    def __cmp__(self, other): return cmp(self._componentValues, other)
+    def __eq__(self, other):
+        return self is other and True or self._componentValues == other
+    def __ne__(self, other): return self._componentValues != other
+    def __lt__(self, other): return self._componentValues < other
+    def __le__(self, other): return self._componentValues <= other
+    def __gt__(self, other): return self._componentValues > other
+    def __ge__(self, other): return self._componentValues >= other
+    def __nonzero__(self): return bool(self._componentValues)
 
     def getComponentTagMap(self):
         raise error.PyAsn1Error('Method not implemented')

@@ -35,15 +35,20 @@ class AbstractConstraint:
             self.__class__.__name__,
             ', '.join(map(lambda x: repr(x), self._values))
         )
-    # __cmp__ must accompany __hash__
-    def __cmp__(self, other):
-        return cmp((self.__class__, self._values), other)
     def __eq__(self, other):
-        return  self is other and 1 or (self.__class__, self._values) == other
+        return self is other and True or self._values == other
+    def __ne__(self, other): return self._values != other
+    def __lt__(self, other): return self._values < other
+    def __le__(self, other): return self._values <= other
+    def __gt__(self, other): return self._values > other
+    def __ge__(self, other): return self._values >= other
+    def __nonzero__(self): return bool(self._values)
+
     def __hash__(self):
         if self.__hashedValues is None:
-            self.__hashedValues = hash((self.__class__, self._values))
+            self.__hashedValues = hash((self.__class__.__name__, self._values))
         return self.__hashedValues
+
     def _setValues(self, values): self._values = values
     def _testValue(self, value, idx):
         raise error.ValueConstraintError(value)
