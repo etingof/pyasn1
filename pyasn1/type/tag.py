@@ -1,6 +1,5 @@
 # ASN.1 types tags
 from operator import getslice
-from string import join
 from pyasn1 import error
 
 tagClassUniversal = 0x00
@@ -62,7 +61,7 @@ class TagSet:
     def __repr__(self):
         return '%s(%s)' % (
             self.__class__.__name__,
-            join(map(lambda x: repr(x), self.__superTags), ', ')
+            ', '.join(map(lambda x: repr(x), self.__superTags))
             )
 
     def __add__(self, superTag):

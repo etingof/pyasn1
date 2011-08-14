@@ -1,5 +1,4 @@
 # BER encoder
-import string
 from pyasn1.type import base, tag, univ, char, useful
 from pyasn1.codec.ber import eoo
 from pyasn1 import error
@@ -94,7 +93,7 @@ class IntegerEncoder(AbstractItemEncoder):
                   (octets[0] == 0 and octets[1] & 0x80 == 0 or \
                    octets[0] == 0xff and octets[1] & 0x80 != 0):
             del octets[0]
-        return string.join(map(chr, octets), ''), 0
+        return ''.join(map(chr, octets)), 0
 
 class BitStringEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
@@ -105,9 +104,7 @@ class BitStringEncoder(AbstractItemEncoder):
                 r[i] = r.get(i,0) | value[p]<<(7-j)
                 p = p + 1
             keys = r.keys(); keys.sort()
-            return chr(7-j) + string.join(
-                map(lambda k,r=r: chr(r[k]), keys),''
-                ), 0
+            return chr(7-j) + ''.join(map(lambda k,r=r: chr(r[k]), keys)), 0
         else:
             pos = 0; substrate = ''
             while 1:
@@ -182,9 +179,9 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
                     subid = subid >> 7 
                 # Convert packed Sub-Object ID to string and add packed
                 # it to resulted Object ID
-                octets = octets + (string.join(res, ''),)
+                octets = octets + (''.join(res),)
                 
-        return string.join(octets, ''), 0
+        return ''.join(octets), 0
 
 class RealEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):

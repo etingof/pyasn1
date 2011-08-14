@@ -1,5 +1,4 @@
 # ASN.1 "universal" data types
-import string
 import operator
 from pyasn1.type import base, tag, constraint, namedtype, namedval, tagmap
 from pyasn1.codec.ber import eoo
@@ -64,14 +63,11 @@ class Integer(base.AbstractSimpleAsn1Item):
         if r is not None:
             return r
         try:
-            return string.atoi(value)
-        except:
-            try:
-                return string.atol(value)
-            except:
-                raise error.PyAsn1Error(
-                    'Can\'t coerce %s into integer' % value
-                    )
+            return int(value)
+        except ValueError, why:
+            raise error.PyAsn1Error(
+                'Can\'t coerce %s into integer: %s' % (value, why)
+                )
 
     def prettyOut(self, value):
         r = self.__namedValues.getName(value)
@@ -213,7 +209,7 @@ class BitString(base.AbstractSimpleAsn1Item):
                 elif value[-2:] == '\'H':
                     for v in value[1:-2]:
                         i = 4
-                        v = string.atoi(v, 16)
+                        v = int(v, 16)
                         while i:
                             i = i - 1
                             r.append((v>>i)&0x01)
@@ -223,7 +219,7 @@ class BitString(base.AbstractSimpleAsn1Item):
                         'Bad BIT STRING value notation %s' % value
                         )                
             else:
-                for i in string.split(value, ','):
+                for i in value.split(','):
                     j = self.__namedValues.getValue(i)
                     if j is None:
                         raise error.PyAsn1Error(
@@ -249,7 +245,7 @@ class BitString(base.AbstractSimpleAsn1Item):
                 )
 
     def prettyOut(self, value):
-        return '\"\'%s\'B\"' % string.join(map(str, value), '')
+        return '\"\'%s\'B\"' % ''.join(map(str, value))
 
 class OctetString(base.AbstractSimpleAsn1Item):
     tagSet = baseTagSet = tag.initTagSet(
@@ -292,12 +288,12 @@ class OctetString(base.AbstractSimpleAsn1Item):
                 p = ''
                 for v in value[1:-2]:
                     if p:
-                        r = r + chr(string.atoi(p+v, 16))
+                        r = r + chr(int(p+v, 16))
                         p = ''
                     else:
                         p = v
                 if p:
-                    r = r + chr(string.atoi(p+'0', 16))
+                    r = r + chr(int(p+'0', 16))
             else:
                 raise error.PyAsn1Error(
                     'Bad OCTET STRING value notation %s' % value
@@ -371,17 +367,14 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
             return tuple(value)        
         elif isinstance(value, str):
             r = []
-            for element in filter(None, string.split(value, '.')):
+            for element in filter(None, value.split('.')):
                 try:
-                    r.append(string.atoi(element, 0))
-                except string.atoi_error:
-                    try:
-                        r.append(string.atol(element, 0))
-                    except string.atol_error, why:                        
-                        raise error.PyAsn1Error(
-                            'Malformed Object ID %s at %s: %s' %
-                            (str(value), self.__class__.__name__, why)
-                            )
+                    r.append(int(element, 0))
+                except ValueError, why:
+                    raise error.PyAsn1Error(
+                        'Malformed Object ID %s at %s: %s' %
+                        (str(value), self.__class__.__name__, why)
+                        )
             value = tuple(r)
 
             pass
@@ -403,7 +396,7 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
             r.append(str(subOid))
             if r[-1] and r[-1][-1] == 'L':
                 r[-1][-1] = r[-1][:-1]
-        return string.join(r, '.')
+        return '.'.join(r)
 
 class Real(base.AbstractSimpleAsn1Item):
     _plusInf = float('inf')

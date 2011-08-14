@@ -11,7 +11,6 @@
 
    Original concept and code by Mike C. Fletcher.
 """
-import string
 from pyasn1.type import error
 
 class AbstractConstraint:
@@ -34,7 +33,7 @@ class AbstractConstraint:
     def __repr__(self):
         return '%s(%s)' % (
             self.__class__.__name__,
-            string.join(map(lambda x: repr(x), self._values), ', ')
+            ', '.join(map(lambda x: repr(x), self._values))
         )
     # __cmp__ must accompany __hash__
     def __cmp__(self, other):

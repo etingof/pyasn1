@@ -1,5 +1,4 @@
 # CER encoder
-import string
 from pyasn1.type import univ
 from pyasn1.codec.ber import encoder
 
@@ -65,7 +64,7 @@ class SetOfEncoder(encoder.SequenceOfEncoder):
                     encodeFun(client[idx], defMode, maxChunkSize)
                     )
             compSubs.sort()  # perhaps padding's not needed
-            substrate = string.join(compSubs, '')
+            substrate = ''.join(compSubs)
         return substrate, 1
 
 tagMap = encoder.tagMap.copy()

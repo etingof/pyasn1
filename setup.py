@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import sys
-import string
 
 def howto_install_setuptools():
     print """Error: You need setuptools Python package!
@@ -17,7 +16,7 @@ try:
         }    
 except ImportError:
     for arg in sys.argv:
-        if string.find(arg, 'egg') != -1:
+        if arg.find('egg') != -1:
             howto_install_setuptools()
             sys.exit(1)
     from distutils.core import setup
