@@ -1,6 +1,5 @@
 # ASN.1 types tags
 from operator import getslice
-from types import SliceType
 from string import join
 from pyasn1 import error
 
@@ -93,7 +92,7 @@ class TagSet:
 
     def getBaseTag(self): return self.__baseTag
     def __getitem__(self, idx):
-        if type(idx) == SliceType:
+        if isinstance(idx, slice):
             return apply(self.__class__,
                          (self.__baseTag,) + getslice(self.__superTags,
                                                       idx.start, idx.stop))

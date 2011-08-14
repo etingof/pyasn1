@@ -1,6 +1,5 @@
 # ASN.1 "universal" data types
 import string
-import types
 import operator
 from pyasn1.type import base, tag, constraint, namedtype, namedval, tagmap
 from pyasn1.codec.ber import eoo
@@ -59,7 +58,7 @@ class Integer(base.AbstractSimpleAsn1Item):
     def __ge__(self, value): return self._value >= value
 
     def prettyIn(self, value):
-        if type(value) != types.StringType:
+        if not isinstance(value, str):
             return long(value)
         r = self.__namedValues.getValue(value)
         if r is not None:
@@ -184,7 +183,7 @@ class BitString(base.AbstractSimpleAsn1Item):
             self._len = len(self._value)
         return self._len
     def __getitem__(self, i):
-        if type(i) == types.SliceType:
+        if isinstance(i, slice):
             return self.clone(operator.getslice(self._value, i.start, i.stop))
         else:
             return self._value[i]
@@ -198,7 +197,7 @@ class BitString(base.AbstractSimpleAsn1Item):
         r = []
         if not value:
             return ()
-        elif type(value) == types.StringType:
+        elif isinstance(value, str):
             if value[0] == '\'':
                 if value[-2:] == '\'B':
                     for v in value[1:-2]:
@@ -234,7 +233,7 @@ class BitString(base.AbstractSimpleAsn1Item):
                         r.extend([0]*(j-len(r)+1))
                     r[j] = 1
                 return tuple(r)
-        elif type(value) == types.TupleType or type(value) == types.ListType:
+        elif isinstance(value, (tuple, list)):
             r = tuple(value)
             for b in r:
                 if b and b != 1:
@@ -258,13 +257,13 @@ class OctetString(base.AbstractSimpleAsn1Item):
         )
     def prettyOut(self, value): return repr(value)
     def prettyIn(self, value):
-        if type(value) == types.StringType:
+        if isinstance(value, str):
             return value
         else:
             return str(value)
 
     def purePrettyIn(self, value):
-        if type(value) != types.StringType:
+        if not isinstance(value, str):
             return str(value)
         elif not value:
             return value
@@ -314,7 +313,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
             self._len = len(self._value)
         return self._len
     def __getitem__(self, i):
-        if type(i) == types.SliceType:
+        if isinstance(i, slice):
             return self.clone(operator.getslice(self._value, i.start, i.stop))
         else:
             return self._value[i]
@@ -347,7 +346,7 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
             self._len = len(self._value)
         return self._len
     def __getitem__(self, i):
-        if type(i) == types.SliceType:
+        if isinstance(i, slice):
             return self.clone(
                 operator.getslice(self._value, i.start, i.stop)
                 )
@@ -366,11 +365,11 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
 
     def prettyIn(self, value):
         """Dotted -> tuple of numerics OID converter"""
-        if type(value) is types.TupleType:
+        if isinstance(value, tuple):
             pass
         elif isinstance(value, ObjectIdentifier):
             return tuple(value)        
-        elif type(value) is types.StringType:
+        elif isinstance(value, str):
             r = []
             for element in filter(None, string.split(value, '.')):
                 try:
@@ -422,9 +421,9 @@ class Real(base.AbstractSimpleAsn1Item):
         return m, b, e
 
     def prettyIn(self, value):
-        if type(value) == types.TupleType and len(value) == 3:
+        if isinstance(value, tuple) and len(value) == 3:
             for d in value:
-                if type(d) not in (types.IntType, types.LongType):
+                if not isinstance(d, (int, long)):
                     raise error.PyAsn1Error(
                         'Lame Real value syntax: %s' % (value,)
                         )
@@ -435,9 +434,9 @@ class Real(base.AbstractSimpleAsn1Item):
             if value[1] == 10:
                 value = self.__normalizeBase10(value)
             return value
-        elif type(value) in (types.IntType, types.LongType):
+        elif isinstance(value, (int, long)):
             return self.__normalizeBase10((value, 10, 0))
-        elif type(value) == types.FloatType:
+        elif isinstance(value, float):
             if value in self._inf:
                 return value
             else:
@@ -449,7 +448,7 @@ class Real(base.AbstractSimpleAsn1Item):
         
         elif isinstance(value, Real):
             return tuple(value)
-        elif type(value) == types.StringType:  # handle infinite literal
+        elif isinstance(value, str):  # handle infinite literal
             try:
                 inf = float(value)
             except ValueError:
@@ -556,7 +555,7 @@ class SetOf(base.AbstractConstructedAsn1Item):
                 self._componentValues[idx] = self._componentType.clone()
                 self._componentValuesSet = self._componentValuesSet + 1
             return self
-        elif type(value) != types.InstanceType:
+        elif not isinstance(value, base.Asn1Item):
             if self._componentType is None:
                 raise error.PyAsn1Error('Component type not defined')
             if isinstance(self._componentType, base.AbstractSimpleAsn1Item):
@@ -606,13 +605,13 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             self._componentTypeLen = len(self._componentType)
 
     def __getitem__(self, idx):
-        if type(idx) == types.StringType:
+        if isinstance(idx, str):
             return self.getComponentByName(idx)
         else:
             return base.AbstractConstructedAsn1Item.__getitem__(self, idx)
 
     def __setitem__(self, idx, value):
-        if type(idx) == types.StringType:
+        if isinstance(idx, str):
             self.setComponentByName(idx, value)
         else:
             base.AbstractConstructedAsn1Item.__setitem__(self, idx, value)
@@ -666,7 +665,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                 self._componentValues[idx] = self._componentType.getTypeByPosition(idx).clone()
                 self._componentValuesSet = self._componentValuesSet + 1
             return self
-        elif type(value) != types.InstanceType:
+        elif not isinstance(value, base.Asn1Item):
             t = self._componentType.getTypeByPosition(idx)
             if isinstance(t, base.AbstractSimpleAsn1Item):
                 value = t.clone(value=value)
@@ -836,7 +835,7 @@ class Choice(Set):
                 self._componentValuesSet = 1
                 self._currentIdx = idx
             return self
-        elif type(value) != types.InstanceType:
+        elif not isinstance(value, base.Asn1Item):
             value = self._componentType.getTypeByPosition(idx).clone(
                 value=value
                 )

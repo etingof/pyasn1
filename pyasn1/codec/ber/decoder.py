@@ -1,5 +1,4 @@
 # BER decoder
-import types
 from pyasn1.type import tag, base, univ, char, useful, tagmap
 from pyasn1.codec.ber import eoo
 from pyasn1 import error
@@ -670,8 +669,7 @@ class Decoder:
                     else:
                         state = stTryAsExplicitTag
             if state == stGetValueDecoderByAsn1Spec:
-                if type(asn1Spec) == types.DictType or \
-                       isinstance(asn1Spec, tagmap.TagMap):
+                if isinstance(asn1Spec, (dict, tagmap.TagMap)):
                     if tagSet in asn1Spec:
                         __chosenSpec = asn1Spec[tagSet]
                     else:

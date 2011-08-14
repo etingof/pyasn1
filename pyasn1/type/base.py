@@ -1,7 +1,6 @@
 # Base classes for ASN.1 types
 from operator import getslice, setslice, delslice
 from string import join
-from types import SliceType
 from pyasn1.type import constraint, tagmap
 from pyasn1 import error
 

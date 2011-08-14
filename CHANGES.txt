@@ -1,3 +1,9 @@
+Revision 0.0.14
+---------------
+
+- Major overhawl for Python 2K/3K compatibility:
+  + Get rid of types
+
 Revision 0.0.13
 ---------------
 

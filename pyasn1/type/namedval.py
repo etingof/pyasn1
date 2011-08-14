@@ -1,5 +1,4 @@
 # ASN.1 named integers
-from  types import TupleType
 from pyasn1 import error
 
 __all__ = [ 'NamedValues' ]
@@ -10,7 +9,7 @@ class NamedValues:
         self.namedValues = ()        
         automaticVal = 1
         for namedValue in namedValues:
-            if type(namedValue) == TupleType:
+            if isinstance(namedValue, tuple):
                 name, val = namedValue
             else:
                 name = namedValue

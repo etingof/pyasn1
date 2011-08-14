@@ -11,7 +11,6 @@
 
    Original concept and code by Mike C. Fletcher.
 """
-import types
 import string
 from pyasn1.type import error
 
@@ -129,7 +128,7 @@ class InnerTypeConstraint(AbstractConstraint):
         self.__multipleTypeConstraint = {}
         self.__singleTypeConstraint = None
         for v in values:
-            if type(v) == types.TupleType:
+            if isinstance(v, tuple):
                 self.__multipleTypeConstraint[v[0]] = v[1], v[2]
             else:
                 self.__singleTypeConstraint = v
