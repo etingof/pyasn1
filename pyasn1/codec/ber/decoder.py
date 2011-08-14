@@ -53,21 +53,21 @@ explicitTagDecoder = ExplicitTagDecoder()
 class IntegerDecoder(AbstractSimpleDecoder):
     protoComponent = univ.Integer(0)
     precomputedValues = {
-        '\x00': 0,
-        '\x01': 1,
-        '\x02': 2,
-        '\x03': 3,
-        '\x04': 4,
-        '\x05': 5,
-        '\x06': 6,
-        '\x07': 7,
-        '\x08': 8,
-        '\x09': 9,
-        'xff': -1,
-        'xfe': -2,
-        'xfd': -3,
-        'xfc': -4,
-        'xfb': -5
+        '\x00':  0,
+        '\x01':  1,
+        '\x02':  2,
+        '\x03':  3,
+        '\x04':  4,
+        '\x05':  5,
+        '\x06':  6,
+        '\x07':  7,
+        '\x08':  8,
+        '\x09':  9,
+        '\xff': -1,
+        '\xfe': -2,
+        '\xfd': -3,
+        '\xfc': -4,
+        '\xfb': -5
         }
     
     def _valueFilter(self, value):
