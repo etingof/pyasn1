@@ -68,12 +68,12 @@ class TagSet:
             )
 
     def __add__(self, superTag):
-        return apply(
-            self.__class__, (self.__baseTag,) + self.__superTags + (superTag,)
+        return self.__class__(
+            self.__baseTag, *self.__superTags + (superTag,)
             )
     def __radd__(self, superTag):
-        return apply(
-            self.__class__, (self.__baseTag, superTag) + self.__superTags
+        return self.__class__(
+            self.__baseTag, *(superTag,) + self.__superTags
             )
 
     def tagExplicitly(self, superTag):
@@ -95,9 +95,9 @@ class TagSet:
     def getBaseTag(self): return self.__baseTag
     def __getitem__(self, idx):
         if isinstance(idx, slice):
-            return apply(self.__class__,
-                         (self.__baseTag,) + getslice(self.__superTags,
-                                                      idx.start, idx.stop))
+            return self.__class__(
+               self.__baseTag, *getslice(self.__superTags, idx.start, idx.stop)
+            )
         return self.__superTags[idx]
     def __eq__(self, other): return self.uniq == other.uniq
     def __ne__(self, other): return self.uniq != other.uniq

@@ -92,7 +92,7 @@ class NamedTypes:
                 ambigiousTypes = (t, ) + ambigiousTypes
             else:
                 ambigiousTypes = (t, )
-            self.__ambigiousTypes[idx] = apply(NamedTypes, ambigiousTypes)
+            self.__ambigiousTypes[idx] = NamedTypes(*ambigiousTypes)
         
     def getTagMapNearPosition(self, idx):
         if not self.__ambigiousTypes: self.__buildAmbigiousTagMap()

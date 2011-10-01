@@ -36,11 +36,11 @@ class NamedValues:
     def __len__(self): return len(self.namedValues)
 
     def __add__(self, namedValues):
-        return apply(self.__class__, self.namedValues + namedValues)
+        return self.__class__(*self.namedValues + namedValues)
     def __radd__(self, namedValues):
-        return apply(self.__class__, namedValues + tuple(self))
+        return self.__class__(*namedValues + tuple(self))
         
     def clone(self, *namedValues):
-        return apply(self.__class__, tuple(self) + namedValues)
+        return self.__class__(*tuple(self) + namedValues)
 
 # XXX clone/subtype?
