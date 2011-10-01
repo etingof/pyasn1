@@ -28,13 +28,6 @@ class OctetStringEncoder(encoder.OctetStringEncoder):
 # specialized UTCTimeEncoder here
 
 class SetOfEncoder(encoder.SequenceOfEncoder):
-    def _cmpSetComponents(self, c1, c2):
-        tagSet1 = isinstance(c1, univ.Choice) and \
-                  c1.getMinTagSet() or c1.getTagSet()
-        tagSet2 = isinstance(c2, univ.Choice) and \
-                  c2.getMinTagSet() or c2.getTagSet()        
-        return cmp(tagSet1, tagSet2)
-    
     def encodeValue(self, encodeFun, client, defMode, maxChunkSize):
         if isinstance(client, univ.SequenceAndSetBase):
             client.setDefaultComponents()
@@ -52,7 +45,8 @@ class SetOfEncoder(encoder.SequenceOfEncoder):
                 if client.getDefaultComponentByPosition(idx) == client[idx]:
                     continue
                 comps.append(client[idx])
-            comps.sort(self._cmpSetComponents)
+            comps.sort(key=lambda x: isinstance(x, univ.Choice) and \
+                                     x.getMinTagSet() or x.getTagSet())
             for c in comps:
                 substrate = substrate + encodeFun(c, defMode, maxChunkSize)
         else:
