@@ -64,7 +64,7 @@ class TagSet:
     def __repr__(self):
         return '%s(%s)' % (
             self.__class__.__name__,
-            ', '.join(map(lambda x: repr(x), self.__superTags))
+            ', '.join([repr(x) for x in self.__superTags])
             )
 
     def __add__(self, superTag):

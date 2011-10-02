@@ -33,7 +33,7 @@ class AbstractConstraint:
     def __repr__(self):
         return '%s(%s)' % (
             self.__class__.__name__,
-            ', '.join(map(lambda x: repr(x), self._values))
+            ', '.join([repr(x) for x in self._values])
         )
     def __eq__(self, other):
         return self is other and True or self._values == other

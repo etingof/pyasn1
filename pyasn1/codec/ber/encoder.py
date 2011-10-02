@@ -93,7 +93,7 @@ class IntegerEncoder(AbstractItemEncoder):
                   (octets[0] == 0 and octets[1] & 0x80 == 0 or \
                    octets[0] == 0xff and octets[1] & 0x80 != 0):
             del octets[0]
-        return ''.join(map(chr, octets)), 0
+        return ''.join([chr(x) for x in octets]), 0
 
 class BitStringEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
@@ -104,7 +104,7 @@ class BitStringEncoder(AbstractItemEncoder):
                 r[i] = r.get(i,0) | value[p]<<(7-j)
                 p = p + 1
             keys = r.keys(); keys.sort()
-            return chr(7-j) + ''.join(map(lambda k,r=r: chr(r[k]), keys)), 0
+            return chr(7-j) + ''.join([chr(r[k]) for k in keys]), 0
         else:
             pos = 0; substrate = ''
             while 1:
