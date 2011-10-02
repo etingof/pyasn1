@@ -1,4 +1,5 @@
 # NamedType specification for constructed types
+import sys
 from pyasn1.type import tagmap
 from pyasn1 import error
 
@@ -39,7 +40,10 @@ class NamedTypes:
     
     def __getitem__(self, idx): return self.__namedTypes[idx]
 
-    def __nonzero__(self): return self.__namedTypesLen and 1 or 0
+    if sys.version[0] <= 2:
+        def __nonzero__(self): return bool(self.__namedTypesLen)
+    else:
+        def __bool__(self): return bool(self.__namedTypesLen)
     def __len__(self): return self.__namedTypesLen
     
     def getTypeByPosition(self, idx):

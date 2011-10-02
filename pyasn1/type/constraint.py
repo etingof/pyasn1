@@ -1,16 +1,17 @@
-"""
-   ASN.1 subtype constraints classes.
-
-   Constraints are relatively rare, but every ASN1 object
-   is doing checks all the time for whether they have any
-   constraints and whether they are applicable to the object.
-
-   What we're going to do is define objects/functions that
-   can be called unconditionally if they are present, and that
-   are simply not present if there are no constraints.
-
-   Original concept and code by Mike C. Fletcher.
-"""
+#
+#   ASN.1 subtype constraints classes.
+#
+#   Constraints are relatively rare, but every ASN1 object
+#   is doing checks all the time for whether they have any
+#   constraints and whether they are applicable to the object.
+#
+#   What we're going to do is define objects/functions that
+#   can be called unconditionally if they are present, and that
+#   are simply not present if there are no constraints.
+#
+#   Original concept and code by Mike C. Fletcher.
+#
+import sys
 from pyasn1.type import error
 
 class AbstractConstraint:
@@ -42,7 +43,10 @@ class AbstractConstraint:
     def __le__(self, other): return self._values <= other
     def __gt__(self, other): return self._values > other
     def __ge__(self, other): return self._values >= other
-    def __nonzero__(self): return bool(self._values)
+    if sys.version[0] <= 2:
+        def __nonzero__(self): return bool(self._values)
+    else:
+        def __bool__(self): return bool(self._values)
 
     def __hash__(self):
         if self.__hashedValues is None:

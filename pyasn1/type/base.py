@@ -1,4 +1,5 @@
 # Base classes for ASN.1 types
+import sys
 from pyasn1.type import constraint, tagmap
 from pyasn1 import error
 
@@ -76,10 +77,11 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
     def __le__(self, other): return self._value <= other
     def __gt__(self, other): return self._value > other
     def __ge__(self, other): return self._value >= other
-    def __nonzero__(self): return bool(self._value)
+    if sys.version[0] <= 2:
+        def __nonzero__(self): return bool(self._value)
+    else:
+        def __bool__(self): return bool(self._value)
     def __hash__(self): return self.__hashedValue
-
-    def __nonzero__(self): return self._value and 1 or 0
 
     def clone(self, value=None, tagSet=None, subtypeSpec=None):
         if value is None and tagSet is None and subtypeSpec is None:
@@ -168,7 +170,10 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
     def __le__(self, other): return self._componentValues <= other
     def __gt__(self, other): return self._componentValues > other
     def __ge__(self, other): return self._componentValues >= other
-    def __nonzero__(self): return bool(self._componentValues)
+    if sys.version[0] <= 2:
+        def __nonzero__(self): return bool(self._componentValues)
+    else:
+        def __bool__(self): return bool(self._componentValues)
 
     def getComponentTagMap(self):
         raise error.PyAsn1Error('Method not implemented')

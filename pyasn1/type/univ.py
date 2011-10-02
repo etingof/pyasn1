@@ -413,7 +413,7 @@ class Real(base.AbstractSimpleAsn1Item):
             e = e + 1
         return m, b, e
 
-    if sys.version_info[0] == 2:
+    if sys.version_info[0] <= 2:
         _intTypes = (int, long)
     else:
         _intTypes = int
@@ -501,7 +501,10 @@ class Real(base.AbstractSimpleAsn1Item):
     def __gt__(self, value): return float(self) > value
     def __ge__(self, value): return float(self) >= value
 
-    def __nonzero__(self): return float(self) and 1 or 0
+    if sys.version[0] <= 2:
+        def __nonzero__(self): return bool(float(self))
+    else:
+        def __bool__(self): return bool(float(self))
 
     def __getitem__(self, idx):
         if self._value in self._inf:
@@ -815,7 +818,10 @@ class Choice(Set):
         if self._componentValues:
             return self._componentValues[self._currentIdx] >= other
         return NotImplemented
-    def __nonzero__(self, other): return bool(self._componentValues)
+    if sys.version[0] <= 2:
+        def __nonzero__(self, other): return bool(self._componentValues)
+    else:
+        def __bool__(self, other): return bool(self._componentValues)
 
     def __len__(self): return self._currentIdx is not None and 1 or 0
     
