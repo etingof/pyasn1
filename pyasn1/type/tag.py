@@ -1,5 +1,5 @@
 # ASN.1 types tags
-from operator import getslice
+from operator import getitem
 from pyasn1 import error
 
 tagClassUniversal = 0x00
@@ -98,7 +98,7 @@ class TagSet:
     def __getitem__(self, idx):
         if isinstance(idx, slice):
             return self.__class__(
-               self.__baseTag, *getslice(self.__superTags, idx.start, idx.stop)
+               self.__baseTag, *getitem(self.__superTags, idx)
             )
         return self.__superTags[idx]
     def __eq__(self, other): return self.uniq == other.uniq

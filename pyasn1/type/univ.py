@@ -180,7 +180,7 @@ class BitString(base.AbstractSimpleAsn1Item):
         return self._len
     def __getitem__(self, i):
         if isinstance(i, slice):
-            return self.clone(operator.getslice(self._value, i.start, i.stop))
+            return self.clone(operator.getitem(self._value, i))
         else:
             return self._value[i]
 
@@ -310,7 +310,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
         return self._len
     def __getitem__(self, i):
         if isinstance(i, slice):
-            return self.clone(operator.getslice(self._value, i.start, i.stop))
+            return self.clone(operator.getitem(self._value, i))
         else:
             return self._value[i]
 
@@ -344,7 +344,7 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
     def __getitem__(self, i):
         if isinstance(i, slice):
             return self.clone(
-                operator.getslice(self._value, i.start, i.stop)
+                operator.getitem(self._value, i)
                 )
         else:
             return self._value[i]
