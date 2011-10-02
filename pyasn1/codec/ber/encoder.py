@@ -81,7 +81,7 @@ class IntegerEncoder(AbstractItemEncoder):
     supportIndefLenMode = 0
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         octets = []
-        value = long(value) # to save on ops on asn1 type
+        value = int(value) # to save on ops on asn1 type
         while 1:
             octets.insert(0, value & 0xff)
             if value == 0 or value == -1:
@@ -166,7 +166,7 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
             if subid > -1 and subid < 128:
                 # Optimize for the common case
                 octets = octets + (chr(subid & 0x7f),)
-            elif subid < 0 or subid > 0xFFFFFFFFL:
+            elif subid < 0 or subid > 0xFFFFFFFF:
                 raise error.PyAsn1Error(
                     'SubId overflow %s in %s' % (subid, value)
                     )
@@ -199,7 +199,7 @@ class RealEncoder(AbstractItemEncoder):
             if m < 0:
                 fo = fo | 0x40  # sign bit
                 m = -m
-            while long(m) != m: # drop floating point
+            while int(m) != m: # drop floating point
                 m *= 2
                 e -= 1
             while m & 0x1 == 0: # mantissa normalization

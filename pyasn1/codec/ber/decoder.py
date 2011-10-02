@@ -86,9 +86,9 @@ class IntegerDecoder(AbstractSimpleDecoder):
         else:
             firstOctet = ord(substrate[0])
             if firstOctet & 0x80:
-                value = -1L
+                value = -1
             else:
-                value = 0L
+                value = 0
             for octet in substrate:
                 value = value << 8 | ord(octet)
             value = self._valueFilter(value)
@@ -267,7 +267,7 @@ class RealDecoder(AbstractSimpleDecoder):
         elif fo & 0xc0 == 0:  # character encoding
             try:
                 if fo & 0x3 == 0x1:  # NR1
-                    value = (long(substrate), 10, 0)
+                    value = (int(substrate), 10, 0)
                 elif fo & 0x3 == 0x2:  # NR2
                     value = float(substrate)
                 elif fo & 0x3 == 0x3:  # NR3
@@ -569,7 +569,7 @@ class Decoder:
                     tagFormat = t&0x20
                     tagId = t&0x1F
                     if tagId == 0x1F:
-                        tagId = 0L
+                        tagId = 0
                         while 1:
                             if not substrate:
                                 raise error.SubstrateUnderrunError(

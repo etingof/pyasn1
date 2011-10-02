@@ -1,5 +1,5 @@
 # ASN.1 "universal" data types
-import operator
+import operator, sys
 from pyasn1.type import base, tag, constraint, namedtype, namedval, tagmap
 from pyasn1.codec.ber import eoo
 from pyasn1 import error
@@ -44,7 +44,7 @@ class Integer(base.AbstractSimpleAsn1Item):
     def __rpow__(self, value): return self.clone(pow(value, self._value))
 
     def __int__(self): return int(self._value)
-    def __long__(self): return long(self._value)
+    def __long__(self): return int(self._value)
     def __float__(self): return float(self._value)    
     def __abs__(self): return abs(self._value)
     def __index__(self): return int(self._value)
@@ -58,7 +58,7 @@ class Integer(base.AbstractSimpleAsn1Item):
 
     def prettyIn(self, value):
         if not isinstance(value, str):
-            return long(value)
+            return int(value)
         r = self.__namedValues.getValue(value)
         if r is not None:
             return r
@@ -413,10 +413,15 @@ class Real(base.AbstractSimpleAsn1Item):
             e = e + 1
         return m, b, e
 
+    if sys.version_info[0] == 2:
+        _intTypes = (int, long)
+    else:
+        _intTypes = int
+
     def prettyIn(self, value):
         if isinstance(value, tuple) and len(value) == 3:
             for d in value:
-                if not isinstance(d, (int, long)):
+                if not isinstance(d, self._intTypes):
                     raise error.PyAsn1Error(
                         'Lame Real value syntax: %s' % (value,)
                         )
@@ -427,17 +432,17 @@ class Real(base.AbstractSimpleAsn1Item):
             if value[1] == 10:
                 value = self.__normalizeBase10(value)
             return value
-        elif isinstance(value, (int, long)):
+        elif isinstance(value, self._intTypes):
             return self.__normalizeBase10((value, 10, 0))
         elif isinstance(value, float):
             if value in self._inf:
                 return value
             else:
                 e = 0
-                while long(value) != value:
+                while int(value) != value:
                     value = value * 10
                     e = e - 1
-                return self.__normalizeBase10((long(value), 10, e))
+                return self.__normalizeBase10((int(value), 10, e))
         
         elif isinstance(value, Real):
             return tuple(value)
@@ -479,7 +484,7 @@ class Real(base.AbstractSimpleAsn1Item):
     def __rpow__(self, value): return self.clone(pow(value, float(self)))
 
     def __int__(self): return int(float(self))
-    def __long__(self): return long(float(self))
+    def __long__(self): return int(float(self))
     def __float__(self):
         if self._value in self._inf:
             return self._value
