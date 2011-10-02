@@ -1,4 +1,4 @@
-import tag, constraint, namedtype, univ
+from test.type import tag, constraint, namedtype, univ
 from pyasn1.error import PyAsn1Error
 try:
     import unittest

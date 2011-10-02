@@ -1,4 +1,4 @@
-import encoder, decoder
+from test.codec.der import encoder, decoder
 from pyasn1.error import PyAsn1Error
 try:
     import unittest

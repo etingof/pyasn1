@@ -1,7 +1,7 @@
-import type.suite
-import codec.ber.suite
-import codec.cer.suite
-import codec.der.suite
+import test.type.suite
+import test.codec.ber.suite
+import test.codec.cer.suite
+import test.codec.der.suite
 from pyasn1.error import PyAsn1Error
 try:
     import unittest
@@ -12,10 +12,10 @@ except ImportError:
 
 suite = unittest.TestSuite()
 for m in (
-    type.suite,
-    codec.ber.suite,
-    codec.cer.suite,
-    codec.der.suite
+    test.type.suite,
+    test.codec.ber.suite,
+    test.codec.cer.suite,
+    test.codec.der.suite
     ):
     suite.addTest(getattr(m, 'suite'))
 
