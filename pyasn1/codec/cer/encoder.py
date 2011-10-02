@@ -7,7 +7,7 @@ class BooleanEncoder(encoder.IntegerEncoder):
         if client == 0:
             substrate = '\000'
         else:
-            substrate = '\777'
+            substrate = '\377'
         return substrate, 0
 
 class BitStringEncoder(encoder.BitStringEncoder):
