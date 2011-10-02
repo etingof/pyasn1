@@ -38,11 +38,13 @@ class Tag:
     def __ge__(self, other): return self.uniq >= other.uniq
     def __hash__(self): return self.__hashedUniqTag
     def __getitem__(self, idx): return self.__tag[idx]
-    def __and__(self, (tagClass, tagFormat, tagId)):
+    def __and__(self, otherTag):
+        (tagClass, tagFormat, tagId) = otherTag
         return self.__class__(
             self.__tag&tagClass, self.__tag&tagFormat, self.__tag&tagId
             )
-    def __or__(self, (tagClass, tagFormat, tagId)):
+    def __or__(self, otherTag):
+        (tagClass, tagFormat, tagId) = otherTag
         return self.__class__(
             self.__tag[0]|tagClass,
             self.__tag[1]|tagFormat,
