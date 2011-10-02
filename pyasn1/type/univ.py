@@ -501,7 +501,7 @@ class Real(base.AbstractSimpleAsn1Item):
     def __gt__(self, value): return float(self) > value
     def __ge__(self, value): return float(self) >= value
 
-    if sys.version[0] <= 2:
+    if sys.version_info[0] <= 2:
         def __nonzero__(self): return bool(float(self))
     else:
         def __bool__(self): return bool(float(self))
@@ -818,7 +818,7 @@ class Choice(Set):
         if self._componentValues:
             return self._componentValues[self._currentIdx] >= other
         return NotImplemented
-    if sys.version[0] <= 2:
+    if sys.version_info[0] <= 2:
         def __nonzero__(self, other): return bool(self._componentValues)
     else:
         def __bool__(self, other): return bool(self._componentValues)

@@ -77,7 +77,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
     def __le__(self, other): return self._value <= other
     def __gt__(self, other): return self._value > other
     def __ge__(self, other): return self._value >= other
-    if sys.version[0] <= 2:
+    if sys.version_info[0] <= 2:
         def __nonzero__(self): return bool(self._value)
     else:
         def __bool__(self): return bool(self._value)
@@ -170,7 +170,7 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
     def __le__(self, other): return self._componentValues <= other
     def __gt__(self, other): return self._componentValues > other
     def __ge__(self, other): return self._componentValues >= other
-    if sys.version[0] <= 2:
+    if sys.version_info[0] <= 2:
         def __nonzero__(self): return bool(self._componentValues)
     else:
         def __bool__(self): return bool(self._componentValues)

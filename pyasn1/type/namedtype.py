@@ -40,7 +40,7 @@ class NamedTypes:
     
     def __getitem__(self, idx): return self.__namedTypes[idx]
 
-    if sys.version[0] <= 2:
+    if sys.version_info[0] <= 2:
         def __nonzero__(self): return bool(self.__namedTypesLen)
     else:
         def __bool__(self): return bool(self.__namedTypesLen)

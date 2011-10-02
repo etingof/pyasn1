@@ -43,7 +43,7 @@ class AbstractConstraint:
     def __le__(self, other): return self._values <= other
     def __gt__(self, other): return self._values > other
     def __ge__(self, other): return self._values >= other
-    if sys.version[0] <= 2:
+    if sys.version_info[0] <= 2:
         def __nonzero__(self): return bool(self._values)
     else:
         def __bool__(self): return bool(self._values)
