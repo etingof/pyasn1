@@ -1,10 +1,20 @@
-Revision 0.0.14
----------------
+Revision 0.0.14a
+----------------
 
-- Major overhawl for Python 2K/3K compatibility:
-  + Get rid of old-style types
-  + Drop string module usage
-  + Switched to rich comparation
+- Fixed a bug/typo at Boolean CER encoder.
+- Major overhawl for Python 2.4 -- 3.2 compatibility:
+  + get rid of old-style types
+  + drop string module usage
+  + switch to rich comparation
+  + drop explicit long integer type use
+  + map()/filter() replaced with list comprehension
+  + apply() replaced with */**args
+  + switched to use 'key' sort() callback function
+  + support both __nonzero__() and __bool__() methods
+  + modified not to use py3k-incompatible exception syntax
+  + getslice() operator fully replaced with getitem()
+  + dictionary operations made 2K/3K compatible
+  + in test suite, implicit relative import replaced with the absolute one
 
 Revision 0.0.13
 ---------------
