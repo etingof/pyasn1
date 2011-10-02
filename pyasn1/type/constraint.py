@@ -27,10 +27,10 @@ class AbstractConstraint:
     def __call__(self, value, idx=None):
         try:
             self._testValue(value, idx)
-        except error.ValueConstraintError, why:
-            raise error.ValueConstraintError('%s failed at: \"%s\"' % (
-                self, why
-                ))
+        except error.ValueConstraintError:
+            raise error.ValueConstraintError(
+               '%s failed at: \"%s\"' % (self, sys.exc_info()[1])
+            )
     def __repr__(self):
         return '%s(%s)' % (
             self.__class__.__name__,

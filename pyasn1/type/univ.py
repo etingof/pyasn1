@@ -64,9 +64,9 @@ class Integer(base.AbstractSimpleAsn1Item):
             return r
         try:
             return int(value)
-        except ValueError, why:
+        except ValueError:
             raise error.PyAsn1Error(
-                'Can\'t coerce %s into integer: %s' % (value, why)
+                'Can\'t coerce %s into integer: %s' % (value, sys.exc_info()[1])
                 )
 
     def prettyOut(self, value):
@@ -370,10 +370,10 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
             for element in [ x for x in value.split('.') if x != '' ]:
                 try:
                     r.append(int(element, 0))
-                except ValueError, why:
+                except ValueError:
                     raise error.PyAsn1Error(
                         'Malformed Object ID %s at %s: %s' %
-                        (str(value), self.__class__.__name__, why)
+                        (str(value), self.__class__.__name__, sys.exc_info()[1])
                         )
             value = tuple(r)
 
