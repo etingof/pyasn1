@@ -103,7 +103,7 @@ class BitStringEncoder(AbstractItemEncoder):
                 i, j = divmod(p, 8)
                 r[i] = r.get(i,0) | value[p]<<(7-j)
                 p = p + 1
-            keys = r.keys(); keys.sort()
+            keys = list(r); keys.sort()
             return chr(7-j) + ''.join([chr(r[k]) for k in keys]), 0
         else:
             pos = 0; substrate = ''

@@ -35,7 +35,7 @@ class TagMap:
             defType = self.__defType
             
         posMap = self.__posMap.copy()
-        for k, v in tagMap.getPosMap().items():
+        for k in tagMap.getPosMap():
             if uniq and k in posMap:
                 raise error.PyAsn1Error('Duplicate positive key %s' % k)
             posMap[k] = parentType

@@ -54,7 +54,7 @@ class NamedTypes:
             while idx > 0:
                 idx = idx - 1
                 tagMap = self.__namedTypes[idx].getType().getTagMap()
-                for t in tagMap.getPosMap().keys():
+                for t in tagMap.getPosMap():
                     if t in self.__tagToPosIdx:
                         raise error.PyAsn1Error('Duplicate type %s' % t)
                     self.__tagToPosIdx[t] = idx
