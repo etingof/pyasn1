@@ -534,7 +534,7 @@ typeMap = {
 
 ( stDecodeTag, stDecodeLength, stGetValueDecoder, stGetValueDecoderByAsn1Spec,
   stGetValueDecoderByTag, stTryAsExplicitTag, stDecodeValue,
-  stDumpRawValue, stErrorCondition, stStop ) = range(10)
+  stDumpRawValue, stErrorCondition, stStop ) = [x for x in range(10)]
 
 class Decoder:
     defaultErrorState = stErrorCondition
