@@ -36,12 +36,19 @@ class Integer(base.AbstractSimpleAsn1Item):
     def __rsub__(self, value): return self.clone(value - self._value)
     def __mul__(self, value): return self.clone(self._value * value)
     def __rmul__(self, value): return self.clone(value * self._value)
-    def __div__(self, value):  return self.clone(self._value // value)
-    def __rdiv__(self, value):  return self.clone(value // self._value)
     def __mod__(self, value): return self.clone(self._value % value)
     def __rmod__(self, value): return self.clone(value % self._value)
     def __pow__(self, value, modulo=None): return self.clone(pow(self._value, value, modulo))
     def __rpow__(self, value): return self.clone(pow(value, self._value))
+
+    if sys.version_info[0] <= 2:
+        def __div__(self, value):  return self.clone(self._value // value)
+        def __rdiv__(self, value):  return self.clone(value // self._value)
+    else:
+        def __truediv__(self, value):  return self.clone(self._value / value)
+        def __rtruediv__(self, value):  return self.clone(value / self._value)
+        def __divmod__(self, value):  return self.clone(self._value // value)
+        def __rdivmod__(self, value):  return self.clone(value // self._value)
 
     def __int__(self): return int(self._value)
     def __long__(self): return int(self._value)
@@ -476,12 +483,19 @@ class Real(base.AbstractSimpleAsn1Item):
     def __rmul__(self, value): return self * value
     def __sub__(self, value): return self.clone(float(self) - value)
     def __rsub__(self, value): return self.clone(value - float(self))
-    def __div__(self, value): return self.clone(float(self) / value)
-    def __rdiv__(self, value): return self.clone(value / float(self))
     def __mod__(self, value): return self.clone(float(self) % value)
     def __rmod__(self, value): return self.clone(value % float(self))
     def __pow__(self, value, modulo=None): return self.clone(pow(float(self), value, modulo))
     def __rpow__(self, value): return self.clone(pow(value, float(self)))
+
+    if sys.version_info[0] <= 2:
+        def __div__(self, value): return self.clone(float(self) / value)
+        def __rdiv__(self, value): return self.clone(value / float(self))
+    else:
+        def __truediv__(self, value): return self.clone(float(self) / value)
+        def __rtruediv__(self, value): return self.clone(value / float(self))
+        def __divmod__(self, value): return self.clone(float(self) // value)
+        def __rdivmod__(self, value): return self.clone(value // float(self))
 
     def __int__(self): return int(float(self))
     def __long__(self): return int(float(self))
