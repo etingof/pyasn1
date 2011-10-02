@@ -367,7 +367,7 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
             return tuple(value)        
         elif isinstance(value, str):
             r = []
-            for element in filter(None, value.split('.')):
+            for element in [ x for x in value.split('.') if x != '' ]:
                 try:
                     r.append(int(element, 0))
                 except ValueError, why:
