@@ -1,6 +1,7 @@
 # BER decoder
 from pyasn1.type import tag, base, univ, char, useful, tagmap
 from pyasn1.codec.ber import eoo
+from pyasn1.compat.octets import oct2int, octs2ints
 from pyasn1 import error
 
 class AbstractDecoder:
@@ -84,13 +85,13 @@ class IntegerDecoder(AbstractSimpleDecoder):
         if substrate in self.precomputedValues:
             value = self.precomputedValues[substrate]
         else:
-            firstOctet = ord(substrate[0])
+            firstOctet = oct2int(substrate[0])
             if firstOctet & 0x80:
                 value = -1
             else:
                 value = 0
             for octet in substrate:
-                value = value << 8 | ord(octet)
+                value = value << 8 | oct2int(octet)
             value = self._valueFilter(value)
         return self._createComponent(asn1Spec, tagSet, value), substrate
 
@@ -110,7 +111,7 @@ class BitStringDecoder(AbstractSimpleDecoder):
         if tagSet[0][1] == tag.tagFormatSimple:    # XXX what tag to check?
             if not substrate:
                 raise error.PyAsn1Error('Missing initial octet')
-            trailingBits = ord(substrate[0])
+            trailingBits = oct2int(substrate[0])
             if trailingBits > 7:
                 raise error.PyAsn1Error(
                     'Trailing bits overflow %s' % trailingBits
@@ -121,7 +122,7 @@ class BitStringDecoder(AbstractSimpleDecoder):
                 if p == l:
                     lsb = trailingBits
                 j = 7                    
-                o = ord(substrate[p])
+                o = oct2int(substrate[p])
                 while j >= lsb:
                     b = b + ((o>>j)&0x01,)
                     j = j - 1
@@ -201,14 +202,14 @@ class ObjectIdentifierDecoder(AbstractSimpleDecoder):
             raise error.PyAsn1Error('Empty substrate')
         oid = (); index = 0        
         # Get the first subid
-        subId = ord(substrate[index])
+        subId = oct2int(substrate[index])
         oid = oid + divmod(subId, 40)
 
         index = index + 1
         substrateLen = len(substrate)
         
         while index < substrateLen:
-            subId = ord(substrate[index])
+            subId = oct2int(substrate[index])
             if subId < 128:
                 oid = oid + (subId,)
                 index = index + 1
@@ -219,7 +220,7 @@ class ObjectIdentifierDecoder(AbstractSimpleDecoder):
                 while nextSubId >= 128 and index < substrateLen:
                     subId = (subId << 7) + (nextSubId & 0x7F)
                     index = index + 1
-                    nextSubId = ord(substrate[index])
+                    nextSubId = oct2int(substrate[index])
                 if index == substrateLen:
                     raise error.SubstrateUnderrunError(
                         'Short substrate for OID %s' % oid
@@ -236,7 +237,7 @@ class RealDecoder(AbstractSimpleDecoder):
         substrate = substrate[:length]
         if not length:
             raise error.SubstrateUnderrunError('Short substrate for Real')
-        fo = ord(substrate[0]); substrate = substrate[1:]
+        fo = oct2int(substrate[0]); substrate = substrate[1:]
         if fo & 0x40:  # infinite value
             value = fo & 0x01 and float('-inf') or float('inf')
         elif fo & 0x80:  # binary enoding
@@ -247,19 +248,19 @@ class RealDecoder(AbstractSimpleDecoder):
             elif fo & 0x02:
                 n = 3
             else:
-                n = ord(substrate[0])
+                n = oct2int(substrate[0])
             eo, substrate = substrate[:n], substrate[n:]
             if not eo or not substrate:
                 raise error.PyAsn1Error('Real exponent screwed')
             e = 0
             while eo:         # exponent
                 e <<= 8
-                e |= ord(eo[0])
+                e |= oct2int(eo[0])
                 eo = eo[1:]
             p = 0
             while substrate:  # value
                 p <<= 8
-                p |= ord(substrate[0])
+                p |= oct2int(substrate[0])
                 substrate = substrate[1:]
             if fo & 0x40:    # sign bit
                 p = -p
@@ -564,7 +565,7 @@ class Decoder:
                 if firstOctet in self.__tagCache:
                     lastTag = self.__tagCache[firstOctet]
                 else:
-                    t = ord(firstOctet)
+                    t = oct2int(firstOctet)
                     tagClass = t&0xC0
                     tagFormat = t&0x20
                     tagId = t&0x1F
@@ -575,7 +576,7 @@ class Decoder:
                                 raise error.SubstrateUnderrunError(
                                     'Short octet stream on long tag decoding'
                                     )
-                            t = ord(substrate[0])
+                            t = oct2int(substrate[0])
                             tagId = tagId << 7 | (t&0x7F)
                             substrate = substrate[1:]
                             if not t&0x80:
@@ -603,7 +604,7 @@ class Decoder:
                      raise error.SubstrateUnderrunError(
                          'Short octet stream on length decoding'
                          )
-                firstOctet  = ord(substrate[0])
+                firstOctet  = oct2int(substrate[0])
                 if firstOctet == 128:
                     size = 1
                     length = -1
@@ -622,7 +623,7 @@ class Decoder:
                             (size, len(lengthString), tagSet)
                             )
                     for char in lengthString:
-                        length = (length << 8) | ord(char)
+                        length = (length << 8) | oct2int(char)
                     size = size + 1
                 state = stGetValueDecoder
                 substrate = substrate[size:]

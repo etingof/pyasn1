@@ -1,6 +1,7 @@
 # BER encoder
 from pyasn1.type import base, tag, univ, char, useful
 from pyasn1.codec.ber import eoo
+from pyasn1.compat.octets import int2oct, ints2octs, null, str2octs
 from pyasn1 import error
 
 class Error(Exception): pass
@@ -13,36 +14,36 @@ class AbstractItemEncoder:
         if isConstructed:
             v = v|tag.tagFormatConstructed
         if tagId < 31:
-            return chr(v|tagId)
+            return int2oct(v|tagId)
         else:
-            s = chr(tagId&0x7f)
+            s = int2oct(tagId&0x7f)
             tagId = tagId >> 7
             while tagId:
-                s = chr(0x80|(tagId&0x7f)) + s
+                s = int2oct(0x80|(tagId&0x7f)) + s
                 tagId = tagId >> 7
-            return chr(v|0x1F) + s
+            return int2oct(v|0x1F) + s
 
     def encodeLength(self, length, defMode):
         if not defMode and self.supportIndefLenMode:
-            return '\x80'
+            return int2oct(0x80)
         if length < 0x80:
-            return chr(length)
+            return int2oct(length)
         else:
-            substrate = ''
+            substrate = null
             while length:
-                substrate = chr(length&0xff) + substrate
+                substrate = int2oct(length&0xff) + substrate
                 length = length >> 8
             substrateLen = len(substrate)
             if substrateLen > 126:
                 raise Error('Length octets overflow (%d)' % substrateLen)
-            return chr(0x80 | substrateLen) + substrate
+            return int2oct(0x80 | substrateLen) + substrate
 
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         raise Error('Not implemented')
 
     def _encodeEndOfOctets(self, encodeFun, defMode):
         if defMode or not self.supportIndefLenMode:
-            return ''
+            return null
         else:
             return encodeFun(eoo.endOfOctets, defMode)
         
@@ -64,7 +65,7 @@ class AbstractItemEncoder:
 
 class EndOfOctetsEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
-        return '', 0
+        return null, 0
 
 class ExplicitlyTaggedItemEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
@@ -93,7 +94,7 @@ class IntegerEncoder(AbstractItemEncoder):
                   (octets[0] == 0 and octets[1] & 0x80 == 0 or \
                    octets[0] == 0xff and octets[1] & 0x80 != 0):
             del octets[0]
-        return ''.join([chr(x) for x in octets]), 0
+        return ints2octs(octets), 0
 
 class BitStringEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
@@ -104,9 +105,9 @@ class BitStringEncoder(AbstractItemEncoder):
                 r[i] = r.get(i,0) | value[p]<<(7-j)
                 p = p + 1
             keys = list(r); keys.sort()
-            return chr(7-j) + ''.join([chr(r[k]) for k in keys]), 0
+            return int2oct(7-j) + ints2octs([r[k] for k in keys]), 0
         else:
-            pos = 0; substrate = ''
+            pos = 0; substrate = null
             while 1:
                 # count in octets
                 v = value.clone(value[pos*8:pos*8+maxChunkSize*8])
@@ -119,9 +120,9 @@ class BitStringEncoder(AbstractItemEncoder):
 class OctetStringEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         if not maxChunkSize or len(value) <= maxChunkSize:
-            return str(value), 0
+            return value.asBytes(), 0
         else:
-            pos = 0; substrate = ''
+            pos = 0; substrate = null
             while 1:
                 v = value.clone(value[pos:pos+maxChunkSize])
                 if not v:
@@ -133,13 +134,13 @@ class OctetStringEncoder(AbstractItemEncoder):
 class NullEncoder(AbstractItemEncoder):
     supportIndefLenMode = 0
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
-        return '', 0
+        return null, 0
 
 class ObjectIdentifierEncoder(AbstractItemEncoder):
     supportIndefLenMode = 0
     precomputedValues = {
-        (1, 3, 6, 1, 2): ('+', '\x06', '\x01', '\x02'),        
-        (1, 3, 6, 1, 4): ('+', '\x06', '\x01', '\x04')
+        (1, 3, 6, 1, 2): (43, 6, 1, 2),        
+        (1, 3, 6, 1, 4): (43, 6, 1, 4)
         }
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):    
         oid = value.asTuple()
@@ -158,42 +159,41 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
                 raise error.PyAsn1Error(
                     'Initial sub-ID overflow %s in OID %s' % (oid[index:], value)
                     )
-            octets = (chr(subid),)
+            octets = (subid,)
             index = index + 2
 
         # Cycle through subids
         for subid in oid[index:]:
             if subid > -1 and subid < 128:
                 # Optimize for the common case
-                octets = octets + (chr(subid & 0x7f),)
+                octets = octets + (subid & 0x7f,)
             elif subid < 0 or subid > 0xFFFFFFFF:
                 raise error.PyAsn1Error(
                     'SubId overflow %s in %s' % (subid, value)
                     )
             else:
                 # Pack large Sub-Object IDs
-                res = (chr(subid & 0x7f),)
+                res = (subid & 0x7f,)
                 subid = subid >> 7
                 while subid > 0:
-                    res = (chr(0x80 | (subid & 0x7f)),) + res
+                    res = (0x80 | (subid & 0x7f),) + res
                     subid = subid >> 7 
-                # Convert packed Sub-Object ID to string and add packed
-                # it to resulted Object ID
-                octets = octets + (''.join(res),)
+                # Add packed Sub-Object ID to resulted Object ID
+                octets += res
                 
-        return ''.join(octets), 0
+        return ints2octs(octets), 0
 
 class RealEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         if value.isPlusInfinity():
-            return '\x40', 0
+            return int2oct(0x40), 0
         if value.isMinusInfinity():
-            return '\x41', 0
+            return int2oct(0x41), 0
         m, b, e = value
         if not m:
-            return '', 0
+            return null, 0
         if b == 10:
-            return '\x03%dE%s%d' % (m, e == 0 and '+' or '', e), 0
+            return str2octs('\x03%dE%s%d' % (m, e == 0 and '+' or '', e)), 0
         elif b == 2:
             fo = 0x80                 # binary enoding
             if m < 0:
@@ -205,9 +205,9 @@ class RealEncoder(AbstractItemEncoder):
             while m & 0x1 == 0: # mantissa normalization
                 m >>= 1
                 e += 1
-            eo = ''
+            eo = null
             while e:
-                eo = chr(e&0xff) + eo
+                eo = int2oct(e&0xff) + eo
                 e >>= 8
             n = len(eo)
             if n > 0xff:
@@ -220,12 +220,12 @@ class RealEncoder(AbstractItemEncoder):
                 fo |= 2
             else:
                 fo |= 3
-                eo = chr(n//0xff+1) + eo
-            po = ''
+                eo = int2oct(n//0xff+1) + eo
+            po = null
             while m:
-                po = chr(m&0xff) + po
+                po = int2oct(m&0xff) + po
                 m >>= 8
-            substrate = chr(fo) + eo + po
+            substrate = int2oct(fo) + eo + po
             return substrate, 0
         else:
             raise error.PyAsn1Error('Prohibited Real base %s' % b)
@@ -234,7 +234,7 @@ class SequenceEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         value.setDefaultComponents()
         value.verifySizeSpec()
-        substrate = ''; idx = len(value)
+        substrate = null; idx = len(value)
         while idx > 0:
             idx = idx - 1
             if value[idx] is None:  # Optional component
@@ -250,7 +250,7 @@ class SequenceEncoder(AbstractItemEncoder):
 class SequenceOfEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         value.verifySizeSpec()
-        substrate = ''; idx = len(value)
+        substrate = null; idx = len(value)
         while idx > 0:
             idx = idx - 1
             substrate = encodeFun(
@@ -264,7 +264,7 @@ class ChoiceEncoder(AbstractItemEncoder):
 
 class AnyEncoder(OctetStringEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
-        return str(value), defMode == 0
+        return value.asBytes(), defMode == 0
 
 tagMap = {
     eoo.endOfOctets.tagSet: EndOfOctetsEncoder(),

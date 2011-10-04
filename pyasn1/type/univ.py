@@ -258,20 +258,51 @@ class OctetString(base.AbstractSimpleAsn1Item):
     tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x04)
         )
-    def prettyOut(self, value): return repr(value)
-    def prettyIn(self, value):
-        if isinstance(value, str):
-            return value
-        else:
-            return str(value)
+    if sys.version_info[0] <= 2:
+        def prettyIn(self, value):
+            if isinstance(value, str):
+                return value
+            elif isinstance(value, OctetString):
+                return value.asBytes()
+            else:
+                return str(value)
+        def purePrettyIn(self, value):
+            if not isinstance(value, str):
+                return str(value)
+            elif not value:
+                return value
+            else:
+                r = self.__parseBinHex(value)
+                if r is None:
+                    return value
+                else:
+                    return ''.join([chr(x) for x in r])
+    else:
+        def prettyIn(self, value):
+            if isinstance(value, bytes):
+                return value
+            elif isinstance(value, OctetString):
+                return value.asBytes()
+            else:
+                return str(value).encode()
+        def purePrettyIn(self, value):
+            if isinstance(value, bytes):
+                return value
+            elif isinstance(value, OctetString):
+                return value.asBytes()
+            elif not value:
+                return value.encode()
+            else:
+                value = str(value)
+                r = self.__parseBinHex(str(value))
+                if r is None:
+                    return value.encode()
+                else:
+                    return bytes(r)
 
-    def purePrettyIn(self, value):
-        if not isinstance(value, str):
-            return str(value)
-        elif not value:
-            return value
-        elif value[0] == '\'':
-            r = ''
+    def __parseBinHex(value):
+        if value[0] == '\'':
+            r = ()
             if value[-2:] == '\'B':
                 bitNo = 8; byte = 0
                 for v in value[1:-2]:
@@ -279,7 +310,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
                         bitNo = bitNo - 1
                     else:
                         bitNo = 7
-                        r = r + chr(byte)
+                        r = r + (byte,)
                         byte = 0
                     if v == '0':
                         v = 0
@@ -290,25 +321,29 @@ class OctetString(base.AbstractSimpleAsn1Item):
                             'Non-binary OCTET STRING initializer %s' % (v,)
                             )
                     byte = byte | (v << bitNo)
-                r = r + chr(byte)
+                r = r + (byte,)
             elif value[-2:] == '\'H':
-                p = ''
+                p = ()
                 for v in value[1:-2]:
                     if p:
-                        r = r + chr(int(p+v, 16))
-                        p = ''
+                        r = r + (int(p+v, 16),)
+                        p = ()
                     else:
                         p = v
                 if p:
-                    r = r + chr(int(p+'0', 16))
+                    r = r + (int(p+'0', 16),)
             else:
                 raise error.PyAsn1Error(
                     'Bad OCTET STRING value notation %s' % value
                     )
             return r
-        else:
-            return value
+
+    def prettyOut(self, value): return repr(value)
     
+    def asBytes(self): return self._value
+   
+    def __str__(self): return self._value.decode()
+ 
     # Immutable sequence object protocol
     
     def __len__(self):
@@ -321,17 +356,17 @@ class OctetString(base.AbstractSimpleAsn1Item):
         else:
             return self._value[i]
 
-    def __add__(self, value): return self.clone(self._value + value)
-    def __radd__(self, value): return self.clone(value + self._value)
+    def __add__(self, value): return self.clone(self._value + self.prettyIn(value))
+    def __radd__(self, value): return self.clone(self.prettyIn(value) + self._value)
     def __mul__(self, value): return self.clone(self._value * value)
     def __rmul__(self, value): return self * value
 
 class Null(OctetString):
-    defaultValue = '' # This is tightly constrained
+    defaultValue = ''.encode()  # This is tightly constrained
     tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x05)
         )
-    subtypeSpec = OctetString.subtypeSpec+constraint.SingleValueConstraint('')
+    subtypeSpec = OctetString.subtypeSpec+constraint.SingleValueConstraint(''.encode())
     
 class ObjectIdentifier(base.AbstractSimpleAsn1Item):
     tagSet = baseTagSet = tag.initTagSet(
@@ -405,6 +440,11 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
                 r[-1][-1] = r[-1][:-1]
         return '.'.join(r)
 
+if sys.version_info[0] <= 2:
+    intTypes = (int, long)
+else:
+    intTypes = int
+
 class Real(base.AbstractSimpleAsn1Item):
     _plusInf = float('inf')
     _minusInf = float('-inf')
@@ -420,15 +460,10 @@ class Real(base.AbstractSimpleAsn1Item):
             e = e + 1
         return m, b, e
 
-    if sys.version_info[0] <= 2:
-        _intTypes = (int, long)
-    else:
-        _intTypes = int
-
     def prettyIn(self, value):
         if isinstance(value, tuple) and len(value) == 3:
             for d in value:
-                if not isinstance(d, self._intTypes):
+                if not isinstance(d, intTypes):
                     raise error.PyAsn1Error(
                         'Lame Real value syntax: %s' % (value,)
                         )
@@ -439,7 +474,7 @@ class Real(base.AbstractSimpleAsn1Item):
             if value[1] == 10:
                 value = self.__normalizeBase10(value)
             return value
-        elif isinstance(value, self._intTypes):
+        elif isinstance(value, intTypes):
             return self.__normalizeBase10((value, 10, 0))
         elif isinstance(value, float):
             if value in self._inf:

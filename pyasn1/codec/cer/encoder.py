@@ -1,13 +1,14 @@
 # CER encoder
 from pyasn1.type import univ
 from pyasn1.codec.ber import encoder
+from pyasn1.compat.octets import int2oct, null
 
 class BooleanEncoder(encoder.IntegerEncoder):
     def encodeValue(self, encodeFun, client, defMode, maxChunkSize):
         if client == 0:
-            substrate = '\000'
+            substrate = int2oct(0)
         else:
-            substrate = '\377'
+            substrate = int2oct(255)
         return substrate, 0
 
 class BitStringEncoder(encoder.BitStringEncoder):
@@ -32,7 +33,7 @@ class SetOfEncoder(encoder.SequenceOfEncoder):
         if isinstance(client, univ.SequenceAndSetBase):
             client.setDefaultComponents()
         client.verifySizeSpec()
-        substrate = ''; idx = len(client)
+        substrate = null; idx = len(client)
         # This is certainly a hack but how else do I distinguish SetOf
         # from Set if they have the same tags&constraints?
         if isinstance(client, univ.SequenceAndSetBase):
@@ -48,7 +49,7 @@ class SetOfEncoder(encoder.SequenceOfEncoder):
             comps.sort(key=lambda x: isinstance(x, univ.Choice) and \
                                      x.getMinTagSet() or x.getTagSet())
             for c in comps:
-                substrate = substrate + encodeFun(c, defMode, maxChunkSize)
+                substrate += encodeFun(c, defMode, maxChunkSize)
         else:
             # SetOf
             compSubs = []
@@ -58,7 +59,9 @@ class SetOfEncoder(encoder.SequenceOfEncoder):
                     encodeFun(client[idx], defMode, maxChunkSize)
                     )
             compSubs.sort()  # perhaps padding's not needed
-            substrate = ''.join(compSubs)
+            substrate = null
+            for compSub in compSubs:
+                substrate += compSub
         return substrate, 1
 
 tagMap = encoder.tagMap.copy()

@@ -1,6 +1,7 @@
 # CER decoder
 from pyasn1.type import univ
 from pyasn1.codec.ber import decoder
+from pyasn1.compat.octets import oct2int
 from pyasn1 import error
 
 class BooleanDecoder(decoder.AbstractSimpleDecoder):
@@ -10,7 +11,7 @@ class BooleanDecoder(decoder.AbstractSimpleDecoder):
         substrate = substrate[:length]
         if not substrate:
             raise error.PyAsn1Error('Empty substrate')
-        byte = ord(substrate[0])
+        byte = oct2int(substrate[0])
         if byte == 0xff:
             value = 1
         elif byte == 0x00:
