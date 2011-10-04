@@ -2,12 +2,13 @@
 import sys
 
 def howto_install_setuptools():
-    print """Error: You need setuptools Python package!
+    print("""
+   Error: You need setuptools Python package!
 
-It's very easy to install it, just type (as root on Linux):
+   It's very easy to install it, just type (as root on Linux):
    wget http://peak.telecommunity.com/dist/ez_setup.py
    python ez_setup.py
-"""
+""")
 
 try:
     from setuptools import setup
@@ -32,10 +33,11 @@ params.update( {
     'license': 'BSD',
     'packages': [ 'pyasn1',
                   'pyasn1.type',
+                  'pyasn1.compat',
                   'pyasn1.codec',
                   'pyasn1.codec.ber',
                   'pyasn1.codec.cer',
                   'pyasn1.codec.der' ]
       } )
 
-apply(setup, (), params)
+setup(**params)
