@@ -1,5 +1,5 @@
-Revision 0.0.14a
-----------------
+Revision 0.0.14
+---------------
 
 - Fixed a bug/typo at Boolean CER encoder.
 - Major overhawl for Python 2.4 -- 3.2 compatibility:
@@ -14,6 +14,8 @@ Revision 0.0.14a
   + modified not to use py3k-incompatible exception syntax
   + getslice() operator fully replaced with getitem()
   + dictionary operations made 2K/3K compatible
+  + base type for encoding substrate and OctetString-based types
+    is now 'bytes' when running py3k and 'str' otherwise
   + in test suite, implicit relative import replaced with the absolute one
 
 Revision 0.0.13
