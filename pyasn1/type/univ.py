@@ -2,6 +2,7 @@
 import operator, sys
 from pyasn1.type import base, tag, constraint, namedtype, namedval, tagmap
 from pyasn1.codec.ber import eoo
+from pyasn1.compat import octets
 from pyasn1 import error
 
 # "Simple" ASN.1 types (yet incomplete)
@@ -258,23 +259,20 @@ class OctetString(base.AbstractSimpleAsn1Item):
     tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x04)
         )
+    def __init__(self, value=None, tagSet=None, subtypeSpec=None,
+                 binValue=None, hexValue=None):
+        if binValue is not None:
+            value = self.fromBinaryString(binValue)
+        if hexValue is not None:
+            value = self.fromHexString(hexValue)
+        base.AbstractSimpleAsn1Item.__init__(self, value, tagSet, subtypeSpec)
+
     if sys.version_info[0] <= 2:
         def prettyIn(self, value):
             if isinstance(value, str):
                 return value
             else:
                 return str(value)
-        def purePrettyIn(self, value):
-            if not isinstance(value, str):
-                return str(value)
-            elif not value:
-                return value
-            else:
-                r = self.__parseBinHex(value)
-                if r is None:
-                    return value
-                else:
-                    return ''.join([chr(x) for x in r])
     else:
         def prettyIn(self, value):
             if isinstance(value, bytes):
@@ -283,59 +281,39 @@ class OctetString(base.AbstractSimpleAsn1Item):
                 return bytes(value)
             else:
                 return str(value).encode()
-        def purePrettyIn(self, value):
-            if isinstance(value, bytes):
-                return value
-            elif isinstance(value, OctetString):
-                return bytes(value)
-            elif not value:
-                return value.encode()
-            else:
-                value = str(value)
-                r = self.__parseBinHex(str(value))
-                if r is None:
-                    return value.encode()
-                else:
-                    return bytes(r)
 
-    def __parseBinHex(value):
-        if value[0] == '\'':
-            r = ()
-            if value[-2:] == '\'B':
-                bitNo = 8; byte = 0
-                for v in value[1:-2]:
-                    if bitNo:
-                        bitNo = bitNo - 1
-                    else:
-                        bitNo = 7
-                        r = r + (byte,)
-                        byte = 0
-                    if v == '0':
-                        v = 0
-                    elif v == '1':
-                        v = 1
-                    else:
-                        raise error.PyAsn1Error(
-                            'Non-binary OCTET STRING initializer %s' % (v,)
-                            )
-                    byte = byte | (v << bitNo)
+    def fromBinaryString(self, value):
+        bitNo = 8; byte = 0; r = ()
+        for v in value:
+            if bitNo:
+                bitNo = bitNo - 1
+            else:
+                bitNo = 7
                 r = r + (byte,)
-            elif value[-2:] == '\'H':
-                p = ()
-                for v in value[1:-2]:
-                    if p:
-                        r = r + (int(p+v, 16),)
-                        p = ()
-                    else:
-                        p = v
-                if p:
-                    r = r + (int(p+'0', 16),)
+                byte = 0
+            if v == '0':
+                v = 0
+            elif v == '1':
+                v = 1
             else:
                 raise error.PyAsn1Error(
-                    'Bad OCTET STRING value notation %s' % value
+                    'Non-binary OCTET STRING initializer %s' % (v,)
                     )
-            return r
-
+            byte = byte | (v << bitNo)
+        return octets.ints2octs(r + (byte,))
+        
+    def fromHexString(self, value):            
+        r = p = ()
+        for v in value:
+            if p:
+                r = r + (int(p+v, 16),)
+                p = ()
+            else:
+                p = v
+        if p:
+            r = r + (int(p+'0', 16),)
+        return octets.ints2octs(r)
+        
     def prettyOut(self, value): return repr(value)
 
     if sys.version_info[0] <= 2:
