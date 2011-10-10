@@ -262,8 +262,6 @@ class OctetString(base.AbstractSimpleAsn1Item):
         def prettyIn(self, value):
             if isinstance(value, str):
                 return value
-            elif isinstance(value, OctetString):
-                return value.asBytes()
             else:
                 return str(value)
         def purePrettyIn(self, value):
@@ -282,14 +280,14 @@ class OctetString(base.AbstractSimpleAsn1Item):
             if isinstance(value, bytes):
                 return value
             elif isinstance(value, OctetString):
-                return value.asBytes()
+                return bytes(value)
             else:
                 return str(value).encode()
         def purePrettyIn(self, value):
             if isinstance(value, bytes):
                 return value
             elif isinstance(value, OctetString):
-                return value.asBytes()
+                return bytes(value)
             elif not value:
                 return value.encode()
             else:
@@ -339,10 +337,12 @@ class OctetString(base.AbstractSimpleAsn1Item):
             return r
 
     def prettyOut(self, value): return repr(value)
-    
-    def asBytes(self): return self._value
-   
-    def __str__(self): return self._value.decode()
+
+    if sys.version_info[0] <= 2:
+        def __str__(self): return str(self._value)
+    else:
+        def __str__(self): return self._value.decode()
+        def __bytes__(self): return self._value   
  
     # Immutable sequence object protocol
     
