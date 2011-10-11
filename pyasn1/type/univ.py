@@ -285,7 +285,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
             elif isinstance(value, OctetString):
                 return bytes(value)
             else:
-                return str(value).encode()
+                return str(value).encode(self._encoding)
 
     def fromBinaryString(self, value):
         bitNo = 8; byte = 0; r = ()
