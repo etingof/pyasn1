@@ -16,7 +16,9 @@ Revision 0.0.14
   + dictionary operations made 2K/3K compatible
   + base type for encoding substrate and OctetString-based types
     is now 'bytes' when running py3k and 'str' otherwise
+  + OctetString and derivatives now unicode compliant.
   + in test suite, implicit relative import replaced with the absolute one
+  + in test suite, string constants replaced with numerics
 
 Revision 0.0.13
 ---------------

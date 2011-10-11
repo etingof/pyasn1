@@ -259,8 +259,13 @@ class OctetString(base.AbstractSimpleAsn1Item):
     tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x04)
         )
+    encoding = 'us-ascii'
     def __init__(self, value=None, tagSet=None, subtypeSpec=None,
-                 binValue=None, hexValue=None):
+                 encoding=None, binValue=None, hexValue=None):
+        if encoding is None:
+            self._encoding = self.encoding
+        else:
+            self._encoding = encoding
         if binValue is not None:
             value = self.fromBinaryString(binValue)
         if hexValue is not None:
@@ -318,8 +323,9 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
     if sys.version_info[0] <= 2:
         def __str__(self): return str(self._value)
+        def __unicode__(self): return self._value.decode(self._encoding)
     else:
-        def __str__(self): return self._value.decode()
+        def __str__(self): return self._value.decode(self._encoding)
         def __bytes__(self): return self._value   
  
     # Immutable sequence object protocol
