@@ -139,8 +139,8 @@ value object</i>.
 
 <p>
 Primitive ASN.1 types are implemented as immutable scalar objects. There values
-could be used just like corresponding native Python values (integers, strings
-etc) and freely mixed with them in expressions.
+could be used just like corresponding native Python values (integers,
+strings/bytes etc) and freely mixed with them in expressions.
 </p>
 
 <table bgcolor="lightgray" border=0 width=100%><TR><TD>
@@ -150,8 +150,9 @@ etc) and freely mixed with them in expressions.
 >>> asn1IntegerValue - 2
 10
 >>> univ.OctetString('abc') == 'abc'
-True
->>>
+True   # Python 2
+>>> univ.OctetString(b'abc') == b'abc'
+True   # Python 3
 </pre>
 </td></tr></table>
 
@@ -595,20 +596,24 @@ style and quoted text initializers for the OctetString objects. To avoid
 possible collisions, quoted text is the default initialization syntax.
 </p>
 
+<p>
+When running pyasn1 on Python 3, always try to use the bytes objects
+for OctetString instantiation, as it's more reliable and efficient.
+</p>
+
 <table bgcolor="lightgray" border=0 width=100%><TR><TD>
 <pre>
 >>> from pyasn1.type import univ
->>> pureAsn1Initializer = univ.OctetString().purePrettyIn
 >>> thumbnail = univ.OctetString(
-...    pureAsn1Initializer("'1000010111101110101111000000111011'B")
+...    binValue='1000010111101110101111000000111011'
 ... )
 >>> thumbnail
-OctetString('\x85\xee\xbc\x0e\xc0')
+OctetString(b'\x85\xee\xbc\x0e\xc0')
 >>> thumbnail = univ.OctetString(
-...    pureAsn1Initializer("'FA9823C43E43510DE3422'H")
+...    hexValue='FA9823C43E43510DE3422'
 ... )
 >>> thumbnail
-OctetString('\xfa\x98#\xc4>CQ\r\xe3B ')
+OctetString(b'\xfa\x98#\xc4>CQ\r\xe3B ')
 >>>
 </pre>
 </td></tr></table>
@@ -623,18 +628,18 @@ a text string.
 >>> from pyasn1.type import univ
 >>> welcomeMessage = univ.OctetString('Welcome to ASN.1 wilderness!')
 >>> welcomeMessage
-OctetString('Welcome to ASN.1 wilderness!')
->>> print '%s' % welcomeMessage
+OctetString(b'Welcome to ASN.1 wilderness!')
+>>> print('%s' % welcomeMessage)
 Welcome to ASN.1 wilderness!
 >>> welcomeMessage[11:16]
-OctetString('ASN.1')
+OctetString(b'ASN.1')
 >>> 
 </pre>
 </td></tr></table>
 
 <p>
-In any case, OctetString objects behave like Python strings in part of
-immutable sequence object protocol support.
+In any case, OctetString objects behave like Python 3 bytes (or Python 2
+strings) in part of immutable sequence object protocol support.
 </p>
 
 <a name="1.1.8"></a>
@@ -740,7 +745,7 @@ Their pyasn1 implementations are:
       "0" "1" "2" "3" "4" "5" "6" "7" "8" "9"
 )
 >>> dialPadNumbers
-NumericString('0123456789')
+NumericString(b'0123456789')
 >>>
 </pre>
 </td></tr></table>
@@ -753,17 +758,17 @@ The following types came to ASN.1 from ISO standards on character sets.
 <pre>
 >>> from pyasn1.type import char
 >>> char.VisibleString("abc")
-VisibleString('abc')
+VisibleString(b'abc')
 >>> char.IA5String('abc')
-IA5String('abc')
+IA5String(b'abc')
 >>> char.TeletexString('abc')
-TeletexString('abc')
+TeletexString(b'abc')
 >>> char.VideotexString('abc')
-VideotexString('abc')
+VideotexString(b'abc')
 >>> char.GraphicString('abc')
-GraphicString('abc')
+GraphicString(b'abc')
 >>> char.GeneralString('abc')
-GeneralString('abc')
+GeneralString(b'abc')
 >>>
 </pre>
 </td></tr></table>
@@ -777,11 +782,16 @@ character string types: UniversalString, BMPString, UTF8String.
 <pre>
 >>> from pyasn1.type import char
 >>> char.UniversalString("abc")
-UniversalString('abc')
+UniversalString(b'abc')
 >>> char.BMPString('abc')
-BMPString('abc')
+BMPString(b'abc')
 >>> char.UTF8String('abc')
-UTF8String('abc')
+UTF8String(b'abc')
+>>> utf8String = char.UTF8String('У попа была собака')
+>>> utf8String
+UTF8String(b'\xd0\xa3 \xd0\xbf\xd0\xbe\xd0\xbf\xd0\xb0 \xd0\xb1\xd1\x8b\xd0\xbb\xd0\xb0 \xd1\x81\xd0\xbe\xd0\xb1\xd0\xb0\xd0\xba\xd0\xb0')
+>>> print(utf8String)
+У попа была собака
 >>>
 </pre>
 </td></tr></table>
@@ -1166,18 +1176,18 @@ and initialized (continuing the above code):
 <pre>
 >>> record = Record()
 >>> record.setComponentByName('id', 123)
->>> print record.prettyPrint()
+>>> print(record.prettyPrint())
 Record:
  id=123
 >>> 
 >>> record.setComponentByPosition(1, 321)
->>> print record.prettyPrint()
+>>> print(record.prettyPrint())
 Record:
  id=123
  room=321
 >>>
 >>> record.setDefaultComponents()
->>> print record.prettyPrint()
+>>> print(record.prettyPrint())
 Record:
  id=123
  room=321
@@ -1193,13 +1203,13 @@ following methods:
 <table bgcolor="lightgray" border=0 width=100%><TR><TD>
 <pre>
 >>> record.getComponentByName('id')
-Integer('123')
+Integer(123)
 >>> record.getComponentByPosition(1)
-Integer('321')
+Integer(321)
 >>> record[2]
-Integer('0')
+Integer(0)
 >>> for idx in range(len(record)):
-...   print record.getNameByPosition(idx), record.getComponentByPosition(idx)
+...   print(record.getNameByPosition(idx), record.getComponentByPosition(idx))
 id 123
 room 321
 house 0
@@ -1226,10 +1236,10 @@ types).
 >>> gamer.setComponentByType(univ.Integer().getTagSet(), 121343)
 >>> gamer.setComponentByType(univ.OctetString().getTagSet(), 'Pascal')
 >>> gamer.setComponentByType(univ.ObjectIdentifier().getTagSet(), (1,3,7,2))
->>> print gamer.prettyPrint()
+>>> print(gamer.prettyPrint())
 Gamer:
  score=121343
- player=Pascal
+ player=b'Pascal'
  id=1.3.7.2
 >>>
 </pre>
@@ -1271,18 +1281,18 @@ should refer to another pyasn1 type object.
 ...   componentType = univ.Integer()
 >>> arithmeticProgression = Progression()
 >>> arithmeticProgression.setComponentByPosition(1, 111)
->>> print arithmeticProgression.prettyPrint()
+>>> print(arithmeticProgression.prettyPrint())
 Progression:
 -empty- 111
 >>> arithmeticProgression.setComponentByPosition(0, 100)
->>> print arithmeticProgression.prettyPrint()
+>>> print(arithmeticProgression.prettyPrint())
 Progression:
 100 111
 >>>
 >>> for idx in range(len(arithmeticProgression)):
 ...    arithmeticProgression.getComponentByPosition(idx)
-Integer('100')
-Integer('111')
+Integer(100)
+Integer(111)
 >>>
 </pre>
 </td></tr></table>
@@ -1329,16 +1339,16 @@ specific to its behaviour.
 ...   )
 >>>
 >>> codeOrMessage = CodeOrMessage()
->>> print codeOrMessage.prettyPrint()
+>>> print(codeOrMessage.prettyPrint())
 CodeOrMessage:
 >>> codeOrMessage.setComponentByName('code', 123)
->>> print codeOrMessage.prettyPrint()
+>>> print(codeOrMessage.prettyPrint())
 CodeOrMessage:
  code=123
 >>> codeOrMessage.setComponentByName('message', 'my string value')
->>> print codeOrMessage.prettyPrint()
+>>> print(codeOrMessage.prettyPrint())
 CodeOrMessage:
- message=my string value
+ message=b'my string value'
 >>>
 </pre>
 </td></tr></table>
@@ -1354,7 +1364,7 @@ value object, either of the following methods could be used for fetching it
 >>> codeOrMessage.getName()
 'message'
 >>> codeOrMessage.getComponent()
-OctetString('my string value')
+OctetString(b'my string value')
 >>>
 </pre>
 </td></tr></table>
@@ -1396,11 +1406,13 @@ pyasn1 OctetString object.
 <table bgcolor="lightgray" border=0 width=100%><TR><TD>
 <pre>
 >>> from pyasn1.type import univ
->>> someValue = univ.Any('\x02\x01\x01')
+>>> someValue = univ.Any(b'\x02\x01\x01')
 >>> someValue
-Any('\x02\x01\x01')
+Any(b'\x02\x01\x01')
 >>> str(someValue)
 '\x02\x01\x01'
+>>> bytes(someValue)
+b'\x02\x01\x01'
 >>>
 </pre>
 </td></tr></table>
@@ -1502,7 +1514,7 @@ later) and calls it for value verification.
 ...       '0','1','2','3','4','5','6','7','8','9'
 ...   )
 >>> DialButton('0')
-DialButton('0')
+DialButton(b'0')
 >>> DialButton('A')
 Traceback (most recent call last):
 ...
@@ -1847,6 +1859,11 @@ data is sometimes called <i>substrate</i> or <i>essence</i>.
 </p>
 
 <p>
+In pyasn1 implementation, substrate takes shape of Python 3 bytes or 
+Python 2 string objects.
+</p>
+
+<p>
 One of the properties of a codec is its ability to cope with incomplete
 data and/or substrate what implies codec to be stateful. In other words, 
 when decoder runs out of substrate and data item being recovered is still 
@@ -1895,7 +1912,7 @@ BER encoder:
 >>> from pyasn1.type import univ
 >>> from pyasn1.codec.ber import encoder
 >>> encoder.encode(univ.Integer(123456))
-'\x02\x03\x01\xe2@'
+b'\x02\x03\x01\xe2@'
 >>>
 </pre>
 </td></tr></table>
@@ -1932,13 +1949,13 @@ to process a large data item.
 ...   defMode=False,
 ...   maxChunkSize=8
 ... )
-'$\x80\x04\x08The quic\x04\x08k brown \x04\x08fox jump\x04\x08s over t\x04\x08he lazy \x04\x03dog\x00\x00'
+b'$\x80\x04\x08The quic\x04\x08k brown \x04\x08fox jump\x04\x08s over t\x04\x08he lazy \x04\x03dog\x00\x00'
 >>>
 >>> encoder.encode(
 ...   univ.OctetString('The quick brown fox jumps over the lazy dog'),
 ...   maxChunkSize=8
 ... )
-'$7\x04\x08The quic\x04\x08k brown \x04\x08fox jump\x04\x08s over t\x04\x08he lazy \x04\x03dog'
+b'$7\x04\x08The quic\x04\x08k brown \x04\x08fox jump\x04\x08s over t\x04\x08he lazy \x04\x03dog'
 </pre>
 </td></tr></table>
 
@@ -1960,11 +1977,11 @@ APIs are all compatible.
 >>> from pyasn1.codec.cer import encoder as cer_encoder
 >>> from pyasn1.codec.der import encoder as der_encoder
 >>> ber_encoder.encode(univ.Boolean(True))
-'\x01\x01\x01'
+b'\x01\x01\x01'
 >>> cer_encoder.encode(univ.Boolean(True))
-'\x01\x01\xff'
+b'\x01\x01\xff'
 >>> der_encoder.encode(univ.Boolean(True))
-'\x01\x01\xff'
+b'\x01\x01\xff'
 >>>
 </pre>
 </td></tr></table>
@@ -1986,7 +2003,7 @@ the original pyasn1 value object(s) are recovered.
 >>> from pyasn1.codec.ber import encoder, decoder
 >>> substrate = encoder.encode(univ.Boolean(True))
 >>> decoder.decode(substrate)
-(Boolean('True(1)'), '')
+(Boolean('True(1)'), b'')
 >>>
 </pre>
 </td></tr></table>
@@ -2014,7 +2031,7 @@ to another is not required.
 ...   maxChunkSize=8
 ... )
 >>> decoder.decode(substrate)
-(OctetString('The quick brown fox jumps over the lazy dog'), '')
+(OctetString(b'The quick brown fox jumps over the lazy dog'), b'')
 >>>
 </pre>
 </td></tr></table>
@@ -2041,8 +2058,8 @@ type objects (also called pyasn1 specification object further in this paper).
 <table bgcolor="lightgray" border=0 width=100%><TR><TD>
 <pre>
 >>> from pyasn1.codec.ber import decoder
->>> decoder.decode('\x02\x01\x0c', asn1Spec=univ.Integer())
-Integer(12), ''
+>>> decoder.decode(b'\x02\x01\x0c', asn1Spec=univ.Integer())
+Integer(12), b''
 >>>
 </pre>
 </td></tr></table>
@@ -2062,14 +2079,14 @@ a hint for choosing proper decoder and as a pattern for creating new objects:
 ... )
 >>> substrate = encoder.encode(i)
 >>> substrate
-'\x9f(\x0209'
+b'\x9f(\x0209'
 >>> decoder.decode(substrate)
 Traceback (most recent call last):
 ...
 pyasn1.error.PyAsn1Error: 
    TagSet(Tag(tagClass=128, tagFormat=0, tagId=40)) not in asn1Spec
 >>> decoder.decode(substrate, asn1Spec=i)
-(Integer('12345'), '')
+(Integer(12345), b'')
 >>>
 </pre>
 </td></tr></table>
@@ -2095,7 +2112,7 @@ and the constrained one.
 ...   subtypeSpec = constraint.ValueRangeConstraint(0,9)
 >>> substrate = encoder.encode(univ.Integer(13))
 >>> decoder.decode(substrate)
-(Integer('13'), '')
+(Integer(13), b'')
 >>> decoder.decode(substrate, asn1Spec=DialDigit())
 Traceback (most recent call last):
 ...
@@ -2121,11 +2138,11 @@ explicitly import and call them - all APIs are compatible.
 >>> from pyasn1.codec.der import decoder as der_decoder
 >>> 
 >>> ber_decoder.decode(substrate)
-(OctetString('http://pyasn1.sf.net'), '')
+(OctetString(b'http://pyasn1.sf.net'), b'')
 >>> cer_decoder.decode(substrate)
-(OctetString('http://pyasn1.sf.net'), '')
+(OctetString(b'http://pyasn1.sf.net'), b'')
 >>> der_decoder.decode(substrate)
-(OctetString('http://pyasn1.sf.net'), '')
+(OctetString(b'http://pyasn1.sf.net'), b'')
 >>> 
 </pre>
 </td></tr></table>
@@ -2159,9 +2176,9 @@ To explain the issue, we will first prepare a Choice object to deal with:
 >>>
 >>> codeOrMessage = CodeOrMessage()
 >>> codeOrMessage.setComponentByName('message', 'my string value')
->>> print codeOrMessage.prettyPrint()
+>>> print(codeOrMessage.prettyPrint())
 CodeOrMessage:
- message=my string value
+ message=b'my string value'
 >>>
 </pre>
 </td></tr></table>
@@ -2176,16 +2193,16 @@ with and without pyasn1 specification object:
 >>> from pyasn1.codec.ber import encoder, decoder
 >>> substrate = encoder.encode(codeOrMessage)
 >>> substrate
-'\x04\x0fmy string value'
+b'\x04\x0fmy string value'
 >>> encoder.encode(univ.OctetString('my string value'))
-'\x04\x0fmy string value'
+b'\x04\x0fmy string value'
 >>>
 >>> decoder.decode(substrate)
-(OctetString('my string value'), '')
+(OctetString(b'my string value'), b'')
 >>> codeOrMessage, substrate = decoder.decode(substrate, asn1Spec=CodeOrMessage())
->>> print codeOrMessage.prettyPrint()
+>>> print(codeOrMessage.prettyPrint())
 CodeOrMessage:
- message=my string value
+ message=b'my string value'
 >>>
 </pre>
 </td></tr></table>
@@ -2230,13 +2247,13 @@ object.
 >>> from pyasn1.codec.ber import encoder, decoder
 >>> innerSubstrate = encoder.encode(univ.Integer(1234))
 >>> innerSubstrate
-'\x02\x02\x04\xd2'
+b'\x02\x02\x04\xd2'
 >>> any = univ.Any(innerSubstrate)
 >>> any
-Any('\x02\x02\x04\xd2')
+Any(b'\x02\x02\x04\xd2')
 >>> substrate = encoder.encode(any)
 >>> substrate
-'\x02\x02\x04\xd2'
+b'\x02\x02\x04\xd2'
 >>>
 </pre>
 </td></tr></table>
@@ -2254,12 +2271,12 @@ decoder. Continuing previous code:
 >>> from pyasn1.codec.ber import encoder, decoder
 
 >>> decoder.decode(substrate)
-(Integer('1234'), '')
+(Integer(1234), b'')
 >>> any, substrate = decoder.decode(substrate, asn1Spec=univ.Any())
 >>> any
-Any('\x02\x02\x04\xd2')
+Any(b'\x02\x02\x04\xd2')
 >>> decoder.decode(str(any))
-(Integer('1234'), '')
+(Integer(1234), b'')
 >>>
 </pre>
 </td></tr></table>
@@ -2299,7 +2316,7 @@ pyasn1.error.PyAsn1Error: TagSet(Tag(tagClass=128, tagFormat=0, tagId=40)) not i
 >>>
 >>> decoder.decode.defaultErrorState = decoder.stDumpRawValue
 >>> decoder.decode(substrate)
-(Any('\x9f(\x0209'), '')
+(Any(b'\x9f(\x0209'), '')
 >>>
 </pre>
 </td></tr></table>
