@@ -51,6 +51,8 @@ class Integer(base.AbstractSimpleAsn1Item):
         def __divmod__(self, value):  return self.clone(self._value // value)
         def __rdivmod__(self, value):  return self.clone(value // self._value)
 
+        __hash__ = base.AbstractSimpleAsn1Item.__hash__
+
     def __int__(self): return int(self._value)
     def __long__(self): return int(self._value)
     def __float__(self): return float(self._value)    
@@ -538,6 +540,7 @@ class Real(base.AbstractSimpleAsn1Item):
         def __nonzero__(self): return bool(float(self))
     else:
         def __bool__(self): return bool(float(self))
+        __hash__ = base.AbstractSimpleAsn1Item.__hash__
 
     def __getitem__(self, idx):
         if self._value in self._inf:
