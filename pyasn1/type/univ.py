@@ -325,9 +325,10 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
     if sys.version_info[0] <= 2:
         def __str__(self): return str(self._value)
-        def __unicode__(self): return self._value.decode(self._encoding)
+        def __unicode__(self):
+            return self._value.decode(self._encoding, 'ignore')
     else:
-        def __str__(self): return self._value.decode(self._encoding)
+        def __str__(self): return self._value.decode(self._encoding, 'ignore')
         def __bytes__(self): return self._value   
  
     # Immutable sequence object protocol
