@@ -433,8 +433,13 @@ else:
     intTypes = int
 
 class Real(base.AbstractSimpleAsn1Item):
-    _plusInf = float('inf')
-    _minusInf = float('-inf')
+    try:
+        _plusInf = float('inf')
+        _minusInf = float('-inf')
+    except ValueError:
+        # Python <2.6 does not reliably support infinity
+        _plusInf = 1e30000
+        _minusInf = -1e30000
     _inf = (_plusInf, _minusInf)
     tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x09)

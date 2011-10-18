@@ -1,6 +1,7 @@
 Revision 0.0.14
 ---------------
 
+- Fixed float() infinity compatibility issue (affects 2.5 and earlier)
 - Fixed a bug/typo at Boolean CER encoder.
 - Major overhawl for Python 2.4 -- 3.2 compatibility:
   + get rid of old-style types
