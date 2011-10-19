@@ -18,6 +18,7 @@ Revision 0.0.14
   + base type for encoding substrate and OctetString-based types
     is now 'bytes' when running py3k and 'str' otherwise
   + OctetString and derivatives now unicode compliant.
+  + OctetString now supports two python-neutral getters: asOcts() & asInts()
   + in test suite, implicit relative import replaced with the absolute one
   + in test suite, string constants replaced with numerics
 

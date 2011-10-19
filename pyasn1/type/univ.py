@@ -272,12 +272,15 @@ class OctetString(base.AbstractSimpleAsn1Item):
             value = self.fromBinaryString(binValue)
         if hexValue is not None:
             value = self.fromHexString(hexValue)
+        self.__intValue = None
         base.AbstractSimpleAsn1Item.__init__(self, value, tagSet, subtypeSpec)
 
     if sys.version_info[0] <= 2:
         def prettyIn(self, value):
             if isinstance(value, str):
                 return value
+            elif isinstance(value, (tuple, list)):
+                return ''.join([ chr(x) for x in value ])
             else:
                 return str(value)
     else:
@@ -285,6 +288,8 @@ class OctetString(base.AbstractSimpleAsn1Item):
             if isinstance(value, bytes):
                 return value
             elif isinstance(value, OctetString):
+                return value.asOcts()
+            elif isinstance(value, (tuple, list, map)):
                 return bytes(value)
             else:
                 return str(value).encode(self._encoding)
@@ -324,12 +329,22 @@ class OctetString(base.AbstractSimpleAsn1Item):
     def prettyOut(self, value): return repr(value)
 
     if sys.version_info[0] <= 2:
-        def __str__(self): return str(self._value)
+        def __str__(self): return self._value
         def __unicode__(self):
             return self._value.decode(self._encoding, 'ignore')
+        def asOcts(self): return self._value
+        def asInts(self):
+            if self.__intValue is None:
+                self.__intValue = tuple([ ord(x) for x in self._value ])
+            return self.__intValue
     else:
         def __str__(self): return self._value.decode(self._encoding, 'ignore')
-        def __bytes__(self): return self._value   
+        def __bytes__(self): return self._value
+        def asOcts(self): return self._value
+        def asInts(self):
+            if self.__intValue is None:
+                self.__intValue = tuple(self._value)
+            return self.__intValue
  
     # Immutable sequence object protocol
     
