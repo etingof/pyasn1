@@ -280,7 +280,12 @@ class OctetString(base.AbstractSimpleAsn1Item):
             if isinstance(value, str):
                 return value
             elif isinstance(value, (tuple, list)):
-                return ''.join([ chr(x) for x in value ])
+                try:
+                    return ''.join([ chr(x) for x in value ])
+                except ValueError:
+                    raise error.PyAsn1Error(
+                        'Bad OctetString initializer \'%s\'' % (value,)
+                        )                
             else:
                 return str(value)
     else:
@@ -290,9 +295,20 @@ class OctetString(base.AbstractSimpleAsn1Item):
             elif isinstance(value, OctetString):
                 return value.asOcts()
             elif isinstance(value, (tuple, list, map)):
-                return bytes(value)
+                try:
+                    return bytes(value)
+                except ValueError:
+                    raise error.PyAsn1Error(
+                        'Bad OctetString initializer \'%s\'' % (value,)
+                        )
             else:
-                return str(value).encode(self._encoding)
+                try:
+                    return str(value).encode(self._encoding)
+                except UnicodeEncodeError:
+                    raise error.PyAsn1Error(
+                        'Can\'t encode string \'%s\' with \'%s\' codec' % (value, self._encoding)
+                        )
+                        
 
     def fromBinaryString(self, value):
         bitNo = 8; byte = 0; r = ()
@@ -325,9 +341,21 @@ class OctetString(base.AbstractSimpleAsn1Item):
         if p:
             r = r + (int(p+'0', 16),)
         return octets.ints2octs(r)
-        
-    def prettyOut(self, value): return repr(value)
 
+    def prettyOut(self, value):
+        if [ x for x in self.asInts() if x < 32 or x > 126 ]:
+            return '\'0x' + ''.join([ '%x' % x for x in self.asInts() ]) + '\''
+        else:
+            return repr(value)
+
+    def __repr__(self):
+        if self._value is base.noValue:
+            return self.__class__.__name__ + '()'
+        if [ x for x in self.asInts() if x < 32 or x > 126 ]:
+            return self.__class__.__name__ + '(hexValue=\'' + ''.join([ '%x' % x for x in self.asInts() ])+'\')'
+        else:
+            return self.__class__.__name__ + '(' + self.prettyOut(self._value) + ')'
+                                
     if sys.version_info[0] <= 2:
         def __str__(self): return self._value
         def __unicode__(self):
