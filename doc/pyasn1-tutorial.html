@@ -596,11 +596,6 @@ style and quoted text initializers for the OctetString objects. To avoid
 possible collisions, quoted text is the default initialization syntax.
 </p>
 
-<p>
-When running pyasn1 on Python 3, always try to use the bytes objects
-for OctetString instantiation, as it's more reliable and efficient.
-</p>
-
 <table bgcolor="lightgray" border=0 width=100%><TR><TD>
 <pre>
 >>> from pyasn1.type import univ
@@ -608,12 +603,12 @@ for OctetString instantiation, as it's more reliable and efficient.
 ...    binValue='1000010111101110101111000000111011'
 ... )
 >>> thumbnail
-OctetString(b'\x85\xee\xbc\x0e\xc0')
+OctetString(hexValue='85eebcec0')
 >>> thumbnail = univ.OctetString(
 ...    hexValue='FA9823C43E43510DE3422'
 ... )
 >>> thumbnail
-OctetString(b'\xfa\x98#\xc4>CQ\r\xe3B ')
+OctetString(hexValue='fa9823c43e4351de34220')
 >>>
 </pre>
 </td></tr></table>
@@ -638,9 +633,41 @@ OctetString(b'ASN.1')
 </td></tr></table>
 
 <p>
-In any case, OctetString objects behave like Python 3 bytes (or Python 2
-strings) in part of immutable sequence object protocol support.
+OctetString objects support the immutable sequence object protocol.
+In other words, they behave like Python 3 bytes (or Python 2 strings).
 </p>
+
+<p>
+When running pyasn1 on Python 3, it's better to use the bytes objects for
+OctetString instantiation, as it's more reliable and efficient.
+</p>
+
+<p>
+Additionally, OctetString's can also be instantiated with a sequence of
+8-bit integers (ASCII codes).
+</p>
+
+<table bgcolor="lightgray" border=0 width=100%><TR><TD>
+<pre>
+>>> univ.OctetString((77, 101, 101, 103, 111))
+OctetString(b'Meego')
+</pre>
+</td></tr></table>
+
+<p>
+It is sometimes convenient to express OctetString instances as 8-bit
+characters (Python 3 bytes or Python 2 strings) or 8-bit integers.
+</p>
+
+<table bgcolor="lightgray" border=0 width=100%><TR><TD>
+<pre>
+>>> octetString = univ.OctetString('ABCDEF')
+>>> octetString.asNumbers()
+(65, 66, 67, 68, 69, 70)
+>>> octetString.asOctets()
+b'ABCDEF'
+</pre>
+</td></tr></table>
 
 <a name="1.1.8"></a>
 <h4>
