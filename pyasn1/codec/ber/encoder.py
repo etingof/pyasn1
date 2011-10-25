@@ -1,5 +1,4 @@
 # BER encoder
-import sys
 from pyasn1.type import base, tag, univ, char, useful
 from pyasn1.codec.ber import eoo
 from pyasn1.compat.octets import int2oct, ints2octs, null, str2octs
@@ -121,10 +120,7 @@ class BitStringEncoder(AbstractItemEncoder):
 class OctetStringEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         if not maxChunkSize or len(value) <= maxChunkSize:
-            if sys.version_info[0] <= 2:
-                return str(value), 0
-            else:
-                return bytes(value), 0
+            return value.asOctets(), 0
         else:
             pos = 0; substrate = null
             while 1:
@@ -268,10 +264,7 @@ class ChoiceEncoder(AbstractItemEncoder):
 
 class AnyEncoder(OctetStringEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
-        if sys.version_info[0] <= 2:
-            return str(value), defMode == 0
-        else:
-            return bytes(value), defMode == 0
+        return value.asOctets(), defMode == 0
 
 tagMap = {
     eoo.endOfOctets.tagSet: EndOfOctetsEncoder(),

@@ -293,7 +293,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
             if isinstance(value, bytes):
                 return value
             elif isinstance(value, OctetString):
-                return value.asOcts()
+                return value.asOctets()
             elif isinstance(value, (tuple, list, map)):
                 try:
                     return bytes(value)
@@ -343,16 +343,16 @@ class OctetString(base.AbstractSimpleAsn1Item):
         return octets.ints2octs(r)
 
     def prettyOut(self, value):
-        if [ x for x in self.asInts() if x < 32 or x > 126 ]:
-            return '\'0x' + ''.join([ '%x' % x for x in self.asInts() ]) + '\''
+        if [ x for x in self.asNumbers() if x < 32 or x > 126 ]:
+            return '\'0x' + ''.join([ '%x' % x for x in self.asNumbers() ]) + '\''
         else:
             return repr(value)
 
     def __repr__(self):
         if self._value is base.noValue:
             return self.__class__.__name__ + '()'
-        if [ x for x in self.asInts() if x < 32 or x > 126 ]:
-            return self.__class__.__name__ + '(hexValue=\'' + ''.join([ '%x' % x for x in self.asInts() ])+'\')'
+        if [ x for x in self.asNumbers() if x < 32 or x > 126 ]:
+            return self.__class__.__name__ + '(hexValue=\'' + ''.join([ '%x' % x for x in self.asNumbers() ])+'\')'
         else:
             return self.__class__.__name__ + '(' + self.prettyOut(self._value) + ')'
                                 
@@ -360,16 +360,16 @@ class OctetString(base.AbstractSimpleAsn1Item):
         def __str__(self): return self._value
         def __unicode__(self):
             return self._value.decode(self._encoding, 'ignore')
-        def asOcts(self): return self._value
-        def asInts(self):
+        def asOctets(self): return self._value
+        def asNumbers(self):
             if self.__intValue is None:
                 self.__intValue = tuple([ ord(x) for x in self._value ])
             return self.__intValue
     else:
         def __str__(self): return self._value.decode(self._encoding, 'ignore')
         def __bytes__(self): return self._value
-        def asOcts(self): return self._value
-        def asInts(self):
+        def asOctets(self): return self._value
+        def asNumbers(self):
             if self.__intValue is None:
                 self.__intValue = tuple(self._value)
             return self.__intValue
