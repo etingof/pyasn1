@@ -344,7 +344,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
     def prettyOut(self, value):
         if [ x for x in self.asNumbers() if x < 32 or x > 126 ]:
-            return '\'0x' + ''.join([ '%x' % x for x in self.asNumbers() ]) + '\''
+            return '0x' + ''.join([ '%x' % x for x in self.asNumbers() ])
         else:
             return repr(value)
 
