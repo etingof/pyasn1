@@ -239,7 +239,7 @@ class RealDecoder(AbstractSimpleDecoder):
             raise error.SubstrateUnderrunError('Short substrate for Real')
         fo = oct2int(substrate[0]); substrate = substrate[1:]
         if fo & 0x40:  # infinite value
-            value = fo & 0x01 and float('-inf') or float('inf')
+            value = fo & 0x01 and '-inf' or 'inf'
         elif fo & 0x80:  # binary enoding
             if fo & 0x11 == 0:
                 n = 1

@@ -479,11 +479,12 @@ class Real(base.AbstractSimpleAsn1Item):
     try:
         _plusInf = float('inf')
         _minusInf = float('-inf')
+        _inf = (_plusInf, _minusInf)
     except ValueError:
-        # Python <2.6 does not reliably support infinity
-        _plusInf = 1e30000
-        _minusInf = -1e30000
-    _inf = (_plusInf, _minusInf)
+        # Infinity support is platform and Python dependent
+        _plusInf = _minusInf = None
+        _inf = ()
+
     tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x09)
         )
@@ -512,7 +513,7 @@ class Real(base.AbstractSimpleAsn1Item):
         elif isinstance(value, intTypes):
             return self.__normalizeBase10((value, 10, 0))
         elif isinstance(value, float):
-            if value in self._inf:
+            if self._inf and value in self._inf:
                 return value
             else:
                 e = 0
@@ -520,17 +521,13 @@ class Real(base.AbstractSimpleAsn1Item):
                     value = value * 10
                     e = e - 1
                 return self.__normalizeBase10((int(value), 10, e))
-        
         elif isinstance(value, Real):
             return tuple(value)
         elif isinstance(value, str):  # handle infinite literal
             try:
-                inf = float(value)
+                return float(value)
             except ValueError:
                 pass
-            else:
-                if inf in self._inf:
-                    return inf
         raise error.PyAsn1Error(
             'Bad real value syntax: %s' % (value,)
             )
