@@ -1,5 +1,5 @@
-Revision 0.0.14
----------------
+Revision 0.1.1
+--------------
 
 - Fixed float() infinity compatibility issue (affects 2.5 and earlier)
 - Fixed a bug/typo at Boolean CER encoder.
