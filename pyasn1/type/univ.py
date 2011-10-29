@@ -346,7 +346,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
         if [ x for x in self.asNumbers() if x < 32 or x > 126 ]:
             return '0x' + ''.join([ '%x' % x for x in self.asNumbers() ])
         else:
-            return repr(value)
+            return str(value)
 
     def __repr__(self):
         if self._value is base.noValue:
