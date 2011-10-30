@@ -261,6 +261,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
     tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x04)
         )
+    defaultBinValue = defaultHexValue = base.noValue
     encoding = 'us-ascii'
     def __init__(self, value=None, tagSet=None, subtypeSpec=None,
                  encoding=None, binValue=None, hexValue=None):
@@ -272,9 +273,30 @@ class OctetString(base.AbstractSimpleAsn1Item):
             value = self.fromBinaryString(binValue)
         if hexValue is not None:
             value = self.fromHexString(hexValue)
+        if value is None or value is base.noValue:
+            value = self.defaultHexValue
+        if value is None or value is base.noValue:
+            value = self.defaultBinValue
         self.__intValue = None
         base.AbstractSimpleAsn1Item.__init__(self, value, tagSet, subtypeSpec)
 
+    def clone(self, value=None, tagSet=None, subtypeSpec=None,
+              encoding=None, binValue=None, hexValue=None):
+        if value is None and tagSet is None and subtypeSpec is None and \
+               encoding is None and binValue is None and hexValue is None:
+            return self
+        if value is None and binValue is None and hexValue is None:
+            value = self._value
+        if tagSet is None:
+            tagSet = self._tagSet
+        if subtypeSpec is None:
+            subtypeSpec = self._subtypeSpec
+        if encoding is None:
+            encoding = self._encoding
+        return self.__class__(
+            value, tagSet, subtypeSpec, encoding, binValue, hexValue
+            )
+   
     if sys.version_info[0] <= 2:
         def prettyIn(self, value):
             if isinstance(value, str):
@@ -343,8 +365,9 @@ class OctetString(base.AbstractSimpleAsn1Item):
         return octets.ints2octs(r)
 
     def prettyOut(self, value):
-        if [ x for x in self.asNumbers() if x < 32 or x > 126 ]:
-            return '0x' + ''.join([ '%x' % x for x in self.asNumbers() ])
+        if isinstance(value, OctetString) and \
+                [ x for x in value.asNumbers() if x < 32 or x > 126 ]:
+            return '0x' + ''.join([ '%x' % x for x in value.asNumbers() ])
         else:
             return str(value)
 

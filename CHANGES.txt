@@ -1,6 +1,8 @@
 Revision 0.1.1
 --------------
 
+- Hex/bin string initializer to OctetString object reworked
+  (in a backward-incompatible manner)
 - Fixed float() infinity compatibility issue (affects 2.5 and earlier)
 - Fixed a bug/typo at Boolean CER encoder.
 - Major overhawl for Python 2.4 -- 3.2 compatibility:
