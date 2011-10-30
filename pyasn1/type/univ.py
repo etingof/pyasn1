@@ -398,6 +398,11 @@ class Null(OctetString):
         )
     subtypeSpec = OctetString.subtypeSpec+constraint.SingleValueConstraint(''.encode())
     
+if sys.version_info[0] <= 2:
+    intTypes = (int, long)
+else:
+    intTypes = int
+
 class ObjectIdentifier(base.AbstractSimpleAsn1Item):
     tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x06)
@@ -454,9 +459,9 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
             value = tuple(value)
 
         for x in value:
-            if x < 0:
+            if not isinstance(x, intTypes) or x < 0:
                 raise error.PyAsn1Error(
-                    'Negative sub-ID in %s at %s' % (value, self.__class__.__name__)
+                    'Invalid sub-ID in %s at %s' % (value, self.__class__.__name__)
                     )
     
         return value
@@ -469,11 +474,6 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
             if r[-1] and r[-1][-1] == 'L':
                 r[-1][-1] = r[-1][:-1]
         return '.'.join(r)
-
-if sys.version_info[0] <= 2:
-    intTypes = (int, long)
-else:
-    intTypes = int
 
 class Real(base.AbstractSimpleAsn1Item):
     try:
