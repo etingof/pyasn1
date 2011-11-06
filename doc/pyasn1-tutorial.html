@@ -1,6 +1,6 @@
 <html>
 <title>
-PyASN1 handbook
+PyASN1 programmer's manual
 </title>
 <head>
 </head>
@@ -9,8 +9,9 @@ PyASN1 handbook
 <table width=60%>
 <tr>
 <td>
+
 <h3>
-PyASN1 handbook
+PyASN1 programmer's manual
 </h3>
 
 <p align=right>
@@ -816,7 +817,8 @@ BMPString(b'abc')
 UTF8String(b'abc')
 >>> utf8String = char.UTF8String('У попа была собака')
 >>> utf8String
-UTF8String(b'\xd0\xa3 \xd0\xbf\xd0\xbe\xd0\xbf\xd0\xb0 \xd0\xb1\xd1\x8b\xd0\xbb\xd0\xb0 \xd1\x81\xd0\xbe\xd0\xb1\xd0\xb0\xd0\xba\xd0\xb0')
+UTF8String(b'\xd0\xa3 \xd0\xbf\xd0\xbe\xd0\xbf\xd0\xb0 \xd0\xb1\xd1\x8b\xd0\xbb\xd0\xb0 \
+\xd1\x81\xd0\xbe\xd0\xb1\xd0\xb0\xd0\xba\xd0\xb0')
 >>> print(utf8String)
 У попа была собака
 >>>
@@ -1976,13 +1978,15 @@ to process a large data item.
 ...   defMode=False,
 ...   maxChunkSize=8
 ... )
-b'$\x80\x04\x08The quic\x04\x08k brown \x04\x08fox jump\x04\x08s over t\x04\x08he lazy \x04\x03dog\x00\x00'
+b'$\x80\x04\x08The quic\x04\x08k brown \x04\x08fox jump\x04\x08s over \
+t\x04\x08he lazy \x04\x03dog\x00\x00'
 >>>
 >>> encoder.encode(
 ...   univ.OctetString('The quick brown fox jumps over the lazy dog'),
 ...   maxChunkSize=8
 ... )
-b'$7\x04\x08The quic\x04\x08k brown \x04\x08fox jump\x04\x08s over t\x04\x08he lazy \x04\x03dog'
+b'$7\x04\x08The quic\x04\x08k brown \x04\x08fox jump\x04\x08s over \
+t\x04\x08he lazy \x04\x03dog'
 </pre>
 </td></tr></table>
 
