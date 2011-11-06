@@ -365,9 +365,12 @@ class OctetString(base.AbstractSimpleAsn1Item):
         return octets.ints2octs(r)
 
     def prettyOut(self, value):
-        if isinstance(value, OctetString) and \
-                [ x for x in value.asNumbers() if x < 32 or x > 126 ]:
-            return '0x' + ''.join([ '%x' % x for x in value.asNumbers() ])
+        if sys.version_info[0] <= 2:
+            numbers = tuple([ ord(x) for x in value ])
+        else:
+            numbers = tuple(value)
+        if [ x for x in numbers if x < 32 or x > 126 ]:
+            return '0x' + ''.join([ '%x' % x for x in numbers ])
         else:
             return str(value)
 
@@ -490,7 +493,6 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
         return value
 
     def prettyOut(self, value):
-        """Tuple of numerics -> dotted string OID converter"""
         r = []
         for subOid in value:
             r.append(str(subOid))
