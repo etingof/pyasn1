@@ -383,7 +383,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
             return self.__class__.__name__ + '(' + self.prettyOut(self._value) + ')'
                                 
     if sys.version_info[0] <= 2:
-        def __str__(self): return self._value
+        def __str__(self): return str(self._value)
         def __unicode__(self):
             return self._value.decode(self._encoding, 'ignore')
         def asOctets(self): return self._value
