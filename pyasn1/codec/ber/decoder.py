@@ -736,7 +736,7 @@ class Decoder:
                 state = stStop
             if state == stErrorCondition:
                 raise error.PyAsn1Error(
-                    '%s not in asn1Spec: %s' % (tagSet, repr(asn1Spec))
+                    '%r not in asn1Spec: %r' % (tagSet, asn1Spec)
                     )
         return value, substrate
             

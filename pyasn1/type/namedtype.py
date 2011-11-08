@@ -9,7 +9,7 @@ class NamedType:
     def __init__(self, name, t):
         self.__name = name; self.__type = t
     def __repr__(self): return '%s(%s, %s)' % (
-        self.__class__.__name__, repr(self.__name), repr(self.__type)
+        self.__class__.__name__, self.__name, self.__type
         )
     def getType(self): return self.__type
     def getName(self): return self.__name
@@ -35,7 +35,7 @@ class NamedTypes:
     def __repr__(self):
         r = '%s(' % self.__class__.__name__
         for n in self.__namedTypes:
-            r = r + '%s, ' % repr(n)
+            r = r + '%r, ' % (n,)
         return r + ')'
     
     def __getitem__(self, idx): return self.__namedTypes[idx]

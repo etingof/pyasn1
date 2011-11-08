@@ -71,7 +71,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         if self._value is noValue:
             return self.__class__.__name__ + '()'
         else:
-            return self.__class__.__name__ + '(' + self.prettyOut(self._value) + ')'
+            return self.__class__.__name__ + '(%s)' % (self.prettyOut(self._value),)
     def __str__(self): return str(self._value)
     def __eq__(self, other):
         return self is other and True or self._value == other
@@ -161,8 +161,8 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         for idx in range(len(self._componentValues)):
             if self._componentValues[idx] is None:
                 continue
-            r = r + '.setComponentByPosition(%s, %s)' % (
-                idx, repr(self._componentValues[idx])
+            r = r + '.setComponentByPosition(%s, %r)' % (
+                idx, self._componentValues[idx]
                 )
         return r
 

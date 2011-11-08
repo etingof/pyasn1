@@ -81,10 +81,7 @@ class Integer(base.AbstractSimpleAsn1Item):
 
     def prettyOut(self, value):
         r = self.__namedValues.getName(value)
-        if r is not None:
-            return '%s(%s)' % (r, value)
-        else:
-            return str(value)
+        return r is None and str(value) or repr(r)
 
     def getNamedValues(self): return self.__namedValues
 
@@ -744,8 +741,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                 )
         t = self._componentType[idx].getType()
         if not t.isSuperTypeOf(value):
-            raise error.PyAsn1Error('Component type error %s vs %s' %
-                                    (repr(t), repr(value)))
+            raise error.PyAsn1Error('Component type error %r vs %r' % (t, value))
 
     def getComponentByName(self, name):
         return self.getComponentByPosition(
@@ -812,7 +808,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             elif not self._componentType[idx].isOptional:
                 if self.getComponentByPosition(idx) is None:
                     raise error.PyAsn1Error(
-                        'Uninitialized component #%s at %s' % (idx, repr(self))
+                        'Uninitialized component #%s at %r' % (idx, self)
                         )
 
     def prettyPrint(self, scope=0):

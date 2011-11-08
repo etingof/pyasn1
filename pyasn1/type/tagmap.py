@@ -21,9 +21,9 @@ class TagMap:
             raise KeyError()
 
     def __repr__(self):
-        s = repr(self.__posMap) + '/' + repr(self.__negMap)
+        s = '%r/%r' % (self.__posMap, self.__negMap)
         if self.__defType is not None:
-            s = s + '/' +  repr(self.__defType)
+            s = s + '/%r' % (self.__defType,)
         return s
 
     def clone(self, parentType, tagMap, uniq=False):

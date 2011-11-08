@@ -3,6 +3,7 @@ Revision 0.1.2
 
 - Fix to OctetString.__str__() workings of a non-initialized object.
 - Fix to quote initializer of OctetString.__repr__()
+- Exlicit repr() calls replaced with '%r'
 
 Revision 0.1.1
 --------------
