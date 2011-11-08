@@ -380,7 +380,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
         if [ x for x in self.asNumbers() if x < 32 or x > 126 ]:
             return self.__class__.__name__ + '(hexValue=\'' + ''.join([ '%x' % x for x in self.asNumbers() ])+'\')'
         else:
-            return self.__class__.__name__ + '(' + self.prettyOut(self._value) + ')'
+            return self.__class__.__name__ + '(\'' + self.prettyOut(self._value) + '\')'
                                 
     if sys.version_info[0] <= 2:
         def __str__(self): return str(self._value)
