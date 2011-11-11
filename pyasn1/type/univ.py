@@ -476,10 +476,14 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
                         (str(value), self.__class__.__name__, sys.exc_info()[1])
                         )
             value = tuple(r)
-
-            pass
         else:
-            value = tuple(value)
+            try:
+                value = tuple(value)
+            except TypeError:
+                raise error.PyAsn1Error(
+                        'Malformed Object ID %s at %s: %s' %
+                        (str(value), self.__class__.__name__,sys.exc_info()[1])
+                        )
 
         for x in value:
             if not isinstance(x, intTypes) or x < 0:
