@@ -1,6 +1,7 @@
 Revision 0.1.2
 --------------
 
+- Fix to __long__() to actually return longs on py2k
 - Fix to OctetString.__str__() workings of a non-initialized object.
 - Fix to quote initializer of OctetString.__repr__()
 - Minor fix towards ObjectIdentifier.prettyIn() reliability
