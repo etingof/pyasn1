@@ -496,14 +496,8 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
     
         return value
 
-    def prettyOut(self, value):
-        r = []
-        for subOid in value:
-            r.append(str(subOid))
-            if r[-1] and r[-1][-1] == 'L':
-                r[-1][-1] = r[-1][:-1]
-        return '.'.join(r)
-
+    def prettyOut(self, value): return '.'.join([ str(x) for x in value ])
+    
 class Real(base.AbstractSimpleAsn1Item):
     try:
         _plusInf = float('inf')
