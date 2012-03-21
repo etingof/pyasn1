@@ -1,3 +1,9 @@
+Revision 0.1.3
+--------------
+
+- Most base types now support initialization from bytes.
+- Include class name into asn1 value constraint violation exception.
+
 Revision 0.1.2
 --------------
 
