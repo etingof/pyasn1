@@ -26,7 +26,11 @@ class Asn1ItemBase(Asn1Item):
             self._subtypeSpec = subtypeSpec
 
     def _verifySubtypeSpec(self, value, idx=None):
-        self._subtypeSpec(value, idx)
+        try:
+            self._subtypeSpec(value, idx)
+        except error.PyAsn1Error:
+            c, i, t = sys.exc_info()
+            raise c('%s at %s' % (i, self.__class__.__name__))
         
     def getSubtypeSpec(self): return self._subtypeSpec
     
