@@ -12,7 +12,7 @@ FEATURES
 
 * Generic implementation of ASN.1 types (X.208)
 * Fully standard compliant BER/CER/DER codecs
-* 100% Python, works with Python 2.4 up to Python 3.2
+* 100% Python, works with Python 2.4 up to Python 3.3 (alpha 2)
 * MT-safe
 
 MISFEATURES
