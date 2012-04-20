@@ -2,6 +2,8 @@ Revision 0.1.3
 --------------
 
 - Include class name into asn1 value constraint violation exception.
+- Fix to OctetString.prettyOut() method that looses leading zero when
+  building hex string.
 
 Revision 0.1.2
 --------------

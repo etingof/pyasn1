@@ -368,7 +368,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
         else:
             numbers = tuple(value)
         if [ x for x in numbers if x < 32 or x > 126 ]:
-            return '0x' + ''.join([ '%x' % x for x in numbers ])
+            return '0x' + ''.join([ '%.2x' % x for x in numbers ])
         else:
             return str(value)
 
@@ -376,7 +376,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
         if self._value is base.noValue:
             return self.__class__.__name__ + '()'
         if [ x for x in self.asNumbers() if x < 32 or x > 126 ]:
-            return self.__class__.__name__ + '(hexValue=\'' + ''.join([ '%x' % x for x in self.asNumbers() ])+'\')'
+            return self.__class__.__name__ + '(hexValue=\'' + ''.join([ '%.2x' % x for x in self.asNumbers() ])+'\')'
         else:
             return self.__class__.__name__ + '(\'' + self.prettyOut(self._value) + '\')'
                                 
