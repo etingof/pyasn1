@@ -92,7 +92,7 @@ class IntegerDecoder(AbstractSimpleDecoder):
                 value = 0
             for octet in substrate:
                 value = value << 8 | oct2int(octet)
-            value = self._valueFilter(value)
+        value = self._valueFilter(value)
         return self._createComponent(asn1Spec, tagSet, value), substrate
 
 class BooleanDecoder(IntegerDecoder):

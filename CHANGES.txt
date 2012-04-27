@@ -1,3 +1,10 @@
+Revision 0.1.4
+--------------
+
+- Fix in Boolean truth testting built-in methods
+- Fix to BER Boolean decoder that allows other pre-computed
+  values besides 0 and 1.
+
 Revision 0.1.3
 --------------
 
