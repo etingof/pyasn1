@@ -71,12 +71,6 @@ class IntegerDecoder(AbstractSimpleDecoder):
         '\xfb': -5
         }
     
-    def _valueFilter(self, value):
-        try:
-            return int(value)
-        except OverflowError:
-            return value
-        
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet, length,
                      state, decodeFun):
         substrate = substrate[:length]
@@ -92,16 +86,12 @@ class IntegerDecoder(AbstractSimpleDecoder):
                 value = 0
             for octet in substrate:
                 value = value << 8 | oct2int(octet)
-        value = self._valueFilter(value)
         return self._createComponent(asn1Spec, tagSet, value), substrate
 
 class BooleanDecoder(IntegerDecoder):
     protoComponent = univ.Boolean(0)
-    def _valueFilter(self, value):
-        if value:
-            return 1
-        else:
-            return 0
+    def _createComponent(self, asn1Spec, tagSet, value=None):
+        return IntegerDecoder._createComponent(self, asn1Spec, tagSet, value and 1 or 0)
 
 class BitStringDecoder(AbstractSimpleDecoder):
     protoComponent = univ.BitString(())
