@@ -924,9 +924,9 @@ class Choice(Set):
             return self._componentValues[self._currentIdx] >= other
         return NotImplemented
     if sys.version_info[0] <= 2:
-        def __nonzero__(self, other): return bool(self._componentValues)
+        def __nonzero__(self): return bool(self._componentValues)
     else:
-        def __bool__(self, other): return bool(self._componentValues)
+        def __bool__(self): return bool(self._componentValues)
 
     def __len__(self): return self._currentIdx is not None and 1 or 0
     
