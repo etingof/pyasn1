@@ -211,9 +211,9 @@ class ObjectIdentifierDecoder(AbstractSimpleDecoder):
                     subId = (subId << 7) + (nextSubId & 0x7F)
                     nextSubId = oct2int(substrate[index])
                     index = index + 1
-                if index == substrateLen:
+                if nextSubId >= 128 and index == substrateLen:
                     raise error.SubstrateUnderrunError(
-                        'Short substrate for OID %s' % (oid,)
+                        'Short substrate for sub-OID past %s' % (oid,)
                         )
                 subId = (subId << 7) + nextSubId
                 oid = oid + (subId,)
