@@ -8,11 +8,11 @@ class AbstractDecoder:
     protoComponent = None
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                      length, state, decodeFun):
-        raise error.PyAsn1Error('Decoder not implemented for %s' % tagSet)
+        raise error.PyAsn1Error('Decoder not implemented for %s' % (tagSet,))
 
     def indefLenValueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                      length, state, decodeFun):
-        raise error.PyAsn1Error('Indefinite length mode decoder not implemented for %s' % tagSet)
+        raise error.PyAsn1Error('Indefinite length mode decoder not implemented for %s' % (tagSet,))
 
 class AbstractSimpleDecoder(AbstractDecoder):
     def _createComponent(self, asn1Spec, tagSet, value=None):
@@ -200,20 +200,20 @@ class ObjectIdentifierDecoder(AbstractSimpleDecoder):
         
         while index < substrateLen:
             subId = oct2int(substrate[index])
+            index = index + 1
             if subId < 128:
                 oid = oid + (subId,)
-                index = index + 1
             else:
                 # Construct subid from a number of octets
                 nextSubId = subId
                 subId = 0
                 while nextSubId >= 128 and index < substrateLen:
                     subId = (subId << 7) + (nextSubId & 0x7F)
-                    index = index + 1
                     nextSubId = oct2int(substrate[index])
+                    index = index + 1
                 if index == substrateLen:
                     raise error.SubstrateUnderrunError(
-                        'Short substrate for OID %s' % oid
+                        'Short substrate for OID %s' % (oid,)
                         )
                 subId = (subId << 7) + nextSubId
                 oid = oid + (subId,)
