@@ -152,15 +152,12 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
                 raise error.PyAsn1Error('Short OID %s' % (value,))
 
             # Build the first twos
-            index = 0
-            subid = oid[index] * 40
-            subid = subid + oid[index+1]
-            if subid < 0 or subid > 0xff:
+            if oid[0] > 6 or oid[1] > 39 or oid[0] == 6 and oid[1] > 15:
                 raise error.PyAsn1Error(
-                    'Initial sub-ID overflow %s in OID %s' % (oid[index:], value)
+                    'Initial sub-ID overflow %s in OID %s' % (oid[:2], value)
                     )
-            octets = (subid,)
-            index = index + 2
+            octets = (oid[0] * 40 + oid[1],)
+            index = 2
 
         # Cycle through subids
         for subid in oid[index:]:

@@ -190,34 +190,30 @@ class ObjectIdentifierDecoder(AbstractSimpleDecoder):
         substrate = substrate[:length]        
         if not substrate:
             raise error.PyAsn1Error('Empty substrate')
-        oid = (); index = 0        
-        # Get the first subid
-        subId = oct2int(substrate[index])
-        oid = oid + divmod(subId, 40)
 
-        index = index + 1
+        # Get the first subid
+        subId = oct2int(substrate[0])
+        oid = divmod(subId, 40)
+
+        index = 1
         substrateLen = len(substrate)
-        
         while index < substrateLen:
             subId = oct2int(substrate[index])
             index = index + 1
-            if subId < 128:
-                oid = oid + (subId,)
-            else:
+            if subId > 127:
                 # Construct subid from a number of octets
                 nextSubId = subId
                 subId = 0
-                while nextSubId >= 128 and index < substrateLen:
+                while nextSubId >= 128:
                     subId = (subId << 7) + (nextSubId & 0x7F)
+                    if index >= substrateLen:
+                        raise error.SubstrateUnderrunError(
+                            'Short substrate for sub-OID past %s' % (oid,)
+                            )
                     nextSubId = oct2int(substrate[index])
                     index = index + 1
-                if nextSubId >= 128 and index == substrateLen:
-                    raise error.SubstrateUnderrunError(
-                        'Short substrate for sub-OID past %s' % (oid,)
-                        )
                 subId = (subId << 7) + nextSubId
-                oid = oid + (subId,)
-                index = index + 1
+            oid = oid + (subId,)
         return self._createComponent(asn1Spec, tagSet, oid), substrate[index:]
 
 class RealDecoder(AbstractSimpleDecoder):
