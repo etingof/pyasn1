@@ -149,7 +149,7 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
             index = 5
         else:
             if len(oid) < 2:
-                raise error.PyAsn1Error('Short OID %s' % value)
+                raise error.PyAsn1Error('Short OID %s' % (value,))
 
             # Build the first twos
             index = 0
@@ -326,7 +326,7 @@ class Encoder:
                 if baseTagSet in self.__tagMap:
                     concreteEncoder = self.__tagMap[baseTagSet]
                 else:
-                    raise Error('No encoder for %s' % value)
+                    raise Error('No encoder for %s' % (value,))
         return concreteEncoder.encode(
             self, value, defMode, maxChunkSize
             )
