@@ -2,7 +2,7 @@
 from pyasn1.type import base, tag, univ, char, useful
 from pyasn1.codec.ber import eoo
 from pyasn1.compat.octets import int2oct, ints2octs, null, str2octs
-from pyasn1 import error
+from pyasn1 import debug, error
 
 class Error(Exception): pass
 
@@ -310,6 +310,7 @@ class Encoder:
         self.__typeMap = typeMap
 
     def __call__(self, value, defMode=1, maxChunkSize=0):
+        debug.logger & debug.flagEncoder and debug.logger('encoder called for type %s, value:\n%s' % (value.__class__.__name__, value.prettyPrint()))
         tagSet = value.getTagSet()
         if len(tagSet) > 1:
             concreteEncoder = explicitlyTaggedItemEncoder
@@ -319,13 +320,16 @@ class Encoder:
             elif tagSet in self.__tagMap:
                 concreteEncoder = self.__tagMap[tagSet]
             else:
-                baseTagSet = value.baseTagSet
-                if baseTagSet in self.__tagMap:
-                    concreteEncoder = self.__tagMap[baseTagSet]
+                tagSet = value.baseTagSet
+                if tagSet in self.__tagMap:
+                    concreteEncoder = self.__tagMap[tagSet]
                 else:
                     raise Error('No encoder for %s' % (value,))
-        return concreteEncoder.encode(
+        debug.logger & debug.flagEncoder and debug.logger('using value codec %s chosen by %r' % (concreteEncoder.__class__.__name__, tagSet))
+        substrate = concreteEncoder.encode(
             self, value, defMode, maxChunkSize
             )
+        debug.logger & debug.flagEncoder and debug.logger('built %s octets of substrate: %s\nencoder completed' % (len(substrate), debug.hexdump(substrate)))
+        return substrate
 
 encode = Encoder(tagMap, typeMap)
