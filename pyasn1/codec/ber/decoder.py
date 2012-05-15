@@ -537,7 +537,8 @@ class Decoder:
         
     def __call__(self, substrate, asn1Spec=None, tagSet=None,
                  length=None, state=stDecodeTag, recursiveFlag=1):
-        debug.logger & debug.flagDecoder and debug.logger('decoder called with state %d, working with up to %d octets of substrate: %s' % (state, len(substrate), debug.hexdump(substrate)))
+        if debug.logger & debug.flagDecoder:
+            debug.logger('decoder called at scope %s with state %d, working with up to %d octets of substrate: %s' % (debug.scope, state, len(substrate), debug.hexdump(substrate)))
         fullSubstrate = substrate
         while state != stStop:
             if state == stDecodeTag:
@@ -658,7 +659,9 @@ class Decoder:
                         state = stDecodeValue
                     else:
                         state = stTryAsExplicitTag
-                debug.logger and debug.logger & debug.flagDecoder and debug.logger('codec %s chosen by a built-in type, decoding %s' % (concreteDecoder and concreteDecoder.__class__.__name__ or "<none>", state == stDecodeValue and 'value' or 'explicit tag'))
+                if debug.logger and debug.logger & debug.flagDecoder:
+                    debug.logger('codec %s chosen by a built-in type, decoding %s' % (concreteDecoder and concreteDecoder.__class__.__name__ or "<none>", state == stDecodeValue and 'value' or 'as explicit tag'))
+                    debug.scope.push(concreteDecoder is None and '?' or concreteDecoder.protoComponent.__class__.__name__)
             if state == stGetValueDecoderByAsn1Spec:
                 if isinstance(asn1Spec, (dict, tagmap.TagMap)):
                     if tagSet in asn1Spec:
@@ -669,9 +672,10 @@ class Decoder:
                         debug.logger('candidate ASN.1 spec is a map of:')
                         for t, v in asn1Spec.getPosMap().items():
                             debug.logger('  %r -> %s' % (t, v.__class__.__name__))
-                        debug.logger('but neither of: ')
-                        for i in asn1Spec.getNegMap().items():
-                            debug.logger('  %r -> %s' % (t, v.__class__.__name__))
+                        if asn1Spec.getNegMap():
+                            debug.logger('but neither of: ')
+                            for i in asn1Spec.getNegMap().items():
+                                debug.logger('  %r -> %s' % (t, v.__class__.__name__))
                         debug.logger('new candidate ASN.1 spec is %s, chosen by %r' % (__chosenSpec is None and '<none>' or __chosenSpec.__class__.__name__, tagSet))
                 else:
                     __chosenSpec = asn1Spec
@@ -704,7 +708,9 @@ class Decoder:
                     state = stDecodeValue
                 else:
                     state = stTryAsExplicitTag
-                debug.logger and debug.logger & debug.flagDecoder and debug.logger('codec %s chosen by ASN.1 spec, decoding %s' % (state == stDecodeValue and concreteDecoder.__class__.__name__ or "<none>", state == stDecodeValue and 'value' or 'explicit tag'))
+                if debug.logger and debug.logger & debug.flagDecoder:
+                    debug.logger('codec %s chosen by ASN.1 spec, decoding %s' % (state == stDecodeValue and concreteDecoder.__class__.__name__ or "<none>", state == stDecodeValue and 'value' or 'as explicit tag'))
+                    debug.scope.push(__chosenSpec is None and '?' or __chosenSpec.__class__.__name__)
             if state == stTryAsExplicitTag:
                 if tagSet and \
                        tagSet[0][1] == tag.tagFormatConstructed and \
@@ -744,7 +750,9 @@ class Decoder:
                 raise error.PyAsn1Error(
                     '%r not in asn1Spec: %r' % (tagSet, asn1Spec)
                     )
-        debug.logger and debug.logger & debug.flagDecoder and debug.logger('decoder call completed')
+        if debug.logger and debug.logger & debug.flagDecoder:
+            debug.scope.pop()
+            debug.logger('decoder left scope %s, call completed' % debug.scope)
         return value, substrate
             
 decode = Decoder(tagMap, typeMap)

@@ -47,3 +47,17 @@ def hexdump(octets):
             [ '%s%.2X' % (n%16 == 0 and ('\n%.5d: ' % n) or '', x) 
               for n,x in zip(range(len(octets)), octs2ints(octets)) ]
         )
+
+class Scope:
+    def __init__(self):
+        self._list = []
+
+    def __str__(self): return '.'.join(self._list)
+
+    def push(self, token):
+        self._list.append(token)
+
+    def pop(self):
+        return self._list.pop()
+
+scope = Scope()
