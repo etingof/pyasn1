@@ -665,8 +665,17 @@ class Decoder:
                         __chosenSpec = asn1Spec[tagSet]
                     else:
                         __chosenSpec = None
+                    if debug.logger and debug.logger & debug.flagDecoder:
+                        debug.logger('candidate ASN.1 spec is a map of:')
+                        for t, v in asn1Spec.getPosMap().items():
+                            debug.logger('  %r -> %s' % (t, v.__class__.__name__))
+                        debug.logger('but neither of: ')
+                        for i in asn1Spec.getNegMap().items():
+                            debug.logger('  %r -> %s' % (t, v.__class__.__name__))
+                        debug.logger('new candidate ASN.1 spec is %s, chosen by %r' % (__chosenSpec is None and '<none>' or __chosenSpec.__class__.__name__, tagSet))
                 else:
                     __chosenSpec = asn1Spec
+                    debug.logger and debug.logger & debug.flagDecoder and debug.logger('candidate ASN.1 spec is %s' % asn1Spec.__class__.__name__)
                 if __chosenSpec is not None and (
                        tagSet == __chosenSpec.getTagSet() or \
                        tagSet in __chosenSpec.getTagMap()
@@ -677,9 +686,11 @@ class Decoder:
                            __chosenSpec.typeId in self.__typeMap:
                         # ambiguous type
                         concreteDecoder = self.__typeMap[__chosenSpec.typeId]
+                        debug.logger and debug.logger & debug.flagDecoder and debug.logger('value decoder chosen for an ambiguous type by type ID %s' % (__chosenSpec.typeId,))
                     elif baseTagSet in self.__tagMap:
                         # base type or tagged subtype
                         concreteDecoder = self.__tagMap[baseTagSet]
+                        debug.logger and debug.logger & debug.flagDecoder and debug.logger('value decoder chosen by base %r' % (baseTagSet,))
                     else:
                         concreteDecoder = None
                     if concreteDecoder:
@@ -689,20 +700,11 @@ class Decoder:
                         state = stTryAsExplicitTag
                 elif tagSet == self.__endOfOctetsTagSet:
                     concreteDecoder = self.__tagMap[tagSet]
+                    debug.logger and debug.logger & debug.flagDecoder and debug.logger('end-of-octets found')
                     state = stDecodeValue
                 else:
                     state = stTryAsExplicitTag
-                if debug.logger and debug.logger & debug.flagDecoder:
-                    if isinstance(asn1Spec, base.Asn1Item):
-                        debug.logger('choosing value codec by ASN.1 spec:\n  %r -> %r' % (asn1Spec.getTagSet(), asn1Spec.__class__.__name__))
-                    else:
-                        debug.logger('choosing value codec by ASN.1 spec that offers either of the following: ')
-                        for t, v in asn1Spec.getPosMap().items():
-                            debug.logger('  %r -> %s' % (t, v.__class__.__name__))
-                        debug.logger('but neither of: ')
-                        for i in asn1Spec.getNegMap().items():
-                            debug.logger('  %r -> %s' % (t, v.__class__.__name__))
-                    debug.logger('codec %s chosen by ASN.1 spec, decoding %s' % (state == stDecodeValue and concreteDecoder.__class__.__name__ or "<none>", state == stDecodeValue and 'value' or 'explicit tag'))
+                debug.logger and debug.logger & debug.flagDecoder and debug.logger('codec %s chosen by ASN.1 spec, decoding %s' % (state == stDecodeValue and concreteDecoder.__class__.__name__ or "<none>", state == stDecodeValue and 'value' or 'explicit tag'))
             if state == stTryAsExplicitTag:
                 if tagSet and \
                        tagSet[0][1] == tag.tagFormatConstructed and \
