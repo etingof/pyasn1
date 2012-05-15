@@ -1,12 +1,13 @@
 Revision 0.1.4
 --------------
 
+- built-in codec debugging facility added
 - Added some more checks to ObjectIdentifier BER encoder catching
-  posible 2^8 overflow condition by two leading sub-OIDs.
+  posible 2^8 overflow condition by two leading sub-OIDs
 - Fix in Boolean truth testting built-in methods
 - Fix to substrate underrun error handling at ObjectIdentifier BER decoder
 - Fix to BER Boolean decoder that allows other pre-computed
-  values besides 0 and 1.
+  values besides 0 and 1
 
 Revision 0.1.3
 --------------
