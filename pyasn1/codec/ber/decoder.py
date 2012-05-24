@@ -704,9 +704,10 @@ class Decoder:
                         state = stTryAsExplicitTag
                 elif tagSet == self.__endOfOctetsTagSet:
                     concreteDecoder = self.__tagMap[tagSet]
-                    debug.logger and debug.logger & debug.flagDecoder and debug.logger('end-of-octets found')
                     state = stDecodeValue
+                    debug.logger and debug.logger & debug.flagDecoder and debug.logger('end-of-octets found')
                 else:
+                    concreteDecoder = None
                     state = stTryAsExplicitTag
                 if debug.logger and debug.logger & debug.flagDecoder:
                     debug.logger('codec %s chosen by ASN.1 spec, decoding %s' % (state == stDecodeValue and concreteDecoder.__class__.__name__ or "<none>", state == stDecodeValue and 'value' or 'as explicit tag'))
@@ -719,6 +720,7 @@ class Decoder:
                     concreteDecoder = explicitTagDecoder
                     state = stDecodeValue
                 else:                    
+                    concreteDecoder = None
                     state = self.defaultErrorState
                 debug.logger and debug.logger & debug.flagDecoder and debug.logger('codec %s chosen, decoding %s' % (concreteDecoder and concreteDecoder.__class__.__name__ or "<none>", state == stDecodeValue and 'value' or 'as failure'))
             if state == stDumpRawValue:
