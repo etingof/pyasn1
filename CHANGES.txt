@@ -8,6 +8,8 @@ Revision 0.1.4
 - Fix to substrate underrun error handling at ObjectIdentifier BER decoder
 - Fix to BER Boolean decoder that allows other pre-computed
   values besides 0 and 1
+- Fix to leading 0x80 octet handling in CER/DER ObjectIdentifier decoder.
+  See http://www.cosic.esat.kuleuven.be/publications/article-1432.pdf
 
 Revision 0.1.3
 --------------
