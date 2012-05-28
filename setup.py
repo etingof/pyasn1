@@ -25,7 +25,7 @@ except ImportError:
 
 params.update( {
     'name': 'pyasn1',
-    'version': '0.1.4',
+    'version': '0.1.4rc0',
     'description': 'ASN.1 types and codecs',
     'author': 'Ilya Etingof',
     'author_email': 'ilya@glas.net',

@@ -1,7 +1,7 @@
 # BER decoder
 from pyasn1.type import tag, base, univ, char, useful, tagmap
 from pyasn1.codec.ber import eoo
-from pyasn1.compat.octets import oct2int, octs2ints
+from pyasn1.compat.octets import oct2int, octs2ints, isOctetsType
 from pyasn1 import debug, error
 
 class AbstractDecoder:
@@ -547,6 +547,9 @@ class Decoder:
                     raise error.SubstrateUnderrunError(
                         'Short octet stream on tag decoding'
                         )
+                if not isOctetsType(substrate) and \
+                   not isinstance(substrate, univ.OctetString):
+                    raise error.PyAsn1Error('Bad octet stream type')
                 
                 firstOctet = substrate[0]
                 substrate = substrate[1:]
