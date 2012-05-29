@@ -8,7 +8,7 @@ class BooleanDecoder(decoder.AbstractSimpleDecoder):
     protoComponent = univ.Boolean(0)
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet, length,
                      state, decodeFun):
-        substrate = substrate[:length]
+        substrate, rest = substrate[:length], substrate[length:]
         if not substrate:
             raise error.PyAsn1Error('Empty substrate')
         byte = oct2int(substrate[0])
@@ -18,13 +18,13 @@ class BooleanDecoder(decoder.AbstractSimpleDecoder):
             value = 0
         else:
             raise error.PyAsn1Error('Boolean CER violation: %s' % byte)
-        return self._createComponent(asn1Spec, tagSet, value), substrate[1:]
+        return self._createComponent(asn1Spec, tagSet, value), rest
 
 class ObjectIdentifierDecoder(decoder.AbstractSimpleDecoder):
     protoComponent = univ.ObjectIdentifier(())
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet, length,
                      state, decodeFun):
-        substrate = substrate[:length]        
+        substrate, rest = substrate[:length], substrate[length:]
         if not substrate:
             raise error.PyAsn1Error('Empty substrate')
 
@@ -56,7 +56,7 @@ class ObjectIdentifierDecoder(decoder.AbstractSimpleDecoder):
                     index = index + 1
                 subId = (subId << 7) + nextSubId
             oid = oid + (subId,)
-        return self._createComponent(asn1Spec, tagSet, oid), substrate[index:]
+        return self._createComponent(asn1Spec, tagSet, oid), rest
 
 tagMap = decoder.tagMap.copy()
 tagMap.update({

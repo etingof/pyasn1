@@ -1,9 +1,13 @@
 Revision 0.1.4
 --------------
 
-- built-in codec debugging facility added
+- Built-in codec debugging facility added
 - Added some more checks to ObjectIdentifier BER encoder catching
   posible 2^8 overflow condition by two leading sub-OIDs
+- Implementations overriding the AbstractDecoder.valueDecoder method
+  changed to return the rest of substrate behind the item being processed
+  rather than the unprocessed substrate within the item (which is usually
+  empty).
 - Catch inappropriate substrate type passed to decoder.
 - Fix in Boolean truth testing built-in methods
 - Fix to substrate underrun error handling at ObjectIdentifier BER decoder
