@@ -7,35 +7,35 @@ from pyasn1 import error
 class BooleanDecoder(decoder.AbstractSimpleDecoder):
     protoComponent = univ.Boolean(0)
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet, length,
-                     state, decodeFun):
-        substrate, rest = substrate[:length], substrate[length:]
-        if not substrate:
+                     state, decodeFun, substrateFun):
+        head, tail = substrate[:length], substrate[length:]
+        if not head:
             raise error.PyAsn1Error('Empty substrate')
-        byte = oct2int(substrate[0])
+        byte = oct2int(head[0])
         if byte == 0xff:
             value = 1
         elif byte == 0x00:
             value = 0
         else:
             raise error.PyAsn1Error('Boolean CER violation: %s' % byte)
-        return self._createComponent(asn1Spec, tagSet, value), rest
+        return self._createComponent(asn1Spec, tagSet, value), tail
 
 class ObjectIdentifierDecoder(decoder.AbstractSimpleDecoder):
     protoComponent = univ.ObjectIdentifier(())
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet, length,
-                     state, decodeFun):
-        substrate, rest = substrate[:length], substrate[length:]
-        if not substrate:
+                     state, decodeFun, substrateFun):
+        head, tail = substrate[:length], substrate[length:]
+        if not head:
             raise error.PyAsn1Error('Empty substrate')
 
         # Get the first subid
-        subId = oct2int(substrate[0])
+        subId = oct2int(head[0])
         oid = divmod(subId, 40)
 
         index = 1
-        substrateLen = len(substrate)
+        substrateLen = len(head)
         while index < substrateLen:
-            subId = oct2int(substrate[index])
+            subId = oct2int(head[index])
             index = index + 1
             if subId == 128:
                 # ASN.1 spec forbids leading zeros (0x80) in sub-ID OID
@@ -52,11 +52,11 @@ class ObjectIdentifierDecoder(decoder.AbstractSimpleDecoder):
                         raise error.SubstrateUnderrunError(
                             'Short substrate for sub-OID past %s' % (oid,)
                             )
-                    nextSubId = oct2int(substrate[index])
+                    nextSubId = oct2int(head[index])
                     index = index + 1
                 subId = (subId << 7) + nextSubId
             oid = oid + (subId,)
-        return self._createComponent(asn1Spec, tagSet, oid), rest
+        return self._createComponent(asn1Spec, tagSet, oid), tail
 
 tagMap = decoder.tagMap.copy()
 tagMap.update({
