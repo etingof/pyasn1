@@ -8,6 +8,9 @@ Revision 0.1.4
   changed to return the rest of substrate behind the item being processed
   rather than the unprocessed substrate within the item (which is usually
   empty).
+- Decoder's recursiveFlag feature generalized as a user callback function
+  which is passed an uninitialized object recovered from substrate and
+  its uninterpreted payload.
 - Catch inappropriate substrate type passed to decoder.
 - Fix in Boolean truth testing built-in methods
 - Fix to substrate underrun error handling at ObjectIdentifier BER decoder
