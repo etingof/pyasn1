@@ -12,6 +12,7 @@ Revision 0.1.4
   which is passed an uninitialized object recovered from substrate and
   its uninterpreted payload.
 - Catch inappropriate substrate type passed to decoder.
+- Expose tagMap/typeMap/Decoder objects at DER decoder to uniform API.
 - Fix in Boolean truth testing built-in methods
 - Fix to substrate underrun error handling at ObjectIdentifier BER decoder
 - Fix to BER Boolean decoder that allows other pre-computed
