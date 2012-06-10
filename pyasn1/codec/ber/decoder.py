@@ -213,7 +213,12 @@ class ObjectIdentifierDecoder(AbstractSimpleDecoder):
         while index < substrateLen:
             subId = oct2int(head[index])
             index = index + 1
-            if subId > 127:
+            if subId == 128:
+                # ASN.1 spec forbids leading zeros (0x80) in sub-ID OID
+                # encoding, tolerating it opens a vulnerability.
+                # See http://www.cosic.esat.kuleuven.be/publications/article-1432.pdf page 7
+                raise error.PyAsn1Error('Invalid leading 0x80 in sub-OID')
+            elif subId > 128:
                 # Construct subid from a number of octets
                 nextSubId = subId
                 subId = 0
