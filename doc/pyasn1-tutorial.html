@@ -15,7 +15,7 @@ PyASN1 programmer's manual
 </h3>
 
 <p align=right>
-<i>written by <a href=mailto:ilya@glas.net>Ilya Etingof</a>, 2011</i>
+<i>written by <a href=mailto:ilya@glas.net>Ilya Etingof</a>, 2011-2012</i>
 </p>
 
 <p>
@@ -2367,17 +2367,24 @@ for API details.
 <p>
 Although pyasn1 software is almost a decade old and used in many production
 environments, it still may have bugs and non-implemented pieces. Anyone
-who happens to run into such defect is welcome to complain at
+who happens to run into such defect is welcome to complain to
 <a href=mailto:pyasn1-users@lists.sourceforge.net>pyasn1 mailing list</a>
 or better yet fix the issue and send
 <a href=mailto:ilya@glas.net>me</a> the patch.
 </p>
 
 <p>
-For more practical information on pyasn1 usage please, refer to
-<a href=http://pyasn1.cvs.sourceforge.net/viewvc/pyasn1/pyasn1-modules/>
-pyasn1-modules source code</a> -- this package contains brief implementations
-of many popular ASN.1-based protocols.
+Typically, pyasn1 is used for building arbitrary protocol support into
+various applications. This involves manual translation of ASN.1 data
+structures into their pyasn1 implementations. To save time and effort,
+data structures for some of the popular protocols are pre-programmed
+and kept for further re-use in form of the
+<a href=http://sourceforge.net/projects/pyasn1/files/pyasn1-modules/>
+pyasn1-modules package</a>. For instance, many structures for PKI (X.509,
+PKCS#*, CRMF, OCSP), LDAP and SNMP are present.
+Applications authors are advised to import and use relevant modules 
+from that package whenever needed protocol structures are already 
+there. New protocol modules contributions are welcome.
 </p>
 
 <p>
