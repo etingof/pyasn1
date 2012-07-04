@@ -15,6 +15,9 @@ Revision 0.1.4
 - Expose tagMap/typeMap/Decoder objects at DER decoder to uniform API.
 - Obsolete __init__.MajorVersionId replaced with __init__.__version__
   which is now in-sync with distutils.
+- Package classifiers updated.
+- The __init__.py's made non-empty (rumors are that they may be optimized 
+  out by package managers).
 - Fix in Boolean truth testing built-in methods
 - Fix to substrate underrun error handling at ObjectIdentifier BER decoder
 - Fix to BER Boolean decoder that allows other pre-computed
