@@ -69,13 +69,18 @@ class Integer(base.AbstractSimpleAsn1Item):
 
     def prettyIn(self, value):
         if not isinstance(value, str):
-            return int(value)
+            try:
+                return int(value)
+            except:
+                raise error.PyAsn1Error(
+                    'Can\'t coerce %s into integer: %s' % (value, sys.exc_info()[1])
+                    )
         r = self.__namedValues.getValue(value)
         if r is not None:
             return r
         try:
             return int(value)
-        except ValueError:
+        except:
             raise error.PyAsn1Error(
                 'Can\'t coerce %s into integer: %s' % (value, sys.exc_info()[1])
                 )
