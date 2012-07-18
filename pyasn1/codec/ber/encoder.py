@@ -1,7 +1,7 @@
 # BER encoder
 from pyasn1.type import base, tag, univ, char, useful
 from pyasn1.codec.ber import eoo
-from pyasn1.compat.octets import int2oct, ints2octs, null, str2octs
+from pyasn1.compat.octets import int2oct, oct2int, ints2octs, null, str2octs
 from pyasn1 import debug, error
 
 class Error(Exception): pass
@@ -203,9 +203,11 @@ class RealEncoder(AbstractItemEncoder):
                 m >>= 1
                 e += 1
             eo = null
-            while e:
+            while e not in (0, -1):
                 eo = int2oct(e&0xff) + eo
                 e >>= 8
+            if e == 0 and eo and oct2int(eo[0]) & 0x80:
+                eo = int2oct(0) + eo
             n = len(eo)
             if n > 0xff:
                 raise error.PyAsn1Error('Real exponent overflow')

@@ -245,18 +245,13 @@ class RealDecoder(AbstractSimpleDecoder):
         if fo & 0x40:  # infinite value
             value = fo & 0x01 and '-inf' or 'inf'
         elif fo & 0x80:  # binary enoding
-            if fo & 0x11 == 0:
-                n = 1
-            elif fo & 0x01:
-                n = 2
-            elif fo & 0x02:
-                n = 3
-            else:
+            n = (fo & 0x03) + 1
+            if n == 4:
                 n = oct2int(head[0])
             eo, head = head[:n], head[n:]
             if not eo or not head:
                 raise error.PyAsn1Error('Real exponent screwed')
-            e = 0
+            e = oct2int(eo[0]) & 0x80 and -1 or 0
             while eo:         # exponent
                 e <<= 8
                 e |= oct2int(eo[0])
