@@ -18,6 +18,7 @@ Revision 0.1.4
 - Package classifiers updated.
 - The __init__.py's made non-empty (rumors are that they may be optimized 
   out by package managers).
+- Bail out gracefully whenever Python version is older than 2.4.
 - Fix to Real codec exponent encoding (should be in 2's complement form),
   some more test cases added.
 - Fix in Boolean truth testing built-in methods
