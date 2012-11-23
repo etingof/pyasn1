@@ -1,6 +1,7 @@
 Revision 0.1.5
 --------------
 
+- Fix to encoder to produce empty-payload INTEGER values for zeros
 - Fix to decoder to support empty-payload INTEGER and REAL values
 - Fix to unit test suites imports to be able to run each from
   their current directory

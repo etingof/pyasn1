@@ -78,9 +78,18 @@ class ExplicitlyTaggedItemEncoder(AbstractItemEncoder):
 
 explicitlyTaggedItemEncoder = ExplicitlyTaggedItemEncoder()
 
+class BooleanEncoder(AbstractItemEncoder):
+    supportIndefLenMode = 0
+    _true = ints2octs((1,))
+    _false = ints2octs((0,))
+    def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
+        return value and self._true or self._false, 0
+
 class IntegerEncoder(AbstractItemEncoder):
     supportIndefLenMode = 0
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
+        if value == 0:  # shortcut for zero value
+            return null, 0
         octets = []
         value = int(value) # to save on ops on asn1 type
         while 1:
@@ -267,7 +276,7 @@ class AnyEncoder(OctetStringEncoder):
 
 tagMap = {
     eoo.endOfOctets.tagSet: EndOfOctetsEncoder(),
-    univ.Boolean.tagSet: IntegerEncoder(),
+    univ.Boolean.tagSet: BooleanEncoder(),
     univ.Integer.tagSet: IntegerEncoder(),
     univ.BitString.tagSet: BitStringEncoder(),
     univ.OctetString.tagSet: OctetStringEncoder(),
