@@ -88,7 +88,7 @@ class IntegerDecoder(AbstractSimpleDecoder):
                      state, decodeFun, substrateFun):
         head, tail = substrate[:length], substrate[length:]
         if not head:
-            raise error.PyAsn1Error('Empty substrate')
+            return self._createComponent(asn1Spec, tagSet, 0), tail
         if head in self.precomputedValues:
             value = self.precomputedValues[head]
         else:
