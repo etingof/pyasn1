@@ -240,7 +240,7 @@ class RealDecoder(AbstractSimpleDecoder):
                      length, state, decodeFun, substrateFun):
         head, tail = substrate[:length], substrate[length:]
         if not head:
-            raise error.SubstrateUnderrunError('Short substrate for Real')
+            return self._createComponent(asn1Spec, tagSet, 0.0), tail
         fo = oct2int(head[0]); head = head[1:]
         if fo & 0x40:  # infinite value
             value = fo & 0x01 and '-inf' or 'inf'

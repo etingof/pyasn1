@@ -1,3 +1,8 @@
+Revision 0.1.5
+--------------
+
+- Fix to decoder to support empty-payload REAL values
+
 Revision 0.1.4
 --------------
 
