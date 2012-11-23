@@ -2,6 +2,8 @@ Revision 0.1.5
 --------------
 
 - Fix to decoder to support empty-payload REAL values
+- Fix to unit test suites imports to be able to run each from
+  their current directory
 
 Revision 0.1.4
 --------------

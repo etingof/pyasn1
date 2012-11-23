@@ -1,4 +1,6 @@
-import tag, constraint, namedtype, univ
+import ber.suite
+import cer.suite
+import der.suite
 from pyasn1.error import PyAsn1Error
 try:
     import unittest
@@ -8,9 +10,12 @@ except ImportError:
         )
 
 suite = unittest.TestSuite()
-loader = unittest.TestLoader()
-for m in (tag, constraint, namedtype, univ):
-    suite.addTest(loader.loadTestsFromModule(m))
+for m in (
+    ber.suite,
+    cer.suite,
+    der.suite
+    ):
+    suite.addTest(getattr(m, 'suite'))
 
 def runTests(): unittest.TextTestRunner(verbosity=2).run(suite)
 
