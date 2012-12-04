@@ -3,6 +3,8 @@ Revision 0.1.5
 
 - Documentation updated and split into chapters to better match
   web-site contents.
+- Make prettyPrint() working for non-initialized pyasn1 data objects. It
+  used to throw an exception.
 - Fix to encoder to produce empty-payload INTEGER values for zeros
 - Fix to decoder to support empty-payload INTEGER and REAL values
 - Fix to unit test suites imports to be able to run each from
