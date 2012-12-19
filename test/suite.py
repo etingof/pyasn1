@@ -1,4 +1,8 @@
+from sys import path
+from os.path import sep
+path.insert(1, path[0]+sep+'type')
 import type.suite
+path.insert(1, path[0]+sep+'codec')
 import codec.suite
 from pyasn1.error import PyAsn1Error
 try:
