@@ -1,6 +1,7 @@
 import sys
 from pyasn1.compat.octets import octs2ints
 from pyasn1 import error
+from pyasn1 import __version__
 
 flagNone     = 0x0000
 flagEncoder  = 0x0001
@@ -18,11 +19,12 @@ class Debug:
     def __init__(self, *flags):
         self._flags = flagNone
         self._printer = self.defaultPrinter
+        self('running pyasn1 version %s' % __version__)
         for f in flags:
             if f not in flagMap:
                 raise error.PyAsn1Error('bad debug flag %s' % (f,))
             self._flags = self._flags | flagMap[f]
-            self('debug category %s enabled' % f)
+            self('debug category \'%s\' enabled' % f)
         
     def __str__(self):
         return 'logger %s, flags %x' % (self._printer, self._flags)
