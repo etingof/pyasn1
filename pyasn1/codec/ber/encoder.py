@@ -87,9 +87,15 @@ class BooleanEncoder(AbstractItemEncoder):
 
 class IntegerEncoder(AbstractItemEncoder):
     supportIndefLenMode = 0
+    supportCompactZero = False
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         if value == 0:  # shortcut for zero value
-            return null, 0
+            if self.supportCompactZero:
+                # this seems to be a correct way for encoding zeros
+                return null, 0
+            else:
+                # this seems to be a widespread way for encoding zeros
+                return ints2octs((0,)), 0
         octets = []
         value = int(value) # to save on ops on asn1 type
         while 1:

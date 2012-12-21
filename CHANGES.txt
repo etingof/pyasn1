@@ -1,6 +1,11 @@
 Revision 0.1.6
 --------------
 
+- The compact (valueless) way of encoding zero INTEGERs introduced in
+  0.1.5 seems to fail miserably as the world is filled with broken
+  BER decoders. So we had to back off the *encoder* for a while.
+  There's still the IntegerEncoder.supportCompactZero flag which
+  enables compact encoding form whenever it evaluates to True.
 - Report package version on debugging code initialization.
 
 Revision 0.1.5
