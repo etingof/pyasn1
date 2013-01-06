@@ -4,6 +4,8 @@
    A pure-Python implementation of ASN.1 types and DER/BER/CER codecs (X.208).
 """
 
+import os
+
 classifiers = """\
 Development Status :: 5 - Production/Stable
 Environment :: Console
@@ -68,7 +70,7 @@ doclines = [ x.strip() for x in __doc__.split('\n') if x ]
 
 params.update( {
     'name': 'pyasn1',
-    'version': open('pyasn1/__init__.py').read().split('\'')[1],
+    'version': open(os.path.join('pyasn1','__init__.py')).read().split('\'')[1],
     'description': doclines[0],
     'long_description': ' '.join(doclines[1:]),
     'maintainer': 'Ilya Etingof <ilya@glas.net>',
@@ -85,6 +87,6 @@ params.update( {
                   'pyasn1.codec.ber',
                   'pyasn1.codec.cer',
                   'pyasn1.codec.der' ]
-      } )
+} )
 
 setup(**params)
