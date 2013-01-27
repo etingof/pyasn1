@@ -15,7 +15,10 @@ class AbstractDecoder:
         raise error.PyAsn1Error('Indefinite length mode decoder not implemented for %s' % (tagSet,))
 
 class AbstractSimpleDecoder(AbstractDecoder):
+    tagFormats = (tag.tagFormatSimple,)
     def _createComponent(self, asn1Spec, tagSet, value=None):
+        if tagSet[0][1] not in self.tagFormats:
+            raise error.PyAsn1Error('Invalid tag format %r for %r' % (tagSet[0], self.protoComponent,))
         if asn1Spec is None:
             return self.protoComponent.clone(value, tagSet)
         elif value is None:
@@ -24,7 +27,10 @@ class AbstractSimpleDecoder(AbstractDecoder):
             return asn1Spec.clone(value)
         
 class AbstractConstructedDecoder(AbstractDecoder):
+    tagFormats = (tag.tagFormatConstructed,)
     def _createComponent(self, asn1Spec, tagSet, value=None):
+        if tagSet[0][1] not in self.tagFormats:
+            raise error.PyAsn1Error('Invalid tag format %r for %r' % (tagSet[0], self.protoComponent,))
         if asn1Spec is None:
             return self.protoComponent.clone(tagSet)
         else:
@@ -37,6 +43,7 @@ class EndOfOctetsDecoder(AbstractSimpleDecoder):
 
 class ExplicitTagDecoder(AbstractSimpleDecoder):
     protoComponent = univ.Any('')
+    tagFormats = (tag.tagFormatConstructed,)
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                      length, state, decodeFun, substrateFun):
         if substrateFun:
@@ -108,6 +115,7 @@ class BooleanDecoder(IntegerDecoder):
 
 class BitStringDecoder(AbstractSimpleDecoder):
     protoComponent = univ.BitString(())
+    tagFormats = (tag.tagFormatSimple, tag.tagFormatConstructed)
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet, length,
                      state, decodeFun, substrateFun):
         head, tail = substrate[:length], substrate[length:]
@@ -157,6 +165,7 @@ class BitStringDecoder(AbstractSimpleDecoder):
 
 class OctetStringDecoder(AbstractSimpleDecoder):
     protoComponent = univ.OctetString('')
+    tagFormats = (tag.tagFormatSimple, tag.tagFormatConstructed)
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet, length,
                      state, decodeFun, substrateFun):
         head, tail = substrate[:length], substrate[length:]
@@ -396,6 +405,7 @@ class SetOfDecoder(SequenceOfDecoder):
     
 class ChoiceDecoder(AbstractConstructedDecoder):
     protoComponent = univ.Choice()
+    tagFormats = (tag.tagFormatSimple, tag.tagFormatConstructed)
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                      length, state, decodeFun, substrateFun):
         head, tail = substrate[:length], substrate[length:]
@@ -421,6 +431,7 @@ class ChoiceDecoder(AbstractConstructedDecoder):
 
 class AnyDecoder(AbstractSimpleDecoder):
     protoComponent = univ.Any()
+    tagFormats = (tag.tagFormatSimple, tag.tagFormatConstructed)
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                      length, state, decodeFun, substrateFun):
         if asn1Spec is None or \
