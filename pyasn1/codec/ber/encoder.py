@@ -196,6 +196,7 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
         return ints2octs(octets), 0
 
 class RealEncoder(AbstractItemEncoder):
+    supportIndefLenMode = 0
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         if value.isPlusInfinity():
             return int2oct(0x40), 0
