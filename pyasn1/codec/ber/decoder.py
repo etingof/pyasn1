@@ -427,7 +427,26 @@ class ChoiceDecoder(AbstractConstructedDecoder):
         r.setComponentByType(effectiveTagSet, component, 0, asn1Spec is None)
         return r, tail
 
-    indefLenValueDecoder = valueDecoder
+    def indefLenValueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
+                     length, state, decodeFun, substrateFun):
+        r = self._createComponent(asn1Spec, tagSet)
+        if substrateFun:
+            return substrateFun(r, substrate, length)
+        if r.getTagSet() == tagSet: # explicitly tagged Choice
+            component, substrate = decodeFun(substrate, r.getComponentTagMap())
+            eooMarker, substrate = decodeFun(substrate)  # eat up EOO marker
+            if eooMarker != eoo.endOfOctets:
+                raise error.PyAsn1Error('No EOO seen before substrate ends')
+        else:
+            component, substrate= decodeFun(
+                substrate, r.getComponentTagMap(), tagSet, length, state
+            )
+        if isinstance(component, univ.Choice):
+            effectiveTagSet = component.getEffectiveTagSet()
+        else:
+            effectiveTagSet = component.getTagSet()
+        r.setComponentByType(effectiveTagSet, component, 0, asn1Spec is None)
+        return r, substrate
 
 class AnyDecoder(AbstractSimpleDecoder):
     protoComponent = univ.Any()

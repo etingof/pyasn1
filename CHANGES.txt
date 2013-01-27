@@ -5,6 +5,8 @@ Revision 0.1.7
   format for the type (e.g. BOOLEAN is always PRIMITIVE, SET is always 
   CONSTRUCTED and OCTET STRING is either of the two)
 - Fix to REAL type encoder to force primitive encoding form encoding.
+- Fix to CHOICE decoder to handle explicitly tagged, indefinite length
+  mode encoding
 
 Revision 0.1.6
 --------------
