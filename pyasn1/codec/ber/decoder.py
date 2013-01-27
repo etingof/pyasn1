@@ -647,7 +647,7 @@ class Decoder:
                         '%d-octet short' % (length - len(substrate))
                         )
                 state = stGetValueDecoder
-                debug.logger and debug.logger & debug.flagDecoder and debug.logger('value length decoded into %d, payload substrate is: %s' % (length, debug.hexdump(substrate[:length])))
+                debug.logger and debug.logger & debug.flagDecoder and debug.logger('value length decoded into %d, payload substrate is: %s' % (length, debug.hexdump(length == -1 and substrate or substrate[:length])))
             if state == stGetValueDecoder:
                 if asn1Spec is None:
                     state = stGetValueDecoderByTag
