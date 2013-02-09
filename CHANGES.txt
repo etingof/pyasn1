@@ -2,8 +2,8 @@ Revision 0.1.7
 --------------
 
 - Fix to decoder working on indefinite length substrate -- end-of-octets
-  marker is now detected by both tag and value. Otherwise implicitly tagged
-  values may interfere with end-of-octets marker.
+  marker is now detected by both tag and value. Otherwise zero values may
+  interfere with end-of-octets marker.
 - Fix to decoder to fail in cases where tagFormat indicates inappropriate
   format for the type (e.g. BOOLEAN is always PRIMITIVE, SET is always 
   CONSTRUCTED and OCTET STRING is either of the two)
