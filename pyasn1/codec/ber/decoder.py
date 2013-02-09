@@ -64,7 +64,8 @@ class ExplicitTagDecoder(AbstractSimpleDecoder):
                    )
         value, substrate = decodeFun(substrate, asn1Spec, tagSet, length)
         terminator, substrate = decodeFun(substrate)
-        if terminator == eoo.endOfOctets:
+        if eoo.endOfOctets.isSameTypeWith(terminator) and \
+                terminator == eoo.endOfOctets:
             return value, substrate
         else:
             raise error.PyAsn1Error('Missing end-of-octets terminator')
@@ -154,7 +155,8 @@ class BitStringDecoder(AbstractSimpleDecoder):
             return substrateFun(r, substrate, length)
         while substrate:
             component, substrate = decodeFun(substrate)
-            if component == eoo.endOfOctets:
+            if eoo.endOfOctets.isSameTypeWith(component) and \
+                    component == eoo.endOfOctets:
                 break
             r = r + component
         else:
@@ -186,7 +188,8 @@ class OctetStringDecoder(AbstractSimpleDecoder):
             return substrateFun(r, substrate, length)
         while substrate:
             component, substrate = decodeFun(substrate)
-            if component == eoo.endOfOctets:
+            if eoo.endOfOctets.isSameTypeWith(component) and \
+                    component == eoo.endOfOctets:
                 break
             r = r + component
         else:
@@ -336,7 +339,8 @@ class SequenceDecoder(AbstractConstructedDecoder):
         while substrate:
             asn1Spec = self._getComponentTagMap(r, idx)
             component, substrate = decodeFun(substrate, asn1Spec)
-            if component == eoo.endOfOctets:
+            if eoo.endOfOctets.isSameTypeWith(component) and \
+                    component == eoo.endOfOctets:
                 break
             idx = self._getComponentPositionByType(
                 r, component.getEffectiveTagSet(), idx
@@ -377,7 +381,8 @@ class SequenceOfDecoder(AbstractConstructedDecoder):
         idx = 0
         while substrate:
             component, substrate = decodeFun(substrate, asn1Spec)
-            if component == eoo.endOfOctets:
+            if eoo.endOfOctets.isSameTypeWith(component) and \
+                    component == eoo.endOfOctets:
                 break
             r.setComponentByPosition(idx, component, asn1Spec is None)
             idx = idx + 1                
@@ -435,7 +440,8 @@ class ChoiceDecoder(AbstractConstructedDecoder):
         if r.getTagSet() == tagSet: # explicitly tagged Choice
             component, substrate = decodeFun(substrate, r.getComponentTagMap())
             eooMarker, substrate = decodeFun(substrate)  # eat up EOO marker
-            if eooMarker != eoo.endOfOctets:
+            if not eoo.endOfOctets.isSameTypeWith(eooMarker) or \
+                    eooMarker != eoo.endOfOctets:
                 raise error.PyAsn1Error('No EOO seen before substrate ends')
         else:
             component, substrate= decodeFun(
@@ -482,7 +488,8 @@ class AnyDecoder(AbstractSimpleDecoder):
             return substrateFun(r, substrate, length)
         while substrate:
             component, substrate = decodeFun(substrate, asn1Spec)
-            if component == eoo.endOfOctets:
+            if eoo.endOfOctets.isSameTypeWith(component) and \
+                    component == eoo.endOfOctets:
                 break
             r = r + component
         else:
