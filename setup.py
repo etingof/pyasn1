@@ -5,6 +5,7 @@
 """
 
 import os
+import sys
 
 classifiers = """\
 Development Status :: 5 - Production/Stable
@@ -50,12 +51,11 @@ def howto_install_setuptools():
 """)
 
 try:
-    from setuptools import setup
+    from setuptools import setup, Command
     params = {
         'zip_safe': True
-        }    
+    }    
 except ImportError:
-    import sys
     for arg in sys.argv:
         if arg.find('egg') != -1:
             if sys.version_info[0] > 2:
@@ -63,7 +63,7 @@ except ImportError:
             else:
                 howto_install_setuptools()
             sys.exit(1)
-    from distutils.core import setup
+    from distutils.core import setup, Command
     params = {}
 
 doclines = [ x.strip() for x in __doc__.split('\n') if x ]
@@ -88,5 +88,28 @@ params.update( {
                   'pyasn1.codec.cer',
                   'pyasn1.codec.der' ]
 } )
+
+# handle unittest discovery feature
+if sys.version_info[0:2] < (2, 7) or \
+   sys.version_info[0:2] in ( (3, 0), (3, 1) ):
+    try:
+        import unittest2 as unittest
+    except ImportError:
+        unittest = None
+else:
+    import unittest
+
+if unittest:
+    class PyTest(Command):
+        user_options = []
+
+        def initialize_options(self): pass
+        def finalize_options(self): pass
+
+        def run(self):
+            suite = unittest.defaultTestLoader.discover('.')
+            unittest.TextTestRunner(verbosity=2).run(suite)
+
+    params['cmdclass'] = { 'test': PyTest }
 
 setup(**params)

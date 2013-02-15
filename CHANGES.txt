@@ -1,6 +1,7 @@
 Revision 0.1.7
 --------------
 
+- Test suite made discoverable by unittest/unittest2 discovery feature.
 - Fix to decoder working on indefinite length substrate -- end-of-octets
   marker is now detected by both tag and value. Otherwise zero values may
   interfere with end-of-octets marker.
