@@ -1,6 +1,8 @@
 Revision 0.1.7
 --------------
 
+- License updated to vanilla BSD 2-Clause to ease package use
+  (http://opensource.org/licenses/BSD-2-Clause).
 - Test suite made discoverable by unittest/unittest2 discovery feature.
 - Fix to decoder working on indefinite length substrate -- end-of-octets
   marker is now detected by both tag and value. Otherwise zero values may
