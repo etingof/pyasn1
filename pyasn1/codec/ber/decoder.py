@@ -254,9 +254,7 @@ class RealDecoder(AbstractSimpleDecoder):
         if not head:
             return self._createComponent(asn1Spec, tagSet, 0.0), tail
         fo = oct2int(head[0]); head = head[1:]
-        if fo & 0x40:  # infinite value
-            value = fo & 0x01 and '-inf' or 'inf'
-        elif fo & 0x80:  # binary enoding
+        if fo & 0x80:  # binary enoding
             n = (fo & 0x03) + 1
             if n == 4:
                 n = oct2int(head[0])
@@ -276,6 +274,8 @@ class RealDecoder(AbstractSimpleDecoder):
             if fo & 0x40:    # sign bit
                 p = -p
             value = (p, 2, e)
+        elif fo & 0x40:  # infinite value
+            value = fo & 0x01 and '-inf' or 'inf'
         elif fo & 0xc0 == 0:  # character encoding
             try:
                 if fo & 0x3 == 0x1:  # NR1
@@ -292,8 +292,6 @@ class RealDecoder(AbstractSimpleDecoder):
                 raise error.SubstrateUnderrunError(
                     'Bad character Real syntax'
                     )
-        elif fo & 0xc0 == 0x40:  # special real value
-            pass
         else:
             raise error.SubstrateUnderrunError(
                 'Unknown encoding (tag %s)' % fo

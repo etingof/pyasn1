@@ -239,6 +239,12 @@ class RealDecoderTestCase(unittest.TestCase):
             ints2octs((9, 4, 128, 11, 4, 77))
         ) == (univ.Real((1101, 2, 11)), null)
 
+    def testBin3(self):
+        assert decoder.decode(
+            ints2octs((9, 3, 192, 10, 123))
+        ) == (univ.Real((-123, 2, 10)), null)
+
+
     def testPlusInf(self):
         assert decoder.decode(
             ints2octs((9, 1, 64))
