@@ -31,11 +31,10 @@ $ easy_install pyasn1
 
 or
 
-$ tar zxf pyasn1-0.1.3.tar.gz
-$ cd pyasn1-0.1.3
+$ tar zxf pyasn1-0.1.7.tar.gz
+$ cd pyasn1-0.1.7
 $ python setup.py install
-$ cd test
-$ python suite.py   # run unit tests
+$ python setup.py test    # run unit tests (optional)
 
 OPERATION
 ---------
