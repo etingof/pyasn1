@@ -8,7 +8,7 @@ class NamedType:
     isDefaulted = 0
     def __init__(self, name, t):
         self.__name = name; self.__type = t
-    def __repr__(self): return '%s(%s, %s)' % (
+    def __repr__(self): return '%s(%s, %r)' % (
         self.__class__.__name__, self.__name, self.__type
         )
     def getType(self): return self.__type
@@ -33,10 +33,10 @@ class NamedTypes:
         self.__ambigiousTypes = {}
 
     def __repr__(self):
-        r = '%s(' % self.__class__.__name__
-        for n in self.__namedTypes:
-            r = r + '%r, ' % (n,)
-        return r + ')'
+        return '%s(%s)' % (
+            self.__class__.__name__,
+            ', '.join([ repr(x) for x in self.__namedTypes ])
+        )
     
     def __getitem__(self, idx): return self.__namedTypes[idx]
 
@@ -45,7 +45,9 @@ class NamedTypes:
     else:
         def __bool__(self): return bool(self.__namedTypesLen)
     def __len__(self): return self.__namedTypesLen
-    
+   
+    def clone(self): return self.__class__(*self.__namedTypes)
+     
     def getTypeByPosition(self, idx):
         if idx < 0 or idx >= self.__namedTypesLen:
             raise error.PyAsn1Error('Type position out of range')

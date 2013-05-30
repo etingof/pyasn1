@@ -1,3 +1,11 @@
+Revision 0.1.8
+--------------
+
+- Fix to SEQUENCE and SET types to give them their private componentTypes
+  collection (which is a NamedTypes object) so that they won't collide in
+  a MT execution environment.
+- Fix to NamedType.__repr__() to work properly.
+
 Revision 0.1.7
 --------------
 

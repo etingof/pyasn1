@@ -708,13 +708,12 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
     componentType = namedtype.NamedTypes()
     def __init__(self, componentType=None, tagSet=None,
                  subtypeSpec=None, sizeSpec=None):
+        if componentType is None:
+            componentType = self.componentType
         base.AbstractConstructedAsn1Item.__init__(
-            self, componentType, tagSet, subtypeSpec, sizeSpec
-            )
-        if self._componentType is None:
-            self._componentTypeLen = 0
-        else:
-            self._componentTypeLen = len(self._componentType)
+            self, componentType.clone(), tagSet, subtypeSpec, sizeSpec
+        )
+        self._componentTypeLen = len(self._componentType)
 
     def __getitem__(self, idx):
         if isinstance(idx, str):
