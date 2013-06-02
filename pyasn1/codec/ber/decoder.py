@@ -1,7 +1,7 @@
 # BER decoder
-from pyasn1.type import tag, base, univ, char, useful, tagmap
+from pyasn1.type import tag, univ, char, useful, tagmap
 from pyasn1.codec.ber import eoo
-from pyasn1.compat.octets import oct2int, octs2ints, isOctetsType
+from pyasn1.compat.octets import oct2int, isOctetsType
 from pyasn1 import debug, error
 
 class AbstractDecoder:
@@ -11,7 +11,7 @@ class AbstractDecoder:
         raise error.PyAsn1Error('Decoder not implemented for %s' % (tagSet,))
 
     def indefLenValueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
-                     length, state, decodeFun, substrateFun):
+                             length, state, decodeFun, substrateFun):
         raise error.PyAsn1Error('Indefinite length mode decoder not implemented for %s' % (tagSet,))
 
 class AbstractSimpleDecoder(AbstractDecoder):
@@ -641,9 +641,9 @@ class Decoder:
             if state == stDecodeLength:
                 # Decode length
                 if not substrate:
-                     raise error.SubstrateUnderrunError(
-                         'Short octet stream on length decoding'
-                         )
+                    raise error.SubstrateUnderrunError(
+                        'Short octet stream on length decoding'
+                    )
                 firstOctet  = oct2int(substrate[0])
                 if firstOctet == 128:
                     size = 1
@@ -725,7 +725,7 @@ class Decoder:
                             debug.logger('  %r -> %s' % (t, v.__class__.__name__))
                         if asn1Spec.getNegMap():
                             debug.logger('but neither of: ')
-                            for i in asn1Spec.getNegMap().items():
+                            for t, v in asn1Spec.getNegMap().items():
                                 debug.logger('  %r -> %s' % (t, v.__class__.__name__))
                         debug.logger('new candidate ASN.1 spec is %s, chosen by %r' % (__chosenSpec is None and '<none>' or __chosenSpec.__class__.__name__, tagSet))
                 else:

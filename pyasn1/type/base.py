@@ -1,13 +1,13 @@
 # Base classes for ASN.1 types
 import sys
-from pyasn1.type import constraint, tagmap
+from pyasn1.type import constraint, tagmap, tag
 from pyasn1 import error
 
 class Asn1Item: pass
 
 class Asn1ItemBase(Asn1Item):
     # Set of tags for this ASN.1 type
-    tagSet = ()
+    tagSet = tag.TagSet()
     
     # A list of constraint.Constraint instances for checking values
     subtypeSpec = constraint.ConstraintsIntersection()
