@@ -234,8 +234,12 @@ class ObjectIdentifier(unittest.TestCase):
         assert o.isPrefixOf((1,3,6)), 'isPrefixOf() fails'
         assert o.isPrefixOf((1,3,6,1)), 'isPrefixOf() fails'
         assert not o.isPrefixOf((1,3)), 'isPrefixOf() fails'        
-    def testInput(self):
+    def testInput1(self):
         assert univ.ObjectIdentifier('1.3.6')==(1,3,6),'prettyIn() fails'
+    def testInput2(self):
+        assert univ.ObjectIdentifier((1,3,6))==(1,3,6),'prettyIn() fails'
+    def testInput3(self):
+        assert univ.ObjectIdentifier(univ.ObjectIdentifier('1.3') + (6,))==(1,3,6),'prettyIn() fails'
     def testTag(self):
         assert univ.ObjectIdentifier().getTagSet() == tag.TagSet(
             (),
