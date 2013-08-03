@@ -114,6 +114,12 @@ class OctetStringTestCase(unittest.TestCase):
         assert univ.OctetString(hexValue="FA9823C43E43510DE3422") == ints2octs((250, 152, 35, 196, 62, 67, 81, 13, 227, 66, 32)), 'hex init fails'
     def testTuple(self):
         assert univ.OctetString((1,2,3,4,5)) == ints2octs((1,2,3,4,5)), 'tuple init failed'
+    if version_info[0] <= 2:
+        def testUnicode(self):
+            assert univ.OctetString(u'q') == 'q', 'unicode init fails'
+    else:
+        def testUnicode(self):
+            assert univ.OctetString('q') == str2octs('q'), 'unicode init fails'
     def testStr(self):
         assert str(univ.OctetString('q')) == 'q', '__str__() fails'
     def testSeq(self):

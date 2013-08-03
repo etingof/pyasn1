@@ -304,19 +304,33 @@ class OctetString(base.AbstractSimpleAsn1Item):
         def prettyIn(self, value):
             if isinstance(value, str):
                 return value
+            elif isinstance(value, unicode):
+                try:
+                    return value.encode(self._encoding)
+                except UnicodeEncodeError:
+                    raise error.PyAsn1Error(
+                        'Can\'t encode string \'%s\' with \'%s\' codec' % (value, self._encoding)
+                    )
             elif isinstance(value, (tuple, list)):
                 try:
                     return ''.join([ chr(x) for x in value ])
                 except ValueError:
                     raise error.PyAsn1Error(
                         'Bad OctetString initializer \'%s\'' % (value,)
-                        )                
+                    )                
             else:
                 return str(value)
     else:
         def prettyIn(self, value):
             if isinstance(value, bytes):
                 return value
+            elif isinstance(value, str):
+                try:
+                    return value.encode(self._encoding)
+                except UnicodeEncodeError:
+                    raise error.PyAsn1Error(
+                        'Can\'t encode string \'%s\' with \'%s\' codec' % (value, self._encoding)
+                    )
             elif isinstance(value, OctetString):
                 return value.asOctets()
             elif isinstance(value, (tuple, list, map)):
@@ -325,14 +339,14 @@ class OctetString(base.AbstractSimpleAsn1Item):
                 except ValueError:
                     raise error.PyAsn1Error(
                         'Bad OctetString initializer \'%s\'' % (value,)
-                        )
+                    )
             else:
                 try:
                     return str(value).encode(self._encoding)
                 except UnicodeEncodeError:
                     raise error.PyAsn1Error(
                         'Can\'t encode string \'%s\' with \'%s\' codec' % (value, self._encoding)
-                        )
+                    )
                         
 
     def fromBinaryString(self, value):

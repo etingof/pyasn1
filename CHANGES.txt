@@ -1,6 +1,7 @@
 Revision 0.1.8
 --------------
 
+- Unicode initializer support added to OctetString type and derivatives.
 - Fix to SEQUENCE and SET types to give them their private componentTypes
   collection (which is a NamedTypes object) so that they won't collide in
   a MT execution environment.
