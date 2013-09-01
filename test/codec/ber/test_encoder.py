@@ -146,12 +146,12 @@ class RealEncoderTestCase(unittest.TestCase):
     def testBin1(self):
         assert encoder.encode(
             univ.Real((1101, 2, 11))
-            ) == ints2octs((9, 4, 128, 11, 4, 77))
+            ) == ints2octs((9, 9, 3, 50, 54, 54, 50, 52, 69, 43, 48))
 
     def testBin2(self):
         assert encoder.encode(
             univ.Real((1101, 2, -11))
-            ) == ints2octs((9, 4, 128, 245, 4, 77))
+            ) == ints2octs((9, 5, 3, 48, 69, 43, 48))
 
     def testPlusInf(self):
         assert encoder.encode(univ.Real('inf')) == ints2octs((9, 1, 64))
