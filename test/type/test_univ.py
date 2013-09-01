@@ -167,6 +167,7 @@ class Null(unittest.TestCase):
             assert 0, 'constraint fail'
 
 class RealTestCase(unittest.TestCase):
+    def testBinary(self): assert univ.Real((10101010, 2, 3)) == 1360, 'binary initializer fails'
     def testStr(self): assert str(univ.Real(1.0)) == '1.0','str() fails'
     def testRepr(self): assert repr(univ.Real(-4.1)) == 'Real((-41, 10, -1))','repr() fails'
     def testAdd(self): assert univ.Real(-4.1) + 1.4 == -2.7, '__add__() fails'

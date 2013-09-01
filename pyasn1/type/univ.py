@@ -531,6 +531,15 @@ class Real(base.AbstractSimpleAsn1Item):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x09)
         )
 
+    def __normalizeBase2(self, value):
+        m, b, e = value
+        try:
+            return int(str(m), 2) * pow(b, e), 10, 0
+        except ValueError:
+            raise error.PyAsn1Error(
+                'Bad binary initializer: %s' % (value,)
+            )
+
     def __normalizeBase10(self, value):
         m, b, e = value
         while m and m % 10 == 0:
@@ -549,9 +558,9 @@ class Real(base.AbstractSimpleAsn1Item):
                 raise error.PyAsn1Error(
                     'Prohibited base for Real value: %s' % (value[1],)
                     )
-            if value[1] == 10:
-                value = self.__normalizeBase10(value)
-            return value
+            if value[1] == 2:
+                value = self.__normalizeBase2(value)
+            return self.__normalizeBase10(value)
         elif isinstance(value, intTypes):
             return self.__normalizeBase10((value, 10, 0))
         elif isinstance(value, float):
