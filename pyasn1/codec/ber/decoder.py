@@ -521,6 +521,8 @@ class BMPStringDecoder(OctetStringDecoder):
     protoComponent = char.BMPString()
 
 # "useful" types
+class ObjectDescriptorDecoder(OctetStringDecoder):
+    protoComponent = useful.ObjectDescriptor()
 class GeneralizedTimeDecoder(OctetStringDecoder):
     protoComponent = useful.GeneralizedTime()
 class UTCTimeDecoder(OctetStringDecoder):
@@ -552,6 +554,7 @@ tagMap = {
     char.UniversalString.tagSet: UniversalStringDecoder(),
     char.BMPString.tagSet: BMPStringDecoder(),
     # useful types
+    useful.ObjectDescriptor.tagSet: ObjectDescriptorDecoder(),
     useful.GeneralizedTime.tagSet: GeneralizedTimeDecoder(),
     useful.UTCTime.tagSet: UTCTimeDecoder()
     }

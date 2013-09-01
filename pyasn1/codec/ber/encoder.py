@@ -308,6 +308,7 @@ tagMap = {
     char.UniversalString.tagSet: OctetStringEncoder(),
     char.BMPString.tagSet: OctetStringEncoder(),
     # useful types
+    useful.ObjectDescriptor.tagSet: OctetStringEncoder(),
     useful.GeneralizedTime.tagSet: OctetStringEncoder(),
     useful.UTCTime.tagSet: OctetStringEncoder()        
     }
