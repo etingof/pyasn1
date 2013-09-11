@@ -116,7 +116,7 @@ class OctetStringTestCase(unittest.TestCase):
         assert univ.OctetString((1,2,3,4,5)) == ints2octs((1,2,3,4,5)), 'tuple init failed'
     if version_info[0] <= 2:
         def testUnicode(self):
-            assert univ.OctetString(u'q') == 'q', 'unicode init fails'
+            assert univ.OctetString(unicode('q')) == 'q', 'unicode init fails'
     else:
         def testUnicode(self):
             assert univ.OctetString('q') == str2octs('q'), 'unicode init fails'
@@ -167,7 +167,7 @@ class Null(unittest.TestCase):
             assert 0, 'constraint fail'
 
 class RealTestCase(unittest.TestCase):
-    def testBinary(self): assert univ.Real((10101010, 2, 3)) == 1360, 'binary initializer fails'
+    def testFloat4BinEnc(self): assert univ.Real((0.25, 2, 3)) == 2.0, 'float initializer for binary encoding fails'
     def testStr(self): assert str(univ.Real(1.0)) == '1.0','str() fails'
     def testRepr(self): assert repr(univ.Real(-4.1)) == 'Real((-41, 10, -1))','repr() fails'
     def testAdd(self): assert univ.Real(-4.1) + 1.4 == -2.7, '__add__() fails'

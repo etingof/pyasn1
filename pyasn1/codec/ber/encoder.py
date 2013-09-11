@@ -197,6 +197,51 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
 
 class RealEncoder(AbstractItemEncoder):
     supportIndefLenMode = 0
+    binEncBase = 2 # set to None to choose encoding base automatically 
+    def _dropFloatingPoint(self, m, encbase, e):
+        ms, es = 1, 1
+        if m < 0:
+            ms = -1  # mantissa sign
+        if e < 0:
+            es = -1  # exponenta sign 
+        m *= ms 
+        if encbase == 8:
+            m = m*2**(abs(e) % 3 * es)
+            e = abs(e) // 3 * es
+        elif encbase == 16:
+            m = m*2**(abs(e) % 4 * es)
+            e = abs(e) // 4 * es
+
+        while 1:
+            if int(m) != m:
+                m *= encbase
+                e -= 1
+                continue
+            break
+        return ms, int(m), encbase, e
+
+    def _chooseEncBase(self, value):
+        m, b, e = value
+        base = [2, 8, 16]
+        if value.binEncBase in base:
+            return self._dropFloatingPoint(m, value.binEncBase, e)
+        elif self.binEncBase in base:
+            return self._dropFloatingPoint(m, self.binEncBase, e)
+        # auto choosing base 2/8/16 
+        mantissa = [m, m, m]
+        exponenta = [e, e, e]
+        encbase = 2 
+        e = float('inf')
+        for i in range(3):
+            sign, mantissa[i], base[i], exponenta[i] = \
+                self._dropFloatingPoint(mantissa[i], base[i], exponenta[i])
+            if abs(exponenta[i]) < abs(e) or \
+               (abs(exponenta[i]) == abs(e) and mantissa[i] < m):
+                e = exponenta[i]
+                m = int(mantissa[i])
+                encbase = base[i]
+        return sign, m, encbase, e
+
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         if value.isPlusInfinity():
             return int2oct(0x40), 0
@@ -208,22 +253,43 @@ class RealEncoder(AbstractItemEncoder):
         if b == 10:
             return str2octs('\x03%dE%s%d' % (m, e == 0 and '+' or '', e)), 0
         elif b == 2:
-            fo = 0x80                 # binary enoding
-            if m < 0:
-                fo = fo | 0x40  # sign bit
-                m = -m
-            while int(m) != m: # drop floating point
-                m *= 2
-                e -= 1
-            while m & 0x1 == 0: # mantissa normalization
+            fo = 0x80 # binary encoding
+            ms, m, encbase, e = self._chooseEncBase(value)
+            if ms < 0: # mantissa sign
+                fo = fo | 0x40 # sign bit
+            # exponenta & mantissa normalization
+            if encbase == 2:
+                while m & 0x1 == 0:
+                    m >>= 1
+                    e += 1
+            elif encbase == 8:
+                while m & 0x7 == 0:
+                    m >>= 3
+                    e += 1
+                fo |= 0x10
+            else: # encbase = 16
+                while m & 0xf == 0:
+                    m >>= 4
+                    e += 1
+                fo |= 0x20
+            sf = 0 # scale factor
+            while m & 0x1 == 0:
                 m >>= 1
-                e += 1
+                sf += 1
+            if sf > 3:
+                raise error.PyAsn1Error('Scale factor overflow') # bug if raised
+            fo |= sf << 2
             eo = null
-            while e not in (0, -1):
-                eo = int2oct(e&0xff) + eo
-                e >>= 8
-            if e == 0 and eo and oct2int(eo[0]) & 0x80:
-                eo = int2oct(0) + eo
+            if e == 0 or e == -1:
+                eo = int2oct(e&0xff)
+            else: 
+                while e not in (0, -1):
+                    eo = int2oct(e&0xff) + eo
+                    e >>= 8
+                if e == 0 and eo and oct2int(eo[0]) & 0x80:
+                    eo = int2oct(0) + eo
+                if e == -1 and eo and not (oct2int(eo[0]) & 0x80):
+                    eo = int2oct(0xff) + eo
             n = len(eo)
             if n > 0xff:
                 raise error.PyAsn1Error('Real exponent overflow')
@@ -235,7 +301,7 @@ class RealEncoder(AbstractItemEncoder):
                 fo |= 2
             else:
                 fo |= 3
-                eo = int2oct(n//0xff+1) + eo
+                eo = int2oct(n&0xff) + eo
             po = null
             while m:
                 po = int2oct(m&0xff) + po

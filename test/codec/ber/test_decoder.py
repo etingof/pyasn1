@@ -229,21 +229,30 @@ class RealDecoderTestCase(unittest.TestCase):
             ints2octs((9, 7, 3, 49, 50, 51, 69, 49, 49))
         ) == (univ.Real((123, 10, 11)), null)
 
-    def testBin1(self):
-        assert decoder.decode(
-            ints2octs((9, 4, 128, 245, 4, 77))
-        ) == (univ.Real((1101, 2, -11)), null)
+    def testBin1(self): # check base = 2
+        assert decoder.decode( # (0.5, 2, 0) encoded with base = 2
+            ints2octs((9, 3, 128, 255, 1))
+        ) == (univ.Real((1, 2, -1)), null)
 
-    def testBin2(self):
-        assert decoder.decode(
-            ints2octs((9, 4, 128, 11, 4, 77))
-        ) == (univ.Real((1101, 2, 11)), null)
+    def testBin2(self): # check base = 2 and scale factor
+        assert decoder.decode( # (3.25, 2, 0) encoded with base = 8
+            ints2octs((9, 3, 148, 255, 13))
+        ) == (univ.Real((26, 2, -3)), null)
 
-    def testBin3(self):
-        assert decoder.decode(
-            ints2octs((9, 3, 192, 10, 123))
-        ) == (univ.Real((-123, 2, 10)), null)
+    def testBin3(self): # check base = 16
+        assert decoder.decode( # (0.00390625, 2, 0) encoded with base = 16
+            ints2octs((9, 3, 160, 254, 1))
+        ) == (univ.Real((1, 2, -8)), null)
+    
+    def testBin4(self): # check exponenta = 0
+        assert decoder.decode( # (1, 2, 0) encoded with base = 2
+            ints2octs((9, 3, 128, 0, 1))
+        ) == (univ.Real((1, 2, 0)), null)
 
+    def testBin5(self): # case of 2 octs for exponenta and negative exponenta
+        assert decoder.decode( # (3, 2, -1020) encoded with base = 16
+            ints2octs((9, 4, 161, 255, 1, 3))
+        ) == (univ.Real((3, 2, -1020)), null)
 
     def testPlusInf(self):
         assert decoder.decode(

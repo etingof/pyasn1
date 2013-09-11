@@ -23,7 +23,11 @@ class OctetStringEncoder(encoder.OctetStringEncoder):
             self, encodeFun, client, defMode, 1000
             )
 
-# specialized RealEncoder here
+class RealEncoder(encoder.RealEncoder):
+    def _chooseEncBase(self, value):
+        m, b, e = value
+        return self._dropFloatingPoint(m, b, e)
+
 # specialized GeneralStringEncoder here
 # specialized GeneralizedTimeEncoder here
 # specialized UTCTimeEncoder here
@@ -69,6 +73,7 @@ tagMap.update({
     univ.Boolean.tagSet: BooleanEncoder(),
     univ.BitString.tagSet: BitStringEncoder(),
     univ.OctetString.tagSet: OctetStringEncoder(),
+    univ.Real.tagSet: RealEncoder(),
     univ.SetOf().tagSet: SetOfEncoder()  # conflcts with Set
     })
 

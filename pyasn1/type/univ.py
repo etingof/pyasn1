@@ -518,6 +518,7 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
     def prettyOut(self, value): return '.'.join([ str(x) for x in value ])
     
 class Real(base.AbstractSimpleAsn1Item):
+    binEncBase = None # binEncBase = 16 is recommended for large numbers
     try:
         _plusInf = float('inf')
         _minusInf = float('-inf')
@@ -531,15 +532,6 @@ class Real(base.AbstractSimpleAsn1Item):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x09)
         )
 
-    def __normalizeBase2(self, value):
-        m, b, e = value
-        try:
-            return int(str(m), 2) * pow(b, e), 10, 0
-        except ValueError:
-            raise error.PyAsn1Error(
-                'Bad binary initializer: %s' % (value,)
-            )
-
     def __normalizeBase10(self, value):
         m, b, e = value
         while m and m % 10 == 0:
@@ -549,18 +541,21 @@ class Real(base.AbstractSimpleAsn1Item):
 
     def prettyIn(self, value):
         if isinstance(value, tuple) and len(value) == 3:
-            for d in value:
-                if not isinstance(d, intTypes):
-                    raise error.PyAsn1Error(
-                        'Lame Real value syntax: %s' % (value,)
-                        )
+            if not ((isinstance(value[0], intTypes) or \
+                    isinstance(value[0], float)) and \
+                    isinstance(value[1], intTypes) and \
+                    isinstance(value[2], intTypes)):
+                raise error.PyAsn1Error('Lame Real value syntax: %s' % (value,))
+            if isinstance(value[0], float) and \
+               self._inf and value[0] in self._inf:
+                return value[0]
             if value[1] not in (2, 10):
                 raise error.PyAsn1Error(
                     'Prohibited base for Real value: %s' % (value[1],)
                     )
-            if value[1] == 2:
-                value = self.__normalizeBase2(value)
-            return self.__normalizeBase10(value)
+            if value[1] == 10:
+                value = self.__normalizeBase10(value)
+            return value
         elif isinstance(value, intTypes):
             return self.__normalizeBase10((value, 10, 0))
         elif isinstance(value, float):

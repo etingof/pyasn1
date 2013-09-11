@@ -258,6 +258,7 @@ class RealDecoder(AbstractSimpleDecoder):
             n = (fo & 0x03) + 1
             if n == 4:
                 n = oct2int(head[0])
+                head = head[1:]
             eo, head = head[:n], head[n:]
             if not eo or not head:
                 raise error.PyAsn1Error('Real exponent screwed')
@@ -266,6 +267,13 @@ class RealDecoder(AbstractSimpleDecoder):
                 e <<= 8
                 e |= oct2int(eo[0])
                 eo = eo[1:]
+            b = fo >> 4 & 0x03 # base bits
+            if b > 2:
+                raise error.PyAsn1Error('Illegal Real base')
+            if b == 1: # encbase = 8
+                e *= 3
+            elif b == 2: # encbase = 16
+                e *= 4
             p = 0
             while head:  # value
                 p <<= 8
@@ -273,6 +281,8 @@ class RealDecoder(AbstractSimpleDecoder):
                 head = head[1:]
             if fo & 0x40:    # sign bit
                 p = -p
+            sf = fo >> 2 & 0x03  # scale bits
+            p *= 2**sf
             value = (p, 2, e)
         elif fo & 0x40:  # infinite value
             value = fo & 0x01 and '-inf' or 'inf'

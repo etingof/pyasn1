@@ -8,7 +8,10 @@ Revision 0.1.8
 - Missing T61String,ISO646String character types and ObjectDescriptor useful
   type added.
 - Fix to NamedType.__repr__() to work properly.
-- Fix to binary initializer support of Real object.
+- Float typed mantissa initializer to REAL type for base 2 added.
+- Encoding bases 8 and 16 support for REAL type binary encoder added.
+- Fix to REAL type binary decoder to handle different bases and scale factor.
+
 
 Revision 0.1.7
 --------------
