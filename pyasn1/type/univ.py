@@ -444,7 +444,9 @@ class Null(OctetString):
 if sys.version_info[0] <= 2:
     intTypes = (int, long)
 else:
-    intTypes = int
+    intTypes = (int,)
+
+numericTypes = intTypes + (float,)
 
 class ObjectIdentifier(base.AbstractSimpleAsn1Item):
     tagSet = baseTagSet = tag.initTagSet(
@@ -541,11 +543,10 @@ class Real(base.AbstractSimpleAsn1Item):
 
     def prettyIn(self, value):
         if isinstance(value, tuple) and len(value) == 3:
-            if not ((isinstance(value[0], intTypes) or \
-                    isinstance(value[0], float)) and \
-                    isinstance(value[1], intTypes) and \
-                    isinstance(value[2], intTypes)):
-                raise error.PyAsn1Error('Lame Real value syntax: %s' % (value,))
+            if not isinstance(value[0], numericTypes) or \
+                    not isinstance(value[1], intTypes) or \
+                    not isinstance(value[2], intTypes):
+               raise error.PyAsn1Error('Lame Real value syntax: %s' % (value,))
             if isinstance(value[0], float) and \
                self._inf and value[0] in self._inf:
                 return value[0]
