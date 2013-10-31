@@ -187,13 +187,19 @@ class ObjectIdentifierDecoderTestCase(unittest.TestCase):
 
     def testEdges1(self):
         assert decoder.decode(
-            ints2octs((6, 1, 255))
-            ) == ((6,15), null)
+            ints2octs((6, 1, 39))
+            ) == ((0,39), null)
 
     def testEdges2(self):
         assert decoder.decode(
-            ints2octs((6, 1, 239))
-            ) == ((5,39), null)
+            ints2octs((6, 1, 79))
+            ) == ((1,39), null)
+
+    def testEdges3(self):
+        assert decoder.decode(
+            ints2octs((6, 5, 223, 255, 255, 255, 127))
+            ) == ((2,0xffffffff), null)
+
 
     def testEdges3(self):
         assert decoder.decode(

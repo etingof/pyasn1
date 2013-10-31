@@ -132,10 +132,25 @@ class NullEncoderTestCase(unittest.TestCase):
         assert encoder.encode(univ.Null('')) == ints2octs((5, 0))
 
 class ObjectIdentifierEncoderTestCase(unittest.TestCase):
-    def testNull(self):
+    def testOne(self):
         assert encoder.encode(
             univ.ObjectIdentifier((1,3,6,0,0xffffe))
-            ) == ints2octs((6, 6, 43, 6, 0, 191, 255, 126))
+        ) == ints2octs((6, 6, 43, 6, 0, 191, 255, 126))
+
+    def testEdge1(self):
+        assert encoder.encode(
+            univ.ObjectIdentifier((0,39))
+        ) == ints2octs((6,1,39))
+
+    def testEdge2(self):
+        assert encoder.encode(
+            univ.ObjectIdentifier((1,39))
+        ) == ints2octs((6,1,79))
+
+    def testEdge3(self):
+        assert encoder.encode(
+            univ.ObjectIdentifier((2,0xffffffff))
+        ) == ints2octs((6, 5, 223, 255, 255, 255, 127))
 
 class RealEncoderTestCase(unittest.TestCase):
     def testChar(self):

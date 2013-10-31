@@ -216,14 +216,24 @@ class ObjectIdentifierDecoder(AbstractSimpleDecoder):
         if not head:
             raise error.PyAsn1Error('Empty substrate')
 
-        # Get the first subid
-        subId = oct2int(head[0])
-        oid = divmod(subId, 40)
-
+        # Decode the first octet
         index = 1
+        subId = oct2int(head[0])
+        if 0 <= subId <= 39:
+            oid = 0, subId
+        elif 40 <= subId <= 79:
+            oid = 1, subId - 40
+        elif subId >= 80:
+            oid = 2,
+            index = 0
+        else:
+            raise error.PyAsn1Error('Malformed first OID octet: %s' % subId)
+
         substrateLen = len(head)
         while index < substrateLen:
             subId = oct2int(head[index])
+            if index == 0:
+                subId -= 80
             index = index + 1
             if subId == 128:
                 # ASN.1 spec forbids leading zeros (0x80) in sub-ID OID

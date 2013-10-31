@@ -166,13 +166,20 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
             if len(oid) < 2:
                 raise error.PyAsn1Error('Short OID %s' % (value,))
 
+            index = 2
+
             # Build the first twos
-            if oid[0] > 6 or oid[1] > 39 or oid[0] == 6 and oid[1] > 15:
+            if oid[0] == 0 and 0 <= oid[1] <= 39:
+                octets = (oid[1],)
+            elif oid[0] == 1 and 0 <= oid[1] <= 39:
+                octets = (oid[1] + 40,)
+            elif oid[0] == 2:
+                octets = ()
+                index = 1
+            else:
                 raise error.PyAsn1Error(
                     'Initial sub-ID overflow %s in OID %s' % (oid[:2], value)
                     )
-            octets = (oid[0] * 40 + oid[1],)
-            index = 2
 
         # Cycle through subids
         for subid in oid[index:]:
@@ -192,7 +199,10 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
                     subid = subid >> 7 
                 # Add packed Sub-Object ID to resulted Object ID
                 octets += res
-                
+
+        if index == 1:
+            octets = (octets[0]+80,) + octets[1:]
+
         return ints2octs(octets), 0
 
 class RealEncoder(AbstractItemEncoder):
