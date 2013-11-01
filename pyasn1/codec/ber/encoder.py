@@ -175,7 +175,8 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
                 octets = (oid[1] + 40,)
             elif oid[0] == 2:
                 octets = ()
-                index = 1
+                oid = (oid[1] + 80,) + oid[2:]
+                index = 0
             else:
                 raise error.PyAsn1Error(
                     'Initial sub-ID overflow %s in OID %s' % (oid[:2], value)
@@ -186,7 +187,7 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
             if subid > -1 and subid < 128:
                 # Optimize for the common case
                 octets = octets + (subid & 0x7f,)
-            elif subid < 0 or subid > 0xFFFFFFFF:
+            elif subid < 0:
                 raise error.PyAsn1Error(
                     'SubId overflow %s in %s' % (subid, value)
                     )
@@ -199,9 +200,6 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
                     subid = subid >> 7 
                 # Add packed Sub-Object ID to resulted Object ID
                 octets += res
-
-        if index == 1:
-            octets = (octets[0]+80,) + octets[1:]
 
         return ints2octs(octets), 0
 
