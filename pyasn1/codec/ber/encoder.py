@@ -160,8 +160,8 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):    
         oid = value.asTuple()
         if oid[:5] in self.precomputedValues:
-            oid = oid[5:]
             octets = self.precomputedValues[oid[:5]]
+            oid = oid[5:]
         else:
             if len(oid) < 2:
                 raise error.PyAsn1Error('Short OID %s' % (value,))
