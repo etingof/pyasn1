@@ -156,48 +156,46 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
     precomputedValues = {
         (1, 3, 6, 1, 2): (43, 6, 1, 2),        
         (1, 3, 6, 1, 4): (43, 6, 1, 4)
-        }
+    }
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):    
         oid = value.asTuple()
         if oid[:5] in self.precomputedValues:
+            oid = oid[5:]
             octets = self.precomputedValues[oid[:5]]
-            index = 5
         else:
             if len(oid) < 2:
                 raise error.PyAsn1Error('Short OID %s' % (value,))
 
-            index = 2
+            octets = ()
 
             # Build the first twos
             if oid[0] == 0 and 0 <= oid[1] <= 39:
-                octets = (oid[1],)
+                oid = (oid[1],) + oid[2:]
             elif oid[0] == 1 and 0 <= oid[1] <= 39:
-                octets = (oid[1] + 40,)
+                oid = (oid[1] + 40,) + oid[2:]
             elif oid[0] == 2:
-                octets = ()
                 oid = (oid[1] + 80,) + oid[2:]
-                index = 0
             else:
                 raise error.PyAsn1Error(
-                    'Initial sub-ID overflow %s in OID %s' % (oid[:2], value)
+                    'Impossible initial arcs %s at %s' % (oid[:2], value)
                     )
 
-        # Cycle through subids
-        for subid in oid[index:]:
-            if subid > -1 and subid < 128:
+        # Cycle through subIds
+        for subId in oid:
+            if subId > -1 and subId < 128:
                 # Optimize for the common case
-                octets = octets + (subid & 0x7f,)
-            elif subid < 0:
+                octets = octets + (subId & 0x7f,)
+            elif subId < 0:
                 raise error.PyAsn1Error(
-                    'SubId overflow %s in %s' % (subid, value)
-                    )
+                    'Negative OID arc %s at %s' % (subId, value)
+                )
             else:
                 # Pack large Sub-Object IDs
-                res = (subid & 0x7f,)
-                subid = subid >> 7
-                while subid > 0:
-                    res = (0x80 | (subid & 0x7f),) + res
-                    subid = subid >> 7 
+                res = (subId & 0x7f,)
+                subId = subId >> 7
+                while subId > 0:
+                    res = (0x80 | (subId & 0x7f),) + res
+                    subId = subId >> 7 
                 # Add packed Sub-Object ID to resulted Object ID
                 octets += res
 

@@ -179,39 +179,66 @@ class NullDecoderTestCase(unittest.TestCase):
         else:
             assert 0, 'wrong tagFormat worked out'
 
+# Useful analysis of OID encoding issues could be found here:
+# http://www.viathinksoft.de/~daniel-marschall/asn.1/oid_facts.html
 class ObjectIdentifierDecoderTestCase(unittest.TestCase):
-    def testOID(self):
+    def testOne(self):
         assert decoder.decode(
             ints2octs((6, 6, 43, 6, 0, 191, 255, 126))
-            ) == ((1,3,6,0,0xffffe), null)
+        ) == ((1,3,6,0,0xffffe), null)
 
-    def testEdges1(self):
+    def testEdge1(self):
         assert decoder.decode(
             ints2octs((6, 1, 39))
-            ) == ((0,39), null)
+        ) == ((0,39), null)
 
-    def testEdges2(self):
+    def testEdge2(self):
         assert decoder.decode(
             ints2octs((6, 1, 79))
-            ) == ((1,39), null)
+        ) == ((1,39), null)
 
-    def testEdges3(self):
+    def testEdge3(self):
         assert decoder.decode(
-            ints2octs((6, 5, 223, 255, 255, 255, 127))
-            ) == ((2,0xffffffff), null)
+            ints2octs((6, 1, 120))
+        ) == ((2,40), null)
 
-
-    def testEdges3(self):
+    def testEdge4(self):
         assert decoder.decode(
-            ints2octs((6, 7, 43, 6, 143, 255, 255, 255, 127))
-            ) == ((1, 3, 6, 4294967295), null)
+            ints2octs((6,5,0x90,0x80,0x80,0x80,0x4F))
+        ) == ((2,0xffffffff), null)
+
+    def testEdge5(self):
+        assert decoder.decode(
+            ints2octs((6,1,0x7F))
+        ) == ((2,47), null)
+
+    def testEdge6(self):
+        assert decoder.decode(
+            ints2octs((6,2,0x81,0x00))
+        ) == ((2,48), null)
+
+
+    def testEdge7(self):
+        assert decoder.decode(
+            ints2octs((6,3,0x81,0x34,0x03))
+        ) == ((2,100,3), null)
+
+    def testEdge8(self):
+        assert decoder.decode(
+            ints2octs((6,2,133,0))
+        ) == ((2,560), null)
+
+    def testEdge9(self):
+        assert decoder.decode(
+            ints2octs((6,4,0x88,0x84,0x87,0x02))
+        ) == ((2,16843570), null)
 
     def testNonLeading0x80(self):
         assert decoder.decode(
             ints2octs((6, 5, 85, 4, 129, 128, 0)),
-            ) == ((2, 5, 4, 16384), null)
+        ) == ((2, 5, 4, 16384), null)
 
-    def testLeading0x80(self):
+    def testLeading0x80Case1(self):
         try:
             decoder.decode(
                 ints2octs((6, 5, 85, 4, 128, 129, 0))
@@ -219,7 +246,37 @@ class ObjectIdentifierDecoderTestCase(unittest.TestCase):
         except PyAsn1Error:
             pass
         else:
-            assert 1, 'Leading 0x80 tolarated'
+            assert 0, 'Leading 0x80 tolarated'
+
+    def testLeading0x80Case2(self):
+        try:
+            decoder.decode(
+                ints2octs((6,7,1,0x80,0x80,0x80,0x80,0x80,0x7F))
+            )
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'Leading 0x80 tolarated'
+
+    def testLeading0x80Case3(self):
+        try:
+            decoder.decode(
+                ints2octs((6,2,0x80,1))
+            )
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'Leading 0x80 tolarated'
+
+    def testLeading0x80Case4(self):
+        try:
+            decoder.decode(
+                ints2octs((6,2,0x80,0x7F))
+            )
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'Leading 0x80 tolarated'
 
     def testTagFormat(self):
         try:
@@ -228,6 +285,48 @@ class ObjectIdentifierDecoderTestCase(unittest.TestCase):
             pass
         else:
             assert 0, 'wrong tagFormat worked out'
+
+    def testZeroLength(self):
+        try:
+            decoder.decode(ints2octs((6, 0, 0)))
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'zero length tolarated'
+
+    def testIndefiniteLength(self):
+        try:
+            decoder.decode(ints2octs((6, 128, 0)))
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'indefinite length tolarated'
+
+    def testReservedLength(self):
+        try:
+            decoder.decode(ints2octs((6, 255, 0)))
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'reserved length tolarated'
+
+    def testReservedLength(self):
+        try:
+            decoder.decode(ints2octs((6, 255, 0)))
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'reserved length tolarated'
+
+    def testLarge1(self):
+        assert decoder.decode(
+            ints2octs((0x06,0x11,0x83,0xC6,0xDF,0xD4,0xCC,0xB3,0xFF,0xFF,0xFE,0xF0,0xB8,0xD6,0xB8,0xCB,0xE2,0xB7,0x17))
+        ) == ((2,18446744073709551535184467440737095), null)
+
+    def testLarge2(self):
+        assert decoder.decode(
+            ints2octs((0x06,0x13,0x88,0x37,0x83,0xC6,0xDF,0xD4,0xCC,0xB3,0xFF,0xFF,0xFE,0xF0,0xB8,0xD6,0xB8,0xCB,0xE2,0xB6,0x47))
+        ) == ((2,999,18446744073709551535184467440737095), null)
 
 class RealDecoderTestCase(unittest.TestCase):
     def testChar(self):

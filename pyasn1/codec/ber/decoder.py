@@ -216,30 +216,14 @@ class ObjectIdentifierDecoder(AbstractSimpleDecoder):
         if not head:
             raise error.PyAsn1Error('Empty substrate')
 
-        # Decode the first octet
-        index = 1
-        subId = oct2int(head[0])
-        if 0 <= subId <= 39:
-            oid = 0, subId
-        elif 40 <= subId <= 79:
-            oid = 1, subId - 40
-        elif subId >= 80:
-            oid = 2,
-            index = 0
-        else:
-            raise error.PyAsn1Error('Malformed first OID octet: %s' % subId)
-
+        oid = ()
+        index = 0
         substrateLen = len(head)
         while index < substrateLen:
             subId = oct2int(head[index])
-            if index == 0:
-                subId -= 80
-            index = index + 1
-            if subId == 128:
-                # ASN.1 spec forbids leading zeros (0x80) in sub-ID OID
-                # encoding, tolerating it opens a vulnerability.
-                # See http://www.cosic.esat.kuleuven.be/publications/article-1432.pdf page 7
-                raise error.PyAsn1Error('Invalid leading 0x80 in sub-OID')
+            index += 1
+            if subId < 128:
+                oid = oid + (subId,)
             elif subId > 128:
                 # Construct subid from a number of octets
                 nextSubId = subId
@@ -249,11 +233,27 @@ class ObjectIdentifierDecoder(AbstractSimpleDecoder):
                     if index >= substrateLen:
                         raise error.SubstrateUnderrunError(
                             'Short substrate for sub-OID past %s' % (oid,)
-                            )
+                        )
                     nextSubId = oct2int(head[index])
-                    index = index + 1
-                subId = (subId << 7) + nextSubId
-            oid = oid + (subId,)
+                    index += 1
+                oid = oid + ((subId << 7) + nextSubId,)
+            elif subId == 128:
+                # ASN.1 spec forbids leading zeros (0x80) in OID
+                # encoding, tolerating it opens a vulnerability. See
+                # http://www.cosic.esat.kuleuven.be/publications/article-1432.pdf
+                # page 7
+                raise error.PyAsn1Error('Invalid octet 0x80 in OID encoding')
+       
+        # Decode two leading arcs
+        if 0 <= oid[0] <= 39:
+            oid = (0,) + oid
+        elif 40 <= oid[0] <= 79:
+            oid = (1, oid[0]-40) + oid[1:]
+        elif oid[0] >= 80:
+            oid = (2, oid[0]-80) + oid[1:]
+        else:
+            raise error.PyAsn1Error('Malformed first OID octet: %s' % head[0])
+
         return self._createComponent(asn1Spec, tagSet, oid), tail
 
 class RealDecoder(AbstractSimpleDecoder):

@@ -148,40 +148,89 @@ class ObjectIdentifierEncoderTestCase(unittest.TestCase):
         ) == ints2octs((6,1,79))
 
     def testEdge3(self):
+        #01111111
+        assert encoder.encode(
+            univ.ObjectIdentifier((2,40))
+        ) == ints2octs((6,1,120))
+
+    def testEdge4(self):
         #10010000|10000000|10000000|10000000|01001111
         assert encoder.encode(
             univ.ObjectIdentifier((2,0xffffffff))
         ) == ints2octs((6,5,0x90,0x80,0x80,0x80,0x4F))
 
-    def testEdge4(self):
+    def testEdge5(self):
         #01111111
         assert encoder.encode(
             univ.ObjectIdentifier((2,47))
         ) == ints2octs((6,1,0x7F))
 
-    def testEdge5(self):
+    def testEdge6(self):
         #10000001|00000000
         assert encoder.encode(
             univ.ObjectIdentifier((2,48))
         ) == ints2octs((6,2,0x81,0x00))
 
-    def testEdge6(self):
+    def testEdge7(self):
         #10000001|00110100|00000003
         assert encoder.encode(
             univ.ObjectIdentifier((2,100,3))
         ) == ints2octs((6,3,0x81,0x34,0x03))
 
-    def testEdge7(self):
+    def testEdge8(self):
         #10000101|00000000
         assert encoder.encode(
             univ.ObjectIdentifier((2,560))
-        ) == ints2octs((6,2,133,00))
+        ) == ints2octs((6,2,133,0))
 
-    def testEdge8(self):
+    def testEdge9(self):
         #10001000|10000100|10000111|0000010
         assert encoder.encode(
             univ.ObjectIdentifier((2,16843570))
         ) == ints2octs((6,4,0x88,0x84,0x87,0x02))
+
+    def testImpossible1(self):
+        try:
+            encoder.encode(univ.ObjectIdentifier((3,1,2)))
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'impossible leading arc tolerated'
+
+    def testImpossible2(self):
+        try:
+            encoder.encode(univ.ObjectIdentifier((0,)))
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'single arc OID tolerated'
+
+    def testImpossible3(self):
+        try:
+            encoder.encode(univ.ObjectIdentifier((0,40)))
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'second arc overflow tolerated'
+
+    def testImpossible4(self):
+        try:
+            encoder.encode(univ.ObjectIdentifier((1,40)))
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'second arc overflow tolerated'
+
+    def testLarge1(self):
+        assert encoder.encode(
+            univ.ObjectIdentifier((2,18446744073709551535184467440737095))
+        ) == ints2octs((0x06,0x11,0x83,0xC6,0xDF,0xD4,0xCC,0xB3,0xFF,0xFF,0xFE,0xF0,0xB8,0xD6,0xB8,0xCB,0xE2,0xB7,0x17))
+
+    def testLarge2(self):
+        assert encoder.encode(
+            univ.ObjectIdentifier((2,999,18446744073709551535184467440737095))
+        ) == ints2octs((0x06,0x13,0x88,0x37,0x83,0xC6,0xDF,0xD4,0xCC,0xB3,0xFF,0xFF,0xFE,0xF0,0xB8,0xD6,0xB8,0xCB,0xE2,0xB6,0x47))
+            
 
 class RealEncoderTestCase(unittest.TestCase):
     def testChar(self):
