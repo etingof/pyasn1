@@ -559,7 +559,14 @@ class Real(base.AbstractSimpleAsn1Item):
             return value
         elif isinstance(value, intTypes):
             return self.__normalizeBase10((value, 10, 0))
-        elif isinstance(value, float):
+        elif isinstance(value, (str, float)):
+            if isinstance(value, str):
+                try:
+                    value = float(value)
+                except ValueError:
+                    raise error.PyAsn1Error(
+                        'Bad real value syntax: %s' % (value,)
+                    )
             if self._inf and value in self._inf:
                 return value
             else:
@@ -570,11 +577,6 @@ class Real(base.AbstractSimpleAsn1Item):
                 return self.__normalizeBase10((int(value), 10, e))
         elif isinstance(value, Real):
             return tuple(value)
-        elif isinstance(value, str):  # handle infinite literal
-            try:
-                return float(value)
-            except ValueError:
-                pass
         raise error.PyAsn1Error(
             'Bad real value syntax: %s' % (value,)
             )
