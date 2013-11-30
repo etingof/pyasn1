@@ -22,6 +22,10 @@ class NamedValues:
             self.valToNameIdx[val] = name
             self.namedValues = self.namedValues + ((name, val),)
             automaticVal = automaticVal + 1
+
+    def __repr__(self):
+        return '%s(%s)' % (self.__class__.__name__, ', '.join([repr(x) for x in self.namedValues]))
+
     def __str__(self): return str(self.namedValues)
     
     def getName(self, value):
