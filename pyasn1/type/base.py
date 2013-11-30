@@ -47,13 +47,14 @@ class Asn1ItemBase(Asn1Item):
         return self._tagSet.isSuperTagSetOf(other.getTagSet()) and \
                self._subtypeSpec.isSuperTypeOf(other.getSubtypeSpec())
 
-class __NoValue:
+class NoValue:
     def __getattr__(self, attr):
         raise error.PyAsn1Error('No value for %s()' % attr)
     def __getitem__(self, i):
         raise error.PyAsn1Error('No value')
+    def __repr__(self): return '%s()' % self.__class__.__name__
     
-noValue = __NoValue()
+noValue = NoValue()
 
 # Base class for "simple" ASN.1 objects. These are immutable.
 class AbstractSimpleAsn1Item(Asn1ItemBase):    
@@ -72,10 +73,15 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         self._len = None
         
     def __repr__(self):
-        if self._value is noValue:
-            return self.__class__.__name__ + '()'
-        else:
-            return self.__class__.__name__ + '(%s)' % (self.prettyOut(self._value),)
+        r = []
+        if self._value is not self.defaultValue:
+            r.append(self.prettyOut(self._value))
+        if self._tagSet is not self.tagSet:
+            r.append('tagSet=%r' % (self._tagSet,))
+        if self._subtypeSpec is not self.subtypeSpec:
+            r.append('subtypeSpec=%r' % (self._subtypeSpec,))
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(r))
+
     def __str__(self): return str(self._value)
     def __eq__(self, other):
         return self is other and True or self._value == other

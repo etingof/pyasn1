@@ -10,7 +10,12 @@ Revision 0.1.8
 - Missing T61String,ISO646String character types and ObjectDescriptor useful
   type added.
 - Distribute is gone, switched to setuptools completely.
+- Missing NamedValues.__repr__() added.
+- The base.NoValue() class, that indicates uninitialized ASN.1 object,
+  made public.
 - Fix to NamedType.__repr__() to work properly.
+- Fixes to __repr__() implementation of many Scalar types to take into
+  account all of their initializers such as tagSet, subtypeSpec etc.
 - String typed float initializer to REAL type now supported.
 - Float typed mantissa initializer to REAL type for base 2 added.
 - Encoding bases 8 and 16 support for REAL type binary encoder added.

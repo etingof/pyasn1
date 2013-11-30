@@ -22,6 +22,12 @@ class Integer(base.AbstractSimpleAsn1Item):
             self, value, tagSet, subtypeSpec
             )
 
+    def __repr__(self):
+        if self.__namedValues is not self.namedValues:
+            return '%s, %r)' % (base.AbstractSimpleAsn1Item.__repr__(self)[:-1], self.__namedValues)
+        else:
+            return base.AbstractSimpleAsn1Item.__repr__(self)
+
     def __and__(self, value): return self.clone(self._value & value)
     def __rand__(self, value): return self.clone(value & self._value)
     def __or__(self, value): return self.clone(self._value | value)
@@ -392,12 +398,24 @@ class OctetString(base.AbstractSimpleAsn1Item):
             return str(value)
 
     def __repr__(self):
-        if self._value is base.noValue:
-            return self.__class__.__name__ + '()'
-        if [ x for x in self.asNumbers() if x < 32 or x > 126 ]:
-            return self.__class__.__name__ + '(hexValue=\'' + ''.join([ '%.2x' % x for x in self.asNumbers() ])+'\')'
-        else:
-            return self.__class__.__name__ + '(\'' + self.prettyOut(self._value) + '\')'
+        r = []
+        doHex = False
+        if self._value is not self.defaultValue:
+            for x in self.asNumbers():
+                if x < 32 or x > 126:
+                    doHex = True
+                    break
+            if not doHex:
+                r.append('%r' % (self._value,))
+        if self._tagSet is not self.tagSet:
+            r.append('tagSet=%r' % (self._tagSet,))
+        if self._subtypeSpec is not self.subtypeSpec:
+            r.append('subtypeSpec=%r' % (self._subtypeSpec,))
+        if self.encoding is not self._encoding:
+            r.append('encoding=%r' % (self._encoding,))
+        if doHex:
+            r.append('hexValue=%r' % ''.join([ '%.2x' % x for x in self.asNumbers() ]))
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(r))
                                 
     if sys.version_info[0] <= 2:
         def __str__(self): return str(self._value)
