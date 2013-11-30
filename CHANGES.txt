@@ -13,6 +13,8 @@ Revision 0.1.8
 - Missing NamedValues.__repr__() added.
 - The base.NoValue() class, that indicates uninitialized ASN.1 object,
   made public.
+- The base.NoValue() class instances now support __repr__() what makes
+  possible to perform repr() on uninitialized pyasn1 types objects.
 - Fix to NamedType.__repr__() to work properly.
 - Fixes to __repr__() implementation of many Scalar types to take into
   account all of their initializers such as tagSet, subtypeSpec etc.
