@@ -172,13 +172,20 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         self._componentValuesSet = 0
 
     def __repr__(self):
-        r = self.__class__.__name__ + '()'
+        r = []
+        if self._componentType is not self.componentType:
+            r.append('componentType=%r' % (self._componentType,))
+        if self._tagSet is not self.tagSet:
+            r.append('tagSet=%r' % (self._tagSet,))
+        if self._subtypeSpec is not self.subtypeSpec:
+            r.append('subtypeSpec=%r' % (self._subtypeSpec,))
+        r = '%s(%s)' % (self.__class__.__name__, ', '.join(r))
         for idx in range(len(self._componentValues)):
             if self._componentValues[idx] is None:
                 continue
             r = r + '.setComponentByPosition(%s, %r)' % (
                 idx, self._componentValues[idx]
-                )
+            )
         return r
 
     def __eq__(self, other):

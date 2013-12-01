@@ -16,7 +16,7 @@ Revision 0.1.8
 - The base.NoValue() class instances now support __repr__() what makes
   possible to perform repr() on uninitialized pyasn1 types objects.
 - Fix to NamedType.__repr__() to work properly.
-- Fixes to __repr__() implementation of many Scalar types to take into
+- Fixes to __repr__() implementation of many built-in ASN.1 types to take into
   account all of their initializers such as tagSet, subtypeSpec etc.
 - String typed float initializer to REAL type now supported.
 - Float typed mantissa initializer to REAL type for base 2 added.
