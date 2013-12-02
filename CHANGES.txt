@@ -15,6 +15,9 @@ Revision 0.1.8
   made public.
 - The base.NoValue() class instances now support __repr__() what makes
   possible to perform repr() on uninitialized pyasn1 types objects.
+- When comparing ASN.1 types, by-tag and/or by-constraints matching
+  can now be performed with the isSuperTypeOf()/isSameTypeWith() optional
+  flags.
 - Fix to NamedType.__repr__() to work properly.
 - Fixes to __repr__() implementation of many built-in ASN.1 types to take into
   account all of their initializers such as tagSet, subtypeSpec etc.

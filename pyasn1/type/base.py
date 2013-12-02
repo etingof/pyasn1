@@ -38,14 +38,19 @@ class Asn1ItemBase(Asn1Item):
     def getEffectiveTagSet(self): return self._tagSet  # used by untagged types
     def getTagMap(self): return tagmap.TagMap({self._tagSet: self})
     
-    def isSameTypeWith(self, other):
+    def isSameTypeWith(self, other, ignoreTags=False, ignoreConstraints=False):
         return self is other or \
-               self._tagSet == other.getTagSet() and \
-               self._subtypeSpec == other.getSubtypeSpec()
-    def isSuperTypeOf(self, other):
+               (ignoreTags or \
+                self._tagSet == other.getTagSet()) and \
+               (ignoreConstraints or \
+                self._subtypeSpec==other.getSubtypeSpec())
+
+    def isSuperTypeOf(self, other, ignoreTags=False, ignoreConstraints=False):
         """Returns true if argument is a ASN1 subtype of ourselves"""
-        return self._tagSet.isSuperTagSetOf(other.getTagSet()) and \
-               self._subtypeSpec.isSuperTypeOf(other.getSubtypeSpec())
+        return (ignoreTags or  \
+                self._tagSet.isSuperTagSetOf(other.getTagSet())) and \
+               (ignoreConstraints or \
+                (self._subtypeSpec.isSuperTypeOf(other.getSubtypeSpec())))
 
 class NoValue:
     def __getattr__(self, attr):
