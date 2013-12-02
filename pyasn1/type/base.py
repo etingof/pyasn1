@@ -38,18 +38,18 @@ class Asn1ItemBase(Asn1Item):
     def getEffectiveTagSet(self): return self._tagSet  # used by untagged types
     def getTagMap(self): return tagmap.TagMap({self._tagSet: self})
     
-    def isSameTypeWith(self, other, ignoreTags=False, ignoreConstraints=False):
+    def isSameTypeWith(self, other, matchTags=True, matchConstraints=True):
         return self is other or \
-               (ignoreTags or \
+               (not matchTags or \
                 self._tagSet == other.getTagSet()) and \
-               (ignoreConstraints or \
+               (not matchConstraints or \
                 self._subtypeSpec==other.getSubtypeSpec())
 
-    def isSuperTypeOf(self, other, ignoreTags=False, ignoreConstraints=False):
+    def isSuperTypeOf(self, other, matchTags=True, matchConstraints=True):
         """Returns true if argument is a ASN1 subtype of ourselves"""
-        return (ignoreTags or  \
+        return (not matchTags or  \
                 self._tagSet.isSuperTagSetOf(other.getTagSet())) and \
-               (ignoreConstraints or \
+               (not matchConstraints or \
                 (self._subtypeSpec.isSuperTypeOf(other.getSubtypeSpec())))
 
 class NoValue:
@@ -244,13 +244,19 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
             self._cloneComponentValues(r, cloneValueFlag)
         return r
 
-    def _verifyComponent(self, idx, value): pass
+    def _verifyComponent(self, idx, value, exactTypes=False,
+                         matchTags=True, matchConstraints=True):
+        pass
 
     def verifySizeSpec(self): self._sizeSpec(self)
 
     def getComponentByPosition(self, idx):
         raise error.PyAsn1Error('Method not implemented')
-    def setComponentByPosition(self, idx, value, verifyConstraints=True):
+    def setComponentByPosition(self, idx, value,
+                               verifyConstraints=True,
+                               exactTypes=False,
+                               matchTags=True,
+                               matchConstraints=True):
         raise error.PyAsn1Error('Method not implemented')
 
     def getComponentType(self): return self._componentType

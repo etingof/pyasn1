@@ -286,9 +286,48 @@ class SequenceOf(unittest.TestCase):
         try:
             s.setComponentByPosition(1, univ.OctetString('Abc'))
         except:
-            pass
+            try:
+                s.setComponentByPosition(1, univ.OctetString('Abc'),
+                                         verifyConstraints=False)
+            except:
+                assert 0, 'constraint failes with verifyConstraints=True'
         else:
             assert 0, 'constraint fails'
+    def testComponentTagsMatching(self):
+        s = self.s1.clone()
+        o = univ.OctetString('abc').subtype(explicitTag=tag.Tag(tag.tagClassPrivate, tag.tagFormatSimple, 12))
+        try:
+            s.setComponentByPosition(0, o)
+        except:
+            assert 0, 'inner supertype tag not allowed with exactTypes=False'
+        try:
+            s.setComponentByPosition(0, o, exactTypes=True)
+        except:
+            try:
+                s.setComponentByPosition(0, o, exactTypes=True,
+                                         matchTags=False)
+            except:
+               assert 0, 'inner supertype tag denied with exactTypes=True & matchTags=False'
+        else:
+            assert 0, 'inner supertype tag allowed with exactTypes=True'
+    def testComponentConstraintsMatching(self):
+        s = self.s1.clone()
+        o = univ.OctetString().subtype(subtypeSpec=constraint.ConstraintsUnion(constraint.SingleValueConstraint(str2octs('cba'))))
+        try:
+            s.setComponentByPosition(0, o.clone('cba'))
+        except:
+            assert 0, 'inner supertype constraint not allowed with exactTypes=False'
+        try:
+            s.setComponentByPosition(0, o.clone('cba'), exactTypes=True)
+        except:
+            try:
+                s.setComponentByPosition(0, o.clone('cba'),
+                                         exactTypes=True,
+                                         matchConstraints=False)
+            except:
+                assert 0, 'inner supertype constraint denied with exactTypes=True & matchConstriaints=False'
+        else:
+            assert 0, 'inner supertype constraint allowed with exactTypes=True'
     def testSizeSpec(self):
         s = self.s1.clone(sizeSpec=constraint.ConstraintsUnion(
             constraint.ValueSizeConstraint(1,1)
@@ -378,6 +417,40 @@ class Sequence(unittest.TestCase):
         assert s.getComponentByPosition(0) == self.s1.getComponentByPosition(0)
         assert s.getComponentByPosition(1) == self.s1.getComponentByPosition(1)
         assert s.getComponentByPosition(2) == self.s1.getComponentByPosition(2)
+    def testComponentTagsMatching(self):
+        s = self.s1.clone()
+        o = univ.OctetString('abc').subtype(explicitTag=tag.Tag(tag.tagClassPrivate, tag.tagFormatSimple, 12))
+        try:
+            s.setComponentByName('name', o)
+        except:
+            assert 0, 'inner supertype tag not allowed with exactTypes=False'
+        try:
+            s.setComponentByName('name', o, exactTypes=True)
+        except:
+            try:
+                s.setComponentByName('name', o, exactTypes=True,
+                                     matchTags=False)
+            except:
+                assert 0, 'inner supertype tag denied with exactTypes=True & matchTags=False'
+        else:
+            assert 0, 'inner supertype tag allowed with exactTypes=True'
+    def testComponentConstraintsMatching(self):
+        s = self.s1.clone()
+        o = univ.OctetString().subtype(subtypeSpec=constraint.ConstraintsUnion(constraint.SingleValueConstraint(str2octs('cba'))))
+        try:
+            s.setComponentByName('name', o.clone('cba'))
+        except:
+            assert 0, 'inner supertype constraint not allowed with exactTypes=False'
+        try:
+            s.setComponentByName('name', o.clone('cba'), exactTypes=True)
+        except:
+            try:
+                s.setComponentByName('name', o.clone('cba'),
+                                     exactTypes=True, matchConstraints=False)
+            except:
+                assert 0, 'inner supertype constraint denied with exactTypes=True & matchConstriaints=False'
+        else:
+            assert 0, 'inner supertype constraint allowed with exactTypes=True'
 
 class SetOf(unittest.TestCase):
     def setUp(self):
