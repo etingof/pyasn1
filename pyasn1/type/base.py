@@ -244,19 +244,13 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
             self._cloneComponentValues(r, cloneValueFlag)
         return r
 
-    def _verifyComponent(self, idx, value, exactTypes=False,
-                         matchTags=True, matchConstraints=True):
-        pass
+    def _verifyComponent(self, idx, value): pass
 
     def verifySizeSpec(self): self._sizeSpec(self)
 
     def getComponentByPosition(self, idx):
         raise error.PyAsn1Error('Method not implemented')
-    def setComponentByPosition(self, idx, value,
-                               verifyConstraints=True,
-                               exactTypes=False,
-                               matchTags=True,
-                               matchConstraints=True):
+    def setComponentByPosition(self, idx, value, verifyConstraints=True):
         raise error.PyAsn1Error('Method not implemented')
 
     def getComponentType(self): return self._componentType

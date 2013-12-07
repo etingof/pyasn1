@@ -18,9 +18,8 @@ Revision 0.1.8
 - When comparing ASN.1 types, by-tag and/or by-constraints matching
   can now be performed with the isSuperTypeOf()/isSameTypeWith() optional
   flags.
-- The setComponentBy*() methods of all CONSTRUCTED objects now accept optional
-  exactTypes, matchTags and matchConstraints flags to give apps finer control
-  on when not to perform relevant data consistency checks.
+- Constructed types now verify their consistency by invoking isSameTypeWith()
+  for their components rather than isSuperTypeOf() as it used to be.
 - Fix to NamedType.__repr__() to work properly.
 - Fixes to __repr__() implementation of many built-in ASN.1 types to take into
   account all of their initializers such as tagSet, subtypeSpec etc.
