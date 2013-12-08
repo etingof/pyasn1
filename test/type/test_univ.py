@@ -13,6 +13,8 @@ else:
 
 class IntegerTestCase(unittest.TestCase):
     def testStr(self): assert str(univ.Integer(1)) in ('1','1L'),'str() fails'
+    def testRepr(self):
+        assert eval(repr(univ.Integer(123)), { 'Integer': univ.Integer}) == univ.Integer(123), 'repr() fails'
     def testAnd(self): assert univ.Integer(1) & 0 == 0, '__and__() fails'
     def testOr(self): assert univ.Integer(1) | 0 == 1, '__or__() fails'
     def testXor(self): assert univ.Integer(1) ^ 0 == 1, '__xor__() fails'
@@ -56,6 +58,8 @@ class BooleanTestCase(unittest.TestCase):
         assert not univ.Boolean(False) and not univ.Boolean(0), 'False initializer fails'
     def testStr(self):
         assert str(univ.Boolean(1)) in ('1', '1L'), 'str() fails'
+    def testRepr(self):
+        assert eval(repr(univ.Boolean(1)), { 'Boolean': univ.Boolean}) == univ.Boolean(1), 'repr() fails'
     def testTag(self):
         assert univ.Boolean().getTagSet() == tag.TagSet(
             (),
@@ -93,7 +97,7 @@ class BitStringTestCase(unittest.TestCase):
     def testStr(self):
         assert str(self.b.clone('Urgent,Active')) == '(1, 1)'
     def testRepr(self):
-        assert repr(self.b.clone('Urgent,Active')) == 'BitString("\'11\'B")'
+        assert eval(repr(self.b.clone('Urgent,Active')), { 'BitString': univ.BitString }) == self.b.clone('Urgent,Active'), 'repr() fails'
     def testTag(self):
         assert univ.BitString().getTagSet() == tag.TagSet(
             (),
@@ -124,6 +128,8 @@ class OctetStringTestCase(unittest.TestCase):
         assert str(univ.OctetString('q')) == 'q', '__str__() fails'
     def testSeq(self):
         assert univ.OctetString('q')[0] == str2octs('q')[0],'__getitem__() fails'
+    def testRepr(self):
+        assert eval(repr(univ.OctetString('abc')), { 'OctetString': univ.OctetString}) == univ.OctetString('abc'), 'repr() fails'
     def testAsOctets(self):
         assert univ.OctetString('abcd').asOctets() == str2octs('abcd'), 'testAsOctets() fails'
     def testAsInts(self):
@@ -153,6 +159,8 @@ class OctetStringTestCase(unittest.TestCase):
 
 class Null(unittest.TestCase):
     def testStr(self): assert str(univ.Null('')) == '', 'str() fails'
+    def testRepr(self):
+        assert eval(repr(univ.Null()), { 'Null': univ.Null}) == univ.Null(), 'repr() fails'
     def testTag(self):
         assert univ.Null().getTagSet() == tag.TagSet(
             (),
@@ -169,7 +177,11 @@ class Null(unittest.TestCase):
 class RealTestCase(unittest.TestCase):
     def testFloat4BinEnc(self): assert univ.Real((0.25, 2, 3)) == 2.0, 'float initializer for binary encoding fails'
     def testStr(self): assert str(univ.Real(1.0)) == '1.0','str() fails'
-    def testRepr(self): assert repr(univ.Real(-4.1)) == 'Real((-41, 10, -1))','repr() fails'
+    def testRepr(self):
+        assert eval(repr(univ.Real(-4.1)), { 'Real': univ.Real}) == univ.Real(-4.1), 'repr() fails'
+        assert repr(univ.Real(-4.1)) == 'Real((-41, 10, -1))','repr() fails'
+        assert eval(repr(univ.Real('inf')), { 'Real': univ.Real}) == univ.Real('inf'), 'repr() fails'
+        assert repr(univ.Real('inf')) == 'Real(\'inf\')','repr() fails'
     def testAdd(self): assert univ.Real(-4.1) + 1.4 == -2.7, '__add__() fails'
     def testRadd(self): assert 4 + univ.Real(0.5) == 4.5, '__radd__() fails'
     def testSub(self): assert univ.Real(3.9) - 1.7 == 2.2, '__sub__() fails'
@@ -189,8 +201,6 @@ class RealTestCase(unittest.TestCase):
     # infinite float values
     def testStrInf(self):
         assert str(univ.Real('inf')) == 'inf','str() fails'
-    def testReprInf(self):
-        assert repr(univ.Real('inf')) == 'Real(\'inf\')','repr() fails'
     def testAddInf(self):
         assert univ.Real('inf') + 1 == float('inf'), '__add__() fails'
     def testRaddInf(self):
@@ -227,7 +237,9 @@ class RealTestCase(unittest.TestCase):
 
 class ObjectIdentifier(unittest.TestCase):
     def testStr(self):
-        assert str(univ.ObjectIdentifier((1,3,6))) == '1.3.6'
+        assert str(univ.ObjectIdentifier((1,3,6))) == '1.3.6', 'str() fails'
+    def testRepr(self):
+        assert eval(repr(univ.ObjectIdentifier('1.3.6')), { 'ObjectIdentifier': univ.ObjectIdentifier}) == univ.ObjectIdentifier('1.3.6'), 'repr() fails'
     def testEq(self):
         assert univ.ObjectIdentifier((1,3,6)) == (1,3,6), '__cmp__() fails'
     def testAdd(self):
