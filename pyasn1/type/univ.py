@@ -490,7 +490,9 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
             return self._value[i]
 
     def __str__(self): return self.prettyPrint()
-    
+    def __repr__(self):
+        return '%s(%r)' % (self.__class__.__name__, self.prettyPrint())
+
     def index(self, suboid): return self._value.index(suboid)
 
     def isPrefixOf(self, value):
