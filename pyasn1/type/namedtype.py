@@ -11,6 +11,14 @@ class NamedType:
     def __repr__(self): return '%s(%r, %r)' % (
         self.__class__.__name__, self.__name, self.__type
         )
+    def __eq__(self, other): return tuple(self) == tuple(other)
+    def __ne__(self, other): return tuple(self) != tuple(other)
+    def __lt__(self, other): return tuple(self) < tuple(other)
+    def __le__(self, other): return tuple(self) <= tuple(other)
+    def __gt__(self, other): return tuple(self) > tuple(other)
+    def __ge__(self, other): return tuple(self) >= tuple(other)
+    def __hash__(self): return hash(tuple(self))
+ 
     def getType(self): return self.__type
     def getName(self): return self.__name
     def __getitem__(self, idx):
@@ -37,7 +45,14 @@ class NamedTypes:
             self.__class__.__name__,
             ', '.join([ repr(x) for x in self.__namedTypes ])
         )
-    
+    def __eq__(self, other): return tuple(self) == tuple(other)
+    def __ne__(self, other): return tuple(self) != tuple(other)
+    def __lt__(self, other): return tuple(self) < tuple(other)
+    def __le__(self, other): return tuple(self) <= tuple(other)
+    def __gt__(self, other): return tuple(self) > tuple(other)
+    def __ge__(self, other): return tuple(self) >= tuple(other)
+    def __hash__(self): return hash(tuple(self))
+   
     def __getitem__(self, idx): return self.__namedTypes[idx]
 
     if sys.version_info[0] <= 2:
