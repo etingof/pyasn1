@@ -24,6 +24,7 @@ Revision 0.1.8
   which accepts both var-args and keyword-args. Default repr() modified to
   reflect this change.
 - NamedTypes() and NamedValues() made comparable.
+- Test coverage extended to cover pyasn1 types __repr__() function.
 - Fix to NamedType.__repr__() to work properly.
 - Fixes to __repr__() implementation of many built-in ASN.1 types to take into
   account all of their initializers such as tagSet, subtypeSpec etc.

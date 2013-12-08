@@ -14,7 +14,11 @@ class TagTestCaseBase(unittest.TestCase):
     def setUp(self):
         self.t1 = tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 3)
         self.t2 = tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 3)
-    
+
+class TagReprTestCase(TagTestCaseBase):
+    def testRepr(self):
+        assert eval(repr(self.t1), { 'Tag': tag.Tag }) == self.t1, 'repr() fails'
+
 class TagCmpTestCase(TagTestCaseBase):
     def testCmp(self):
         assert self.t1 == self.t2, 'tag comparation fails'
@@ -35,6 +39,10 @@ class TagSetTestCaseBase(unittest.TestCase):
         self.ts2 = tag.initTagSet(
             tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 12)
             )
+
+class TagSetReprTestCase(TagSetTestCaseBase):
+    def testRepr(self):
+        assert eval(repr(self.ts1), { 'TagSet': tag.TagSet, 'Tag': tag.Tag }) == self.ts1, 'repr() fails'
 
 class TagSetCmpTestCase(TagSetTestCaseBase):
     def testCmp(self):

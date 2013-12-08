@@ -12,10 +12,12 @@ else:
 
 class NamedTypeCaseBase(unittest.TestCase):
     def setUp(self):
-        self.e = namedtype.NamedType('age', univ.Integer())
+        self.e = namedtype.NamedType('age', univ.Integer(0))
     def testIter(self):
         n, t = self.e
         assert n == 'age' or t == univ.Integer(), 'unpack fails'
+    def testRepr(self):
+        assert eval(repr(self.e), { 'NamedType': namedtype.NamedType, 'Integer': univ.Integer}) == self.e, 'repr() fails'
 
 class NamedTypesCaseBase(unittest.TestCase):
     def setUp(self):
@@ -24,6 +26,8 @@ class NamedTypesCaseBase(unittest.TestCase):
             namedtype.OptionalNamedType('age', univ.Integer(0)),
             namedtype.NamedType('family-name', univ.OctetString(''))
             )
+    def testRepr(self):
+        assert eval(repr(self.e), { 'NamedTypes': namedtype.NamedTypes, 'NamedType': namedtype.NamedType, 'OptionalNamedType': namedtype.OptionalNamedType, 'Integer': univ.Integer, 'OctetString': univ.OctetString }) == self.e, 'repr() fails'
     def testIter(self):
         for t in self.e:
             break

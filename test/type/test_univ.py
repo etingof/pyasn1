@@ -271,6 +271,8 @@ class SequenceOf(unittest.TestCase):
             componentType=univ.OctetString('')
             )
         self.s2 = self.s1.clone()
+    def testRepr(self):
+        assert eval(repr(self.s1.clone().setComponents('a', 'b')), { 'SequenceOf': univ.SequenceOf, 'OctetString': univ.OctetString }) == self.s1.clone().setComponents('a', 'b'), 'repr() fails'
     def testTag(self):
         assert self.s1.getTagSet() == tag.TagSet(
             (),
@@ -373,6 +375,8 @@ class Sequence(unittest.TestCase):
             namedtype.OptionalNamedType('nick', univ.OctetString('')),
             namedtype.DefaultedNamedType('age', univ.Integer(34))
             ))
+    def testRepr(self):
+        assert eval(repr(self.s1.clone().setComponents('a', 'b')), { 'Sequence': univ.Sequence, 'OctetString': univ.OctetString, 'Integer': univ.Integer, 'NamedTypes': namedtype.NamedTypes, 'NamedType': namedtype.NamedType, 'OptionalNamedType': namedtype.OptionalNamedType, 'DefaultedNamedType': namedtype.DefaultedNamedType }) == self.s1.clone().setComponents('a', 'b'), 'repr() fails'
     def testTag(self):
         assert self.s1.getTagSet() == tag.TagSet(
             (),
@@ -501,6 +505,9 @@ class Choice(unittest.TestCase):
             ))
     def testTag(self):
         assert self.s1.getTagSet() == tag.TagSet(), 'wrong tagSet'
+    def testRepr(self):
+        assert eval(repr(self.s1.clone().setComponents('a')), { 'Choice': univ.Choice, 'OctetString': univ.OctetString, 'Integer': univ.Integer, 'Boolean': univ.Boolean, 'NamedTypes': namedtype.NamedTypes, 'NamedType': namedtype.NamedType }) == self.s1.clone().setComponents('a'), 'repr() fails'
+        assert eval(repr(self.s1.clone().setComponents(sex=self.s1.setComponentByPosition(1).getComponentByPosition(1).clone().setComponents(count=univ.Integer(123)))), { 'Choice': univ.Choice, 'OctetString': univ.OctetString, 'Integer': univ.Integer, 'Boolean': univ.Boolean, 'NamedTypes': namedtype.NamedTypes, 'NamedType': namedtype.NamedType }) == self.s1.clone().setComponents(sex=self.s1.setComponentByPosition(1).getComponentByPosition(1).clone().setComponents(count=univ.Integer(123))), 'repr() fails'
     def testOuterByTypeWithPythonValue(self):
         self.s1.setComponentByType(univ.OctetString.tagSet, 'abc')
         assert self.s1.getComponentByType(
