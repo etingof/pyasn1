@@ -20,6 +20,9 @@ Revision 0.1.8
   flags.
 - Constructed types now verify their consistency by invoking isSameTypeWith()
   for their components rather than isSuperTypeOf() as it used to be.
+- Constructed types can now be initialized with new .setComponents() method
+  which accepts both var-args and keyword-args. Default repr() modified to
+  reflect this change.
 - Fix to NamedType.__repr__() to work properly.
 - Fixes to __repr__() implementation of many built-in ASN.1 types to take into
   account all of their initializers such as tagSet, subtypeSpec etc.

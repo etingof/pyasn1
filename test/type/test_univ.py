@@ -350,7 +350,10 @@ class SequenceOf(unittest.TestCase):
         s = self.s1.clone(cloneValueFlag=1)
         assert len(s) == 1
         assert s.getComponentByPosition(0) == self.s1.getComponentByPosition(0)
-        
+    def testSetComponents(self):
+        assert self.s1.clone().setComponents('abc', 'def') == \
+            self.s1.setComponentByPosition(0, 'abc').setComponentByPosition(1, 'def')
+                
 class Sequence(unittest.TestCase):
     def setUp(self):
         self.s1 = univ.Sequence(componentType=namedtype.NamedTypes(
@@ -418,6 +421,9 @@ class Sequence(unittest.TestCase):
             pass
         else:
             assert 0, 'inner supertype constraint allowed'
+    def testSetComponents(self):
+        assert self.s1.clone().setComponents(name='a', nick='b', age=1) == \
+            self.s1.setComponentByPosition(0, 'a').setComponentByPosition(1, 'b').setComponentByPosition(2, 1)
 
 class SetOf(unittest.TestCase):
     def setUp(self):

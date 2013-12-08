@@ -185,12 +185,8 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         if self._subtypeSpec is not self.subtypeSpec:
             r.append('subtypeSpec=%r' % (self._subtypeSpec,))
         r = '%s(%s)' % (self.__class__.__name__, ', '.join(r))
-        for idx in range(len(self._componentValues)):
-            if self._componentValues[idx] is None:
-                continue
-            r = r + '.setComponentByPosition(%s, %r)' % (
-                idx, self._componentValues[idx]
-            )
+        if self._componentValues:
+            r += '.setComponents(%s)' % ', '.join([repr(x) for x in self._componentValues])
         return r
 
     def __eq__(self, other):
@@ -253,7 +249,16 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
     def setComponentByPosition(self, idx, value, verifyConstraints=True):
         raise error.PyAsn1Error('Method not implemented')
 
+    def setComponents(self, *args, **kwargs):
+        for idx in range(len(args)):
+            self[idx] = args[idx]
+        for k in kwargs:
+            self[k] = kwargs[k]
+        return self
+
     def getComponentType(self): return self._componentType
+
+    def setDefaultComponents(self): pass
 
     def __getitem__(self, idx): return self.getComponentByPosition(idx)
     def __setitem__(self, idx, value): self.setComponentByPosition(idx, value)
@@ -264,4 +269,3 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         self._componentValues = []
         self._componentValuesSet = 0
 
-    def setDefaultComponents(self): pass

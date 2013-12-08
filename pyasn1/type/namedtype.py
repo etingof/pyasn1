@@ -8,7 +8,7 @@ class NamedType:
     isDefaulted = 0
     def __init__(self, name, t):
         self.__name = name; self.__type = t
-    def __repr__(self): return '%s(%s, %r)' % (
+    def __repr__(self): return '%s(%r, %r)' % (
         self.__class__.__name__, self.__name, self.__type
         )
     def getType(self): return self.__type
