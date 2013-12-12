@@ -319,12 +319,20 @@ class SequenceOf(unittest.TestCase):
     def testComponentConstraintsMatching(self):
         s = self.s1.clone()
         o = univ.OctetString().subtype(subtypeSpec=constraint.ConstraintsUnion(constraint.SingleValueConstraint(str2octs('cba'))))
+        s.strictConstraints = True
         try:
             s.setComponentByPosition(0, o.clone('cba'))
         except:
             pass
         else:
             assert 0, 'inner supertype constraint allowed'
+        s.strictConstraints = False
+        try:
+            s.setComponentByPosition(0, o.clone('cba'))
+        except:
+            assert 0, 'inner supertype constraint disallowed'
+        else:
+            pass
     def testSizeSpec(self):
         s = self.s1.clone(sizeSpec=constraint.ConstraintsUnion(
             constraint.ValueSizeConstraint(1,1)
@@ -431,12 +439,20 @@ class Sequence(unittest.TestCase):
     def testComponentConstraintsMatching(self):
         s = self.s1.clone()
         o = univ.OctetString().subtype(subtypeSpec=constraint.ConstraintsUnion(constraint.SingleValueConstraint(str2octs('cba'))))
+        s.strictConstraints = True
         try:
             s.setComponentByName('name', o.clone('cba'))
         except:
             pass
         else:
             assert 0, 'inner supertype constraint allowed'
+        s.strictConstraints = False
+        try:
+            s.setComponentByName('name', o.clone('cba'))
+        except:
+            assert 0, 'inner supertype constraint disallowed'
+        else:
+            pass
     def testSetComponents(self):
         assert self.s1.clone().setComponents(name='a', nick='b', age=1) == \
             self.s1.setComponentByPosition(0, 'a').setComponentByPosition(1, 'b').setComponentByPosition(2, 1)

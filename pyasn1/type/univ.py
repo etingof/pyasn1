@@ -677,6 +677,7 @@ class SetOf(base.AbstractConstructedAsn1Item):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x11)
         )
     typeId = 1
+    strictConstraints = False
 
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         idx = 0; l = len(self._componentValues)
@@ -692,9 +693,14 @@ class SetOf(base.AbstractConstructedAsn1Item):
             idx = idx + 1
         
     def _verifyComponent(self, idx, value):
-        if self._componentType is not None and \
-                not self._componentType.isSameTypeWith(value):
-            raise error.PyAsn1Error('Component type error %r' % (value,))
+        t = self._componentType
+        if t is None:
+            return
+        if not t.isSameTypeWith(value,matchConstraints=self.strictConstraints):
+            raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, t))
+        if self.strictConstraints and \
+                not t.isSuperTypeOf(value, matchTags=False):
+            raise error.PyAsn1Error('Component value is constraints-incompatible: %r' % (value, t))
 
     def getComponentByPosition(self, idx): return self._componentValues[idx]
     def setComponentByPosition(self, idx, value=None, verifyConstraints=True):
@@ -747,6 +753,7 @@ class SequenceOf(SetOf):
 
 class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
     componentType = namedtype.NamedTypes()
+    strictConstraints = False
     def __init__(self, componentType=None, tagSet=None,
                  subtypeSpec=None, sizeSpec=None):
         if componentType is None:
@@ -787,8 +794,11 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                 'Component type error out of range'
                 )
         t = self._componentType[idx].getType()
-        if not t.isSameTypeWith(value):
-            raise error.PyAsn1Error('Component type error %r vs %r' % (t, value))
+        if not t.isSameTypeWith(value,matchConstraints=self.strictConstraints):
+            raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, t))
+        if self.strictConstraints and \
+                not t.isSuperTypeOf(value, matchTags=False):
+            raise error.PyAsn1Error('Component value is constraints-incompatible: %r' % (value, t))
 
     def getComponentByName(self, name):
         return self.getComponentByPosition(
