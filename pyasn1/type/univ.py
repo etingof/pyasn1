@@ -68,12 +68,16 @@ class Integer(base.AbstractSimpleAsn1Item):
     def __pos__(self): return self.clone(+self._value)
     def __neg__(self): return self.clone(-self._value)
     def __invert__(self): return self.clone(~self._value)
-
-    def __round__(self, n): return round(self._value, n)
+    def __round__(self, n=0):
+        r = round(self._value, n)
+        if n:
+            return self.clone(r)
+        else:
+            return r
     def __floor__(self): return math.floor(self._value)
     def __ceil__(self): return math.ceil(self._value)
     if sys.version_info[0:2] > (2, 4):
-        def __trunc__(self): return math.trunc(self._value)
+        def __trunc__(self): return self.clone(math.trunc(self._value))
 
     def __lt__(self, value): return self._value < value
     def __le__(self, value): return self._value <= value
@@ -655,12 +659,16 @@ class Real(base.AbstractSimpleAsn1Item):
     def __abs__(self): return self.clone(abs(float(self)))
     def __pos__(self): return self.clone(+float(self))
     def __neg__(self): return self.clone(-float(self))
-
-    def __round__(self, n): return round(float(self), n)
-    def __floor__(self): return math.floor(float(self))
-    def __ceil__(self): return math.ceil(float(self))
+    def __round__(self, n=0):
+        r = round(float(self), n)
+        if n:
+            return self.clone(r)
+        else:
+            return r
+    def __floor__(self): return self.clone(math.floor(float(self)))
+    def __ceil__(self): return self.clone(math.ceil(float(self)))
     if sys.version_info[0:2] > (2, 4):
-        def __trunc__(self): return math.trunc(float(self))
+        def __trunc__(self): return self.clone(math.trunc(float(self)))
 
     def __lt__(self, value): return float(self) < value
     def __le__(self, value): return float(self) <= value
