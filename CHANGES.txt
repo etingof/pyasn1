@@ -29,6 +29,11 @@ Revision 0.1.8
   reflect this change.
 - NamedTypes() and NamedValues() made comparable.
 - Test coverage extended to cover pyasn1 types __repr__() function.
+- The abs(Integer()) & abs(Real()) operation now returns respective pyasn1 
+  type, not a Python type.
+- More Python magic methods implementations added to Integer & Real classes
+  (e.g.  __pos__, __neg__, __round__, __floor__, __ceil__, __trunc__)
+- The Integer.__invert__ Python magic method implemented.
 - Fix to NamedType.__repr__() to work properly.
 - Fixes to __repr__() implementation of many built-in ASN.1 types to take into
   account all of their initializers such as tagSet, subtypeSpec etc.

@@ -1,5 +1,5 @@
 # ASN.1 "universal" data types
-import operator, sys
+import operator, sys, math
 from pyasn1.type import base, tag, constraint, namedtype, namedval, tagmap
 from pyasn1.codec.ber import eoo
 from pyasn1.compat import octets
@@ -63,8 +63,17 @@ class Integer(base.AbstractSimpleAsn1Item):
     if sys.version_info[0] <= 2:
         def __long__(self): return long(self._value)
     def __float__(self): return float(self._value)    
-    def __abs__(self): return abs(self._value)
+    def __abs__(self): return self.clone(abs(self._value))
     def __index__(self): return int(self._value)
+    def __pos__(self): return self.clone(+self._value)
+    def __neg__(self): return self.clone(-self._value)
+    def __invert__(self): return self.clone(~self._value)
+
+    def __round__(self, n): return round(self._value, n)
+    def __floor__(self): return math.floor(self._value)
+    def __ceil__(self): return math.ceil(self._value)
+    if sys.version_info[0:2] > (2, 4):
+        def __trunc__(self): return math.trunc(self._value)
 
     def __lt__(self, value): return self._value < value
     def __le__(self, value): return self._value <= value
@@ -642,8 +651,16 @@ class Real(base.AbstractSimpleAsn1Item):
         else:
             return float(
                 self._value[0] * pow(self._value[1], self._value[2])
-                )
-    def __abs__(self): return abs(float(self))
+            )
+    def __abs__(self): return self.clone(abs(float(self)))
+    def __pos__(self): return self.clone(+float(self))
+    def __neg__(self): return self.clone(-float(self))
+
+    def __round__(self, n): return round(float(self), n)
+    def __floor__(self): return math.floor(float(self))
+    def __ceil__(self): return math.ceil(float(self))
+    if sys.version_info[0:2] > (2, 4):
+        def __trunc__(self): return math.trunc(float(self))
 
     def __lt__(self, value): return float(self) < value
     def __le__(self, value): return float(self) <= value

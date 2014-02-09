@@ -2,6 +2,7 @@ from pyasn1.type import univ, tag, constraint, namedtype, namedval, error
 from pyasn1.compat.octets import str2octs, ints2octs
 from pyasn1.error import PyAsn1Error
 from sys import version_info
+import math
 if version_info[0:2] < (2, 7) or \
    version_info[0:2] in ( (3, 0), (3, 1) ):
     try:
@@ -38,6 +39,18 @@ class IntegerTestCase(unittest.TestCase):
     def testInt(self): assert int(univ.Integer(3)) == 3, '__int__() fails'
     def testLong(self): assert int(univ.Integer(8)) == 8, '__long__() fails'
     def testFloat(self): assert float(univ.Integer(4))==4.0,'__float__() fails'
+    def testPos(self): assert +univ.Integer(1) == 1, '__pos__() fails'
+    def testNeg(self): assert -univ.Integer(1) == -1, '__neg__() fails'
+    def testInvert(self): assert ~univ.Integer(1) == -2, '__invert__() fails'
+    def testRound(self): 
+        assert round(univ.Integer(1), 3) == 1.0,'__round__() fails'
+    def testFloor(self): 
+        assert math.floor(univ.Integer(1)) == 1,'__floor__() fails'
+    def testCeil(self): 
+        assert math.ceil(univ.Integer(1)) == 1,'__ceil__() fails'
+    if version_info[0:2] > (2, 4):
+        def testTrunc(self): 
+            assert math.trunc(univ.Integer(1)) == 1,'__trunc__() fails'
     def testPrettyIn(self): assert univ.Integer('3') == 3, 'prettyIn() fails'
     def testTag(self):
         assert univ.Integer().getTagSet() == tag.TagSet(
@@ -229,6 +242,18 @@ class RealTestCase(unittest.TestCase):
     def testMinusInf(self):
         assert univ.Real('-inf').isMinusInfinity(), 'isMinusInfinity failed'
 
+    def testPos(self): assert +univ.Real(1.0) == 1.0, '__pos__() fails'
+    def testNeg(self): assert -univ.Real(1.0) == -1.0, '__neg__() fails'
+    def testRound(self): 
+        assert round(univ.Real(1.123), 2) == 1.12,'__round__() fails'
+    def testFloor(self): 
+        assert math.floor(univ.Real(1.6)) == 1.0,'__floor__() fails'
+    def testCeil(self): 
+        assert math.ceil(univ.Real(1.2)) == 2.0,'__ceil__() fails'
+    if version_info[0:2] > (2, 4):
+        def testTrunc(self): 
+            assert math.trunc(univ.Real(1.1)) == 1.0,'__trunc__() fails'
+ 
     def testTag(self):
         assert univ.Real().getTagSet() == tag.TagSet(
             (),
