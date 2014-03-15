@@ -34,7 +34,7 @@ Revision 0.1.8
 - More Python magic methods implementations added to Integer & Real classes
   (e.g.  __pos__, __neg__, __round__, __floor__, __ceil__, __trunc__)
 - The Integer.__invert__ Python magic method implemented.
-- Handle the case of absent stderr stream at Debug printer.
+- Handle the case of null writer at Debug printer.
 - Fix to NamedType.__repr__() to work properly.
 - Fixes to __repr__() implementation of many built-in ASN.1 types to take into
   account all of their initializers such as tagSet, subtypeSpec etc.

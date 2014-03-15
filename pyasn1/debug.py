@@ -18,10 +18,9 @@ class Debug:
     defaultPrinter = sys.stderr.write
     def __init__(self, *flags):
         self._flags = flagNone
-        if self.defaultPrinter:
-            self._printer = self.defaultPrinter
-        else:
-            self._printer = lambda x: None  # stderr may not be available
+        if not self.defaultPrinter:
+            raise error.PyAsn1Error('Null debug writer specified')
+        self._printer = self.defaultPrinter
         self('running pyasn1 version %s' % __version__)
         for f in flags:
             if f not in flagMap:
