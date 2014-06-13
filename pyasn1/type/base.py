@@ -140,6 +140,9 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
     # XXX Compatibility stub
     def prettyPrinter(self, scope=0): return self.prettyPrint(scope)
     
+    def prettyPrintType(self, scope=0):
+        return '%s -> %s' % (self.getTagSet(), self.__class__.__name__)
+
 #
 # Constructed types:
 # * There are five of them: Sequence, SequenceOf/SetOf, Set and Choice

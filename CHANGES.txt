@@ -4,6 +4,11 @@ Revision 0.1.8
 - ObjectIdentifier codec fixed to work properly with arc 0 and arc 2 values.
 - Explicit limit on ObjectIdentifier arc value size removed.
 - Unicode initializer support added to OctetString type and derivatives.
+- New prettyPrintType() abstract method implemented to base pyasn1 types
+  to facilitate encoding errors analisys.
+- The __str__() method implemented to Tag, TagSet and TagMap classes to
+  ease encoding errors troubleshooting.
+  easing encoding errors
 - Fix to SEQUENCE and SET types to give them their private componentTypes
   collection (which is a NamedTypes object) so that they won't collide in
   a MT execution environment.

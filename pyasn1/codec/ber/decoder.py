@@ -18,7 +18,7 @@ class AbstractSimpleDecoder(AbstractDecoder):
     tagFormats = (tag.tagFormatSimple,)
     def _createComponent(self, asn1Spec, tagSet, value=None):
         if tagSet[0][1] not in self.tagFormats:
-            raise error.PyAsn1Error('Invalid tag format %r for %r' % (tagSet[0], self.protoComponent,))
+            raise error.PyAsn1Error('Invalid tag format %s for %s' % (tagSet[0], self.protoComponent.prettyPrintType()))
         if asn1Spec is None:
             return self.protoComponent.clone(value, tagSet)
         elif value is None:
@@ -30,7 +30,7 @@ class AbstractConstructedDecoder(AbstractDecoder):
     tagFormats = (tag.tagFormatConstructed,)
     def _createComponent(self, asn1Spec, tagSet, value=None):
         if tagSet[0][1] not in self.tagFormats:
-            raise error.PyAsn1Error('Invalid tag format %r for %r' % (tagSet[0], self.protoComponent,))
+            raise error.PyAsn1Error('Invalid tag format %s for %s' % (tagSet[0], self.protoComponent.prettyPrintType()))
         if asn1Spec is None:
             return self.protoComponent.clone(tagSet)
         else:
@@ -660,7 +660,7 @@ class Decoder:
                 else:
                     tagSet = lastTag + tagSet
                 state = stDecodeLength
-                debug.logger and debug.logger & debug.flagDecoder and debug.logger('tag decoded into %r, decoding length' % tagSet)
+                debug.logger and debug.logger & debug.flagDecoder and debug.logger('tag decoded into %s, decoding length' % tagSet)
             if state == stDecodeLength:
                 # Decode length
                 if not substrate:
@@ -745,12 +745,12 @@ class Decoder:
                     if debug.logger and debug.logger & debug.flagDecoder:
                         debug.logger('candidate ASN.1 spec is a map of:')
                         for t, v in asn1Spec.getPosMap().items():
-                            debug.logger('  %r -> %s' % (t, v.__class__.__name__))
+                            debug.logger('  %s -> %s' % (t, v.__class__.__name__))
                         if asn1Spec.getNegMap():
                             debug.logger('but neither of: ')
                             for t, v in asn1Spec.getNegMap().items():
-                                debug.logger('  %r -> %s' % (t, v.__class__.__name__))
-                        debug.logger('new candidate ASN.1 spec is %s, chosen by %r' % (__chosenSpec is None and '<none>' or __chosenSpec.__class__.__name__, tagSet))
+                                debug.logger('  %s -> %s' % (t, v.__class__.__name__))
+                        debug.logger('new candidate ASN.1 spec is %s, chosen by %s' % (__chosenSpec is None and '<none>' or __chosenSpec.prettyPrintType(), tagSet))
                 else:
                     __chosenSpec = asn1Spec
                     debug.logger and debug.logger & debug.flagDecoder and debug.logger('candidate ASN.1 spec is %s' % asn1Spec.__class__.__name__)
@@ -768,7 +768,7 @@ class Decoder:
                     elif baseTagSet in self.__tagMap:
                         # base type or tagged subtype
                         concreteDecoder = self.__tagMap[baseTagSet]
-                        debug.logger and debug.logger & debug.flagDecoder and debug.logger('value decoder chosen by base %r' % (baseTagSet,))
+                        debug.logger and debug.logger & debug.flagDecoder and debug.logger('value decoder chosen by base %s' % (baseTagSet,))
                     else:
                         concreteDecoder = None
                     if concreteDecoder:
@@ -818,7 +818,7 @@ class Decoder:
                 debug.logger and debug.logger & debug.flagDecoder and debug.logger('codec %s yields type %s, value:\n%s\n...remaining substrate is: %s' % (concreteDecoder.__class__.__name__, value.__class__.__name__, value.prettyPrint(), substrate and debug.hexdump(substrate) or '<none>'))
             if state == stErrorCondition:
                 raise error.PyAsn1Error(
-                    '%r not in asn1Spec: %r' % (tagSet, asn1Spec)
+                    '%s not in asn1Spec: %s' % (tagSet, asn1Spec)
                     )
         if debug.logger and debug.logger & debug.flagDecoder:
             debug.scope.pop()

@@ -770,6 +770,14 @@ class SetOf(base.AbstractConstructedAsn1Item):
                 r = r + self._componentValues[idx].prettyPrint(scope)
         return r
 
+    def prettyPrintType(self, scope=0):
+        scope = scope + 1
+        r = '%s -> %s {\n' % (self.getTagSet(), self.__class__.__name__)
+        if self._componentType is not None:
+            r = r + ' '*scope
+            r = r + self._componentType.prettyPrintType(scope)
+        return r + '\n' + ' '*(scope-1) + '}'
+
 class SequenceOf(SetOf):
     tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x10)
@@ -911,6 +919,17 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                     r, self._componentValues[idx].prettyPrint(scope)
                     )
         return r
+
+    def prettyPrintType(self, scope=0):
+        scope = scope + 1
+        r = '%s -> %s {\n' % (self.getTagSet(), self.__class__.__name__)
+        for idx in range(len(self.componentType)):
+            r = r + ' '*scope
+            r = r + '"%s"' % self.componentType.getNameByPosition(idx)
+            r = '%s = %s\n' % (
+                r, self._componentType.getTypeByPosition(idx).prettyPrintType(scope)
+            )
+        return r + '\n' + ' '*(scope-1) + '}'
 
 class Sequence(SequenceAndSetBase):
     tagSet = baseTagSet = tag.initTagSet(
