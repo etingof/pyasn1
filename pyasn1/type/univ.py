@@ -76,7 +76,7 @@ class Integer(base.AbstractSimpleAsn1Item):
             return r
     def __floor__(self): return math.floor(self._value)
     def __ceil__(self): return math.ceil(self._value)
-    if sys.version_info[0:2] > (2, 4):
+    if sys.version_info[0:2] > (2, 5):
         def __trunc__(self): return self.clone(math.trunc(self._value))
 
     def __lt__(self, value): return self._value < value
@@ -667,7 +667,7 @@ class Real(base.AbstractSimpleAsn1Item):
             return r
     def __floor__(self): return self.clone(math.floor(float(self)))
     def __ceil__(self): return self.clone(math.ceil(float(self)))
-    if sys.version_info[0:2] > (2, 4):
+    if sys.version_info[0:2] > (2, 5):
         def __trunc__(self): return self.clone(math.trunc(float(self)))
 
     def __lt__(self, value): return float(self) < value

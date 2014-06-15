@@ -48,7 +48,7 @@ class IntegerTestCase(unittest.TestCase):
         assert math.floor(univ.Integer(1)) == 1,'__floor__() fails'
     def testCeil(self): 
         assert math.ceil(univ.Integer(1)) == 1,'__ceil__() fails'
-    if version_info[0:2] > (2, 4):
+    if version_info[0:2] > (2, 5):
         def testTrunc(self): 
             assert math.trunc(univ.Integer(1)) == 1,'__trunc__() fails'
     def testPrettyIn(self): assert univ.Integer('3') == 3, 'prettyIn() fails'
@@ -250,7 +250,7 @@ class RealTestCase(unittest.TestCase):
         assert math.floor(univ.Real(1.6)) == 1.0,'__floor__() fails'
     def testCeil(self): 
         assert math.ceil(univ.Real(1.2)) == 2.0,'__ceil__() fails'
-    if version_info[0:2] > (2, 4):
+    if version_info[0:2] > (2, 5):
         def testTrunc(self): 
             assert math.trunc(univ.Real(1.1)) == 1.0,'__trunc__() fails'
  
