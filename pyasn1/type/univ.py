@@ -581,9 +581,9 @@ class Real(base.AbstractSimpleAsn1Item):
             if not isinstance(value[0], numericTypes) or \
                     not isinstance(value[1], intTypes) or \
                     not isinstance(value[2], intTypes):
-               raise error.PyAsn1Error('Lame Real value syntax: %s' % (value,))
+                raise error.PyAsn1Error('Lame Real value syntax: %s' % (value,))
             if isinstance(value[0], float) and \
-               self._inf and value[0] in self._inf:
+                self._inf and value[0] in self._inf:
                 return value[0]
             if value[1] not in (2, 10):
                 raise error.PyAsn1Error(
@@ -727,7 +727,7 @@ class SetOf(base.AbstractConstructedAsn1Item):
             raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, t))
         if self.strictConstraints and \
                 not t.isSuperTypeOf(value, matchTags=False):
-            raise error.PyAsn1Error('Component value is constraints-incompatible: %r' % (value, t))
+            raise error.PyAsn1Error('Component value is constraints-incompatible: %r vs %r' % (value, t))
 
     def getComponentByPosition(self, idx): return self._componentValues[idx]
     def setComponentByPosition(self, idx, value=None, verifyConstraints=True):
@@ -833,7 +833,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, t))
         if self.strictConstraints and \
                 not t.isSuperTypeOf(value, matchTags=False):
-            raise error.PyAsn1Error('Component value is constraints-incompatible: %r' % (value, t))
+            raise error.PyAsn1Error('Component value is constraints-incompatible: %r vs %r' % (value, t))
 
     def getComponentByName(self, name):
         return self.getComponentByPosition(
