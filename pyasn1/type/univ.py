@@ -299,7 +299,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
             value = self.defaultHexValue
         if value is None or value is base.noValue:
             value = self.defaultBinValue
-        self.__intValue = None
+        self.__asNumbersCache = None
         base.AbstractSimpleAsn1Item.__init__(self, value, tagSet, subtypeSpec)
 
     def clone(self, value=None, tagSet=None, subtypeSpec=None,
@@ -436,17 +436,17 @@ class OctetString(base.AbstractSimpleAsn1Item):
             return self._value.decode(self._encoding, 'ignore')
         def asOctets(self): return self._value
         def asNumbers(self):
-            if self.__intValue is None:
-                self.__intValue = tuple([ ord(x) for x in self._value ])
-            return self.__intValue
+            if self.__asNumbersCache is None:
+                self.__asNumbersCache = tuple([ ord(x) for x in self._value ])
+            return self.__asNumbersCache
     else:
         def __str__(self): return self._value.decode(self._encoding, 'ignore')
         def __bytes__(self): return self._value
         def asOctets(self): return self._value
         def asNumbers(self):
-            if self.__intValue is None:
-                self.__intValue = tuple(self._value)
-            return self.__intValue
+            if self.__asNumbersCache is None:
+                self.__asNumbersCache = tuple(self._value)
+            return self.__asNumbersCache
  
     # Immutable sequence object protocol
     
@@ -464,7 +464,9 @@ class OctetString(base.AbstractSimpleAsn1Item):
     def __radd__(self, value): return self.clone(self.prettyIn(value) + self._value)
     def __mul__(self, value): return self.clone(self._value * value)
     def __rmul__(self, value): return self * value
-
+    def __int__(self): return int(self._value)
+    def __float__(self): return float(self._value)
+    
 class Null(OctetString):
     defaultValue = ''.encode()  # This is tightly constrained
     tagSet = baseTagSet = tag.initTagSet(
