@@ -41,6 +41,7 @@ Revision 0.1.8
 - The Integer.__invert__ Python magic method implemented.
 - The OctetString.__int__() and .__float__() magic methods implemented.
 - Handle the case of null writer at Debug printer.
+- BitString encoder/decoder performance improved.
 - Fix to NamedType.__repr__() to work properly.
 - Fixes to __repr__() implementation of many built-in ASN.1 types to take into
   account all of their initializers such as tagSet, subtypeSpec etc.

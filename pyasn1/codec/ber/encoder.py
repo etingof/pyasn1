@@ -114,13 +114,17 @@ class IntegerEncoder(AbstractItemEncoder):
 class BitStringEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         if not maxChunkSize or len(value) <= maxChunkSize*8:
-            r = {}; l = len(value); p = 0; j = 7
-            while p < l:
-                i, j = divmod(p, 8)
-                r[i] = r.get(i,0) | value[p]<<(7-j)
-                p = p + 1
-            keys = list(r); keys.sort()
-            return int2oct(7-j) + ints2octs([r[k] for k in keys]), 0
+            out_len = (len(value) + 7) // 8
+            out_list = out_len * [0]
+            j = 7
+            i = -1
+            for val in value:
+                j += 1
+                if j == 8:
+                    i += 1
+                    j = 0
+                out_list[i] = out_list[i] | val << (7-j)
+            return int2oct(7-j) + ints2octs(out_list), 0
         else:
             pos = 0; substrate = null
             while 1:

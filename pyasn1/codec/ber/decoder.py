@@ -129,14 +129,14 @@ class BitStringDecoder(AbstractSimpleDecoder):
                     'Trailing bits overflow %s' % trailingBits
                     )
             head = head[1:]
-            lsb = p = 0; l = len(head)-1; b = ()
+            lsb = p = 0; l = len(head)-1; b = []
             while p <= l:
                 if p == l:
                     lsb = trailingBits
                 j = 7                    
                 o = oct2int(head[p])
                 while j >= lsb:
-                    b = b + ((o>>j)&0x01,)
+                    b.append((o>>j)&0x01)
                     j = j - 1
                 p = p + 1
             return self._createComponent(asn1Spec, tagSet, b), tail
