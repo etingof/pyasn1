@@ -23,7 +23,7 @@ class Printer:
         if handler is None:
             handler = logging.StreamHandler()
         if formatter is None:
-            formatter = logging.Formatter('%(name)s: %(message)s')
+            formatter = logging.Formatter('%(asctime)s %(name)s: %(message)s')
         handler.setFormatter(formatter)
         handler.setLevel(logging.DEBUG)
         logger.addHandler(handler)
@@ -40,30 +40,40 @@ class Debug:
             self._printer = options.get('printer')
         elif self.defaultPrinter is not None:
             self._printer = self.defaultPrinter
+        if 'loggerName' in options: 
+            # route our logs to parent logger
+            self._printer = Printer(
+                logger=logging.getLogger(options['loggerName']),
+                handler=logging.NullHandler()
+            )
         else:
             self._printer = Printer()
         self('running pyasn1 version %s' % __version__)
         for f in flags:
-            if f not in flagMap:
-                raise error.PyAsn1Error('bad debug flag %s' % (f,))
-            self._flags = self._flags | flagMap[f]
-            self('debug category \'%s\' enabled' % f)
-        
+            inverse = f and f[0] in ('!', '~')
+            if inverse:
+                f = f[1:]
+            try:
+                if inverse:
+                    self._flags &= ~flagMap[f]
+                else:
+                    self._flags |= flagMap[f]
+            except KeyError:
+                raise error.PyAsn1Error('bad debug flag %s' % f)
+  
+            self('debug category \'%s\' %s' % (f, inverse and 'disabled' or 'enabled'))
+
     def __str__(self):
         return 'logger %s, flags %x' % (self._printer, self._flags)
     
     def __call__(self, msg):
-        self._printer('[%s]: %s' % (self.timestamp(), msg))
+        self._printer(msg)
 
     def __and__(self, flag):
         return self._flags & flag
 
     def __rand__(self, flag):
         return flag & self._flags
-
-    def timestamp(self):
-        return time.strftime('%H:%M:%S', time.localtime()) + \
-               '.%.3d' % int((time.time() % 1) * 1000)
 
 logger = 0
 
