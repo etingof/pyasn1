@@ -402,13 +402,13 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
     def prettyOut(self, value):
         if sys.version_info[0] <= 2:
-            numbers = tuple([ ord(x) for x in value ])
+            numbers = tuple(( ord(x) for x in value ))
         else:
             numbers = tuple(value)
-        if [ x for x in numbers if x < 32 or x > 126 ]:
-            return '0x' + ''.join([ '%.2x' % x for x in numbers ])
-        else:
+        if all(x < 32 or x > 126 for x in numbers):
             return str(value)
+        else:
+            return '0x' + ''.join(( '%.2x' % x for x in numbers ))
 
     def __repr__(self):
         r = []
