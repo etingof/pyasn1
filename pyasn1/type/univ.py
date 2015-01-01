@@ -405,7 +405,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
             numbers = tuple(( ord(x) for x in value ))
         else:
             numbers = tuple(value)
-        if all(x < 32 or x > 126 for x in numbers):
+        if all(x >= 32 and x <= 126 for x in numbers):
             return str(value)
         else:
             return '0x' + ''.join(( '%.2x' % x for x in numbers ))
