@@ -279,6 +279,15 @@ class BitString(base.AbstractSimpleAsn1Item):
     def prettyOut(self, value):
         return '\"\'%s\'B\"' % ''.join([str(x) for x in value])
 
+try:
+    all
+except NameError:  # Python 2.4
+    def all(iterable):
+        for element in iterable:
+            if not element:
+                return False
+        return True
+
 class OctetString(base.AbstractSimpleAsn1Item):
     tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x04)
