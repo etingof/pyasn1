@@ -631,6 +631,12 @@ class Real(base.AbstractSimpleAsn1Item):
         else:
             return str(value)
 
+    def prettyPrint(self, scope=0):
+        if self.isInfinity():
+            return self.prettyOut(self._value)
+        else:
+            return str(float(self))
+
     def isPlusInfinity(self): return self._value == self._plusInf
     def isMinusInfinity(self): return self._value == self._minusInf
     def isInfinity(self): return self._value in self._inf
