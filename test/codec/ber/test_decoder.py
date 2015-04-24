@@ -382,6 +382,14 @@ class RealDecoderTestCase(unittest.TestCase):
         else:
             assert 0, 'wrong tagFormat worked out'
 
+    def testShortEncoding(self):
+        try:
+            decoder.decode(ints2octs((9, 1, 131)))
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'accepted too-short real'
+
 class SequenceDecoderTestCase(unittest.TestCase):
     def setUp(self):
         self.s = univ.Sequence(componentType=namedtype.NamedTypes(
