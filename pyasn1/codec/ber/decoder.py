@@ -144,7 +144,7 @@ class BitStringDecoder(AbstractSimpleDecoder):
         if substrateFun:
             return substrateFun(r, substrate, length)
         while head:
-            component, head = decodeFun(head)
+            component, head = decodeFun(head, self.protoComponent)
             r = r + component
         return r, tail
 
@@ -154,7 +154,7 @@ class BitStringDecoder(AbstractSimpleDecoder):
         if substrateFun:
             return substrateFun(r, substrate, length)
         while substrate:
-            component, substrate = decodeFun(substrate)
+            component, substrate = decodeFun(substrate, self.protoComponent)
             if eoo.endOfOctets.isSameTypeWith(component) and \
                     component == eoo.endOfOctets:
                 break
@@ -177,7 +177,7 @@ class OctetStringDecoder(AbstractSimpleDecoder):
         if substrateFun:
             return substrateFun(r, substrate, length)
         while head:
-            component, head = decodeFun(head)
+            component, head = decodeFun(head, self.protoComponent)
             r = r + component
         return r, tail
 
@@ -187,7 +187,7 @@ class OctetStringDecoder(AbstractSimpleDecoder):
         if substrateFun:
             return substrateFun(r, substrate, length)
         while substrate:
-            component, substrate = decodeFun(substrate)
+            component, substrate = decodeFun(substrate, self.protoComponent)
             if eoo.endOfOctets.isSameTypeWith(component) and \
                     component == eoo.endOfOctets:
                 break

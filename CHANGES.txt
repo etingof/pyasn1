@@ -52,6 +52,8 @@ Revision 0.1.8rc2
 - Fix to REAL type binary decoder to handle different bases and scale factor.
 - Fix to TagSet.repr() to include [obsolete] baseTag information.
 - Fix to broken REAL type decoding handling.
+- Fix to BitString and OctetString decoders dealing with constructed
+  encoding -- it used to be possible to embed other types in substrate.
 
 Revision 0.1.7
 --------------
