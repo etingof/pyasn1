@@ -36,11 +36,6 @@ class AbstractConstructedDecoder(AbstractDecoder):
         else:
             return asn1Spec.clone()
                                 
-class EndOfOctetsDecoder(AbstractSimpleDecoder):
-    def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
-                     length, state, decodeFun, substrateFun):
-        return eoo.endOfOctets, substrate[length:]
-
 class ExplicitTagDecoder(AbstractSimpleDecoder):
     protoComponent = univ.Any('')
     tagFormats = (tag.tagFormatConstructed,)
@@ -63,7 +58,7 @@ class ExplicitTagDecoder(AbstractSimpleDecoder):
                        substrate, length
                    )
         value, substrate = decodeFun(substrate, asn1Spec, tagSet, length)
-        terminator, substrate = decodeFun(substrate)
+        terminator, substrate = decodeFun(substrate, allowEoo=True)
         if eoo.endOfOctets.isSameTypeWith(terminator) and \
                 terminator == eoo.endOfOctets:
             return value, substrate
@@ -154,7 +149,8 @@ class BitStringDecoder(AbstractSimpleDecoder):
         if substrateFun:
             return substrateFun(r, substrate, length)
         while substrate:
-            component, substrate = decodeFun(substrate, self.protoComponent)
+            component, substrate = decodeFun(substrate, self.protoComponent,
+                                             allowEoo=True)
             if eoo.endOfOctets.isSameTypeWith(component) and \
                     component == eoo.endOfOctets:
                 break
@@ -187,7 +183,8 @@ class OctetStringDecoder(AbstractSimpleDecoder):
         if substrateFun:
             return substrateFun(r, substrate, length)
         while substrate:
-            component, substrate = decodeFun(substrate, self.protoComponent)
+            component, substrate = decodeFun(substrate, self.protoComponent,
+                                             allowEoo=True)
             if eoo.endOfOctets.isSameTypeWith(component) and \
                     component == eoo.endOfOctets:
                 break
@@ -360,7 +357,7 @@ class SequenceDecoder(AbstractConstructedDecoder):
         idx = 0
         while substrate:
             asn1Spec = self._getComponentTagMap(r, idx)
-            component, substrate = decodeFun(substrate, asn1Spec)
+            component, substrate = decodeFun(substrate, asn1Spec, allowEoo=True)
             if eoo.endOfOctets.isSameTypeWith(component) and \
                     component == eoo.endOfOctets:
                 break
@@ -402,7 +399,7 @@ class SequenceOfDecoder(AbstractConstructedDecoder):
         asn1Spec = r.getComponentType()
         idx = 0
         while substrate:
-            component, substrate = decodeFun(substrate, asn1Spec)
+            component, substrate = decodeFun(substrate, asn1Spec, allowEoo=True)
             if eoo.endOfOctets.isSameTypeWith(component) and \
                     component == eoo.endOfOctets:
                 break
@@ -461,7 +458,8 @@ class ChoiceDecoder(AbstractConstructedDecoder):
             return substrateFun(r, substrate, length)
         if r.getTagSet() == tagSet: # explicitly tagged Choice
             component, substrate = decodeFun(substrate, r.getComponentTagMap())
-            eooMarker, substrate = decodeFun(substrate)  # eat up EOO marker
+            # eat up EOO marker
+            eooMarker, substrate = decodeFun(substrate, allowEoo=True)
             if not eoo.endOfOctets.isSameTypeWith(eooMarker) or \
                     eooMarker != eoo.endOfOctets:
                 raise error.PyAsn1Error('No EOO seen before substrate ends')
@@ -509,7 +507,7 @@ class AnyDecoder(AbstractSimpleDecoder):
         if substrateFun:
             return substrateFun(r, substrate, length)
         while substrate:
-            component, substrate = decodeFun(substrate, asn1Spec)
+            component, substrate = decodeFun(substrate, asn1Spec, allowEoo=True)
             if eoo.endOfOctets.isSameTypeWith(component) and \
                     component == eoo.endOfOctets:
                 break
@@ -553,7 +551,6 @@ class UTCTimeDecoder(OctetStringDecoder):
     protoComponent = useful.UTCTime()
 
 tagMap = {
-    eoo.endOfOctets.tagSet: EndOfOctetsDecoder(),
     univ.Integer.tagSet: IntegerDecoder(),
     univ.Boolean.tagSet: BooleanDecoder(),
     univ.BitString.tagSet: BitStringDecoder(),
@@ -581,7 +578,7 @@ tagMap = {
     useful.ObjectDescriptor.tagSet: ObjectDescriptorDecoder(),
     useful.GeneralizedTime.tagSet: GeneralizedTimeDecoder(),
     useful.UTCTime.tagSet: UTCTimeDecoder()
-    }
+}
 
 # Type-to-codec map for ambiguous ASN.1 types
 typeMap = {
@@ -591,7 +588,7 @@ typeMap = {
     univ.SequenceOf.typeId: SequenceOfDecoder(),
     univ.Choice.typeId: ChoiceDecoder(),
     univ.Any.typeId: AnyDecoder()
-    }
+}
 
 ( stDecodeTag, stDecodeLength, stGetValueDecoder, stGetValueDecoderByAsn1Spec,
   stGetValueDecoderByTag, stTryAsExplicitTag, stDecodeValue,
@@ -604,20 +601,18 @@ class Decoder:
     def __init__(self, tagMap, typeMap={}):
         self.__tagMap = tagMap
         self.__typeMap = typeMap
-        self.__endOfOctetsTagSet = eoo.endOfOctets.getTagSet()
         # Tag & TagSet objects caches
         self.__tagCache = {}
         self.__tagSetCache = {}
         
     def __call__(self, substrate, asn1Spec=None, tagSet=None,
                  length=None, state=stDecodeTag, recursiveFlag=1,
-                 substrateFun=None):
+                 substrateFun=None, allowEoo=False):
         if debug.logger & debug.flagDecoder:
             debug.logger('decoder called at scope %s with state %d, working with up to %d octets of substrate: %s' % (debug.scope, state, len(substrate), debug.hexdump(substrate)))
         fullSubstrate = substrate
         while state != stStop:
             if state == stDecodeTag:
-                # Decode tag
                 if not substrate:
                     raise error.SubstrateUnderrunError(
                         'Short octet stream on tag decoding'
@@ -625,13 +620,25 @@ class Decoder:
                 if not isOctetsType(substrate) and \
                    not isinstance(substrate, univ.OctetString):
                     raise error.PyAsn1Error('Bad octet stream type')
-                
+                # Decode tag
                 firstOctet = substrate[0]
                 substrate = substrate[1:]
                 if firstOctet in self.__tagCache:
                     lastTag = self.__tagCache[firstOctet]
                 else:
                     t = oct2int(firstOctet)
+                    # Look for end-of-octets sentinel
+                    if t == 0:
+                        if substrate and oct2int(substrate[0]) == 0:
+                            if allowEoo:
+                                debug.logger and debug.logger & debug.flagDecoder and debug.logger('end-of-octets sentinel found')
+                                value, substrate = eoo.endOfOctets, substrate[1:]
+                                state = stStop
+                                continue
+                            else:
+                                raise error.PyAsn1Error('Unexpected end-of-contents sentinel')
+                        else:
+                            raise error.PyAsn1Error('Zero tag encountered')
                     tagClass = t&0xC0
                     tagFormat = t&0x20
                     tagId = t&0x1F
@@ -649,7 +656,7 @@ class Decoder:
                                 break
                     lastTag = tag.Tag(
                         tagClass=tagClass, tagFormat=tagFormat, tagId=tagId
-                        )
+                    )
                     if tagId < 31:
                         # cache short tags
                         self.__tagCache[firstOctet] = lastTag
@@ -780,10 +787,6 @@ class Decoder:
                         state = stDecodeValue
                     else:
                         state = stTryAsExplicitTag
-                elif tagSet == self.__endOfOctetsTagSet:
-                    concreteDecoder = self.__tagMap[tagSet]
-                    state = stDecodeValue
-                    debug.logger and debug.logger & debug.flagDecoder and debug.logger('end-of-octets found')
                 else:
                     concreteDecoder = None
                     state = stTryAsExplicitTag
@@ -823,7 +826,7 @@ class Decoder:
             if state == stErrorCondition:
                 raise error.PyAsn1Error(
                     '%s not in asn1Spec: %s' % (tagSet, asn1Spec)
-                    )
+                )
         if debug.logger and debug.logger & debug.flagDecoder:
             debug.scope.pop()
             debug.logger('decoder left scope %s, call completed' % debug.scope)

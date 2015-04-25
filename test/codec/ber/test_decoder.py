@@ -1,5 +1,5 @@
 from pyasn1.type import tag, namedtype, univ
-from pyasn1.codec.ber import decoder
+from pyasn1.codec.ber import decoder, eoo
 from pyasn1.compat.octets import ints2octs, str2octs, null
 from pyasn1.error import PyAsn1Error
 from sys import version_info
@@ -660,5 +660,55 @@ class AnyDecoderTestCase(unittest.TestCase):
             asn1Spec=self.s,
             substrateFun=lambda a,b,c: (b,c)
         ) == (ints2octs((164, 5, 4, 3, 102, 111, 120)), 7)
+
+class EndOfOctetsTestCase(unittest.TestCase):
+    def testUnexpectedEoo(self):
+        try:
+            decoder.decode(ints2octs((0, 0)))
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'end-of-contents octets accepted at top level'
+
+    def testExpectedEoo(self):
+        result, remainder = decoder.decode(ints2octs((0, 0)), allowEoo=True)
+        assert eoo.endOfOctets.isSameTypeWith(result) and result == eoo.endOfOctets
+        assert remainder == null
+
+    def testDefiniteNoEoo(self):
+        try:
+            decoder.decode(ints2octs((0x23, 0x02, 0x00, 0x00)))
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'end-of-contents octets accepted inside definite-length encoding'
+
+    def testIndefiniteEoo(self):
+        result, remainder = decoder.decode(ints2octs((0x23, 0x80, 0x00, 0x00)))
+        assert result == () and remainder == null, 'incorrect decoding of indefinite length end-of-octets'
+
+    def testNoLongFormEoo(self):
+        try:
+            decoder.decode(ints2octs((0x23, 0x80, 0x00, 0x81, 0x00)))
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'end-of-contents octets accepted with invalid long-form length'
+
+    def testNoConstructedEoo(self):
+        try:
+            decoder.decode(ints2octs((0x23, 0x80, 0x20, 0x00)))
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'end-of-contents octets accepted with invalid constructed encoding'
+
+    def testNoEooData(self):
+        try:
+            decoder.decode(ints2octs((0x23, 0x80, 0x00, 0x01, 0x00)))
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'end-of-contents octets accepted with unexpected data'
 
 if __name__ == '__main__': unittest.main()
