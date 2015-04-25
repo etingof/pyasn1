@@ -17,12 +17,13 @@ tagMap.update({
     univ.OctetString.tagSet: encoder.encoder.OctetStringEncoder(),
     # Set & SetOf have same tags
     univ.SetOf().tagSet: SetOfEncoder()
-    })
+})
 
 typeMap = encoder.typeMap
 
 class Encoder(encoder.Encoder):
-    def __call__(self, client, defMode=1, maxChunkSize=0):
+    supportIndefLength = False
+    def __call__(self, client, defMode=True, maxChunkSize=0):
         return encoder.Encoder.__call__(self, client, defMode, maxChunkSize)
-        
+
 encode = Encoder(tagMap, typeMap)

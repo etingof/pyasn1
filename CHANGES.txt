@@ -58,6 +58,7 @@ Revision 0.1.8rc2
   * require strict two-zeros sentinel encoding
   * recognize EOO sentinel only when explicitly requested by caller
     of the decoder (via allowEoo=True parameter)
+- DER codec hardened not to tolerate indefinite length encoding/decoding.
 
 Revision 0.1.7
 --------------

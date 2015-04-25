@@ -598,6 +598,7 @@ class Decoder:
     defaultErrorState = stErrorCondition
 #    defaultErrorState = stDumpRawValue
     defaultRawDecoder = AnyDecoder()
+    supportIndefLength = True
     def __init__(self, tagMap, typeMap={}):
         self.__tagMap = tagMap
         self.__typeMap = typeMap
@@ -630,7 +631,7 @@ class Decoder:
                     # Look for end-of-octets sentinel
                     if t == 0:
                         if substrate and oct2int(substrate[0]) == 0:
-                            if allowEoo:
+                            if allowEoo and self.supportIndefLength:
                                 debug.logger and debug.logger & debug.flagDecoder and debug.logger('end-of-octets sentinel found')
                                 value, substrate = eoo.endOfOctets, substrate[1:]
                                 state = stStop
@@ -704,6 +705,8 @@ class Decoder:
                     raise error.SubstrateUnderrunError(
                         '%d-octet short' % (length - len(substrate))
                         )
+                if length == -1 and not self.supportIndefLength:
+                    error.PyAsn1Error('Indefinite length encoding not supported by this codec')
                 state = stGetValueDecoder
                 debug.logger and debug.logger & debug.flagDecoder and debug.logger('value length decoded into %d, payload substrate is: %s' % (length, debug.hexdump(length == -1 and substrate or substrate[:length])))
             if state == stGetValueDecoder:

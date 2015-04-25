@@ -15,13 +15,13 @@ class BitStringEncoder(encoder.BitStringEncoder):
     def encodeValue(self, encodeFun, client, defMode, maxChunkSize):
         return encoder.BitStringEncoder.encodeValue(
             self, encodeFun, client, defMode, 1000
-            )
+        )
 
 class OctetStringEncoder(encoder.OctetStringEncoder):
     def encodeValue(self, encodeFun, client, defMode, maxChunkSize):
         return encoder.OctetStringEncoder.encodeValue(
             self, encodeFun, client, defMode, 1000
-            )
+        )
 
 class RealEncoder(encoder.RealEncoder):
     def _chooseEncBase(self, value):
@@ -75,16 +75,16 @@ tagMap.update({
     univ.OctetString.tagSet: OctetStringEncoder(),
     univ.Real.tagSet: RealEncoder(),
     univ.SetOf().tagSet: SetOfEncoder()  # conflcts with Set
-    })
+})
 
 typeMap = encoder.typeMap.copy()
 typeMap.update({
     univ.Set.typeId: SetOfEncoder(),
     univ.SetOf.typeId: SetOfEncoder()
-    })
+})
 
 class Encoder(encoder.Encoder):
-    def __call__(self, client, defMode=0, maxChunkSize=0):
+    def __call__(self, client, defMode=False, maxChunkSize=0):
         return encoder.Encoder.__call__(self, client, defMode, maxChunkSize)
 
 encode = Encoder(tagMap, typeMap)

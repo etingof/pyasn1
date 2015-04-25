@@ -17,6 +17,13 @@ class OctetStringEncoderTestCase(unittest.TestCase):
         assert encoder.encode(
             univ.OctetString('Quick brown fox')
             ) == ints2octs((4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120))
+    def testIndefMode(self):
+        try:
+            assert encoder.encode(univ.OctetString('Quick brown'), defMode=0)
+        except PyAsn1Error:
+            pass
+        else:
+            assert 1, 'Indefinite length encoding tolerated'
 
 class BitStringEncoderTestCase(unittest.TestCase):
     def testShortMode(self):
