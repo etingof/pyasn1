@@ -1,4 +1,4 @@
-from pyasn1.type import tag, namedtype, univ
+from pyasn1.type import tag, namedtype, univ, char
 from pyasn1.codec.ber import decoder, eoo
 from pyasn1.compat.octets import ints2octs, str2octs, null
 from pyasn1.error import PyAsn1Error
@@ -396,6 +396,18 @@ class RealDecoderTestCase(unittest.TestCase):
             pass
         else:
             assert 0, 'accepted too-short real'
+
+class UniversalStringDecoderTestCase(unittest.TestCase):
+    def testDecoder(self):
+        assert decoder.decode(ints2octs((28, 12, 0, 0, 0, 97, 0, 0, 0, 98, 0, 0, 0, 99))) == (char.UniversalString(u'abc'), null)
+
+class BMPStringDecoderTestCase(unittest.TestCase):
+    def testDecoder(self):
+        assert decoder.decode(ints2octs((30, 6, 0, 97, 0, 98, 0, 99))) == (char.BMPString(u'abc'), null)
+
+class UTF8StringDecoderTestCase(unittest.TestCase):
+    def testDecoder(self):
+        assert decoder.decode(ints2octs((12, 3, 97, 98, 99))) == (char.UTF8String(u'abc'), null)
 
 class SequenceDecoderTestCase(unittest.TestCase):
     def setUp(self):

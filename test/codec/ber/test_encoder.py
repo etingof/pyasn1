@@ -1,4 +1,4 @@
-from pyasn1.type import tag, namedtype, univ
+from pyasn1.type import tag, namedtype, univ, char
 from pyasn1.codec.ber import encoder
 from pyasn1.compat.octets import ints2octs
 from pyasn1.error import PyAsn1Error
@@ -294,6 +294,18 @@ class RealEncoderTestCase(unittest.TestCase):
     def testZero(self):
         assert encoder.encode(univ.Real(0)) == ints2octs((9, 0))
         
+class UniversalStringEncoderTestCase(unittest.TestCase):
+    def testEncoding(self):
+        assert encoder.encode(char.UniversalString(u'abc')) == ints2octs((28, 12, 0, 0, 0, 97, 0, 0, 0, 98, 0, 0, 0, 99)), 'Incorrect encoding'
+        
+class BMPStringEncoderTestCase(unittest.TestCase):
+    def testEncoding(self):
+        assert encoder.encode(char.BMPString(u'abc')) == ints2octs((30, 6, 0, 97, 0, 98, 0, 99)), 'Incorrect encoding'
+
+class UTF8StringEncoderTestCase(unittest.TestCase):
+    def testEncoding(self):
+        assert encoder.encode(char.UTF8String(u'abc')) == ints2octs((12, 3, 97, 98, 99)), 'Incorrect encoding'
+
 class SequenceEncoderTestCase(unittest.TestCase):
     def setUp(self):
         self.s = univ.Sequence(componentType=namedtype.NamedTypes(
