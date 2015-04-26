@@ -1,4 +1,4 @@
-Revision 0.1.8rc2
+Revision 0.1.8rc3
 -----------------
 
 - ObjectIdentifier codec fixed to work properly with arc 0 and arc 2 values.
@@ -49,6 +49,7 @@ Revision 0.1.8rc2
 - String typed float initializer to REAL type now supported.
 - Float typed mantissa initializer to REAL type for base 2 added.
 - Encoding bases 8 and 16 support for REAL type binary encoder added.
+- More strict CER/DER encoders added for GeneralizedTime and UTCTime types.
 - Fix to REAL type binary decoder to handle different bases and scale factor.
 - Fix to TagSet.repr() to include [obsolete] baseTag information.
 - Fix to broken REAL type decoding handling.

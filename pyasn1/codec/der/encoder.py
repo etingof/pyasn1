@@ -12,7 +12,7 @@ class SetOfEncoder(encoder.SetOfEncoder):
 
 tagMap = encoder.tagMap.copy()
 tagMap.update({
-    # Overload CER encodrs with BER ones (a bit hackerish XXX)
+    # Overload CER encoders with BER ones (a bit hackerish XXX)
     univ.BitString.tagSet: encoder.encoder.BitStringEncoder(),
     univ.OctetString.tagSet: encoder.encoder.OctetStringEncoder(),
     # Set & SetOf have same tags
