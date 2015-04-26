@@ -104,7 +104,7 @@ class BitStringDecoderTestCase(unittest.TestCase):
             decoder.decode(ints2octs((35, 4, 2, 2, 42, 42)))
         except PyAsn1Error:
             pass
-        except:
+        else:
             assert 0, 'accepted mis-encoded bit-string constructed out of an integer'
 
 class OctetStringDecoderTestCase(unittest.TestCase):
@@ -394,7 +394,7 @@ class RealDecoderTestCase(unittest.TestCase):
             decoder.decode(ints2octs((9, 1, 131)))
         except PyAsn1Error:
             pass
-        except:
+        else:
             assert 0, 'accepted too-short real'
 
 class SequenceDecoderTestCase(unittest.TestCase):

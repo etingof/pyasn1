@@ -23,7 +23,7 @@ class OctetStringEncoderTestCase(unittest.TestCase):
         except PyAsn1Error:
             pass
         else:
-            assert 1, 'Indefinite length encoding tolerated'
+            assert 0, 'Indefinite length encoding tolerated'
 
 class BitStringEncoderTestCase(unittest.TestCase):
     def testShortMode(self):

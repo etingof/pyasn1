@@ -26,6 +26,6 @@ class OctetStringDecoderTestCase(unittest.TestCase):
         except PyAsn1Error:
             pass
         else:
-            assert 1, 'indefinite length encoding tolerated'
+            assert 0, 'indefinite length encoding tolerated'
 
 if __name__ == '__main__': unittest.main()
