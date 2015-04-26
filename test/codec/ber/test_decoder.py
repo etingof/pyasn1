@@ -397,17 +397,18 @@ class RealDecoderTestCase(unittest.TestCase):
         else:
             assert 0, 'accepted too-short real'
 
-class UniversalStringDecoderTestCase(unittest.TestCase):
-    def testDecoder(self):
-        assert decoder.decode(ints2octs((28, 12, 0, 0, 0, 97, 0, 0, 0, 98, 0, 0, 0, 99))) == (char.UniversalString(u'abc'), null)
+if version_info[0:2] > (2, 5):
+    class UniversalStringDecoderTestCase(unittest.TestCase):
+        def testDecoder(self):
+             assert decoder.decode(ints2octs((28, 12, 0, 0, 0, 97, 0, 0, 0, 98, 0, 0, 0, 99))) == (char.UniversalString(version_info[0] == 3 and 'abc' or unicode('abc')), null)
 
 class BMPStringDecoderTestCase(unittest.TestCase):
     def testDecoder(self):
-        assert decoder.decode(ints2octs((30, 6, 0, 97, 0, 98, 0, 99))) == (char.BMPString(u'abc'), null)
+        assert decoder.decode(ints2octs((30, 6, 0, 97, 0, 98, 0, 99))) == (char.BMPString(version_info[0] == 3 and 'abc' or unicode('abc')), null)
 
 class UTF8StringDecoderTestCase(unittest.TestCase):
     def testDecoder(self):
-        assert decoder.decode(ints2octs((12, 3, 97, 98, 99))) == (char.UTF8String(u'abc'), null)
+        assert decoder.decode(ints2octs((12, 3, 97, 98, 99))) == (char.UTF8String(version_info[0] == 3 and 'abc' or unicode('abc')), null)
 
 class SequenceDecoderTestCase(unittest.TestCase):
     def setUp(self):

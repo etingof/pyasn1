@@ -335,7 +335,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
             elif isinstance(value, unicode):
                 try:
                     return value.encode(self._encoding)
-                except UnicodeEncodeError:
+                except (LookupError, UnicodeEncodeError):
                     raise error.PyAsn1Error(
                         'Can\'t encode string \'%s\' with \'%s\' codec' % (value, self._encoding)
                     )
