@@ -12,7 +12,7 @@ FEATURES
 
 * Generic implementation of ASN.1 types (X.208)
 * Fully standard compliant BER/CER/DER codecs
-* 100% Python, works with Python 2.4 up to Python 3.3 (beta 1)
+* 100% Python, works with Python 2.4 up to Python 3.4
 * MT-safe
 
 MISFEATURES
@@ -31,8 +31,8 @@ $ easy_install pyasn1
 
 or
 
-$ tar zxf pyasn1-0.1.7.tar.gz
-$ cd pyasn1-0.1.7
+$ tar zxf pyasn1-0.1.8.tar.gz
+$ cd pyasn1-0.1.8
 $ python setup.py install
 $ python setup.py test    # run unit tests (optional)
 
