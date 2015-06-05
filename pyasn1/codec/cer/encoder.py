@@ -38,16 +38,17 @@ class GeneralizedTimeEncoder(OctetStringEncoder):
     def encodeValue(self, encodeFun, client, defMode, maxChunkSize):
         octets = client.asOctets()
         if '+' in octets:
-            raise error.PyAsn1Error('Must be UTC time')
-        if '.' not in octets:
-            raise error.PyAsn1Error('Format must include fraction of second')
+            raise error.PyAsn1Error('Must be UTC time: %r' % octets)
+# This breaks too many existing data items
+#        if '.' not in octets:
+#            raise error.PyAsn1Error('Format must include fraction of second: %r' % octets)
         if octets and octets[-1] != self.zchar:
-            raise error.PyAsn1Error('Missing timezone specifier')
-        if len(octets) < 16:
-            raise error.PyAsn1Error('Bad UTC time length')
+            raise error.PyAsn1Error('Missing timezone specifier: %r' % octets)
+        if len(octets) < 15:
+            raise error.PyAsn1Error('Bad UTC time length: %r' % octets)
         if octets[-2] == self.zero or \
                 octets[-3] != self.zero and octets[-2] == self.zero:
-            raise error.PyAsn1Error('Meningless zero in fraction of second')
+            raise error.PyAsn1Error('Meningless zero in fraction of second: %r' % octets)
         return encoder.OctetStringEncoder.encodeValue(
             self, encodeFun, client, defMode, 1000
         )
@@ -57,13 +58,11 @@ class UTCTimeEncoder(encoder.OctetStringEncoder):
     def encodeValue(self, encodeFun, client, defMode, maxChunkSize):
         octets = client.asOctets()
         if '+' in octets:
-            raise error.PyAsn1Error('Must be UTC time')
-        if '.' in octets:
-            raise error.PyAsn1Error('Must be no fraction of second')
+            raise error.PyAsn1Error('Must be UTC time: %r' % octets)
         if octets and octets[-1] != self.zchar:
             client = client.clone(octets + self.zchar)
         if len(client) != 13:
-            raise error.PyAsn1Error('Bad UTC time length')
+            raise error.PyAsn1Error('Bad UTC time length: %r' % client)
         return encoder.OctetStringEncoder.encodeValue(
             self, encodeFun, client, defMode, 1000
         )
