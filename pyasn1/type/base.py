@@ -101,6 +101,9 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         def __bool__(self): return bool(self._value)
     def __hash__(self): return self.__hashedValue
 
+    def hasValue(self):
+        return not isinstance(self._value, NoValue)
+
     def clone(self, value=None, tagSet=None, subtypeSpec=None):
         if value is None and tagSet is None and subtypeSpec is None:
             return self
@@ -132,10 +135,10 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
     def prettyOut(self, value): return str(value)
 
     def prettyPrint(self, scope=0):
-        if self._value is noValue:
-            return '<no value>'
-        else:
+        if self.hasValue():
             return self.prettyOut(self._value)
+        else:
+            return '<no value>'
 
     # XXX Compatibility stub
     def prettyPrinter(self, scope=0): return self.prettyPrint(scope)

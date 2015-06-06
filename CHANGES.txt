@@ -50,6 +50,8 @@ Revision 0.1.8rc3
 - Float typed mantissa initializer to REAL type for base 2 added.
 - Encoding bases 8 and 16 support for REAL type binary encoder added.
 - More strict CER/DER encoders added for GeneralizedTime and UTCTime types.
+- Asn1Item.hasValue() added to easily distinguish initalized ASN.1 objects
+  from uninitialized ones (e.g. pure types).
 - Fix to REAL type binary decoder to handle different bases and scale factor.
 - Fix to TagSet.repr() to include [obsolete] baseTag information.
 - Fix to broken REAL type decoding handling.
