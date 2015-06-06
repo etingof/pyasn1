@@ -135,15 +135,17 @@ class GeneralizedTimeEncoderTestCase(unittest.TestCase):
         else:
             assert 0, 'Missing timezone tolerated'
 
-    def testDecimalPoint(self):
-        try:
-            assert encoder.encode(
-                    useful.GeneralizedTime('20150501120112Z')
-             )
-        except PyAsn1Error:
-            pass
-        else:
-            assert 0, 'Missing decimal point tolerated'
+# When enabled, this breaks many existing encodings
+#
+#    def testDecimalPoint(self):
+#        try:
+#            assert encoder.encode(
+#                    useful.GeneralizedTime('20150501120112Z')
+#             )
+#        except PyAsn1Error:
+#            pass
+#        else:
+#            assert 0, 'Missing decimal point tolerated'
 
 class UTCTimeEncoderTestCase(unittest.TestCase):
     def testFractionOfSecond(self):
