@@ -1,5 +1,10 @@
-Revision 0.1.8
+Revision 0.1.9
 --------------
+
+- Extensions added to text files, CVS attic flushed.
+
+Revision 0.1.8, released 22-06-2015
+-----------------------------------
 
 - ObjectIdentifier codec fixed to work properly with arc 0 and arc 2 values.
 - Explicit limit on ObjectIdentifier arc value size removed.
