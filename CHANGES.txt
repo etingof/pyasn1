@@ -2,6 +2,7 @@ Revision 0.1.9
 --------------
 
 - Extensions added to text files, CVS attic flushed.
+- Fix to make uninitilaized pyasn1 objects failing properly on hash().
 
 Revision 0.1.8, released 22-06-2015
 -----------------------------------

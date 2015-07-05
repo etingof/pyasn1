@@ -99,7 +99,8 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         def __nonzero__(self): return bool(self._value)
     else:
         def __bool__(self): return bool(self._value)
-    def __hash__(self): return self.__hashedValue
+    def __hash__(self):
+        return self.__hashedValue is noValue and hash(noValue) or self.__hashedValue
 
     def hasValue(self):
         return not isinstance(self._value, NoValue)
