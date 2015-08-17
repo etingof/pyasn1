@@ -1,6 +1,7 @@
 Revision 0.1.9
 --------------
 
+- Wheel distribution format now supported.
 - Extensions added to text files, CVS attic flushed.
 - Fix to make uninitilaized pyasn1 objects failing properly on hash().
 
