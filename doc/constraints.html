@@ -146,8 +146,50 @@ pyasn1.type.error.ValueConstraintError:
 </td></tr></table>
 
 <p>
-Value range constraint usually applies numeric types.
+Value range constraint usually applies to numeric types.
 </p>
+
+<p>
+ASN.1 MIN and MAX operands can be substituted with floating
+point infinity values.
+</p>
+
+<table bgcolor="lightgray" border=0 width=100%><TR><TD>
+<pre>
+NegativeInt ::= INTEGER (MIN..-1)
+PositiveInt ::= INTEGER (1..MAX)
+</pre>
+</td></tr></table>
+
+<p>
+And in pyasn1 terms:
+</p>
+
+<table bgcolor="lightgray" border=0 width=100%><TR><TD>
+<pre>
+>>> from pyasn1.type import univ, constraint
+>>> class NegativeInt(univ.Integer):
+...   subtypeSpec = constraint.ValueRangeConstraint(float('-inf'), -1)
+>>> NegativeInt(-1)
+NegativeInt(-1)
+>>> NegativeInt(0)
+Traceback (most recent call last):
+...
+pyasn1.type.error.ValueConstraintError:
+  ValueConstraintError: ValueRangeConstraint() failed at: "0" at NegativeInt
+>>> class PositiveInt(univ.Integer):
+...   subtypeSpec = constraint.ValueRangeConstraint(1, float('inf'))
+>> PositiveInt(1)
+PositiveInt(1)
+>> PositiveInt(4)
+PositiveInt(4)
+>> PositiveInt(-1)
+Traceback (most recent call last):
+...
+pyasn1.type.error.ValueConstraintError:
+  ValueConstraintError: ValueRangeConstraint() failed at: "-1" at PositiveInt
+</pre>
+</td></tr></table>
 
 <a name="1.4.3"></a>
 <h4>
