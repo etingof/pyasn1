@@ -533,7 +533,7 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
             pass
         elif isinstance(value, ObjectIdentifier):
             return tuple(value)        
-        elif isinstance(value, str):
+        elif octets.isStringType(value):
             r = []
             for element in [ x for x in value.split('.') if x != '' ]:
                 try:
