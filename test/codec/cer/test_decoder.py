@@ -17,6 +17,16 @@ class BooleanDecoderTestCase(unittest.TestCase):
         assert decoder.decode(ints2octs((1, 1, 255))) == (1, null)
     def testFalse(self):
         assert decoder.decode(ints2octs((1, 1, 0))) == (0, null)
+    def testEmpty(self):
+        try:
+            decoder.decode(ints2octs((1, 0)))
+        except PyAsn1Error:
+            pass
+    def testOverflow(self):
+        try:
+            decoder.decode(ints2octs((1, 2, 0, 0)))
+        except PyAsn1Error:
+            pass
         
 class OctetStringDecoderTestCase(unittest.TestCase):
     def testShortMode(self):
