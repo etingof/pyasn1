@@ -12,13 +12,16 @@ FEATURES
 
 * Generic implementation of ASN.1 types (X.208)
 * Fully standard compliant BER/CER/DER codecs
-* 100% Python, works with Python 2.4 up to Python 3.4
+* 100% Python, works with Python 2.4 up to Python 3.5
 * MT-safe
 
 MISFEATURES
 -----------
 
-* No ASN.1 compiler (by-hand ASN.1 spec compilation into Python code required)
+* No ASN.1 compiler shipped with pyasn1, so by-hand ASN.1 spec compilation 
+  into Python code would be needed. But there is a project, called Asn1ate,
+  that compiles ASN.1 documents into pyasn1 code. 
+  More info: https://github.com/kimgr/asn1ate
 * Codecs are not restartable
 
 INSTALLATION
@@ -31,8 +34,8 @@ $ easy_install pyasn1
 
 or
 
-$ tar zxf pyasn1-0.1.8.tar.gz
-$ cd pyasn1-0.1.8
+$ tar zxf pyasn1-0.1.9.tar.gz
+$ cd pyasn1-0.1.9
 $ python setup.py install
 $ python setup.py test    # run unit tests (optional)
 
