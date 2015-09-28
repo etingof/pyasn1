@@ -285,7 +285,10 @@ class ObjectIdentifier(unittest.TestCase):
     def testInput3(self):
         assert univ.ObjectIdentifier(univ.ObjectIdentifier('1.3') + (6,))==(1,3,6),'prettyIn() fails'
     def testUnicode(self):
-        assert univ.ObjectIdentifier(u'1.3.6') == (1,3,6), 'unicode init fails'
+        s = '1.3.6'
+        if version_info[0] < 3:
+            s = s.decode()
+        assert univ.ObjectIdentifier(s) == (1,3,6), 'unicode init fails'
     def testTag(self):
         assert univ.ObjectIdentifier().getTagSet() == tag.TagSet(
             (),
