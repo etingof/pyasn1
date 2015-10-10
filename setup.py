@@ -55,9 +55,10 @@ except ImportError:
     from distutils.core import setup, Command
     params = {}
 
-doclines = [ x.strip() for x in __doc__.split('\n') if x ]
+doclines = [x.strip() for x in (__doc__ or '').split('\n') if x]
 
-params.update( {
+
+params.update({
     'name': 'pyasn1',
     'version': open(os.path.join('pyasn1','__init__.py')).read().split('\'')[1],
     'description': doclines[0],
@@ -76,7 +77,7 @@ params.update( {
                   'pyasn1.codec.ber',
                   'pyasn1.codec.cer',
                   'pyasn1.codec.der' ]
-} )
+})
 
 # handle unittest discovery feature
 if sys.version_info[0:2] < (2, 7) or \
