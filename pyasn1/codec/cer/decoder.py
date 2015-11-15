@@ -4,7 +4,6 @@
 # Copyright (c) 2005-2015, Ilya Etingof <ilya@glas.net>
 # License: http://pyasn1.sf.net/license.html
 #
-# CER decoder
 from pyasn1.type import univ
 from pyasn1.codec.ber import decoder
 from pyasn1.compat.octets import oct2int

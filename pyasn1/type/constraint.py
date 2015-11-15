@@ -4,16 +4,6 @@
 # Copyright (c) 2005-2015, Ilya Etingof <ilya@glas.net>
 # License: http://pyasn1.sf.net/license.html
 #
-# ASN.1 subtype constraints classes.
-#
-# Constraints are relatively rare, but every ASN1 object
-# is doing checks all the time for whether they have any
-# constraints and whether they are applicable to the object.
-#
-# What we're going to do is define objects/functions that
-# can be called unconditionally if they are present, and that
-# are simply not present if there are no constraints.
-#
 # Original concept and code by Mike C. Fletcher.
 #
 import sys
@@ -23,7 +13,8 @@ class AbstractConstraint:
     """Abstract base-class for constraint objects
 
        Constraints should be stored in a simple sequence in the
-       namespace of their client Asn1Item sub-classes.
+       namespace of their client Asn1Item sub-classes in cases
+       when ASN.1 constraint is define.
     """
     def __init__(self, *values):
         self._valueMap = {}

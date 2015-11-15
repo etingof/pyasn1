@@ -4,7 +4,6 @@
 # Copyright (c) 2005-2015, Ilya Etingof <ilya@glas.net>
 # License: http://pyasn1.sf.net/license.html
 #
-# DER decoder
 from pyasn1.codec.cer import decoder
 
 tagMap = decoder.tagMap

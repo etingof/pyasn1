@@ -4,8 +4,6 @@
 # Copyright (c) 2005-2015, Ilya Etingof <ilya@glas.net>
 # License: http://pyasn1.sf.net/license.html
 #
-# ASN.1 "universal" data types
-#
 import operator, sys, math
 from pyasn1.type import base, tag, constraint, namedtype, namedval, tagmap
 from pyasn1.codec.ber import eoo

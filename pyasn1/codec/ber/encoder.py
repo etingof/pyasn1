@@ -4,7 +4,6 @@
 # Copyright (c) 2005-2015, Ilya Etingof <ilya@glas.net>
 # License: http://pyasn1.sf.net/license.html
 #
-# BER encoder
 from pyasn1.type import base, tag, univ, char, useful
 from pyasn1.codec.ber import eoo
 from pyasn1.compat.octets import int2oct, oct2int, ints2octs, null, str2octs

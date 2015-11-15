@@ -4,8 +4,6 @@
 # Copyright (c) 2005-2015, Ilya Etingof <ilya@glas.net>
 # License: http://pyasn1.sf.net/license.html
 #
-# ASN.1 types tags
-#
 from operator import getitem
 from pyasn1 import error
 
@@ -22,6 +20,7 @@ tagCategoryExplicit = 0x02
 tagCategoryUntagged = 0x04
 
 class Tag:
+    """ASN.1 types tags"""
     def __init__(self, tagClass, tagFormat, tagId):
         if tagId < 0:
             raise error.PyAsn1Error(
