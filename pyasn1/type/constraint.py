@@ -1,15 +1,20 @@
 #
-#   ASN.1 subtype constraints classes.
+# This file is part of pyasn1 software.
 #
-#   Constraints are relatively rare, but every ASN1 object
-#   is doing checks all the time for whether they have any
-#   constraints and whether they are applicable to the object.
+# Copyright (c) 2005-2015, Ilya Etingof <ilya@glas.net>
+# License: http://pyasn1.sf.net/license.html
 #
-#   What we're going to do is define objects/functions that
-#   can be called unconditionally if they are present, and that
-#   are simply not present if there are no constraints.
+# ASN.1 subtype constraints classes.
 #
-#   Original concept and code by Mike C. Fletcher.
+# Constraints are relatively rare, but every ASN1 object
+# is doing checks all the time for whether they have any
+# constraints and whether they are applicable to the object.
+#
+# What we're going to do is define objects/functions that
+# can be called unconditionally if they are present, and that
+# are simply not present if there are no constraints.
+#
+# Original concept and code by Mike C. Fletcher.
 #
 import sys
 from pyasn1.type import error

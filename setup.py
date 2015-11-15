@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-"""ASN.1 types and codecs
-
-   A pure-Python implementation of ASN.1 types and DER/BER/CER codecs (X.208).
-"""
-
+#
+# This file is part of pyasn1 software.
+#
+# Copyright (c) 2005-2015, Ilya Etingof <ilya@glas.net>
+# License: http://pyasn1.sf.net/license.html
+#
 import os
 import sys
 
@@ -55,14 +56,11 @@ except ImportError:
     from distutils.core import setup, Command
     params = {}
 
-doclines = [x.strip() for x in (__doc__ or '').split('\n') if x]
-
-
 params.update({
     'name': 'pyasn1',
     'version': open(os.path.join('pyasn1','__init__.py')).read().split('\'')[1],
-    'description': doclines[0],
-    'long_description': ' '.join(doclines[1:]),
+    'description': 'ASN.1 types and codecs',
+    'long_description': 'Pure-Python implementation of ASN.1 types and DER/BER/CER codecs (X.208)',
     'maintainer': 'Ilya Etingof <ilya@glas.net>',
     'author': 'Ilya Etingof',
     'author_email': 'ilya@glas.net',

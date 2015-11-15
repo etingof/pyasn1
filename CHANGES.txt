@@ -1,7 +1,7 @@
-Revision 0.1.10, released 10-10-2015
+Revision 0.1.10, released 20-11-2015
 ------------------------------------
 
-- Fix to __doc__ use in setup.py to make -O0 installation mode working.
+- Copyright notice added to non-trivial source code files.
 
 Revision 0.1.9, released 28-09-2015
 -----------------------------------

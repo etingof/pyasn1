@@ -1,3 +1,9 @@
+#
+# This file is part of pyasn1 software.
+#
+# Copyright (c) 2005-2015, Ilya Etingof <ilya@glas.net>
+# License: http://pyasn1.sf.net/license.html
+#
 # BER decoder
 from pyasn1.type import tag, univ, char, useful, tagmap
 from pyasn1.codec.ber import eoo

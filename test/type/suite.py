@@ -1,3 +1,9 @@
+#
+# This file is part of pyasn1 software.
+#
+# Copyright (c) 2005-2015, Ilya Etingof <ilya@glas.net>
+# License: http://pyasn1.sf.net/license.html
+#
 import test_tag, test_constraint, test_namedtype, test_univ
 from pyasn1.error import PyAsn1Error
 from sys import version_info

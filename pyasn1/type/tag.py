@@ -1,4 +1,11 @@
+#
+# This file is part of pyasn1 software.
+#
+# Copyright (c) 2005-2015, Ilya Etingof <ilya@glas.net>
+# License: http://pyasn1.sf.net/license.html
+#
 # ASN.1 types tags
+#
 from operator import getitem
 from pyasn1 import error
 
