@@ -71,11 +71,13 @@ Revision 0.1.8, released 22-06-2015
 - Fix to broken REAL type decoding handling.
 - Fix to BitString and OctetString decoders dealing with constructed
   encoding -- it used to be possible to embed other types in substrate.
-- Fix to end-of-octest sentinel handling:
-  * require strict two-zeros sentinel encoding
-  * recognize EOO sentinel only when explicitly requested by caller
-    of the decoder via allowEoo=True parameter (warning: API change)
 - DER codec hardened not to tolerate indefinite length encoding/decoding.
+- Fix to end-of-octest sentinel handling:
+
+  + require strict two-zeros sentinel encoding
+  + recognize EOO sentinel only when explicitly requested by caller
+    of the decoder via allowEoo=True parameter (warning: API change)
+
 
 Revision 0.1.7
 --------------
@@ -177,14 +179,14 @@ Revision 0.1.1
   + switch to rich comparation
   + drop explicit long integer type use
   + map()/filter() replaced with list comprehension
-  + apply() replaced with */**args
+  + apply() replaced with \*/\*\*args
   + switched to use 'key' sort() callback function
   + support both __nonzero__() and __bool__() methods
   + modified not to use py3k-incompatible exception syntax
   + getslice() operator fully replaced with getitem()
   + dictionary operations made 2K/3K compatible
   + base type for encoding substrate and OctetString-based types
-    is now 'bytes' when running py3k and 'str' otherwise
+  is now 'bytes' when running py3k and 'str' otherwise
   + OctetString and derivatives now unicode compliant.
   + OctetString now supports two python-neutral getters: asOcts() & asInts()
   + print OctetString content in hex whenever it is not printable otherwise
@@ -221,6 +223,7 @@ Revision 0.0.13a
 - Fix to proper behaviour of PermittedAlphabetConstraint object.
 - Fix to improper Boolean substrate handling at CER/DER decoders.
 - Changes towards performance improvement:
+
   + all dict.has_key() & dict.get() invocations replaced with modern syntax
     (this breaks compatibility with Python 2.1 and older).
   + tag and tagset caches introduced to decoder
@@ -328,7 +331,7 @@ Revision 0.0.5a
 Revision 0.0.4a
 ---------------
 
-* Asn1ItemBase.prettyPrinter() -> *.prettyPrint()
+* Asn1ItemBase.prettyPrinter() -> \*.prettyPrint()
 
 Revision 0.0.3a
 ---------------
