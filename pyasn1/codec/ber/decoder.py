@@ -654,7 +654,7 @@ class Decoder:
                     short = True
                     if tagId == 0x1F:
                         short = False
-                        tagId = 0
+                        tagId = 1
                         while 1:
                             if not substrate:
                                 raise error.SubstrateUnderrunError(
