@@ -23,7 +23,7 @@ class AbstractItemEncoder:
         else:
             s = int2oct(tagId&0x7f)
             tagId = tagId >> 7
-            while tagId:
+            while tagId > 1:
                 s = int2oct(0x80|(tagId&0x7f)) + s
                 tagId = tagId >> 7
             return int2oct(v|0x1F) + s
