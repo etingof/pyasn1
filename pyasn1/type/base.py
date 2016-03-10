@@ -1,7 +1,7 @@
 #
 # This file is part of pyasn1 software.
 #
-# Copyright (c) 2005-2015, Ilya Etingof <ilya@glas.net>
+# Copyright (c) 2005-2016, Ilya Etingof <ilya@glas.net>
 # License: http://pyasn1.sf.net/license.html
 #
 import sys
@@ -11,10 +11,12 @@ from pyasn1 import error
 class Asn1Item: pass
 
 class Asn1ItemBase(Asn1Item):
-    # Set of tags for this ASN.1 type
+    #: Default :py:class:`~pyasn1.type.tag.TagSet` object representing
+    #: ASN.1 tag(s) associated with this ASN.1 type.
     tagSet = tag.TagSet()
     
-    # A list of constraint.Constraint instances for checking values
+    #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
+    #: object imposing constraints on initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
 
     # Used for ambiguous ASN.1 types identification
@@ -44,6 +46,29 @@ class Asn1ItemBase(Asn1Item):
     def getTagMap(self): return tagmap.TagMap({self._tagSet: self})
     
     def isSameTypeWith(self, other, matchTags=True, matchConstraints=True):
+        """Evaluates ASN.1 types for equality.
+        
+        Indicates if argument is an object of the same ASN.1 type
+        as the calling type or not. ASN.1 tags (:py:mod:`~pyasn1.type.tag`)
+        and constraints (:py:mod:`~pyasn1.type.constraint`) are considered
+        when carrying out ASN.1 types comparision.
+
+        Parameters
+        ----------
+            other: a pyasn1 type object
+                Class instance representing ASN.1 type. 
+
+        Returns
+        -------
+            : :class:`bool`
+                :class:`True` if types are the same, :class:`False` otherwise.
+
+        Note
+        ----
+            No Python inheritance relationship between pyasn1 objects is
+            considered.
+
+        """
         return self is other or \
                (not matchTags or \
                 self._tagSet == other.getTagSet()) and \
@@ -51,23 +76,59 @@ class Asn1ItemBase(Asn1Item):
                 self._subtypeSpec==other.getSubtypeSpec())
 
     def isSuperTypeOf(self, other, matchTags=True, matchConstraints=True):
-        """Returns true if argument is a ASN1 subtype of ourselves"""
+        """Evaluates ASN.1 types for relationship.
+        
+        Indicates if argument is an ASN.1 type that is derived from
+        the ASN.1 type of the calling type. ASN.1 tags
+        (:py:mod:`~pyasn1.type.tag`) and constraints
+        (:py:mod:`~pyasn1.type.constraint`) are considered when carrying
+        out ASN.1 types comparision.
+
+        Parameters
+        ----------
+            other: a pyasn1 type object
+                Class instance representing ASN.1 type. 
+
+        Returns
+        -------
+            : :class:`bool`
+                :class:`True` if argument is derived from the calling type,
+                :class:`False` otherwise.
+
+        Note
+        ----
+            No Python inheritance relationship between pyasn1 objects is
+            considered.
+
+        """
         return (not matchTags or  \
                 self._tagSet.isSuperTagSetOf(other.getTagSet())) and \
                (not matchConstraints or \
                 (self._subtypeSpec.isSuperTypeOf(other.getSubtypeSpec())))
 
 class NoValue:
+    """Creates an instance of NoValue class.
+
+    NoValue object can be used as an initializer on PyASN1 type class
+    instantiation to represent ASN.1 type rather than ASN.1 data value.
+
+    No operations other than type comparision can be performed on
+    a PyASN1 type object.
+    """
     def __getattr__(self, attr):
-        raise error.PyAsn1Error('No value for %s()' % attr)
+        if attr in ('__qualname__', '__repr__', '__getitem__'):
+            raise AttributeError('attribute %s not present' % attr)
+        raise error.PyAsn1Error('No value for "%s"' % attr)
     def __getitem__(self, i):
         raise error.PyAsn1Error('No value')
-    def __repr__(self): return '%s()' % self.__class__.__name__
-    
+    def __repr__(self):
+        return '%s()' % self.__class__.__name__
+
 noValue = NoValue()
 
 # Base class for "simple" ASN.1 objects. These are immutable.
-class AbstractSimpleAsn1Item(Asn1ItemBase):    
+class AbstractSimpleAsn1Item(Asn1ItemBase):
+    #: Default payload value
     defaultValue = noValue
     def __init__(self, value=None, tagSet=None, subtypeSpec=None):
         Asn1ItemBase.__init__(self, tagSet, subtypeSpec)
@@ -108,6 +169,20 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         return self.__hashedValue is noValue and hash(noValue) or self.__hashedValue
 
     def hasValue(self):
+        """Indicates that this object represents ASN.1 value rather than ASN.1 type.
+
+        The pyasn1 type objects can only participate in types comparision
+        and serve as a blueprints for serialization codecs to resolve
+        ambiguous types. Values can additionally participate to most
+        of built-in Python operations.
+
+        Returns
+        -------
+            : :class:`bool`
+                :class:`True` if object is ASN.1 value,
+                :class:`False` otherwise.
+
+        """
         return not isinstance(self._value, NoValue)
 
     def clone(self, value=None, tagSet=None, subtypeSpec=None):
@@ -141,6 +216,14 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
     def prettyOut(self, value): return str(value)
 
     def prettyPrint(self, scope=0):
+        """Provides human-friendly printable object representation.
+
+        Returns
+        -------
+            : :class:`str`
+                human-friendly type and/or value representation.
+
+        """
         if self.hasValue():
             return self.prettyOut(self._value)
         else:
