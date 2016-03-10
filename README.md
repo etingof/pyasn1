@@ -1,8 +1,7 @@
 
-![build-status](https://travis-ci.org/etingof/pyasn1.svg?branch=master)
-
-ASN.1 library for Python 
+ASN.1 library for Python ![build-status](https://travis-ci.org/etingof/pyasn1.svg?branch=master)
 ------------------------
+
 
 This is a free and open source implementation of ASN.1 types and codecs as a Python
 package. It has been first written to support particular protocol (SNMP)
@@ -21,35 +20,30 @@ Misfeatures
 -----------
 
 * No ASN.1 compiler shipped with pyasn1, so by-hand ASN.1 spec compilation 
-  into Python code would be needed. But there is a project, called Asn1ate,
-  that compiles ASN.1 documents into pyasn1 code. 
-  [More info](https://github.com/kimgr/asn1ate)
+  into Python code would be needed. But there is a project, called
+  [Asn1ate](https://github.com/kimgr/asn1ate) that compiles ASN.1 documents
+  into pyasn1 code. 
 * Codecs are not restartable
 
 Installation
 ------------
 
-Download pyasn1 from [PyPI](https://pypi.python.org/pypi/pyasn1) by running:
+Download pyasn1 from [PyPI](https://pypi.python.org/pypi/pyasn1) or just run:
 
     $ pip install pyasn1
 
-Operation
----------
+Documentation
+-------------
 
-Perhaps a typical use would involve [by-hand] compilation of your ASN.1
-specification into pyasn1-backed Python code at your application.
-
-For more information on pyasn1 APIs, please, refer to the [documentation](http://pyasn1.sourceforge.net).
-
-Also refer to example modules. Take a look at [pyasn1-modules](https://pypi.python.org/pypi/pyasn1)
-package -- maybe it already holds something useful to you.
+Information on pyasn1 APIs can be found in the [documentation](http://pyasn1.sourceforge.net),
+working examples are in the pyasn1-modeules [repo](https://github.com/etingof/pyasn1-modules).
 
 Download
 --------
 
 The pyasn1 package is distributed under terms and conditions of 2-clause
 BSD [license](http://pyasn1.sourceforge.net/license.html). Source code is freely
-[available](https://github.com/etingof/pyasn1) from GitHub:
+available as a Github [repo](https://github.com/etingof/pyasn1).
 
 Feedback
 --------
