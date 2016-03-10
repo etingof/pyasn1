@@ -1,6 +1,7 @@
 
+![build-status](https://travis-ci.org/etingof/pyasn1.svg?branch=master)
 
-ASN.1 library for Python ![build-status](https://travis-ci.org/etingof/pyasn1.svg?branch=master)
+ASN.1 library for Python 
 ------------------------
 
 This is a free and open source implementation of ASN.1 types and codecs as a Python
