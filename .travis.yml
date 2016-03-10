@@ -12,6 +12,3 @@ python:
   - "pypy3"
 install: python setup.py install
 script: python test/suite.py
-branches:
-  only:
-    - master
