@@ -10,5 +10,11 @@ python:
   - "nightly"
   - "pypy"
   - "pypy3"
-install: python setup.py install
-script: python test/suite.py
+before_install:
+  - pip install codecov
+install:
+  - python setup.py install
+script:
+  - python test/suite.py
+after_success:
+  - codecov
