@@ -10,8 +10,11 @@ python:
   - "nightly"
   - "pypy"
   - "pypy3"
-install: python setup.py install
-script: python test/suite.py
-branches:
-  only:
-    - master
+install:
+  - pip install codecov
+  - python setup.py install
+script:
+  - python test/suite.py
+after_success:
+  - coverage run test/suite.py
+  - codecov
