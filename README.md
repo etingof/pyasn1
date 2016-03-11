@@ -6,7 +6,6 @@ ASN.1 library for Python
 [![Downloads](https://img.shields.io/pypi/dm/pyasn1.svg)](https://pypi.python.org/pypi/pyasn1)
 [![Build status](https://travis-ci.org/etingof/pyasn1.svg?branch=master)](https://secure.travis-ci.org/etingof/pyasn1)
 [![Coverage Status](https://img.shields.io/codecov/c/github/etingof/pyasn1.svg](https://codecov.io/github/etingof/pyasn1/coverage.svg?branch=master)
-[![Coverage Status](https://img.shields.io/codecov/etingof/pyasn1.svg)](https://codecov.io/github/etingof/pyasn1/coverage.svg?branch=master)
 
 This is a free and open source implementation of ASN.1 types and codecs
 as a Python package. It has been first written to support particular
