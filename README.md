@@ -1,7 +1,6 @@
 
 ASN.1 library for Python
 ------------------------
-[![Can I Use Python 3?](https://caniusepython3.com/project/pyasn1.svg)](https://caniusepython3.com/project/pyasn1)
 [![GitHub license](https://img.shields.io/badge/license-BSD-blue.svg)](https://raw.githubusercontent.com/etingof/pyasn1/master/LICENSE.txt)
 [![Downloads](https://img.shields.io/pypi/dm/pyasn1.svg)](https://pypi.python.org/pypi/pyasn1)
 [![Build status](https://travis-ci.org/etingof/pyasn1.svg?branch=master)](https://secure.travis-ci.org/etingof/pyasn1)
