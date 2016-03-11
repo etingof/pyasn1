@@ -95,6 +95,9 @@ into a fully-fledged, initialized data structure.
     b'0\x07\x02\x01{\x80\x02\x01A'
 
 Many high-profile Internet protocols and file formats utilize ASN.1 serialization.
+Quite a number of books cover the topic of ASN.1. 
+[Communication between heterogeneous systems](http://www.oss.com/asn1/dubuisson.html)
+by Olivier Dubuisson is one of high quality books freely available on the Internet.
 
 Detailed information on pyasn1 APIs can be found in the
 [documentation](http://pyasn1.sourceforge.net),
