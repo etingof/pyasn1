@@ -29,6 +29,13 @@ Misfeatures
   into pyasn1 code. 
 * Codecs are not restartable
 
+Download
+--------
+
+The pyasn1 package is distributed under terms and conditions of 2-clause
+BSD [license](http://pyasn1.sourceforge.net/license.html). Source code is freely
+available as a Github [repo](https://github.com/etingof/pyasn1).
+
 Installation
 ------------
 
@@ -36,20 +43,63 @@ Download pyasn1 from [PyPI](https://pypi.python.org/pypi/pyasn1) or just run:
 
     $ pip install pyasn1
 
-Documentation
--------------
+How to use pyasn1
+-----------------
 
-Information on pyasn1 APIs can be found in the
+With pyasn1 you can build ASN.1 structures from Python objects. For example, the
+following ASN.1 structure:
+
+    Record ::= SEQUENCE {
+      id        INTEGER,
+      room  [0] INTEGER OPTIONAL,
+      house [1] INTEGER DEFAULT 0
+    }
+
+Could be expressed in pyasn1 like this:
+    
+    class Record(Sequence):
+        componentType = NamedTypes(
+            NamedType('id', Integer()),
+            OptionalNamedType(
+                'room',
+                Integer().subtype(
+                    implicitTag=Tag(tagClassContext, tagFormatSimple, 0)
+                )
+            ),
+            DefaultedNamedType(
+                'house', 
+                Integer(0).subtype(
+                    implicitTag=Tag(tagClassContext, tagFormatSimple, 1)
+                )
+            )
+        )
+
+Once you have your ASN.1 data structure defined, you can use it as a conventional
+data structure:
+    
+    >>> record = Record()
+    >>> record['id'] = 123
+    >>> record[1] = 321
+    >>> print(record.prettyPrint())
+    Record:
+     id=123
+     room=321
+    >>>
+
+The power of ASN.1 comes with its serialization features. You can serialize your
+initialized data structure and send it over the network. Conversely, you can
+turn serialized ASN.1 content, as received from network or read from a file,
+into a fully-fledged, initialized data structure.
+
+    >>> encode(record)
+    b'0\x07\x02\x01{\x80\x02\x01A'
+
+Many high-profile Internet protocols and file formats utilize ASN.1 serialization.
+
+Detailed information on pyasn1 APIs can be found in the
 [documentation](http://pyasn1.sourceforge.net),
 working examples are in the pyasn1-modules
 [repo](https://github.com/etingof/pyasn1-modules).
-
-Download
---------
-
-The pyasn1 package is distributed under terms and conditions of 2-clause
-BSD [license](http://pyasn1.sourceforge.net/license.html). Source code is freely
-available as a Github [repo](https://github.com/etingof/pyasn1).
 
 Feedback
 --------
