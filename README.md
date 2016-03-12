@@ -33,7 +33,9 @@ Installation
 
 Download pyasn1 from [PyPI](https://pypi.python.org/pypi/pyasn1) or just run:
 
-    $ pip install pyasn1
+```bash
+$ pip install pyasn1
+```
 
 How to use pyasn1
 -----------------
@@ -41,50 +43,58 @@ How to use pyasn1
 With pyasn1 you can build ASN.1 structures from Python objects. For example, the
 following ASN.1 structure:
 
-    Record ::= SEQUENCE {
-      id        INTEGER,
-      room  [0] INTEGER OPTIONAL,
-      house [1] INTEGER DEFAULT 0
-    }
+```bash
+Record ::= SEQUENCE {
+  id        INTEGER,
+  room  [0] INTEGER OPTIONAL,
+  house [1] INTEGER DEFAULT 0
+}
+```
 
 Could be expressed in pyasn1 like this:
-    
-    class Record(Sequence):
-        componentType = NamedTypes(
-            NamedType('id', Integer()),
-            OptionalNamedType(
-                'room',
-                Integer().subtype(
-                    implicitTag=Tag(tagClassContext, tagFormatSimple, 0)
-                )
-            ),
-            DefaultedNamedType(
-                'house', 
-                Integer(0).subtype(
-                    implicitTag=Tag(tagClassContext, tagFormatSimple, 1)
-                )
+
+```python
+class Record(Sequence):
+    componentType = NamedTypes(
+        NamedType('id', Integer()),
+        OptionalNamedType(
+            'room',
+            Integer().subtype(
+                implicitTag=Tag(tagClassContext, tagFormatSimple, 0)
+            )
+        ),
+        DefaultedNamedType(
+            'house', 
+            Integer(0).subtype(
+                implicitTag=Tag(tagClassContext, tagFormatSimple, 1)
             )
         )
+    )
+```
 
 Once you have your ASN.1 data structure defined, you can use it as a conventional
 data structure:
-    
-    >>> record = Record()
-    >>> record['id'] = 123
-    >>> record[1] = 321
-    >>> print(record.prettyPrint())
-    Record:
-     id=123
-     room=321
-    >>>
+
+```python
+>>> record = Record()
+>>> record['id'] = 123
+>>> record[1] = 321
+>>> print(record.prettyPrint())
+Record:
+ id=123
+ room=321
+>>>
+```
 
 The power of ASN.1 comes with its serialization features. You can serialize your
 initialized data structure and send it over the network. Conversely, you can
 turn serialized ASN.1 content, as received from network or read from a file,
 into a fully-fledged, initialized data structure.
 
-    >>> encode(record)
-    b'0\x07\x02\x01{\x80\x02\x01A'
+```python
+>>> encode(record)
+b'0\x07\x02\x01{\x80\x02\x01A'
+```
 
 Many high-profile Internet protocols and file formats utilize ASN.1 serialization.
 Quite a number of books cover the topic of ASN.1. 
