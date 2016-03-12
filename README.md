@@ -19,15 +19,7 @@ Features
 * Fully standard compliant BER/CER/DER codecs
 * 100% Python, works with Python 2.4 up to Python 3.5
 * MT-safe
-
-Misfeatures
------------
-
-* No ASN.1 compiler shipped with pyasn1, so by-hand ASN.1 spec compilation 
-  into Python code would be needed. But there is a project, called
-  [Asn1ate](https://github.com/kimgr/asn1ate) that compiles ASN.1 documents
-  into pyasn1 code. 
-* Codecs are not restartable
+* Contributed ASN.1 compiler [Asn1ate](https://github.com/kimgr/asn1ate)
 
 Download
 --------
