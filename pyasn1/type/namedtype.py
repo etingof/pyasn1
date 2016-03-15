@@ -25,19 +25,19 @@ class NamedType:
     def __gt__(self, other): return tuple(self) > tuple(other)
     def __ge__(self, other): return tuple(self) >= tuple(other)
     def __hash__(self): return hash(tuple(self))
- 
+
     def getType(self): return self.__type
     def getName(self): return self.__name
     def __getitem__(self, idx):
         if idx == 0: return self.__name
         if idx == 1: return self.__type
         raise IndexError()
-    
+
 class OptionalNamedType(NamedType):
     isOptional = 1
 class DefaultedNamedType(NamedType):
     isDefaulted = 1
-    
+
 class NamedTypes:
     def __init__(self, *namedTypes):
         self.__namedTypes = namedTypes
@@ -59,7 +59,7 @@ class NamedTypes:
     def __gt__(self, other): return tuple(self) > tuple(other)
     def __ge__(self, other): return tuple(self) >= tuple(other)
     def __hash__(self): return hash(tuple(self))
-   
+
     def __getitem__(self, idx): return self.__namedTypes[idx]
 
     if sys.version_info[0] <= 2:
@@ -67,9 +67,9 @@ class NamedTypes:
     else:
         def __bool__(self): return bool(self.__namedTypesLen)
     def __len__(self): return self.__namedTypesLen
-   
+
     def clone(self): return self.__class__(*self.__namedTypes)
-     
+
     def getTypeByPosition(self, idx):
         if idx < 0 or idx >= self.__namedTypesLen:
             raise error.PyAsn1Error('Type position out of range')
@@ -90,7 +90,7 @@ class NamedTypes:
             return self.__tagToPosIdx[tagSet]
         except KeyError:
             raise error.PyAsn1Error('Type %s not found' % (tagSet,))
-        
+
     def getNameByPosition(self, idx):
         try:
             return self.__namedTypes[idx].getName()
@@ -121,7 +121,7 @@ class NamedTypes:
             else:
                 ambigiousTypes = (t, )
             self.__ambigiousTypes[idx] = NamedTypes(*ambigiousTypes)
-        
+
     def getTagMapNearPosition(self, idx):
         if not self.__ambigiousTypes: self.__buildAmbigiousTagMap()
         try:
@@ -144,7 +144,7 @@ class NamedTypes:
                 if self.__minTagSet is None or tagSet < self.__minTagSet:
                     self.__minTagSet = tagSet
         return self.__minTagSet
-    
+
     def getTagMap(self, uniq=False):
         if self.__tagMap[uniq] is None:
             tagMap = tagmap.TagMap()

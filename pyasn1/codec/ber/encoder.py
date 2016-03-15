@@ -51,7 +51,7 @@ class AbstractItemEncoder:
             return null
         else:
             return encodeFun(eoo.endOfOctets, defMode)
-        
+
     def encode(self, encodeFun, value, defMode, maxChunkSize):
         substrate, isConstructed = self.encodeValue(
             encodeFun, value, defMode, maxChunkSize
@@ -163,10 +163,10 @@ class NullEncoder(AbstractItemEncoder):
 class ObjectIdentifierEncoder(AbstractItemEncoder):
     supportIndefLenMode = 0
     precomputedValues = {
-        (1, 3, 6, 1, 2): (43, 6, 1, 2),        
+        (1, 3, 6, 1, 2): (43, 6, 1, 2),
         (1, 3, 6, 1, 4): (43, 6, 1, 4)
     }
-    def encodeValue(self, encodeFun, value, defMode, maxChunkSize):    
+    def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         oid = value.asTuple()
         if oid[:5] in self.precomputedValues:
             octets = self.precomputedValues[oid[:5]]
@@ -204,7 +204,7 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
                 subId = subId >> 7
                 while subId > 0:
                     res = (0x80 | (subId & 0x7f),) + res
-                    subId = subId >> 7 
+                    subId = subId >> 7
                 # Add packed Sub-Object ID to resulted Object ID
                 octets += res
 
@@ -219,7 +219,7 @@ class RealEncoder(AbstractItemEncoder):
             ms = -1  # mantissa sign
         if e < 0:
             es = -1  # exponenta sign 
-        m *= ms 
+        m *= ms
         if encbase == 8:
             m = m*2**(abs(e) % 3 * es)
             e = abs(e) // 3 * es
@@ -245,7 +245,7 @@ class RealEncoder(AbstractItemEncoder):
         # auto choosing base 2/8/16 
         mantissa = [m, m, m]
         exponenta = [e, e, e]
-        encbase = 2 
+        encbase = 2
         e = float('inf')
         for i in range(3):
             sign, mantissa[i], base[i], exponenta[i] = \
@@ -297,7 +297,7 @@ class RealEncoder(AbstractItemEncoder):
             eo = null
             if e == 0 or e == -1:
                 eo = int2oct(e&0xff)
-            else: 
+            else:
                 while e not in (0, -1):
                     eo = int2oct(e&0xff) + eo
                     e >>= 8
@@ -391,7 +391,7 @@ tagMap = {
     # useful types
     useful.ObjectDescriptor.tagSet: OctetStringEncoder(),
     useful.GeneralizedTime.tagSet: OctetStringEncoder(),
-    useful.UTCTime.tagSet: OctetStringEncoder()        
+    useful.UTCTime.tagSet: OctetStringEncoder()
     }
 
 # Type-to-codec map for ambiguous ASN.1 types

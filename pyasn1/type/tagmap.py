@@ -11,7 +11,7 @@ class TagMap:
         self.__posMap = posMap.copy()
         self.__negMap = negMap.copy()
         self.__defType = defType
-        
+
     def __contains__(self, tagSet):
         return tagSet in self.__posMap or \
                self.__defType is not None and tagSet not in self.__negMap
@@ -53,7 +53,7 @@ class TagMap:
             defType = tagMap.getDef()
         else:
             defType = self.__defType
-            
+
         posMap = self.__posMap.copy()
         for k in tagMap.getPosMap():
             if uniq and k in posMap:
@@ -62,7 +62,7 @@ class TagMap:
 
         negMap = self.__negMap.copy()
         negMap.update(tagMap.getNegMap())
-        
+
         return self.__class__(
             posMap, negMap, defType,
             )
