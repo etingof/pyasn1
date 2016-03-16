@@ -750,6 +750,11 @@ class SetOf(base.AbstractConstructedAsn1Item):
 
     def getComponentByPosition(self, idx): return self._componentValues[idx]
     def setComponentByPosition(self, idx, value=None, verifyConstraints=True):
+        # setting the default value can be either done by value None, or by
+        # special sentinel
+        if value is base.DEFAULT_VALUE_SENTINEL:
+            value = None
+
         l = len(self._componentValues)
         if idx >= l:
             self._componentValues = self._componentValues + (idx-l+1)*[None]
@@ -875,6 +880,11 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                                exactTypes=False,
                                matchTags=True,
                                matchConstraints=True):
+        # setting the default value can be either done by value None, or by
+        # special sentinel
+        if value is base.DEFAULT_VALUE_SENTINEL:
+            value = None
+
         l = len(self._componentValues)
         if idx >= l:
             self._componentValues = self._componentValues + (idx-l+1)*[None]
@@ -1077,6 +1087,11 @@ class Choice(Set):
                 myClone.setComponentByType(tagSet, c.clone())
 
     def setComponentByPosition(self, idx, value=None, verifyConstraints=True):
+        # setting the default value can be either done by value None, or by
+        # special sentinel
+        if value is base.DEFAULT_VALUE_SENTINEL:
+            value = None
+
         l = len(self._componentValues)
         if idx >= l:
             self._componentValues = self._componentValues + (idx-l+1)*[None]
