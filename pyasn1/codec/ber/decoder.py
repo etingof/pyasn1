@@ -616,7 +616,7 @@ class Decoder:
                  substrateFun=None, allowEoo=False):
         if debug.logger & debug.flagDecoder:
             debug.logger('decoder called at scope %s with state %d, working with up to %d octets of substrate: %s' % (debug.scope, state, len(substrate), debug.hexdump(substrate)))
-        if not isinstance(asn1Spec, base.Asn1Item):
+        if asn1Spec is not None and not isinstance(asn1Spec, base.Asn1Item):
             raise error.PyAsn1Error('asn1Spec is not valid (should be an instance of an ASN.1 Item)')
 
         fullSubstrate = substrate

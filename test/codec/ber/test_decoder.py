@@ -603,7 +603,7 @@ class GuidedSequenceDecoderTestCase(unittest.TestCase):
 
     def testBadSpec(self):
         try:
-            decoder.decode(ints2octs((48, 2, 5, 0)), asn1Spec=None)
+            decoder.decode(ints2octs((48, 2, 5, 0)), asn1Spec='not an Asn1Item')
         except PyAsn1Error:
             pass
         else:
