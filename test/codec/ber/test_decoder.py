@@ -18,6 +18,15 @@ if version_info[0:2] < (2, 7) or \
 else:
     import unittest
 
+class BadAsn1SpecTestCase(unittest.TestCase):
+    def testBadSpec(self):
+        try:
+            decoder.decode(ints2octs((48, 2, 5, 0)), asn1Spec='not an Asn1Item')
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'Invalid asn1Spec accepted'
+
 class LargeTagDecoderTestCase(unittest.TestCase):
     def testLargeTag(self):
         assert decoder.decode(ints2octs((127, 141, 245, 182, 253, 47, 3, 2, 1, 1))) == (1, null)
@@ -600,14 +609,6 @@ class GuidedSequenceDecoderTestCase(unittest.TestCase):
         assert decoder.decode(
             ints2octs((48, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)), asn1Spec=self.s
             ) == (self.s, null)
-
-    def testBadSpec(self):
-        try:
-            decoder.decode(ints2octs((48, 2, 5, 0)), asn1Spec='not an Asn1Item')
-        except PyAsn1Error:
-            pass
-        else:
-            assert 0, 'Invalid asn1Spec accepted'
 
 class ChoiceDecoderTestCase(unittest.TestCase):
     def setUp(self):
