@@ -284,6 +284,28 @@ class BitString(base.AbstractSimpleAsn1Item):
     def prettyOut(self, value):
         return '\"\'%s\'B\"' % ''.join([str(x) for x in value])
 
+    def toHexString(self):
+        """Convenience method for getting value as a hex string.
+
+        This method will raise an exception in case of bitstrings which are
+        not multiples of 8 in length. It also does not decorate the result in
+        any way. The result can be translated into bytes/str using
+        binascii.unhexlify().
+        """
+        if len(self) % 8 != 0:
+            raise error.PyAsn1Error('Value length is not a multiple of 8')
+
+        result = ""
+        i = 0
+        while i < len(self):
+            byte = 0
+            for x in range(8):
+                byte |= self[i+x] << (7-x)
+            result += "%02X" % (byte,)
+            i += 8
+        return result
+
+
 try:
     all
 except NameError:  # Python 2.4

@@ -127,6 +127,14 @@ class BitStringTestCase(unittest.TestCase):
         assert self.b.clone("'A98A'H")[0] == 1
         assert self.b.clone("'A98A'H")[1] == 0
         assert self.b.clone("'A98A'H")[2] == 1
+    def testToHexString(self):
+        assert self.b.clone("'A98A'H").toHexString() == 'A98A'
+        try:
+            self.b.clone((1, 0, 1)).toHexString()
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, "non 8-bit bitstring didn't fail"
         
 class OctetStringTestCase(unittest.TestCase):
     def testInit(self):
