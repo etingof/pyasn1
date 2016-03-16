@@ -4,7 +4,7 @@
 # Copyright (c) 2005-2016, Ilya Etingof <ilya@glas.net>
 # License: http://pyasn1.sf.net/license.html
 #
-from pyasn1.type import tag, univ, char, useful, tagmap
+from pyasn1.type import base, tag, univ, char, useful, tagmap
 from pyasn1.codec.ber import eoo
 from pyasn1.compat.octets import str2octs, oct2int, isOctetsType
 from pyasn1 import debug, error
@@ -616,6 +616,9 @@ class Decoder:
                  substrateFun=None, allowEoo=False):
         if debug.logger & debug.flagDecoder:
             debug.logger('decoder called at scope %s with state %d, working with up to %d octets of substrate: %s' % (debug.scope, state, len(substrate), debug.hexdump(substrate)))
+        if not isinstance(asn1Spec, base.Asn1Item):
+            raise error.PyAsn1Error('asn1Spec is not valid (should be an instance of an ASN.1 Item)')
+
         fullSubstrate = substrate
         while state != stStop:
             if state == stDecodeTag:
