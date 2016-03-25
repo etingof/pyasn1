@@ -129,10 +129,13 @@ class BitStringTestCase(unittest.TestCase):
         assert self.b.clone("'A98A'H")[0] == 1
         assert self.b.clone("'A98A'H")[1] == 0
         assert self.b.clone("'A98A'H")[2] == 1
-    def testToHexString(self):
-        assert self.b.clone("'A98A'H").toHexString() == 'A98A'
+    def testAsOctets(self):
+        assert self.b.clone(hexValue='A98A').asOctets() == ints2octs((0xa9, 0x8a)), 'testAsOctets() fails'
+    def testAsInts(self):
+        assert self.b.clone(hexValue='A98A').asNumbers() == (0xa9, 0x8a), 'testAsNumbers() fails'
+    def testMultipleOfEight(self):
         try:
-            self.b.clone((1, 0, 1)).toHexString()
+            self.b.clone((1, 0, 1)).asOctets()
         except PyAsn1Error:
             pass
         else:

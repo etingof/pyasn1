@@ -258,6 +258,7 @@ class BitString(base.AbstractSimpleAsn1Item):
             value = self.defaultHexValue
         if value is None or value is base.noValue:
             value = self.defaultBinValue
+        self.__asNumbersCache = None
         base.AbstractSimpleAsn1Item.__init__(
             self, value, tagSet, subtypeSpec
         )
@@ -325,26 +326,38 @@ class BitString(base.AbstractSimpleAsn1Item):
     def __rmul__(self, value):
         return self * value
 
-    def toHexString(self):
-        """Convenience method for getting value as a hex string.
+    def asOctets(self):
+        """Convenience method for getting BIT STRING value as a sequence of octets.
 
-        This method will raise an exception in case of bitstrings which are
-        not multiples of 8 in length. It also does not decorate the result in
-        any way. The result can be translated into bytes/str using
-        binascii.unhexlify().
+        This method will raise an exception in case of BIT STRING which is
+        not multiples of 8 in length.
         """
-        if len(self) % 8 != 0:
-            raise error.PyAsn1Error('Value length is not a multiple of 8')
+        return octets.ints2octs(self.asNumbers())
 
-        result = ""
+    def asNumbers(self):
+        """Convenience method for getting BIT STRING value as a sequence of integers.
+
+        This method will raise an exception in case of BIT STRING which is
+        not multiples of 8 in length.
+        """
+        if self.__asNumbersCache is not None:
+            return self.__asNumbersCache
+
+        if len(self) % 8 != 0:
+            raise error.PyAsn1Error('BIT STRING length is not a multiple of 8')
+
+        result = []
         i = 0
         while i < len(self):
             byte = 0
             for x in range(8):
                 byte |= self[i + x] << (7 - x)
-            result += "%02X" % (byte,)
+            result.append(byte)
             i += 8
-        return result
+
+        self.__asNumbersCache = tuple(result)
+
+        return self.__asNumbersCache
 
     @staticmethod
     def fromHexString(value):
