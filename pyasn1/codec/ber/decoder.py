@@ -651,7 +651,9 @@ class Decoder:
                     tagClass = t&0xC0
                     tagFormat = t&0x20
                     tagId = t&0x1F
+                    short = True
                     if tagId == 0x1F:
+                        short = False
                         tagId = 0
                         while 1:
                             if not substrate:
@@ -666,7 +668,7 @@ class Decoder:
                     lastTag = tag.Tag(
                         tagClass=tagClass, tagFormat=tagFormat, tagId=tagId
                     )
-                    if tagId < 31:
+                    if short:
                         # cache short tags
                         self.__tagCache[firstOctet] = lastTag
                 if tagSet is None:
