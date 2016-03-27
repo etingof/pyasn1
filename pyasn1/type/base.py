@@ -8,6 +8,15 @@ import sys
 from pyasn1.type import constraint, tagmap, tag
 from pyasn1 import error
 
+
+DEFAULT_VALUE_SENTINEL = object()
+
+def default_value():
+    """Get a marker which can be used to set a component to a default value. For
+    example: sequence['element_name'] = default_value()
+    """
+    return DEFAULT_VALUE_SENTINEL
+
 class Asn1Item: pass
 
 class Asn1ItemBase(Asn1Item):

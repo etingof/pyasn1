@@ -4,7 +4,7 @@
 # Copyright (c) 2005-2016, Ilya Etingof <ilya@glas.net>
 # License: http://pyasn1.sf.net/license.html
 #
-from pyasn1.type import univ, tag, constraint, namedtype, namedval, error
+from pyasn1.type import base, univ, tag, constraint, namedtype, namedval, error
 from pyasn1.compat.octets import str2octs, ints2octs
 from pyasn1.error import PyAsn1Error
 from sys import version_info
@@ -505,6 +505,12 @@ class Sequence(unittest.TestCase):
     def testSetComponents(self):
         assert self.s1.clone().setComponents(name='a', nick='b', age=1) == \
             self.s1.setComponentByPosition(0, 'a').setComponentByPosition(1, 'b').setComponentByPosition(2, 1)
+    def testSetToDefault(self):
+        s = self.s1.clone()
+        s.setComponentByPosition(0, base.default_value())
+        s[2] = base.default_value()
+        assert s[0] == univ.OctetString('')
+        assert s[2] == univ.Integer(34)
 
 class SetOf(unittest.TestCase):
     def setUp(self):
@@ -557,6 +563,9 @@ class Set(unittest.TestCase):
         assert self.s1.getComponentPositionByType(
             univ.Null().getTagSet()
             ) == 1
+    def testSetToDefault(self):
+        self.s1.setComponentByName('name', base.default_value())
+        assert self.s1['name'] == univ.OctetString('')
 
 class Choice(unittest.TestCase):
     def setUp(self):
@@ -609,6 +618,9 @@ class Choice(unittest.TestCase):
     def testSetComponentByPosition(self):
         self.s1.setComponentByPosition(0, univ.OctetString('Jim'))
         assert self.s1 == str2octs('Jim')
+    def testSetToDefault(self):
+        self.s1.setComponentByName('sex', base.default_value())
+        assert self.s1['sex'] != None
     def testClone(self):
         self.s1.setComponentByPosition(0, univ.OctetString('abc'))
         s = self.s1.clone()
