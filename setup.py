@@ -27,6 +27,7 @@ Topic :: Security :: Cryptography
 Topic :: Software Development :: Libraries :: Python Modules
 """
 
+
 def howto_install_setuptools():
     print("""
    Error: You need setuptools Python package!
@@ -39,26 +40,29 @@ def howto_install_setuptools():
    Then you could make eggs from this package.
 """)
 
+
 if sys.version_info[:2] < (2, 4):
     print("ERROR: this package requires Python 2.4 or later!")
     sys.exit(1)
 
 try:
     from setuptools import setup, Command
+
     params = {
         'zip_safe': True
-    }    
+    }
 except ImportError:
     for arg in sys.argv:
         if 'egg' in arg:
             howto_install_setuptools()
             sys.exit(1)
     from distutils.core import setup, Command
+
     params = {}
 
 params.update({
     'name': 'pyasn1',
-    'version': open(os.path.join('pyasn1','__init__.py')).read().split('\'')[1],
+    'version': open(os.path.join('pyasn1', '__init__.py')).read().split('\'')[1],
     'description': 'ASN.1 types and codecs',
     'long_description': 'Pure-Python implementation of ASN.1 types and DER/BER/CER codecs (X.208)',
     'maintainer': 'Ilya Etingof <ilya@glas.net>',
@@ -66,20 +70,20 @@ params.update({
     'author_email': 'ilya@glas.net',
     'url': 'http://sourceforge.net/projects/pyasn1/',
     'platforms': ['any'],
-    'classifiers': [ x for x in classifiers.split('\n') if x ],
+    'classifiers': [x for x in classifiers.split('\n') if x],
     'license': 'BSD',
-    'packages': [ 'pyasn1',
-                  'pyasn1.type',
-                  'pyasn1.compat',
-                  'pyasn1.codec',
-                  'pyasn1.codec.ber',
-                  'pyasn1.codec.cer',
-                  'pyasn1.codec.der' ]
+    'packages': ['pyasn1',
+                 'pyasn1.type',
+                 'pyasn1.compat',
+                 'pyasn1.codec',
+                 'pyasn1.codec.ber',
+                 'pyasn1.codec.cer',
+                 'pyasn1.codec.der']
 })
 
 # handle unittest discovery feature
 if sys.version_info[0:2] < (2, 7) or \
-   sys.version_info[0:2] in ( (3, 0), (3, 1) ):
+                sys.version_info[0:2] in ((3, 0), (3, 1)):
     try:
         import unittest2 as unittest
     except ImportError:
@@ -91,13 +95,17 @@ if unittest:
     class PyTest(Command):
         user_options = []
 
-        def initialize_options(self): pass
-        def finalize_options(self): pass
+        def initialize_options(self):
+            pass
+
+        def finalize_options(self):
+            pass
 
         def run(self):
             suite = unittest.defaultTestLoader.discover('.')
             unittest.TextTestRunner(verbosity=2).run(suite)
 
-    params['cmdclass'] = { 'test': PyTest }
+
+    params['cmdclass'] = {'test': PyTest}
 
 setup(**params)

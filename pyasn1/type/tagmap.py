@@ -6,6 +6,7 @@
 #
 from pyasn1 import error
 
+
 class TagMap:
     def __init__(self, posMap={}, negMap={}, defType=None):
         self.__posMap = posMap.copy()
@@ -29,21 +30,21 @@ class TagMap:
     def __repr__(self):
         s = self.__class__.__name__ + '('
         if self.__posMap:
-            s = s + 'posMap=%r, ' % (self.__posMap,)
+            s += 'posMap=%r, ' % (self.__posMap,)
         if self.__negMap:
-            s = s + 'negMap=%r, ' % (self.__negMap,)
+            s += 'negMap=%r, ' % (self.__negMap,)
         if self.__defType is not None:
-            s = s + 'defType=%r' % (self.__defType,)
+            s += 'defType=%r' % (self.__defType,)
         return s + ')'
 
     def __str__(self):
         s = self.__class__.__name__ + ':\n'
         if self.__posMap:
-            s = s + 'posMap:\n%s, ' % ',\n '.join([ x.prettyPrintType() for x in self.__posMap.values()])
+            s += 'posMap:\n%s, ' % ',\n '.join([x.prettyPrintType() for x in self.__posMap.values()])
         if self.__negMap:
-            s = s + 'negMap:\n%s, ' % ',\n '.join([ x.prettyPrintType() for x in self.__negMap.values()])
+            s += 'negMap:\n%s, ' % ',\n '.join([x.prettyPrintType() for x in self.__negMap.values()])
         if self.__defType is not None:
-            s = s + 'defType:\n%s, ' % self.__defType.prettyPrintType()
+            s += 'defType:\n%s, ' % self.__defType.prettyPrintType()
         return s
 
     def clone(self, parentType, tagMap, uniq=False):
@@ -65,8 +66,13 @@ class TagMap:
 
         return self.__class__(
             posMap, negMap, defType,
-            )
+        )
 
-    def getPosMap(self): return self.__posMap.copy()
-    def getNegMap(self): return self.__negMap.copy()
-    def getDef(self): return self.__defType
+    def getPosMap(self):
+        return self.__posMap.copy()
+
+    def getNegMap(self):
+        return self.__negMap.copy()
+
+    def getDef(self):
+        return self.__defType

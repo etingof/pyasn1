@@ -7,8 +7,9 @@
 from pyasn1.type import tag
 from pyasn1.error import PyAsn1Error
 from sys import version_info
+
 if version_info[0:2] < (2, 7) or \
-   version_info[0:2] in ( (3, 0), (3, 1) ):
+        version_info[0:2] in ((3, 0), (3, 1)):
     try:
         import unittest2 as unittest
     except ImportError:
@@ -16,14 +17,17 @@ if version_info[0:2] < (2, 7) or \
 else:
     import unittest
 
+
 class TagTestCaseBase(unittest.TestCase):
     def setUp(self):
         self.t1 = tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 3)
         self.t2 = tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 3)
 
+
 class TagReprTestCase(TagTestCaseBase):
     def testRepr(self):
-        assert eval(repr(self.t1), { 'Tag': tag.Tag }) == self.t1, 'repr() fails'
+        assert eval(repr(self.t1), {'Tag': tag.Tag}) == self.t1, 'repr() fails'
+
 
 class TagCmpTestCase(TagTestCaseBase):
     def testCmp(self):
@@ -37,18 +41,21 @@ class TagCmpTestCase(TagTestCaseBase):
                self.t1[1] == self.t2[1] and \
                self.t1[2] == self.t2[2], 'tag sequence protocol fails'
 
+
 class TagSetTestCaseBase(unittest.TestCase):
     def setUp(self):
         self.ts1 = tag.initTagSet(
             tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 12)
-            )
+        )
         self.ts2 = tag.initTagSet(
             tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 12)
-            )
+        )
+
 
 class TagSetReprTestCase(TagSetTestCaseBase):
     def testRepr(self):
-        assert eval(repr(self.ts1), { 'TagSet': tag.TagSet, 'Tag': tag.Tag }) == self.ts1, 'repr() fails'
+        assert eval(repr(self.ts1), {'TagSet': tag.TagSet, 'Tag': tag.Tag}) == self.ts1, 'repr() fails'
+
 
 class TagSetCmpTestCase(TagSetTestCaseBase):
     def testCmp(self):
@@ -60,25 +67,27 @@ class TagSetCmpTestCase(TagSetTestCaseBase):
     def testLen(self):
         assert len(self.ts1) == len(self.ts2), 'tag length comparation fails'
 
+
 class TaggingTestSuite(TagSetTestCaseBase):
     def testImplicitTag(self):
         t = self.ts1.tagImplicitly(
             tag.Tag(tag.tagClassApplication, tag.tagFormatSimple, 14)
-            )
+        )
         assert t == tag.TagSet(
             tag.Tag(tag.tagClassApplication, tag.tagFormatSimple, 12),
             tag.Tag(tag.tagClassApplication, tag.tagFormatSimple, 14)
-            ), 'implicit tagging went wrong'
+        ), 'implicit tagging went wrong'
 
     def testExplicitTag(self):
         t = self.ts1.tagExplicitly(
             tag.Tag(tag.tagClassPrivate, tag.tagFormatSimple, 32)
-            )
+        )
         assert t == tag.TagSet(
             tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 12),
             tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 12),
             tag.Tag(tag.tagClassPrivate, tag.tagFormatConstructed, 32)
-            ), 'explicit tagging went wrong'
+        ), 'explicit tagging went wrong'
+
 
 class TagSetAddTestSuite(TagSetTestCaseBase):
     def testAdd(self):
@@ -87,7 +96,7 @@ class TagSetAddTestSuite(TagSetTestCaseBase):
             tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 12),
             tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 12),
             tag.Tag(tag.tagClassApplication, tag.tagFormatSimple, 2)
-            ), 'TagSet.__add__() fails'
+        ), 'TagSet.__add__() fails'
 
     def testRadd(self):
         t = tag.Tag(tag.tagClassApplication, tag.tagFormatSimple, 2) + self.ts1
@@ -95,27 +104,30 @@ class TagSetAddTestSuite(TagSetTestCaseBase):
             tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 12),
             tag.Tag(tag.tagClassApplication, tag.tagFormatSimple, 2),
             tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 12)
-            ), 'TagSet.__radd__() fails'
+        ), 'TagSet.__radd__() fails'
+
 
 class SuperTagSetTestCase(TagSetTestCaseBase):
     def testSuperTagCheck1(self):
         assert self.ts1.isSuperTagSetOf(
             tag.TagSet(
-            tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 12),
-            tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 12)
+                tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 12),
+                tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 12)
             )), 'isSuperTagSetOf() fails'
 
     def testSuperTagCheck2(self):
         assert not self.ts1.isSuperTagSetOf(
             tag.TagSet(
-            tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 12),
-            tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 13)
+                tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 12),
+                tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 13)
             )), 'isSuperTagSetOf() fails'
 
     def testSuperTagCheck3(self):
         assert self.ts1.isSuperTagSetOf(
             tag.TagSet((), tag.Tag(tag.tagClassUniversal,
                                    tag.tagFormatSimple, 12))
-            ), 'isSuperTagSetOf() fails'
-    
-if __name__ == '__main__': unittest.main()
+        ), 'isSuperTagSetOf() fails'
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -9,8 +9,9 @@ from pyasn1.codec.der import decoder
 from pyasn1.compat.octets import ints2octs
 from pyasn1.error import PyAsn1Error
 from sys import version_info
+
 if version_info[0:2] < (2, 7) or \
-   version_info[0:2] in ( (3, 0), (3, 1) ):
+        version_info[0:2] in ((3, 0), (3, 1)):
     try:
         import unittest2 as unittest
     except ImportError:
@@ -18,11 +19,12 @@ if version_info[0:2] < (2, 7) or \
 else:
     import unittest
 
+
 class OctetStringDecoderTestCase(unittest.TestCase):
     def testShortMode(self):
         assert decoder.decode(
             '\004\017Quick brown fox'.encode()
-            ) == ('Quick brown fox'.encode(), ''.encode())
+        ) == ('Quick brown fox'.encode(), ''.encode())
 
     def testIndefMode(self):
         try:
@@ -34,4 +36,6 @@ class OctetStringDecoderTestCase(unittest.TestCase):
         else:
             assert 0, 'indefinite length encoding tolerated'
 
-if __name__ == '__main__': unittest.main()
+
+if __name__ == '__main__':
+    unittest.main()

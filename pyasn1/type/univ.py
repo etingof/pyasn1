@@ -4,13 +4,16 @@
 # Copyright (c) 2005-2016, Ilya Etingof <ilya@glas.net>
 # License: http://pyasn1.sf.net/license.html
 #
-import operator, sys, math
+import operator
+import sys
+import math
 from pyasn1.type import base, tag, constraint, namedtype, namedval, tagmap
 from pyasn1.codec.ber import eoo
 from pyasn1.compat import octets
 from pyasn1 import error
 
 NoValue = base.NoValue
+
 
 # "Simple" ASN.1 types (yet incomplete)
 
@@ -425,6 +428,7 @@ class Boolean(Integer):
         """
         return Integer.subtype(self, value, implicitTag, explicitTag)
 
+
 class BitString(base.AbstractSimpleAsn1Item):
     """Creates ASN.1 BIT STRING type or object.
 
@@ -716,6 +720,7 @@ class BitString(base.AbstractSimpleAsn1Item):
     def prettyOut(self, value):
         return '\"\'%s\'B\"' % ''.join([str(x) for x in value])
 
+
 try:
     all
 
@@ -832,7 +837,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
         """
         if value is None and tagSet is None and subtypeSpec is None and \
-                        encoding is None and binValue is None and hexValue is None:
+                encoding is None and binValue is None and hexValue is None:
             return self
         if value is None and binValue is None and hexValue is None:
             value = self._value
@@ -892,8 +897,8 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
         """
         if value is None and implicitTag is None and \
-               explicitTag is None and subtypeSpec is None and \
-               encoding is None and binValue is None and hexValue is None:
+                explicitTag is None and subtypeSpec is None and \
+                encoding is None and binValue is None and hexValue is None:
             return self
         if value is None and binValue is None and hexValue is None:
             value = self._value
@@ -912,7 +917,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
         return self.__class__(
             value, tagSet, subtypeSpec, encoding, binValue, hexValue
         )
-   
+
     if sys.version_info[0] <= 2:
         def prettyIn(self, value):
             if isinstance(value, str):
@@ -966,10 +971,11 @@ class OctetString(base.AbstractSimpleAsn1Item):
             numbers = tuple((ord(x) for x in value))
         else:
             numbers = tuple(value)
-        if all(x >= 32 and x <= 126 for x in numbers):
-            return str(value)
+        for x in numbers:
+            if x < 32 or x > 126:
+                return '0x' + ''.join(('%.2x' % x for x in numbers))
         else:
-            return '0x' + ''.join(('%.2x' % x for x in numbers))
+            return octets.octs2str(value)
 
     @staticmethod
     def fromBinaryString(value):
@@ -997,28 +1003,18 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
     @staticmethod
     def fromHexString(value):
-        r = p = ()
+        r = []
+        p = []
         for v in value:
             if p:
-                r += (int(p + v, 16),)
-                p = ()
+                r.append(int(p + v, 16))
+                p = None
             else:
                 p = v
         if p:
-            r += (int(p + '0', 16),)
+            r.append(int(p + '0', 16))
 
         return octets.ints2octs(r)
-
-    def prettyOut(self, value):
-        if sys.version_info[0] <= 2:
-            numbers = tuple((ord(x) for x in value))
-        else:
-            numbers = tuple(value)
-        for x in numbers:
-            if x < 32 or x > 126:
-                return '0x' + ''.join(('%.2x' % x for x in numbers))
-        else:
-            return octets.octs2str(value)
 
     def __repr__(self):
         r = []
@@ -1129,7 +1125,7 @@ class Null(OctetString):
     )
     baseTagSet = tagSet
     subtypeSpec = OctetString.subtypeSpec + constraint.SingleValueConstraint(octets.str2octs(''))
-    
+
     def clone(self, value=None, tagSet=None):
         """Creates a copy of object representing ASN.1 type or value.
 
@@ -1183,6 +1179,7 @@ class Null(OctetString):
 
         """
         return OctetString.subtype(self, value, implicitTag, explicitTag)
+
 
 if sys.version_info[0] <= 2:
     intTypes = (int, long)
@@ -1378,8 +1375,9 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
         return value
 
     def prettyOut(self, value):
-        return '.'.join([ str(x) for x in value ])
-    
+        return '.'.join([str(x) for x in value])
+
+
 class Real(base.AbstractSimpleAsn1Item):
     """Creates ASN.1 REAL type or object.
 
@@ -1406,7 +1404,7 @@ class Real(base.AbstractSimpleAsn1Item):
             On constraint violation or bad initializer.
 
     """
-    binEncBase = None # binEncBase = 16 is recommended for large numbers
+    binEncBase = None  # binEncBase = 16 is recommended for large numbers
 
     try:
         _plusInf = float('inf')
@@ -1489,11 +1487,12 @@ class Real(base.AbstractSimpleAsn1Item):
         """
         return base.AbstractSimpleAsn1Item.subtype(self, value, implicitTag, explicitTag)
 
-    def __normalizeBase10(self, value):
+    @staticmethod
+    def __normalizeBase10(value):
         m, b, e = value
         while m and m % 10 == 0:
-            m = m / 10
-            e = e + 1
+            m /= 10
+            e += 1
         return m, b, e
 
     def prettyIn(self, value):
@@ -1527,8 +1526,8 @@ class Real(base.AbstractSimpleAsn1Item):
             else:
                 e = 0
                 while int(value) != value:
-                    value = value * 10
-                    e = e - 1
+                    value *= 10
+                    e -= 1
                 return self.__normalizeBase10((int(value), 10, e))
         elif isinstance(value, Real):
             return tuple(value)
@@ -1812,6 +1811,7 @@ class Enumerated(Integer):
         """
         return Integer.subtype(self, value, implicitTag, explicitTag, namedValues)
 
+
 # "Structured" ASN.1 types
 
 class SetOf(base.AbstractConstructedAsn1Item):
@@ -1823,7 +1823,7 @@ class SetOf(base.AbstractConstructedAsn1Item):
     strictConstraints = False
 
     def _cloneComponentValues(self, myClone, cloneValueFlag):
-        idx = 0;
+        idx = 0
         l = len(self._componentValues)
         while idx < l:
             c = self._componentValues[idx]
@@ -1834,7 +1834,7 @@ class SetOf(base.AbstractConstructedAsn1Item):
                     )
                 else:
                     myClone.setComponentByPosition(idx, c.clone())
-            idx = idx + 1
+            idx += 1
 
     def _verifyComponent(self, idx, value):
         t = self._componentType
@@ -1858,7 +1858,7 @@ class SetOf(base.AbstractConstructedAsn1Item):
                 if self._componentType is None:
                     raise error.PyAsn1Error('Component type not defined')
                 self._componentValues[idx] = self._componentType.clone()
-                self._componentValuesSet = self._componentValuesSet + 1
+                self._componentValuesSet += 1
             return self
         elif not isinstance(value, base.Asn1Item):
             if self._componentType is None:
@@ -1872,7 +1872,7 @@ class SetOf(base.AbstractConstructedAsn1Item):
                 self._verifyComponent(idx, value)
             self._verifySubtypeSpec(value, idx)
         if self._componentValues[idx] is None:
-            self._componentValuesSet = self._componentValuesSet + 1
+            self._componentValuesSet += 1
         self._componentValues[idx] = value
         return self
 
@@ -1881,21 +1881,21 @@ class SetOf(base.AbstractConstructedAsn1Item):
             return self._componentType.getTagMap()
 
     def prettyPrint(self, scope=0):
-        scope = scope + 1
+        scope += 1
         r = self.__class__.__name__ + ':\n'
         for idx in range(len(self._componentValues)):
-            r = r + ' ' * scope
+            r += ' ' * scope
             if self._componentValues[idx] is None:
-                r = r + '<empty>'
+                r += '<empty>'
             else:
                 r = r + self._componentValues[idx].prettyPrint(scope)
         return r
 
     def prettyPrintType(self, scope=0):
-        scope = scope + 1
+        scope += 1
         r = '%s -> %s {\n' % (self.getTagSet(), self.__class__.__name__)
         if self._componentType is not None:
-            r = r + ' ' * scope
+            r += ' ' * scope
             r = r + self._componentType.prettyPrintType(scope)
         return r + '\n' + ' ' * (scope - 1) + '}'
 
@@ -1933,7 +1933,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             base.AbstractConstructedAsn1Item.__setitem__(self, idx, value)
 
     def _cloneComponentValues(self, myClone, cloneValueFlag):
-        idx = 0;
+        idx = 0
         l = len(self._componentValues)
         while idx < l:
             c = self._componentValues[idx]
@@ -1944,7 +1944,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                     )
                 else:
                     myClone.setComponentByPosition(idx, c.clone())
-            idx = idx + 1
+            idx += 1
 
     def _verifyComponent(self, idx, value):
         if idx >= self._componentTypeLen:
@@ -1987,7 +1987,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         if value is None:
             if self._componentValues[idx] is None:
                 self._componentValues[idx] = self._componentType.getTypeByPosition(idx).clone()
-                self._componentValuesSet = self._componentValuesSet + 1
+                self._componentValuesSet += 1
             return self
         elif not isinstance(value, base.Asn1Item):
             t = self._componentType.getTypeByPosition(idx)
@@ -2000,7 +2000,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                 self._verifyComponent(idx, value)
             self._verifySubtypeSpec(value, idx)
         if self._componentValues[idx] is None:
-            self._componentValuesSet = self._componentValuesSet + 1
+            self._componentValuesSet += 1
         self._componentValues[idx] = value
         return self
 
@@ -2021,7 +2021,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             return
         idx = self._componentTypeLen
         while idx:
-            idx = idx - 1
+            idx -= 1
             if self._componentType[idx].isDefaulted:
                 if self.getComponentByPosition(idx) is None:
                     self.setComponentByPosition(idx)
@@ -2032,14 +2032,14 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                     )
 
     def prettyPrint(self, scope=0):
-        scope = scope + 1
+        scope += 1
         r = self.__class__.__name__ + ':\n'
         for idx in range(len(self._componentValues)):
             if self._componentValues[idx] is not None:
-                r = r + ' ' * scope
+                r += ' ' * scope
                 componentType = self.getComponentType()
                 if componentType is None:
-                    r = r + '<no-name>'
+                    r += '<no-name>'
                 else:
                     r = r + componentType.getNameByPosition(idx)
                 r = '%s=%s\n' % (
@@ -2048,11 +2048,11 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         return r
 
     def prettyPrintType(self, scope=0):
-        scope = scope + 1
+        scope += 1
         r = '%s -> %s {\n' % (self.getTagSet(), self.__class__.__name__)
         for idx in range(len(self.componentType)):
-            r = r + ' ' * scope
-            r = r + '"%s"' % self.componentType.getNameByPosition(idx)
+            r += ' ' * scope
+            r += '"%s"' % self.componentType.getNameByPosition(idx)
             r = '%s = %s\n' % (
                 r, self._componentType.getTypeByPosition(idx).prettyPrintType(scope)
             )

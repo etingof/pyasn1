@@ -9,8 +9,10 @@ from pyasn1.codec.ber import decoder
 from pyasn1.compat.octets import oct2int
 from pyasn1 import error
 
+
 class BooleanDecoder(decoder.AbstractSimpleDecoder):
     protoComponent = univ.Boolean(0)
+
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet, length,
                      state, decodeFun, substrateFun):
         head, tail = substrate[:length], substrate[length:]
@@ -28,13 +30,15 @@ class BooleanDecoder(decoder.AbstractSimpleDecoder):
             raise error.PyAsn1Error('Unexpected Boolean payload: %s' % byte)
         return self._createComponent(asn1Spec, tagSet, value), tail
 
+
 tagMap = decoder.tagMap.copy()
-tagMap.update({
-    univ.Boolean.tagSet: BooleanDecoder()
-    })
+tagMap.update({univ.Boolean.tagSet: BooleanDecoder()})
 
 typeMap = decoder.typeMap
 
-class Decoder(decoder.Decoder): pass
+
+class Decoder(decoder.Decoder):
+    pass
+
 
 decode = Decoder(tagMap, decoder.typeMap)

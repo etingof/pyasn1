@@ -153,7 +153,7 @@ an INTEGER type.
 
    Temperature ::= INTEGER {
      freezing(0),
-     boiling(100) 
+     boiling(100)
    }
 
 The Temperature type expressed in pyasn1:
@@ -278,8 +278,8 @@ length.  A BIT STRING value could be initialized by either a binary
 .. code-block:: bash
 
    public-key BIT STRING ::= '1010111011110001010110101101101
-			      1011000101010000010110101100010
-			      0110101010000111101010111111110'B
+                              1011000101010000010110101100010
+                              0110101010000111101010111111110'B
 
    signature  BIT STRING ::= 'AF01330CD932093392100B39FF00DE0'H
 
@@ -548,7 +548,7 @@ Their pyasn1 implementations are
    >>> '%s' % char.PrintableString("Welcome to ASN.1 text types")
    'Welcome to ASN.1 text types'
    >>> dialPadNumbers = char.NumericString(
-	 "0" "1" "2" "3" "4" "5" "6" "7" "8" "9"
+     "0" "1" "2" "3" "4" "5" "6" "7" "8" "9"
    )
    >>> dialPadNumbers
    NumericString(b'0123456789')
