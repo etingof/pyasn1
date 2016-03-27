@@ -30,6 +30,12 @@ class BadAsn1SpecTestCase(unittest.TestCase):
 class LargeTagDecoderTestCase(unittest.TestCase):
     def testLargeTag(self):
         assert decoder.decode(ints2octs((127, 141, 245, 182, 253, 47, 3, 2, 1, 1))) == (1, null)
+    def testLongTag(self):
+        assert decoder.decode(ints2octs((0x1f, 2, 1, 0)))[0].tagSet == univ.Integer.tagSet
+
+class DecoderCacheTestCase(unittest.TestCase):
+    def testCache(self):
+        assert decoder.decode(ints2octs((0x1f, 2, 1, 0))) == decoder.decode(ints2octs((0x1f, 2, 1, 0)))
 
 class IntegerDecoderTestCase(unittest.TestCase):
     def testPosInt(self):
