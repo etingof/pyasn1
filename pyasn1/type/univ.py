@@ -71,63 +71,138 @@ class Integer(base.AbstractSimpleAsn1Item):
         else:
             return base.AbstractSimpleAsn1Item.__repr__(self)
 
-    def __and__(self, value): return self.clone(self._value & value)
-    def __rand__(self, value): return self.clone(value & self._value)
-    def __or__(self, value): return self.clone(self._value | value)
-    def __ror__(self, value): return self.clone(value | self._value)
-    def __xor__(self, value): return self.clone(self._value ^ value)
-    def __rxor__(self, value): return self.clone(value ^ self._value)
-    def __lshift__(self, value): return self.clone(self._value << value)
-    def __rshift__(self, value): return self.clone(self._value >> value)
+    def __and__(self, value):
+        return self.clone(self._value & value)
 
-    def __add__(self, value): return self.clone(self._value + value)
-    def __radd__(self, value): return self.clone(value + self._value)
-    def __sub__(self, value): return self.clone(self._value - value)
-    def __rsub__(self, value): return self.clone(value - self._value)
-    def __mul__(self, value): return self.clone(self._value * value)
-    def __rmul__(self, value): return self.clone(value * self._value)
-    def __mod__(self, value): return self.clone(self._value % value)
-    def __rmod__(self, value): return self.clone(value % self._value)
-    def __pow__(self, value, modulo=None): return self.clone(pow(self._value, value, modulo))
-    def __rpow__(self, value): return self.clone(pow(value, self._value))
+    def __rand__(self, value):
+        return self.clone(value & self._value)
+
+    def __or__(self, value):
+        return self.clone(self._value | value)
+
+    def __ror__(self, value):
+        return self.clone(value | self._value)
+
+    def __xor__(self, value):
+        return self.clone(self._value ^ value)
+
+    def __rxor__(self, value):
+        return self.clone(value ^ self._value)
+
+    def __lshift__(self, value):
+        return self.clone(self._value << value)
+
+    def __rshift__(self, value):
+        return self.clone(self._value >> value)
+
+    def __add__(self, value):
+        return self.clone(self._value + value)
+
+    def __radd__(self, value):
+        return self.clone(value + self._value)
+
+    def __sub__(self, value):
+        return self.clone(self._value - value)
+
+    def __rsub__(self, value):
+        return self.clone(value - self._value)
+
+    def __mul__(self, value):
+        return self.clone(self._value * value)
+
+    def __rmul__(self, value):
+        return self.clone(value * self._value)
+
+    def __mod__(self, value):
+        return self.clone(self._value % value)
+
+    def __rmod__(self, value):
+        return self.clone(value % self._value)
+
+    def __pow__(self, value, modulo=None):
+        return self.clone(pow(self._value, value, modulo))
+
+    def __rpow__(self, value):
+        return self.clone(pow(value, self._value))
 
     if sys.version_info[0] <= 2:
-        def __div__(self, value):  return self.clone(self._value // value)
-        def __rdiv__(self, value):  return self.clone(value // self._value)
+        def __div__(self, value):
+            return self.clone(self._value // value)
+
+        def __rdiv__(self, value):
+            return self.clone(value // self._value)
     else:
-        def __truediv__(self, value):  return self.clone(self._value / value)
-        def __rtruediv__(self, value):  return self.clone(value / self._value)
-        def __divmod__(self, value):  return self.clone(self._value // value)
-        def __rdivmod__(self, value):  return self.clone(value // self._value)
+        def __truediv__(self, value):
+            return self.clone(self._value / value)
+
+        def __rtruediv__(self, value):
+            return self.clone(value / self._value)
+
+        def __divmod__(self, value):
+            return self.clone(self._value // value)
+
+        def __rdivmod__(self, value):
+            return self.clone(value // self._value)
 
         __hash__ = base.AbstractSimpleAsn1Item.__hash__
 
-    def __int__(self): return int(self._value)
+    def __int__(self):
+        return int(self._value)
+
     if sys.version_info[0] <= 2:
         def __long__(self): return long(self._value)
-    def __float__(self): return float(self._value)    
-    def __abs__(self): return self.clone(abs(self._value))
-    def __index__(self): return int(self._value)
-    def __pos__(self): return self.clone(+self._value)
-    def __neg__(self): return self.clone(-self._value)
-    def __invert__(self): return self.clone(~self._value)
+
+    def __float__(self):
+        return float(self._value)
+
+    def __abs__(self):
+        return self.clone(abs(self._value))
+
+    def __index__(self):
+        return int(self._value)
+
+    def __pos__(self):
+        return self.clone(+self._value)
+
+    def __neg__(self):
+        return self.clone(-self._value)
+
+    def __invert__(self):
+        return self.clone(~self._value)
+
     def __round__(self, n=0):
         r = round(self._value, n)
         if n:
             return self.clone(r)
         else:
             return r
-    def __floor__(self): return math.floor(self._value)
-    def __ceil__(self): return math.ceil(self._value)
+
+    def __floor__(self):
+        return math.floor(self._value)
+
+    def __ceil__(self):
+        return math.ceil(self._value)
+
     if sys.version_info[0:2] > (2, 5):
         def __trunc__(self): return self.clone(math.trunc(self._value))
 
-    def __lt__(self, value): return self._value < value
-    def __le__(self, value): return self._value <= value
-    def __eq__(self, value): return self._value == value
-    def __ne__(self, value): return self._value != value
-    def __gt__(self, value): return self._value > value
-    def __ge__(self, value): return self._value >= value
+    def __lt__(self, value):
+        return self._value < value
+
+    def __le__(self, value):
+        return self._value <= value
+
+    def __eq__(self, value):
+        return self._value == value
+
+    def __ne__(self, value):
+        return self._value != value
+
+    def __gt__(self, value):
+        return self._value > value
+
+    def __ge__(self, value):
+        return self._value >= value
 
     def prettyIn(self, value):
         if not isinstance(value, str):
@@ -136,7 +211,7 @@ class Integer(base.AbstractSimpleAsn1Item):
             except:
                 raise error.PyAsn1Error(
                     'Can\'t coerce %r into integer: %s' % (value, sys.exc_info()[1])
-                    )
+                )
         r = self.__namedValues.getValue(value)
         if r is not None:
             return r
@@ -145,13 +220,14 @@ class Integer(base.AbstractSimpleAsn1Item):
         except:
             raise error.PyAsn1Error(
                 'Can\'t coerce %r into integer: %s' % (value, sys.exc_info()[1])
-                )
+            )
 
     def prettyOut(self, value):
         r = self.__namedValues.getName(value)
         return r is None and str(value) or repr(r)
 
-    def getNamedValues(self): return self.__namedValues
+    def getNamedValues(self):
+        return self.__namedValues
 
     def clone(self, value=None, tagSet=None, subtypeSpec=None,
               namedValues=None):
@@ -183,7 +259,7 @@ class Integer(base.AbstractSimpleAsn1Item):
 
         """
         if value is None and tagSet is None and subtypeSpec is None \
-               and namedValues is None:
+                and namedValues is None:
             return self
         if value is None:
             value = self._value
@@ -251,6 +327,7 @@ class Integer(base.AbstractSimpleAsn1Item):
             namedValues = namedValues + self.__namedValues
         return self.__class__(value, tagSet, subtypeSpec, namedValues)
 
+
 class Boolean(Integer):
     """Creates ASN.1 BOOLEAN type or object.
 
@@ -282,7 +359,7 @@ class Boolean(Integer):
 
     #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
     #: object imposing constraints on initialization values.
-    subtypeSpec = Integer.subtypeSpec+constraint.SingleValueConstraint(0,1)
+    subtypeSpec = Integer.subtypeSpec + constraint.SingleValueConstraint(0, 1)
 
     namedValues = Integer.namedValues.clone(('False', 0), ('True', 1))
 
@@ -378,7 +455,7 @@ class BitString(base.AbstractSimpleAsn1Item):
     #: *BitString* objects
     tagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x03)
-        )
+    )
     baseTagSet = tagSet
 
     #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
@@ -389,18 +466,29 @@ class BitString(base.AbstractSimpleAsn1Item):
     #: representing symbolic aliases for numbers
     namedValues = namedval.NamedValues()
 
+    defaultBinValue = defaultHexValue = base.noValue
+
     def __init__(self, value=None, tagSet=None, subtypeSpec=None,
-                 namedValues=None):
+                 namedValues=None, binValue=None, hexValue=None):
         if namedValues is None:
             self.__namedValues = self.namedValues
         else:
             self.__namedValues = namedValues
+        if binValue is not None:
+            value = self.fromBinaryString(binValue)
+        if hexValue is not None:
+            value = self.fromHexString(hexValue)
+        if value is None or value is base.noValue:
+            value = self.defaultHexValue
+        if value is None or value is base.noValue:
+            value = self.defaultBinValue
+        self.__asNumbersCache = None
         base.AbstractSimpleAsn1Item.__init__(
             self, value, tagSet, subtypeSpec
-            )
+        )
 
     def clone(self, value=None, tagSet=None, subtypeSpec=None,
-              namedValues=None):
+              namedValues=None, binValue=None, hexValue=None):
         """Creates a copy of BitString object representing ASN.1 type or value.
 
         If additional parameters are specified, they will be used
@@ -429,9 +517,9 @@ class BitString(base.AbstractSimpleAsn1Item):
                 
         """
         if value is None and tagSet is None and subtypeSpec is None \
-               and namedValues is None:
+                and namedValues is None and binValue is None and hexValue is None:
             return self
-        if value is None:
+        if value is None and binValue is None and hexValue is None:
             value = self._value
         if tagSet is None:
             tagSet = self._tagSet
@@ -439,10 +527,10 @@ class BitString(base.AbstractSimpleAsn1Item):
             subtypeSpec = self._subtypeSpec
         if namedValues is None:
             namedValues = self.__namedValues
-        return self.__class__(value, tagSet, subtypeSpec, namedValues)
+        return self.__class__(value, tagSet, subtypeSpec, namedValues, binValue, hexValue)
 
     def subtype(self, value=None, implicitTag=None, explicitTag=None,
-                subtypeSpec=None, namedValues=None):
+                subtypeSpec=None, namedValues=None, binValue=None, hexValue=None):
         """Creates a copy of BIT STRING object representing ASN.1 subtype or a value.
 
         If additional parameters are specified, they will be merged
@@ -479,7 +567,7 @@ class BitString(base.AbstractSimpleAsn1Item):
             new instance of BIT STRING type/value
 
         """
-        if value is None:
+        if value is None and binValue is None and hexValue is None:
             value = self._value
         if implicitTag is not None:
             tagSet = self._tagSet.tagImplicitly(implicitTag)
@@ -495,9 +583,10 @@ class BitString(base.AbstractSimpleAsn1Item):
             namedValues = self.__namedValues
         else:
             namedValues = namedValues + self.__namedValues
-        return self.__class__(value, tagSet, subtypeSpec, namedValues)
+        return self.__class__(value, tagSet, subtypeSpec, namedValues, binValue, hexValue)
 
-    def __str__(self): return str(tuple(self))
+    def __str__(self):
+        return str(tuple(self))
 
     # Immutable sequence object protocol
 
@@ -505,83 +594,138 @@ class BitString(base.AbstractSimpleAsn1Item):
         if self._len is None:
             self._len = len(self._value)
         return self._len
+
     def __getitem__(self, i):
         if isinstance(i, slice):
             return self.clone(operator.getitem(self._value, i))
         else:
             return self._value[i]
 
-    def __add__(self, value): return self.clone(self._value + value)
-    def __radd__(self, value): return self.clone(value + self._value)
-    def __mul__(self, value): return self.clone(self._value * value)
-    def __rmul__(self, value): return self * value
+    def __add__(self, value):
+        return self.clone(self._value + value)
+
+    def __radd__(self, value):
+        return self.clone(value + self._value)
+
+    def __mul__(self, value):
+        return self.clone(self._value * value)
+
+    def __rmul__(self, value):
+        return self * value
+
+    def asOctets(self):
+        """Convenience method for getting BIT STRING value as a sequence of octets.
+
+        This method will raise an exception in case of BIT STRING which is
+        not multiples of 8 in length.
+        """
+        return octets.ints2octs(self.asNumbers())
+
+    def asNumbers(self):
+        """Convenience method for getting BIT STRING value as a sequence of integers.
+
+        This method will raise an exception in case of BIT STRING which is
+        not multiples of 8 in length.
+        """
+        if self.__asNumbersCache is not None:
+            return self.__asNumbersCache
+
+        if len(self) % 8 != 0:
+            raise error.PyAsn1Error('BIT STRING length is not a multiple of 8')
+
+        result = []
+        i = 0
+        while i < len(self):
+            byte = 0
+            for x in range(8):
+                byte |= self[i + x] << (7 - x)
+            result.append(byte)
+            i += 8
+
+        self.__asNumbersCache = tuple(result)
+
+        return self.__asNumbersCache
+
+    @staticmethod
+    def fromHexString(value):
+        r = []
+        for v in value:
+            v = int(v, 16)
+            i = 4
+            while i:
+                i -= 1
+                r.append((v >> i) & 0x01)
+        return tuple(r)
+
+    @staticmethod
+    def fromBinaryString(value):
+        r = []
+        for v in value:
+            if v in ('0', '1'):
+                r.append(int(v))
+            else:
+                raise error.PyAsn1Error(
+                    'Non-binary BIT STRING initializer %s' % (v,)
+                )
+        return tuple(r)
 
     def prettyIn(self, value):
         r = []
         if not value:
             return ()
+
         elif isinstance(value, str):
             if value[0] == '\'':
                 if value[-2:] == '\'B':
-                    for v in value[1:-2]:
-                        if v == '0':
-                            r.append(0)
-                        elif v == '1':
-                            r.append(1)
-                        else:
-                            raise error.PyAsn1Error(
-                                'Non-binary BIT STRING initializer %s' % (v,)
-                                )
-                    return tuple(r)
+                    return self.fromBinaryString(value[1:-2])
                 elif value[-2:] == '\'H':
-                    for v in value[1:-2]:
-                        i = 4
-                        v = int(v, 16)
-                        while i:
-                            i = i - 1
-                            r.append((v>>i)&0x01)
-                    return tuple(r)
+                    return self.fromHexString(value[1:-2])
                 else:
                     raise error.PyAsn1Error(
                         'Bad BIT STRING value notation %s' % (value,)
-                        )                
+                    )
             else:
                 for i in value.split(','):
                     j = self.__namedValues.getValue(i)
                     if j is None:
                         raise error.PyAsn1Error(
                             'Unknown bit identifier \'%s\'' % (i,)
-                            )
+                        )
                     if j >= len(r):
-                        r.extend([0]*(j-len(r)+1))
+                        r.extend([0] * (j - len(r) + 1))
                     r[j] = 1
                 return tuple(r)
+
         elif isinstance(value, (tuple, list)):
             r = tuple(value)
             for b in r:
                 if b and b != 1:
                     raise error.PyAsn1Error(
                         'Non-binary BitString initializer \'%s\'' % (r,)
-                        )
+                    )
             return r
+
         elif isinstance(value, BitString):
             return tuple(value)
+
         else:
             raise error.PyAsn1Error(
                 'Bad BitString initializer type \'%s\'' % (value,)
-                )
+            )
 
     def prettyOut(self, value):
         return '\"\'%s\'B\"' % ''.join([str(x) for x in value])
 
 try:
     all
+
 except NameError:  # Python 2.4
     def all(iterable):
         for element in iterable:
             if not element:
                 return False
         return True
+
 
 class OctetString(base.AbstractSimpleAsn1Item):
     """Creates ASN.1 OCTET STRING type or object.
@@ -632,6 +776,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
     defaultBinValue = defaultHexValue = base.noValue
     encoding = 'us-ascii'
+
     def __init__(self, value=None, tagSet=None, subtypeSpec=None,
                  encoding=None, binValue=None, hexValue=None):
         if encoding is None:
@@ -687,7 +832,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
         """
         if value is None and tagSet is None and subtypeSpec is None and \
-               encoding is None and binValue is None and hexValue is None:
+                        encoding is None and binValue is None and hexValue is None:
             return self
         if value is None and binValue is None and hexValue is None:
             value = self._value
@@ -781,11 +926,11 @@ class OctetString(base.AbstractSimpleAsn1Item):
                     )
             elif isinstance(value, (tuple, list)):
                 try:
-                    return ''.join([ chr(x) for x in value ])
+                    return ''.join([chr(x) for x in value])
                 except ValueError:
                     raise error.PyAsn1Error(
                         'Bad OctetString initializer \'%s\'' % (value,)
-                    )                
+                    )
             else:
                 return str(value)
     else:
@@ -815,38 +960,53 @@ class OctetString(base.AbstractSimpleAsn1Item):
                     raise error.PyAsn1Error(
                         'Can\'t encode string \'%s\' with \'%s\' codec' % (value, self._encoding)
                     )
-                        
 
-    def fromBinaryString(self, value):
-        bitNo = 8; byte = 0; r = ()
+    def prettyOut(self, value):
+        if sys.version_info[0] <= 2:
+            numbers = tuple((ord(x) for x in value))
+        else:
+            numbers = tuple(value)
+        if all(x >= 32 and x <= 126 for x in numbers):
+            return str(value)
+        else:
+            return '0x' + ''.join(('%.2x' % x for x in numbers))
+
+    @staticmethod
+    def fromBinaryString(value):
+        bitNo = 8
+        byte = 0
+        r = []
         for v in value:
             if bitNo:
-                bitNo = bitNo - 1
+                bitNo -= 1
             else:
                 bitNo = 7
-                r = r + (byte,)
+                r.append(byte)
                 byte = 0
-            if v == '0':
-                v = 0
-            elif v == '1':
-                v = 1
+            if v in ('0', '1'):
+                v = int(v)
             else:
                 raise error.PyAsn1Error(
                     'Non-binary OCTET STRING initializer %s' % (v,)
-                    )
-            byte = byte | (v << bitNo)
-        return octets.ints2octs(r + (byte,))
-        
-    def fromHexString(self, value):            
+                )
+            byte |= v << bitNo
+
+        r.append(byte)
+
+        return octets.ints2octs(r)
+
+    @staticmethod
+    def fromHexString(value):
         r = p = ()
         for v in value:
             if p:
-                r = r + (int(p+v, 16),)
+                r += (int(p + v, 16),)
                 p = ()
             else:
                 p = v
         if p:
-            r = r + (int(p+'0', 16),)
+            r += (int(p + '0', 16),)
+
         return octets.ints2octs(r)
 
     def prettyOut(self, value):
@@ -877,46 +1037,70 @@ class OctetString(base.AbstractSimpleAsn1Item):
         if self.encoding is not self._encoding:
             r.append('encoding=%r' % (self._encoding,))
         if doHex:
-            r.append('hexValue=%r' % ''.join([ '%.2x' % x for x in self.asNumbers() ]))
+            r.append('hexValue=%r' % ''.join(['%.2x' % x for x in self.asNumbers()]))
         return '%s(%s)' % (self.__class__.__name__, ', '.join(r))
-                                
+
     if sys.version_info[0] <= 2:
-        def __str__(self): return str(self._value)
+        def __str__(self):
+            return str(self._value)
+
         def __unicode__(self):
             return self._value.decode(self._encoding, 'ignore')
-        def asOctets(self): return self._value
+
+        def asOctets(self):
+            return self._value
+
         def asNumbers(self):
             if self.__asNumbersCache is None:
-                self.__asNumbersCache = tuple([ ord(x) for x in self._value ])
+                self.__asNumbersCache = tuple([ord(x) for x in self._value])
             return self.__asNumbersCache
     else:
-        def __str__(self): return self._value.decode(self._encoding, 'ignore')
-        def __bytes__(self): return self._value
-        def asOctets(self): return self._value
+        def __str__(self):
+            return self._value.decode(self._encoding, 'ignore')
+
+        def __bytes__(self):
+            return self._value
+
+        def asOctets(self):
+            return self._value
+
         def asNumbers(self):
             if self.__asNumbersCache is None:
                 self.__asNumbersCache = tuple(self._value)
             return self.__asNumbersCache
- 
+
     # Immutable sequence object protocol
-    
+
     def __len__(self):
         if self._len is None:
             self._len = len(self._value)
         return self._len
+
     def __getitem__(self, i):
         if isinstance(i, slice):
             return self.clone(operator.getitem(self._value, i))
         else:
             return self._value[i]
 
-    def __add__(self, value): return self.clone(self._value + self.prettyIn(value))
-    def __radd__(self, value): return self.clone(self.prettyIn(value) + self._value)
-    def __mul__(self, value): return self.clone(self._value * value)
-    def __rmul__(self, value): return self * value
-    def __int__(self): return int(self._value)
-    def __float__(self): return float(self._value)
-    
+    def __add__(self, value):
+        return self.clone(self._value + self.prettyIn(value))
+
+    def __radd__(self, value):
+        return self.clone(self.prettyIn(value) + self._value)
+
+    def __mul__(self, value):
+        return self.clone(self._value * value)
+
+    def __rmul__(self, value):
+        return self * value
+
+    def __int__(self):
+        return int(self._value)
+
+    def __float__(self):
+        return float(self._value)
+
+
 class Null(OctetString):
     """Creates ASN.1 NULL type or object.
 
@@ -944,7 +1128,7 @@ class Null(OctetString):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x05)
     )
     baseTagSet = tagSet
-    subtypeSpec = OctetString.subtypeSpec+constraint.SingleValueConstraint(''.encode())
+    subtypeSpec = OctetString.subtypeSpec + constraint.SingleValueConstraint(octets.str2octs(''))
     
     def clone(self, value=None, tagSet=None):
         """Creates a copy of object representing ASN.1 type or value.
@@ -1006,6 +1190,7 @@ else:
     intTypes = (int,)
 
 numericTypes = intTypes + (float,)
+
 
 class ObjectIdentifier(base.AbstractSimpleAsn1Item):
     """Creates ASN.1 OBJECT IDENTIFIER type or object.
@@ -1104,30 +1289,38 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
         """
         return base.AbstractSimpleAsn1Item.subtype(self, value, implicitTag, explicitTag)
 
-    def __add__(self, other): return self.clone(self._value + other)
-    def __radd__(self, other): return self.clone(other + self._value)
+    def __add__(self, other):
+        return self.clone(self._value + other)
 
-    def asTuple(self): return self._value
-    
+    def __radd__(self, other):
+        return self.clone(other + self._value)
+
+    def asTuple(self):
+        return self._value
+
     # Sequence object protocol
-    
+
     def __len__(self):
         if self._len is None:
             self._len = len(self._value)
         return self._len
+
     def __getitem__(self, i):
         if isinstance(i, slice):
             return self.clone(
                 operator.getitem(self._value, i)
-                )
+            )
         else:
             return self._value[i]
 
-    def __str__(self): return self.prettyPrint()
+    def __str__(self):
+        return self.prettyPrint()
+
     def __repr__(self):
         return '%s(%r)' % (self.__class__.__name__, self.prettyPrint())
 
-    def index(self, suboid): return self._value.index(suboid)
+    def index(self, suboid):
+        return self._value.index(suboid)
 
     def isPrefixOf(self, value):
         """Indicates if caller is a prefix of passed *ObjectIdentifier*
@@ -1155,33 +1348,33 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
         if isinstance(value, tuple):
             pass
         elif isinstance(value, ObjectIdentifier):
-            return tuple(value)        
+            return tuple(value)
         elif octets.isStringType(value):
             r = []
-            for element in [ x for x in value.split('.') if x != '' ]:
+            for element in [x for x in value.split('.') if x != '']:
                 try:
                     r.append(int(element, 0))
                 except ValueError:
                     raise error.PyAsn1Error(
                         'Malformed Object ID %s at %s: %s' %
                         (str(value), self.__class__.__name__, sys.exc_info()[1])
-                        )
+                    )
             value = tuple(r)
         else:
             try:
                 value = tuple(value)
             except TypeError:
                 raise error.PyAsn1Error(
-                        'Malformed Object ID %s at %s: %s' %
-                        (str(value), self.__class__.__name__,sys.exc_info()[1])
-                        )
+                    'Malformed Object ID %s at %s: %s' %
+                    (str(value), self.__class__.__name__, sys.exc_info()[1])
+                )
 
         for x in value:
             if not isinstance(x, intTypes) or x < 0:
                 raise error.PyAsn1Error(
                     'Invalid sub-ID in %s at %s' % (value, self.__class__.__name__)
-                    )
-    
+                )
+
         return value
 
     def prettyOut(self, value):
@@ -1214,6 +1407,7 @@ class Real(base.AbstractSimpleAsn1Item):
 
     """
     binEncBase = None # binEncBase = 16 is recommended for large numbers
+
     try:
         _plusInf = float('inf')
         _minusInf = float('-inf')
@@ -1309,12 +1503,12 @@ class Real(base.AbstractSimpleAsn1Item):
                     not isinstance(value[2], intTypes):
                 raise error.PyAsn1Error('Lame Real value syntax: %s' % (value,))
             if isinstance(value[0], float) and \
-                self._inf and value[0] in self._inf:
+                    self._inf and value[0] in self._inf:
                 return value[0]
             if value[1] not in (2, 10):
                 raise error.PyAsn1Error(
                     'Prohibited base for Real value: %s' % (value[1],)
-                    )
+                )
             if value[1] == 10:
                 value = self.__normalizeBase10(value)
             return value
@@ -1340,8 +1534,8 @@ class Real(base.AbstractSimpleAsn1Item):
             return tuple(value)
         raise error.PyAsn1Error(
             'Bad real value syntax: %s' % (value,)
-            )
-        
+        )
+
     def prettyOut(self, value):
         if value in self._inf:
             return '\'%s\'' % value
@@ -1380,32 +1574,65 @@ class Real(base.AbstractSimpleAsn1Item):
 
     def isInfinity(self):
         return self._value in self._inf
-    
-    def __str__(self): return str(float(self))
-    
-    def __add__(self, value): return self.clone(float(self) + value)
-    def __radd__(self, value): return self + value
-    def __mul__(self, value): return self.clone(float(self) * value)
-    def __rmul__(self, value): return self * value
-    def __sub__(self, value): return self.clone(float(self) - value)
-    def __rsub__(self, value): return self.clone(value - float(self))
-    def __mod__(self, value): return self.clone(float(self) % value)
-    def __rmod__(self, value): return self.clone(value % float(self))
-    def __pow__(self, value, modulo=None): return self.clone(pow(float(self), value, modulo))
-    def __rpow__(self, value): return self.clone(pow(value, float(self)))
+
+    def __str__(self):
+        return str(float(self))
+
+    def __add__(self, value):
+        return self.clone(float(self) + value)
+
+    def __radd__(self, value):
+        return self + value
+
+    def __mul__(self, value):
+        return self.clone(float(self) * value)
+
+    def __rmul__(self, value):
+        return self * value
+
+    def __sub__(self, value):
+        return self.clone(float(self) - value)
+
+    def __rsub__(self, value):
+        return self.clone(value - float(self))
+
+    def __mod__(self, value):
+        return self.clone(float(self) % value)
+
+    def __rmod__(self, value):
+        return self.clone(value % float(self))
+
+    def __pow__(self, value, modulo=None):
+        return self.clone(pow(float(self), value, modulo))
+
+    def __rpow__(self, value):
+        return self.clone(pow(value, float(self)))
 
     if sys.version_info[0] <= 2:
-        def __div__(self, value): return self.clone(float(self) / value)
-        def __rdiv__(self, value): return self.clone(value / float(self))
-    else:
-        def __truediv__(self, value): return self.clone(float(self) / value)
-        def __rtruediv__(self, value): return self.clone(value / float(self))
-        def __divmod__(self, value): return self.clone(float(self) // value)
-        def __rdivmod__(self, value): return self.clone(value // float(self))
+        def __div__(self, value):
+            return self.clone(float(self) / value)
 
-    def __int__(self): return int(float(self))
+        def __rdiv__(self, value):
+            return self.clone(value / float(self))
+    else:
+        def __truediv__(self, value):
+            return self.clone(float(self) / value)
+
+        def __rtruediv__(self, value):
+            return self.clone(value / float(self))
+
+        def __divmod__(self, value):
+            return self.clone(float(self) // value)
+
+        def __rdivmod__(self, value):
+            return self.clone(value // float(self))
+
+    def __int__(self):
+        return int(float(self))
+
     if sys.version_info[0] <= 2:
         def __long__(self): return long(float(self))
+
     def __float__(self):
         if self._value in self._inf:
             return self._value
@@ -1413,31 +1640,57 @@ class Real(base.AbstractSimpleAsn1Item):
             return float(
                 self._value[0] * pow(self._value[1], self._value[2])
             )
-    def __abs__(self): return self.clone(abs(float(self)))
-    def __pos__(self): return self.clone(+float(self))
-    def __neg__(self): return self.clone(-float(self))
+
+    def __abs__(self):
+        return self.clone(abs(float(self)))
+
+    def __pos__(self):
+        return self.clone(+float(self))
+
+    def __neg__(self):
+        return self.clone(-float(self))
+
     def __round__(self, n=0):
         r = round(float(self), n)
         if n:
             return self.clone(r)
         else:
             return r
-    def __floor__(self): return self.clone(math.floor(float(self)))
-    def __ceil__(self): return self.clone(math.ceil(float(self)))
+
+    def __floor__(self):
+        return self.clone(math.floor(float(self)))
+
+    def __ceil__(self):
+        return self.clone(math.ceil(float(self)))
+
     if sys.version_info[0:2] > (2, 5):
         def __trunc__(self): return self.clone(math.trunc(float(self)))
 
-    def __lt__(self, value): return float(self) < value
-    def __le__(self, value): return float(self) <= value
-    def __eq__(self, value): return float(self) == value
-    def __ne__(self, value): return float(self) != value
-    def __gt__(self, value): return float(self) > value
-    def __ge__(self, value): return float(self) >= value
+    def __lt__(self, value):
+        return float(self) < value
+
+    def __le__(self, value):
+        return float(self) <= value
+
+    def __eq__(self, value):
+        return float(self) == value
+
+    def __ne__(self, value):
+        return float(self) != value
+
+    def __gt__(self, value):
+        return float(self) > value
+
+    def __ge__(self, value):
+        return float(self) >= value
 
     if sys.version_info[0] <= 2:
-        def __nonzero__(self): return bool(float(self))
+        def __nonzero__(self):
+            return bool(float(self))
     else:
-        def __bool__(self): return bool(float(self))
+        def __bool__(self):
+            return bool(float(self))
+
         __hash__ = base.AbstractSimpleAsn1Item.__hash__
 
     def __getitem__(self, idx):
@@ -1445,7 +1698,8 @@ class Real(base.AbstractSimpleAsn1Item):
             raise error.PyAsn1Error('Invalid infinite value operation')
         else:
             return self._value[idx]
-    
+
+
 class Enumerated(Integer):
     """Creates ASN.1 ENUMERATED type or object.
 
@@ -1564,38 +1818,41 @@ class SetOf(base.AbstractConstructedAsn1Item):
     componentType = None
     tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x11)
-        )
+    )
     typeId = 1
     strictConstraints = False
 
     def _cloneComponentValues(self, myClone, cloneValueFlag):
-        idx = 0; l = len(self._componentValues)
+        idx = 0;
+        l = len(self._componentValues)
         while idx < l:
             c = self._componentValues[idx]
             if c is not None:
                 if isinstance(c, base.AbstractConstructedAsn1Item):
                     myClone.setComponentByPosition(
                         idx, c.clone(cloneValueFlag=cloneValueFlag)
-                        )
+                    )
                 else:
                     myClone.setComponentByPosition(idx, c.clone())
             idx = idx + 1
-        
+
     def _verifyComponent(self, idx, value):
         t = self._componentType
         if t is None:
             return
-        if not t.isSameTypeWith(value,matchConstraints=self.strictConstraints):
+        if not t.isSameTypeWith(value, matchConstraints=self.strictConstraints):
             raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, t))
         if self.strictConstraints and \
                 not t.isSuperTypeOf(value, matchTags=False):
             raise error.PyAsn1Error('Component value is constraints-incompatible: %r vs %r' % (value, t))
 
-    def getComponentByPosition(self, idx): return self._componentValues[idx]
+    def getComponentByPosition(self, idx):
+        return self._componentValues[idx]
+
     def setComponentByPosition(self, idx, value=None, verifyConstraints=True):
         l = len(self._componentValues)
         if idx >= l:
-            self._componentValues = self._componentValues + (idx-l+1)*[None]
+            self._componentValues = self._componentValues + (idx - l + 1) * [None]
         if value is None:
             if self._componentValues[idx] is None:
                 if self._componentType is None:
@@ -1613,7 +1870,7 @@ class SetOf(base.AbstractConstructedAsn1Item):
         if verifyConstraints:
             if self._componentType is not None:
                 self._verifyComponent(idx, value)
-            self._verifySubtypeSpec(value, idx)            
+            self._verifySubtypeSpec(value, idx)
         if self._componentValues[idx] is None:
             self._componentValuesSet = self._componentValuesSet + 1
         self._componentValues[idx] = value
@@ -1625,9 +1882,9 @@ class SetOf(base.AbstractConstructedAsn1Item):
 
     def prettyPrint(self, scope=0):
         scope = scope + 1
-        r = self.__class__.__name__ + ':\n'        
+        r = self.__class__.__name__ + ':\n'
         for idx in range(len(self._componentValues)):
-            r = r + ' '*scope
+            r = r + ' ' * scope
             if self._componentValues[idx] is None:
                 r = r + '<empty>'
             else:
@@ -1638,19 +1895,22 @@ class SetOf(base.AbstractConstructedAsn1Item):
         scope = scope + 1
         r = '%s -> %s {\n' % (self.getTagSet(), self.__class__.__name__)
         if self._componentType is not None:
-            r = r + ' '*scope
+            r = r + ' ' * scope
             r = r + self._componentType.prettyPrintType(scope)
-        return r + '\n' + ' '*(scope-1) + '}'
+        return r + '\n' + ' ' * (scope - 1) + '}'
+
 
 class SequenceOf(SetOf):
     tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x10)
-        )
+    )
     typeId = 2
+
 
 class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
     componentType = namedtype.NamedTypes()
     strictConstraints = False
+
     def __init__(self, componentType=None, tagSet=None,
                  subtypeSpec=None, sizeSpec=None):
         if componentType is None:
@@ -1671,16 +1931,17 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             self.setComponentByName(idx, value)
         else:
             base.AbstractConstructedAsn1Item.__setitem__(self, idx, value)
-        
+
     def _cloneComponentValues(self, myClone, cloneValueFlag):
-        idx = 0; l = len(self._componentValues)
+        idx = 0;
+        l = len(self._componentValues)
         while idx < l:
             c = self._componentValues[idx]
             if c is not None:
                 if isinstance(c, base.AbstractConstructedAsn1Item):
                     myClone.setComponentByPosition(
                         idx, c.clone(cloneValueFlag=cloneValueFlag)
-                        )
+                    )
                 else:
                     myClone.setComponentByPosition(idx, c.clone())
             idx = idx + 1
@@ -1689,9 +1950,9 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         if idx >= self._componentTypeLen:
             raise error.PyAsn1Error(
                 'Component type error out of range'
-                )
+            )
         t = self._componentType[idx].getType()
-        if not t.isSameTypeWith(value,matchConstraints=self.strictConstraints):
+        if not t.isSameTypeWith(value, matchConstraints=self.strictConstraints):
             raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, t))
         if self.strictConstraints and \
                 not t.isSuperTypeOf(value, matchTags=False):
@@ -1700,10 +1961,11 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
     def getComponentByName(self, name):
         return self.getComponentByPosition(
             self._componentType.getPositionByName(name)
-            )
+        )
+
     def setComponentByName(self, name, value=None, verifyConstraints=True):
         return self.setComponentByPosition(
-            self._componentType.getPositionByName(name),value,verifyConstraints
+            self._componentType.getPositionByName(name), value, verifyConstraints
         )
 
     def getComponentByPosition(self, idx):
@@ -1713,6 +1975,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             if idx < self._componentTypeLen:
                 return
             raise
+
     def setComponentByPosition(self, idx, value=None,
                                verifyConstraints=True,
                                exactTypes=False,
@@ -1720,7 +1983,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                                matchConstraints=True):
         l = len(self._componentValues)
         if idx >= l:
-            self._componentValues = self._componentValues + (idx-l+1)*[None]
+            self._componentValues = self._componentValues + (idx - l + 1) * [None]
         if value is None:
             if self._componentValues[idx] is None:
                 self._componentValues[idx] = self._componentType.getTypeByPosition(idx).clone()
@@ -1735,7 +1998,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         if verifyConstraints:
             if self._componentTypeLen:
                 self._verifyComponent(idx, value)
-            self._verifySubtypeSpec(value, idx)            
+            self._verifySubtypeSpec(value, idx)
         if self._componentValues[idx] is None:
             self._componentValuesSet = self._componentValuesSet + 1
         self._componentValues[idx] = value
@@ -1752,7 +2015,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
     def getComponentType(self):
         if self._componentTypeLen:
             return self._componentType
-    
+
     def setDefaultComponents(self):
         if self._componentTypeLen == self._componentValuesSet:
             return
@@ -1766,14 +2029,14 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                 if self.getComponentByPosition(idx) is None:
                     raise error.PyAsn1Error(
                         'Uninitialized component #%s at %r' % (idx, self)
-                        )
+                    )
 
     def prettyPrint(self, scope=0):
         scope = scope + 1
         r = self.__class__.__name__ + ':\n'
         for idx in range(len(self._componentValues)):
             if self._componentValues[idx] is not None:
-                r = r + ' '*scope
+                r = r + ' ' * scope
                 componentType = self.getComponentType()
                 if componentType is None:
                     r = r + '<no-name>'
@@ -1781,55 +2044,58 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                     r = r + componentType.getNameByPosition(idx)
                 r = '%s=%s\n' % (
                     r, self._componentValues[idx].prettyPrint(scope)
-                    )
+                )
         return r
 
     def prettyPrintType(self, scope=0):
         scope = scope + 1
         r = '%s -> %s {\n' % (self.getTagSet(), self.__class__.__name__)
         for idx in range(len(self.componentType)):
-            r = r + ' '*scope
+            r = r + ' ' * scope
             r = r + '"%s"' % self.componentType.getNameByPosition(idx)
             r = '%s = %s\n' % (
                 r, self._componentType.getTypeByPosition(idx).prettyPrintType(scope)
             )
-        return r + '\n' + ' '*(scope-1) + '}'
+        return r + '\n' + ' ' * (scope - 1) + '}'
+
 
 class Sequence(SequenceAndSetBase):
     tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x10)
-        )
+    )
     typeId = 3
 
     def getComponentTagMapNearPosition(self, idx):
         if self._componentType:
             return self._componentType.getTagMapNearPosition(idx)
-    
+
     def getComponentPositionNearType(self, tagSet, idx):
         if self._componentType:
             return self._componentType.getPositionNearType(tagSet, idx)
         else:
             return idx
-    
+
+
 class Set(SequenceAndSetBase):
     tagSet = baseTagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x11)
-        )
+    )
     typeId = 4
 
-    def getComponent(self, innerFlag=0): return self
-    
+    def getComponent(self, innerFlag=0):
+        return self
+
     def getComponentByType(self, tagSet, innerFlag=0):
         c = self.getComponentByPosition(
             self._componentType.getPositionByType(tagSet)
-            )
+        )
         if innerFlag and isinstance(c, Set):
             # get inner component by inner tagSet
             return c.getComponent(1)
         else:
             # get outer component by inner tagSet
             return c
-        
+
     def setComponentByType(self, tagSet, value=None, innerFlag=0,
                            verifyConstraints=True):
         idx = self._componentType.getPositionByType(tagSet)
@@ -1848,7 +2114,7 @@ class Set(SequenceAndSetBase):
             return self.setComponentByPosition(
                 idx, value, verifyConstraints
             )
-            
+
     def getComponentTagMap(self):
         if self._componentType:
             return self._componentType.getTagMap(True)
@@ -1857,11 +2123,12 @@ class Set(SequenceAndSetBase):
         if self._componentType:
             return self._componentType.getPositionByType(tagSet)
 
+
 class Choice(Set):
     tagSet = baseTagSet = tag.TagSet()  # untagged
     sizeSpec = constraint.ConstraintsIntersection(
         constraint.ValueSizeConstraint(1, 1)
-        )
+    )
     typeId = 5
     _currentIdx = None
 
@@ -1869,33 +2136,42 @@ class Choice(Set):
         if self._componentValues:
             return self._componentValues[self._currentIdx] == other
         return NotImplemented
+
     def __ne__(self, other):
         if self._componentValues:
             return self._componentValues[self._currentIdx] != other
         return NotImplemented
+
     def __lt__(self, other):
         if self._componentValues:
             return self._componentValues[self._currentIdx] < other
         return NotImplemented
+
     def __le__(self, other):
         if self._componentValues:
             return self._componentValues[self._currentIdx] <= other
         return NotImplemented
+
     def __gt__(self, other):
         if self._componentValues:
             return self._componentValues[self._currentIdx] > other
         return NotImplemented
+
     def __ge__(self, other):
         if self._componentValues:
             return self._componentValues[self._currentIdx] >= other
         return NotImplemented
-    if sys.version_info[0] <= 2:
-        def __nonzero__(self): return bool(self._componentValues)
-    else:
-        def __bool__(self): return bool(self._componentValues)
 
-    def __len__(self): return self._currentIdx is not None and 1 or 0
-    
+    if sys.version_info[0] <= 2:
+        def __nonzero__(self):
+            return bool(self._componentValues)
+    else:
+        def __bool__(self):
+            return bool(self._componentValues)
+
+    def __len__(self):
+        return self._currentIdx is not None and 1 or 0
+
     def verifySizeSpec(self):
         if self._currentIdx is None:
             raise error.PyAsn1Error('Component not chosen')
@@ -1915,14 +2191,14 @@ class Choice(Set):
             if isinstance(c, base.AbstractConstructedAsn1Item):
                 myClone.setComponentByType(
                     tagSet, c.clone(cloneValueFlag=cloneValueFlag)
-                    )
+                )
             else:
                 myClone.setComponentByType(tagSet, c.clone())
 
     def setComponentByPosition(self, idx, value=None, verifyConstraints=True):
         l = len(self._componentValues)
         if idx >= l:
-            self._componentValues = self._componentValues + (idx-l+1)*[None]
+            self._componentValues = self._componentValues + (idx - l + 1) * [None]
         if self._currentIdx is not None:
             self._componentValues[self._currentIdx] = None
         if value is None:
@@ -1934,11 +2210,11 @@ class Choice(Set):
         elif not isinstance(value, base.Asn1Item):
             value = self._componentType.getTypeByPosition(idx).clone(
                 value=value
-                )
+            )
         if verifyConstraints:
             if self._componentTypeLen:
                 self._verifyComponent(idx, value)
-            self._verifySubtypeSpec(value, idx)            
+            self._verifySubtypeSpec(value, idx)
         self._componentValues[idx] = value
         self._currentIdx = idx
         self._componentValuesSet = 1
@@ -1986,7 +2262,9 @@ class Choice(Set):
                     return c.getName(innerFlag)
             return self._componentType.getNameByPosition(self._currentIdx)
 
-    def setDefaultComponents(self): pass
+    def setDefaultComponents(self):
+        pass
+
 
 class Any(OctetString):
     """Creates ASN.1 ANY type or object.
@@ -2037,10 +2315,10 @@ class Any(OctetString):
 
     def getTagMap(self):
         return tagmap.TagMap(
-            { self.getTagSet(): self },
-            { eoo.endOfOctets.getTagSet(): eoo.endOfOctets },
+            {self.getTagSet(): self},
+            {eoo.endOfOctets.getTagSet(): eoo.endOfOctets},
             self
-            )
+        )
 
     def clone(self, value=None, tagSet=None, subtypeSpec=None,
               encoding=None, binValue=None, hexValue=None):

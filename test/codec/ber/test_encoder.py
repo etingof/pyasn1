@@ -18,6 +18,15 @@ if version_info[0:2] < (2, 7) or \
 else:
     import unittest
 
+class BadAsn1SpecTestCase(unittest.TestCase):
+    def testBadValueType(self):
+        try:
+            encoder.encode('not an Asn1Item')
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'Invalid value type accepted'
+
 class LargeTagEncoderTestCase(unittest.TestCase):
     def setUp(self):
         self.o = univ.Integer().subtype(
@@ -25,7 +34,7 @@ class LargeTagEncoderTestCase(unittest.TestCase):
             )
     def testEncoder(self):
         assert encoder.encode(self.o) == ints2octs((127, 141, 245, 182, 253, 47, 3, 2, 1, 1))
-        
+
 class IntegerEncoderTestCase(unittest.TestCase):
     def testPosInt(self):
         assert encoder.encode(univ.Integer(12)) == ints2octs((2, 1, 12))

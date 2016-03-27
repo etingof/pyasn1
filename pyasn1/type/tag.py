@@ -60,7 +60,7 @@ class Tag:
             self.__tag[2]|tagId
             )
     def asTuple(self): return self.__tag  # __getitem__() is slow
-    
+
 class TagSet:
     def __init__(self, baseTag=(), *superTags):
         self.__baseTag = baseTag
@@ -74,7 +74,7 @@ class TagSet:
 
     def __str__(self):
         return self.__superTags and '+'.join([str(x) for x in self.__superTags]) or '[untagged]'
- 
+
     def __repr__(self):
         return '%s(%s)' % (
             self.__class__.__name__,
@@ -130,5 +130,6 @@ class TagSet:
                 return
             idx = idx - 1
         return 1
-    
-def initTagSet(tag): return TagSet(tag, tag)
+
+def initTagSet(tag):
+    return TagSet(tag, tag)

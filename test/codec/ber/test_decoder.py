@@ -18,9 +18,27 @@ if version_info[0:2] < (2, 7) or \
 else:
     import unittest
 
+class BadAsn1SpecTestCase(unittest.TestCase):
+    def testBadSpec(self):
+        try:
+            decoder.decode(ints2octs((48, 2, 5, 0)), asn1Spec='not an Asn1Item')
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'Invalid asn1Spec accepted'
+
 class LargeTagDecoderTestCase(unittest.TestCase):
     def testLargeTag(self):
         assert decoder.decode(ints2octs((127, 141, 245, 182, 253, 47, 3, 2, 1, 1))) == (1, null)
+    def testLongTag(self):
+        assert decoder.decode(ints2octs((0x1f, 2, 1, 0)))[0].tagSet == univ.Integer.tagSet
+    def testTagsEquivalence(self):
+        integer = univ.Integer(2, tag.TagSet((), tag.Tag(tag.tagClassContext, 0, 0)))
+        assert decoder.decode(ints2octs((0x9f, 0x80, 0x00, 0x02, 0x01, 0x02)), asn1Spec=integer) == decoder.decode(ints2octs((0x9f, 0x00, 0x02, 0x01, 0x02)), asn1Spec=integer)
+
+class DecoderCacheTestCase(unittest.TestCase):
+    def testCache(self):
+        assert decoder.decode(ints2octs((0x1f, 2, 1, 0))) == decoder.decode(ints2octs((0x1f, 2, 1, 0)))
 
 class IntegerDecoderTestCase(unittest.TestCase):
     def testPosInt(self):

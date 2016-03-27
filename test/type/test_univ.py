@@ -112,6 +112,8 @@ class BitStringTestCase(unittest.TestCase):
         assert self.b.clone('Active') == (1,)
         assert self.b.clone("'1010100110001010'B") == (1,0,1,0,1,0,0,1,1,0,0,0,1,0,1,0)
         assert self.b.clone("'A98A'H") == (1,0,1,0,1,0,0,1,1,0,0,0,1,0,1,0)
+        assert self.b.clone(binValue='1010100110001010') == (1,0,1,0,1,0,0,1,1,0,0,0,1,0,1,0)
+        assert self.b.clone(hexValue='A98A') == (1,0,1,0,1,0,0,1,1,0,0,0,1,0,1,0)
         assert self.b.clone((1,0,1)) == (1,0,1)
     def testStr(self):
         assert str(self.b.clone('Urgent,Active')) == '(1, 1)'
@@ -127,6 +129,17 @@ class BitStringTestCase(unittest.TestCase):
         assert self.b.clone("'A98A'H")[0] == 1
         assert self.b.clone("'A98A'H")[1] == 0
         assert self.b.clone("'A98A'H")[2] == 1
+    def testAsOctets(self):
+        assert self.b.clone(hexValue='A98A').asOctets() == ints2octs((0xa9, 0x8a)), 'testAsOctets() fails'
+    def testAsInts(self):
+        assert self.b.clone(hexValue='A98A').asNumbers() == (0xa9, 0x8a), 'testAsNumbers() fails'
+    def testMultipleOfEight(self):
+        try:
+            self.b.clone((1, 0, 1)).asOctets()
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, "non 8-bit bitstring didn't fail"
         
 class OctetStringTestCase(unittest.TestCase):
     def testInit(self):

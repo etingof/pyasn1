@@ -25,7 +25,7 @@ class AbstractConstraint:
             self._testValue(value, idx)
         except error.ValueConstraintError:
             raise error.ValueConstraintError(
-               '%s failed at: \"%s\"' % (self, sys.exc_info()[1])
+               '%s failed at: %r' % (self, sys.exc_info()[1])
             )
     def __repr__(self):
         return '%s(%s)' % (
@@ -95,7 +95,7 @@ class ValueRangeConstraint(AbstractConstraint):
                 )
             )
         AbstractConstraint._setValues(self, values)
-        
+
 class ValueSizeConstraint(ValueRangeConstraint):
     """len(value) must be within start and stop values (inclusive)"""
     def _testValue(self, value, idx):
@@ -165,7 +165,7 @@ class AbstractConstraintSet(AbstractConstraint):
     def __len__(self): return len(self._values)
 
     # Constraints inclusion in sets
-    
+
     def _setValues(self, values):
         self._values = values
         for v in values:

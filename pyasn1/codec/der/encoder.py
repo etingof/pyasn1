@@ -13,7 +13,7 @@ class SetOfEncoder(encoder.SetOfEncoder):
         tagSet1 = isinstance(c1, univ.Choice) and \
                   c1.getEffectiveTagSet() or c1.getTagSet()
         tagSet2 = isinstance(c2, univ.Choice) and \
-                  c2.getEffectiveTagSet() or c2.getTagSet()        
+                  c2.getEffectiveTagSet() or c2.getTagSet()
         return cmp(tagSet1, tagSet2)
 
 tagMap = encoder.tagMap.copy()
