@@ -34,7 +34,7 @@ class LargeTagEncoderTestCase(unittest.TestCase):
             )
     def testEncoder(self):
         assert encoder.encode(self.o) == ints2octs((127, 141, 245, 182, 253, 47, 3, 2, 1, 1))
-        
+
 class IntegerEncoderTestCase(unittest.TestCase):
     def testPosInt(self):
         assert encoder.encode(univ.Integer(12)) == ints2octs((2, 1, 12))
