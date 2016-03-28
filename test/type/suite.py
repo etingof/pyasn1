@@ -4,7 +4,10 @@
 # Copyright (c) 2005-2016, Ilya Etingof <ilya@glas.net>
 # License: http://pyasn1.sf.net/license.html
 #
-import test_tag, test_constraint, test_namedtype, test_univ
+import test_tag
+import test_constraint
+import test_namedtype
+import test_univ
 from sys import version_info
 
 if version_info[0:2] < (2, 7) or \

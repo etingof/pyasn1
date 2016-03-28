@@ -17,6 +17,7 @@ class Error(Exception):
 class AbstractItemEncoder:
     supportIndefLenMode = 1
 
+    # noinspection PyMethodMayBeStatic
     def encodeTag(self, t, isConstructed):
         tagClass, tagFormat, tagId = t.asTuple()  # this is a hotspot
         v = tagClass | tagFormat
@@ -259,10 +260,10 @@ class RealEncoder(AbstractItemEncoder):
 
     def _chooseEncBase(self, value):
         m, b, e = value
-        base = [2, 8, 16]
-        if value.binEncBase in base:
+        encBase = [2, 8, 16]
+        if value.binEncBase in encBase:
             return self._dropFloatingPoint(m, value.binEncBase, e)
-        elif self.binEncBase in base:
+        elif self.binEncBase in encBase:
             return self._dropFloatingPoint(m, self.binEncBase, e)
         # auto choosing base 2/8/16 
         mantissa = [m, m, m]
@@ -271,13 +272,13 @@ class RealEncoder(AbstractItemEncoder):
         encbase = 2
         e = float('inf')
         for i in range(3):
-            sign, mantissa[i], base[i], exponenta[i] = \
-                self._dropFloatingPoint(mantissa[i], base[i], exponenta[i])
+            sign, mantissa[i], encBase[i], exponenta[i] = \
+                self._dropFloatingPoint(mantissa[i], encBase[i], exponenta[i])
             if abs(exponenta[i]) < abs(e) or \
                     (abs(exponenta[i]) == abs(e) and mantissa[i] < m):
                 e = exponenta[i]
                 m = int(mantissa[i])
-                encbase = base[i]
+                encbase = encBase[i]
         return sign, m, encbase, e
 
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
@@ -438,6 +439,7 @@ typeMap = {
 class Encoder:
     supportIndefLength = True
 
+    # noinspection PyDefaultArgument
     def __init__(self, tagMap, typeMap={}):
         self.__tagMap = tagMap
         self.__typeMap = typeMap

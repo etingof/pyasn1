@@ -8,6 +8,7 @@ from pyasn1 import error
 
 
 class TagMap:
+    # noinspection PyDefaultArgument
     def __init__(self, posMap={}, negMap={}, defType=None):
         self.__posMap = posMap.copy()
         self.__negMap = negMap.copy()

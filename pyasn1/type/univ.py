@@ -722,9 +722,11 @@ class BitString(base.AbstractSimpleAsn1Item):
 
 
 try:
+    # noinspection PyStatementEffect
     all
 
 except NameError:  # Python 2.4
+    # noinspection PyShadowingBuiltins
     def all(iterable):
         for element in iterable:
             if not element:

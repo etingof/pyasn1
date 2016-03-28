@@ -22,6 +22,7 @@ flagMap = {
 
 
 class Printer:
+    # noinspection PyShadowingNames
     def __init__(self, logger=None, handler=None, formatter=None):
         if logger is None:
             logger = logging.getLogger('pyasn1')

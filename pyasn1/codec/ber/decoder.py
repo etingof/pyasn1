@@ -39,6 +39,7 @@ class AbstractSimpleDecoder(AbstractDecoder):
 class AbstractConstructedDecoder(AbstractDecoder):
     tagFormats = (tag.tagFormatConstructed,)
 
+    # noinspection PyUnusedLocal
     def _createComponent(self, asn1Spec, tagSet, value=None):
         if tagSet[0][1] not in self.tagFormats:
             raise error.PyAsn1Error('Invalid tag format %s for %s' % (tagSet[0], self.protoComponent.prettyPrintType()))
@@ -669,6 +670,7 @@ class Decoder:
     defaultRawDecoder = AnyDecoder()
     supportIndefLength = True
 
+    # noinspection PyDefaultArgument
     def __init__(self, tagMap, typeMap={}):
         self.__tagMap = tagMap
         self.__typeMap = typeMap

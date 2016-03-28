@@ -43,6 +43,7 @@ class NamedTypesCaseBase(unittest.TestCase):
                                    'OptionalNamedType': namedtype.OptionalNamedType, 'Integer': univ.Integer,
                                    'OctetString': univ.OctetString}) == self.e, 'repr() fails'
 
+    # noinspection PyUnusedLocal
     def testIter(self):
         for t in self.e:
             break
