@@ -4,6 +4,8 @@
 # Copyright (c) 2005-2016, Ilya Etingof <ilya@glas.net>
 # License: http://pyasn1.sf.net/license.html
 #
+import test_debug
+
 from sys import path, version_info
 from os.path import sep
 
@@ -23,12 +25,12 @@ else:
     import unittest
 
 suite = unittest.TestSuite()
-for m in (
-        type.suite,
-        codec.suite
-):
-    suite.addTest(getattr(m, 'suite'))
 
+loader = unittest.TestLoader()
+suite.addTest(loader.loadTestsFromModule(test_debug))
+
+for m in type.suite, codec.suite:
+    suite.addTest(getattr(m, 'suite'))
 
 def runTests():
     unittest.TextTestRunner(verbosity=2).run(suite)
