@@ -5,7 +5,6 @@
 # License: http://pyasn1.sf.net/license.html
 #
 from pyasn1.type import tag
-from pyasn1.error import PyAsn1Error
 from sys import version_info
 
 if version_info[0:2] < (2, 7) or \

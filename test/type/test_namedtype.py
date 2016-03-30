@@ -80,6 +80,16 @@ class NamedTypesCaseBase(unittest.TestCase):
             univ.Integer.tagSet: univ.Integer(0)
         }
 
+    def testStrTagMap(self):
+        assert 'TagMap' in str(self.e.getTagMap())
+        assert 'OctetString' in str(self.e.getTagMap())
+        assert 'Integer' in str(self.e.getTagMap())
+
+    def testReprTagMap(self):
+        assert 'TagMap' in repr(self.e.getTagMap())
+        assert 'OctetString' in repr(self.e.getTagMap())
+        assert 'Integer' in repr(self.e.getTagMap())
+
     def testGetTagMapWithDups(self):
         try:
             self.e.getTagMap(1)
