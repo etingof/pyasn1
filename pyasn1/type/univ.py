@@ -208,7 +208,7 @@ class Integer(base.AbstractSimpleAsn1Item):
         return self._value >= value
 
     def prettyIn(self, value):
-        if not isinstance(value, str):
+        if not octets.isStringType(value):
             try:
                 return int(value)
             except:
@@ -678,7 +678,7 @@ class BitString(base.AbstractSimpleAsn1Item):
         if not value:
             return ()
 
-        elif isinstance(value, str):
+        elif octets.isStringType(value):
             if value[0] == '\'':
                 if value[-2:] == '\'B':
                     return self.fromBinaryString(value[1:-2])
@@ -1515,8 +1515,8 @@ class Real(base.AbstractSimpleAsn1Item):
             return value
         elif isinstance(value, intTypes):
             return self.__normalizeBase10((value, 10, 0))
-        elif isinstance(value, (str, float)):
-            if isinstance(value, str):
+        elif isinstance(value, float) or octets.isStringType(value):
+            if octets.isStringType(value):
                 try:
                     value = float(value)
                 except ValueError:
@@ -1923,13 +1923,13 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         self._componentTypeLen = len(self._componentType)
 
     def __getitem__(self, idx):
-        if isinstance(idx, str):
+        if octets.isStringType(idx):
             return self.getComponentByName(idx)
         else:
             return base.AbstractConstructedAsn1Item.__getitem__(self, idx)
 
     def __setitem__(self, idx, value):
-        if isinstance(idx, str):
+        if octets.isStringType(idx):
             self.setComponentByName(idx, value)
         else:
             base.AbstractConstructedAsn1Item.__setitem__(self, idx, value)

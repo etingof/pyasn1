@@ -10,6 +10,7 @@ Revision 0.1.10, released XX-XX-2016
   iso-8859-1 encoding.
 - Fix to BER decoder improperly caching long tags.
 - Fix to IntegerDecoder's precomputed value map on Python 3.
+- Fix to base ASN.1 types to run in "unicode_literals" mode.
 
 Revision 0.1.9, released 28-09-2015
 -----------------------------------
