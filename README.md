@@ -92,8 +92,21 @@ turn serialized ASN.1 content, as received from network or read from a file,
 into a fully-fledged, initialized data structure.
 
 ```python
->>> encode(record)
+>>> substrate = encode(record)
+>>> substrate
 b'0\x07\x02\x01{\x80\x02\x01A'
+>>>
+>>> decoded_record, substrate = decode(substrate, asn1Spec=Record())
+>>>
+>>> print(decoded_record.prettyPrint())
+Record:
+ id=123
+ room=321
+ house=0
+>>>
+>>> record == decoded_record
+True
+>>>
 ```
 
 Many high-profile Internet protocols and file formats utilize ASN.1 serialization.
