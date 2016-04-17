@@ -96,7 +96,7 @@ into a fully-fledged, initialized data structure.
 >>> substrate
 b'0\x07\x02\x01{\x80\x02\x01A'
 >>>
->>> decoded_record, substrate = decode(substrate, asn1Spec=Record())
+>>> decoded_record, rest_of_substrate = decode(substrate, asn1Spec=Record())
 >>>
 >>> print(decoded_record.prettyPrint())
 Record:
