@@ -1,14 +1,22 @@
+
 Revision 0.1.10, released XX-XX-2016
 ------------------------------------
 
-- Copyright notice added to non-trivial source code files.
+- POTENTIAL SECURITY ISSUE: fix to BER decoder improperly
+  caching long tags.
 - BitString improvements:
   * binValue and hexValue initializers added
   * defaultBinValue and defaultHexValue class-level initializers added
   * .asNumbers() and .asOctets() representation builders added
+- Components of constructed ASN.1 types can now be populated with
+  uninitialized ASN.1 objects by assigning either noValue sentinel or
+  setupComponent() function return in addition to now-legacy None sentinel.
+  This should improve code readability.
+- NoValue class improved to become a singleton and catch more kinds
+  of access to it.
 - Compat wrappers str2octs() and oct2strs() fixed to run over
   iso-8859-1 encoding.
-- Fix to BER decoder improperly caching long tags.
+- Copyright notice added to non-trivial source code files.
 - Fix to IntegerDecoder's precomputed value map on Python 3.
 - Fix to base ASN.1 types to run in "unicode_literals" mode.
 
@@ -17,7 +25,7 @@ Revision 0.1.9, released 28-09-2015
 
 - Wheel distribution format now supported.
 - Extensions added to text files, CVS attic flushed.
-- Fix to make uninitilaized pyasn1 objects failing properly on hash().
+- Fix to make uninitialized pyasn1 objects failing properly on hash().
 - Fix to ObjectIdentifier initialization from unicode string.
 - Fix to CER/DER Boolean decoder - fail on non single-octet payload.
 
@@ -28,7 +36,7 @@ Revision 0.1.8, released 22-06-2015
 - Explicit limit on ObjectIdentifier arc value size removed.
 - Unicode initializer support added to OctetString type and derivatives.
 - New prettyPrintType() abstract method implemented to base pyasn1 types
-  to facilitate encoding errors analisys.
+  to facilitate encoding errors analysis.
 - The __str__() method implemented to Tag, TagSet and TagMap classes to
   ease encoding errors troubleshooting.
   easing encoding errors

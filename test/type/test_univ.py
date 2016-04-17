@@ -20,6 +20,127 @@ else:
     import unittest
 
 
+class NoValueTestCase(unittest.TestCase):
+    def testSingleton(self):
+        assert univ.NoValue() is univ.NoValue(), 'NoValue is not a singleton'
+
+    def testRepr(self):
+        try:
+            repr(univ.noValue)
+
+        except PyAsn1Error:
+            assert False, 'repr() on NoValue object fails'
+
+    def testIsInstance(self):
+        try:
+            assert isinstance(univ.noValue, univ.NoValue), 'isinstance() on NoValue() object fails'
+
+        except PyAsn1Error:
+            assert False, 'isinstance() on NoValue object fails'
+
+    def testStr(self):
+        try:
+            str(univ.noValue)
+
+        except PyAsn1Error:
+            pass
+
+        else:
+            assert False, 'str() works for NoValue object'
+
+    def testLen(self):
+        try:
+            len(univ.noValue)
+
+        except PyAsn1Error:
+            pass
+
+        else:
+            assert False, 'len() works for NoValue object'
+
+    def testCmp(self):
+        try:
+            univ.noValue == 1
+
+        except PyAsn1Error:
+            pass
+
+        else:
+            assert False, 'comparison works for NoValue object'
+
+    def testSubs(self):
+        try:
+            univ.noValue[0]
+
+        except PyAsn1Error:
+            pass
+
+        else:
+            assert False, '__getitem__() works for NoValue object'
+
+    def testKey(self):
+        try:
+            univ.noValue['key']
+
+        except PyAsn1Error:
+            pass
+
+        else:
+            assert False, '__getitem__() works for NoValue object'
+
+    def testKeyAssignment(self):
+        try:
+            univ.noValue['key'] = 123
+
+        except PyAsn1Error:
+            pass
+
+        else:
+            assert False, '__setitem__() works for NoValue object'
+
+    def testInt(self):
+        try:
+            int(univ.noValue)
+
+        except PyAsn1Error:
+            pass
+
+        else:
+            assert False, 'integer conversion works for NoValue object'
+
+    def testAdd(self):
+        try:
+            univ.noValue + univ.noValue
+
+        except PyAsn1Error:
+            pass
+
+        else:
+            assert False, 'addition works for NoValue object'
+
+    def testBitShift(self):
+        try:
+            univ.noValue << 1
+
+        except PyAsn1Error:
+            pass
+
+        else:
+            assert False, 'bitshift works for NoValue object'
+
+
+    def testBooleanEvaluation(self):
+        try:
+            if univ.noValue:
+                pass
+
+        except PyAsn1Error:
+            pass
+
+        else:
+            assert False, 'boolean evaluation works for NoValue object'
+
+
 class IntegerTestCase(unittest.TestCase):
     def testStr(self): assert str(univ.Integer(1)) in ('1', '1L'), 'str() fails'
 
@@ -153,6 +274,20 @@ class BitStringTestCase(unittest.TestCase):
             namedValues=namedval.NamedValues(('Active', 0), ('Urgent', 1))
         )
 
+    def testBinDefault(self):
+
+        class BinDefault(univ.BitString):
+            defaultBinValue = '1010100110001010'
+
+        assert BinDefault() == univ.BitString(binValue='1010100110001010')
+
+    def testHexDefault(self):
+
+        class HexDefault(univ.BitString):
+            defaultHexValue = 'A98A'
+
+        assert HexDefault() == univ.BitString(hexValue='A98A')
+
     def testSet(self):
         assert self.b.clone('Active') == (1,)
         assert self.b.clone("'1010100110001010'B") == (1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0)
@@ -198,6 +333,21 @@ class BitStringTestCase(unittest.TestCase):
 
 
 class OctetStringTestCase(unittest.TestCase):
+
+    def testBinDefault(self):
+
+        class BinDefault(univ.OctetString):
+            defaultBinValue = '1000010111101110101111000000111011'
+
+        assert BinDefault() == univ.OctetString(binValue='1000010111101110101111000000111011')
+
+    def testHexDefault(self):
+
+        class HexDefault(univ.OctetString):
+            defaultHexValue = 'FA9823C43E43510DE3422'
+
+        assert HexDefault() == univ.OctetString(hexValue='FA9823C43E43510DE3422')
+
     def testInit(self):
         assert univ.OctetString(str2octs('abcd')) == str2octs('abcd'), '__init__() fails'
 
@@ -682,6 +832,13 @@ class Sequence(unittest.TestCase):
         assert self.s1.clone().setComponents(name='a', nick='b', age=1) == \
                self.s1.setComponentByPosition(0, 'a').setComponentByPosition(1, 'b').setComponentByPosition(2, 1)
 
+    def testSetToDefault(self):
+        s = self.s1.clone()
+        s.setComponentByPosition(0, univ.noValue)
+        s[2] = univ.noValue
+        assert s[0] == univ.OctetString('')
+        assert s[2] == univ.Integer(34)
+
 
 class SetOf(unittest.TestCase):
     def setUp(self):
@@ -743,6 +900,10 @@ class Set(unittest.TestCase):
         assert self.s1.getComponentPositionByType(
             univ.Null().getTagSet()
         ) == 1
+
+    def testSetToDefault(self):
+        self.s1.setComponentByName('name', univ.noValue)
+        assert self.s1['name'] == univ.OctetString('')
 
 
 class Choice(unittest.TestCase):
@@ -825,6 +986,10 @@ class Choice(unittest.TestCase):
         assert len(s) == 1
         assert s.getComponentByPosition(0) == self.s1.getComponentByPosition(0)
 
+    def testSetToDefault(self):
+        s = self.s1.clone()
+        s.setComponentByName('sex', univ.noValue)
+        assert s['sex'] is not univ.noValue
 
 if __name__ == '__main__':
     unittest.main()

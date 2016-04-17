@@ -115,28 +115,54 @@ class Asn1ItemBase(Asn1Item):
                (not matchConstraints or
                 (self._subtypeSpec.isSuperTypeOf(other.getSubtypeSpec())))
 
+    @staticmethod
+    def isNoValue(*values):
+        for value in values:
+            if value is not None and value is not noValue:
+                return False
+        return True
 
-class NoValue:
-    """Creates an instance of NoValue class.
+
+class NoValue(object):
+    """Creates a singleton instance of NoValue class.
 
     NoValue object can be used as an initializer on PyASN1 type class
     instantiation to represent ASN.1 type rather than ASN.1 data value.
 
-    No operations other than type comparision can be performed on
+    No operations other than type comparison can be performed on
     a PyASN1 type object.
     """
+    skipMethods = ('__getattribute__', '__getattr__', '__setattr__', '__delattr__',
+                   '__class__', '__init__', '__del__', '__new__', '__repr__', '__qualname__')
+
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            def getPlug(name):
+                def plug(self, *args, **kw):
+                    raise error.PyAsn1Error('Uninitialized ASN.1 value ("%s" attribute looked up)' % name)
+                return plug
+
+            op_names = [name
+                        for typ in (str, int, list, dict)
+                        for name in dir(typ)
+                        if name not in cls.skipMethods and name.startswith('__') and name.endswith('__') and callable(getattr(typ, name))]
+
+            for name in set(op_names):
+                setattr(cls, name, getPlug(name))
+
+            cls._instance = object.__new__(cls)
+
+        return cls._instance
 
     def __getattr__(self, attr):
-        if attr in ('__qualname__', '__repr__', '__getitem__'):
+        if attr in self.skipMethods:
             raise AttributeError('attribute %s not present' % attr)
         raise error.PyAsn1Error('No value for "%s"' % attr)
 
-    def __getitem__(self, i):
-        raise error.PyAsn1Error('No value')
-
     def __repr__(self):
         return '%s()' % self.__class__.__name__
-
 
 noValue = NoValue()
 
@@ -146,11 +172,11 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
     #: Default payload value
     defaultValue = noValue
 
-    def __init__(self, value=None, tagSet=None, subtypeSpec=None):
+    def __init__(self, value=noValue, tagSet=None, subtypeSpec=None):
         Asn1ItemBase.__init__(self, tagSet, subtypeSpec)
-        if value is None or value is noValue:
+        if self.isNoValue(value):
             value = self.defaultValue
-        if value is None or value is noValue:
+        if self.isNoValue(value):
             self.__hashedValue = value = noValue
         else:
             value = self.prettyIn(value)
@@ -215,12 +241,12 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
                 :class:`False` otherwise.
 
         """
-        return not isinstance(self._value, NoValue)
+        return self._value is not noValue
 
-    def clone(self, value=None, tagSet=None, subtypeSpec=None):
-        if value is None and tagSet is None and subtypeSpec is None:
-            return self
-        if value is None:
+    def clone(self, value=noValue, tagSet=None, subtypeSpec=None):
+        if self.isNoValue(value):
+            if self.isNoValue(tagSet, subtypeSpec):
+                return self
             value = self._value
         if tagSet is None:
             tagSet = self._tagSet
@@ -228,9 +254,9 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
             subtypeSpec = self._subtypeSpec
         return self.__class__(value, tagSet, subtypeSpec)
 
-    def subtype(self, value=None, implicitTag=None, explicitTag=None,
+    def subtype(self, value=noValue, implicitTag=None, explicitTag=None,
                 subtypeSpec=None):
-        if value is None:
+        if self.isNoValue(value):
             value = self._value
         if implicitTag is not None:
             tagSet = self._tagSet.tagImplicitly(implicitTag)
@@ -291,6 +317,23 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
 # * Component type is a scalar type for SequenceOf/SetOf types and a list
 #   of types for Sequence/Set/Choice.
 #
+
+def setupComponent():
+    """Returns a sentinel value.
+
+     Indicates to a constructed type to set up its inner component so that it
+     can be referred to. This is useful in situation when you want to populate
+     descendants of a constructed type what requires being able to refer to
+     their parent types along the way.
+
+     Example
+     -------
+
+     >>> constructed['record'] = setupComponent()
+     >>> constructed['record']['scalar'] = 42
+    """
+    return noValue
+
 
 class AbstractConstructedAsn1Item(Asn1ItemBase):
     componentType = None

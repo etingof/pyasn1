@@ -13,6 +13,7 @@ from pyasn1.compat import octets
 from pyasn1 import error
 
 NoValue = base.NoValue
+noValue = NoValue()
 
 
 # "Simple" ASN.1 types (yet incomplete)
@@ -58,7 +59,7 @@ class Integer(base.AbstractSimpleAsn1Item):
     #: representing symbolic aliases for numbers
     namedValues = namedval.NamedValues()
 
-    def __init__(self, value=None, tagSet=None, subtypeSpec=None,
+    def __init__(self, value=noValue, tagSet=None, subtypeSpec=None,
                  namedValues=None):
         if namedValues is None:
             self.__namedValues = self.namedValues
@@ -232,7 +233,7 @@ class Integer(base.AbstractSimpleAsn1Item):
     def getNamedValues(self):
         return self.__namedValues
 
-    def clone(self, value=None, tagSet=None, subtypeSpec=None,
+    def clone(self, value=noValue, tagSet=None, subtypeSpec=None,
               namedValues=None):
         """Creates a copy of object representing ASN.1 INTEGER type or value.
 
@@ -261,10 +262,9 @@ class Integer(base.AbstractSimpleAsn1Item):
             new instance of INTEGER type/value
 
         """
-        if value is None and tagSet is None and subtypeSpec is None \
-                and namedValues is None:
-            return self
-        if value is None:
+        if self.isNoValue(value):
+            if self.isNoValue(tagSet, subtypeSpec, namedValues):
+                return self
             value = self._value
         if tagSet is None:
             tagSet = self._tagSet
@@ -274,7 +274,7 @@ class Integer(base.AbstractSimpleAsn1Item):
             namedValues = self.__namedValues
         return self.__class__(value, tagSet, subtypeSpec, namedValues)
 
-    def subtype(self, value=None, implicitTag=None, explicitTag=None,
+    def subtype(self, value=noValue, implicitTag=None, explicitTag=None,
                 subtypeSpec=None, namedValues=None):
         """Creates a copy of object representing ASN.1 INTEGER subtype or a value.
 
@@ -312,7 +312,7 @@ class Integer(base.AbstractSimpleAsn1Item):
             new instance of INTEGER type/value
 
         """
-        if value is None:
+        if self.isNoValue(value):
             value = self._value
         if implicitTag is not None:
             tagSet = self._tagSet.tagImplicitly(implicitTag)
@@ -366,7 +366,7 @@ class Boolean(Integer):
 
     namedValues = Integer.namedValues.clone(('False', 0), ('True', 1))
 
-    def clone(self, value=None, tagSet=None, subtypeSpec=None):
+    def clone(self, value=noValue, tagSet=None, subtypeSpec=None):
         """Creates a copy of BOOLEAN object representing ASN.1 type or value.
 
         If additional parameters are specified, they will be used
@@ -393,7 +393,7 @@ class Boolean(Integer):
         """
         return Integer.clone(self, value, tagSet, subtypeSpec)
 
-    def subtype(self, value=None, implicitTag=None, explicitTag=None,
+    def subtype(self, value=noValue, implicitTag=None, explicitTag=None,
                 subtypeSpec=None):
         """Creates a copy of BOOLEAN object representing ASN.1 subtype or a value.
 
@@ -449,6 +449,14 @@ class BitString(base.AbstractSimpleAsn1Item):
     namedValues: :py:class:`~pyasn1.type.namedval.NamedValues`
         Object representing non-default symbolic aliases for numbers
 
+    binValue: :py:class:`str`
+        Binary string initializer to use instead of the *value*.
+        Example: '10110011'.
+
+    hexValue: :py:class:`str`
+        Hexadecimal string initializer to use instead of the *value*.
+        Example: 'DEADBEAF'.
+
     Raises
     ------
     PyAsn1Error :
@@ -470,29 +478,30 @@ class BitString(base.AbstractSimpleAsn1Item):
     #: representing symbolic aliases for numbers
     namedValues = namedval.NamedValues()
 
-    defaultBinValue = defaultHexValue = base.noValue
+    defaultBinValue = defaultHexValue = noValue
 
-    def __init__(self, value=None, tagSet=None, subtypeSpec=None,
-                 namedValues=None, binValue=None, hexValue=None):
+    def __init__(self, value=noValue, tagSet=None, subtypeSpec=None,
+                 namedValues=None, binValue=noValue, hexValue=noValue):
         if namedValues is None:
             self.__namedValues = self.namedValues
         else:
             self.__namedValues = namedValues
-        if binValue is not None:
+        if not self.isNoValue(binValue):
             value = self.fromBinaryString(binValue)
-        if hexValue is not None:
+        if not self.isNoValue(hexValue):
             value = self.fromHexString(hexValue)
-        if value is None or value is base.noValue:
-            value = self.defaultHexValue
-        if value is None or value is base.noValue:
-            value = self.defaultBinValue
+        if self.isNoValue(value):
+            if self.defaultBinValue is not noValue:
+                value = self.fromBinaryString(self.defaultBinValue)
+            elif self.defaultHexValue is not noValue:
+                value = self.fromHexString(self.defaultHexValue)
         self.__asNumbersCache = None
         base.AbstractSimpleAsn1Item.__init__(
             self, value, tagSet, subtypeSpec
         )
 
-    def clone(self, value=None, tagSet=None, subtypeSpec=None,
-              namedValues=None, binValue=None, hexValue=None):
+    def clone(self, value=noValue, tagSet=None, subtypeSpec=None,
+              namedValues=None, binValue=noValue, hexValue=noValue):
         """Creates a copy of BitString object representing ASN.1 type or value.
 
         If additional parameters are specified, they will be used
@@ -514,16 +523,23 @@ class BitString(base.AbstractSimpleAsn1Item):
         namedValues: :py:class:`~pyasn1.type.namedval.NamedValues`
             Class instance representing BitString type enumerations
 
+        binValue: :py:class:`str`
+            Binary string initializer to use instead of the *value*.
+            Example: '10110011'.
+
+        hexValue: :py:class:`str`
+            Hexadecimal string initializer to use instead of the *value*.
+            Example: 'DEADBEAF'.
+
         Returns
         -------
         : :py:class:`~pyasn1.type.univ.BitString`
             new instance of BIT STRING type/value
                 
         """
-        if value is None and tagSet is None and subtypeSpec is None \
-                and namedValues is None and binValue is None and hexValue is None:
-            return self
-        if value is None and binValue is None and hexValue is None:
+        if self.isNoValue(value, binValue, hexValue):
+            if self.isNoValue(tagSet, subtypeSpec, namedValues):
+                return self
             value = self._value
         if tagSet is None:
             tagSet = self._tagSet
@@ -533,8 +549,8 @@ class BitString(base.AbstractSimpleAsn1Item):
             namedValues = self.__namedValues
         return self.__class__(value, tagSet, subtypeSpec, namedValues, binValue, hexValue)
 
-    def subtype(self, value=None, implicitTag=None, explicitTag=None,
-                subtypeSpec=None, namedValues=None, binValue=None, hexValue=None):
+    def subtype(self, value=noValue, implicitTag=None, explicitTag=None,
+                subtypeSpec=None, namedValues=None, binValue=noValue, hexValue=noValue):
         """Creates a copy of BIT STRING object representing ASN.1 subtype or a value.
 
         If additional parameters are specified, they will be merged
@@ -565,13 +581,23 @@ class BitString(base.AbstractSimpleAsn1Item):
             to one of the caller, then use the result as new object's
             named numbers.
 
+        binValue: :py:class:`str`
+            Binary string initializer to use instead of the *value*.
+            Example: '10110011'.
+
+        hexValue: :py:class:`str`
+            Hexadecimal string initializer to use instead of the *value*.
+            Example: 'DEADBEAF'.
+
         Returns
         -------
         : :py:class:`~pyasn1.type.univ.BitString`
             new instance of BIT STRING type/value
 
         """
-        if value is None and binValue is None and hexValue is None:
+        if self.isNoValue(value, binValue, hexValue):
+            if self.isNoValue(implicitTag, explicitTag, subtypeSpec, namedValues):
+                return self
             value = self._value
         if implicitTag is not None:
             tagSet = self._tagSet.tagImplicitly(implicitTag)
@@ -781,28 +807,29 @@ class OctetString(base.AbstractSimpleAsn1Item):
     #: object imposing constraints on initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
 
-    defaultBinValue = defaultHexValue = base.noValue
+    defaultBinValue = defaultHexValue = noValue
     encoding = 'us-ascii'
 
-    def __init__(self, value=None, tagSet=None, subtypeSpec=None,
-                 encoding=None, binValue=None, hexValue=None):
+    def __init__(self, value=noValue, tagSet=None, subtypeSpec=None,
+                 encoding=None, binValue=noValue, hexValue=noValue):
         if encoding is None:
             self._encoding = self.encoding
         else:
             self._encoding = encoding
-        if binValue is not None:
+        if not self.isNoValue(binValue):
             value = self.fromBinaryString(binValue)
-        if hexValue is not None:
+        if not self.isNoValue(hexValue):
             value = self.fromHexString(hexValue)
-        if value is None or value is base.noValue:
-            value = self.defaultHexValue
-        if value is None or value is base.noValue:
-            value = self.defaultBinValue
+        if self.isNoValue(value):
+            if self.defaultBinValue is not noValue:
+                value = self.fromBinaryString(self.defaultBinValue)
+            elif self.defaultHexValue is not noValue:
+                value = self.fromHexString(self.defaultHexValue)
         self.__asNumbersCache = None
         base.AbstractSimpleAsn1Item.__init__(self, value, tagSet, subtypeSpec)
 
-    def clone(self, value=None, tagSet=None, subtypeSpec=None,
-              encoding=None, binValue=None, hexValue=None):
+    def clone(self, value=noValue, tagSet=None, subtypeSpec=None,
+              encoding=None, binValue=noValue, hexValue=noValue):
         """Creates a copy of OCTET STRING object representing ASN.1 type or value.
 
         If additional parameters are specified, they will be used
@@ -838,10 +865,9 @@ class OctetString(base.AbstractSimpleAsn1Item):
             new instance of OCTET STRING type/value
 
         """
-        if value is None and tagSet is None and subtypeSpec is None and \
-                encoding is None and binValue is None and hexValue is None:
-            return self
-        if value is None and binValue is None and hexValue is None:
+        if self.isNoValue(value, binValue, hexValue):
+            if self.isNoValue(tagSet, subtypeSpec, encoding):
+                return self
             value = self._value
         if tagSet is None:
             tagSet = self._tagSet
@@ -853,9 +879,9 @@ class OctetString(base.AbstractSimpleAsn1Item):
             value, tagSet, subtypeSpec, encoding, binValue, hexValue
         )
 
-    def subtype(self, value=None, implicitTag=None, explicitTag=None,
-                subtypeSpec=None, encoding=None, binValue=None,
-                hexValue=None):
+    def subtype(self, value=noValue, implicitTag=None, explicitTag=None,
+                subtypeSpec=None, encoding=None, binValue=noValue,
+                hexValue=noValue):
         """Creates a copy of OCTET STRING object representing ASN.1 subtype or a value.
 
         If additional parameters are specified, they will be merged
@@ -898,11 +924,9 @@ class OctetString(base.AbstractSimpleAsn1Item):
             new instance of OCTET STRING type/value
 
         """
-        if value is None and implicitTag is None and \
-                explicitTag is None and subtypeSpec is None and \
-                encoding is None and binValue is None and hexValue is None:
-            return self
-        if value is None and binValue is None and hexValue is None:
+        if self.isNoValue(value, binValue, hexValue):
+            if self.isNoValue(implicitTag, explicitTag, subtypeSpec, encoding):
+                return self
             value = self._value
         if implicitTag is not None:
             tagSet = self._tagSet.tagImplicitly(implicitTag)
@@ -1128,7 +1152,7 @@ class Null(OctetString):
     baseTagSet = tagSet
     subtypeSpec = OctetString.subtypeSpec + constraint.SingleValueConstraint(octets.str2octs(''))
 
-    def clone(self, value=None, tagSet=None):
+    def clone(self, value=noValue, tagSet=None):
         """Creates a copy of object representing ASN.1 type or value.
 
         If additional parameters are specified, they will be used
@@ -1152,7 +1176,7 @@ class Null(OctetString):
         """
         return OctetString.clone(self, value, tagSet)
 
-    def subtype(self, value=None, implicitTag=None, explicitTag=None):
+    def subtype(self, value=noValue, implicitTag=None, explicitTag=None):
         """Creates a copy of object representing ASN.1 subtype or a value.
 
         If additional parameters are specified, they will be merged
@@ -1226,7 +1250,7 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
     #: object imposing constraints on initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
 
-    def clone(self, value=None, tagSet=None, subtypeSpec=None):
+    def clone(self, value=noValue, tagSet=None, subtypeSpec=None):
         """Creates a copy of OBJECT IDENTIFIER object representing ASN.1 type or value.
 
         If additional parameters are specified, they will be used
@@ -1253,7 +1277,7 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
         """
         return base.AbstractSimpleAsn1Item.clone(self, value, tagSet, subtypeSpec)
 
-    def subtype(self, value=None, implicitTag=None, explicitTag=None,
+    def subtype(self, value=noValue, implicitTag=None, explicitTag=None,
                 subtypeSpec=None):
         """Creates a copy of OBJECT IDENTIFIER object representing ASN.1 subtype or a value.
 
@@ -1428,7 +1452,7 @@ class Real(base.AbstractSimpleAsn1Item):
     #: object imposing constraints on initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
 
-    def clone(self, value=None, tagSet=None, subtypeSpec=None):
+    def clone(self, value=noValue, tagSet=None, subtypeSpec=None):
         """Creates a copy of REAL object representing ASN.1 type or value.
 
         If additional parameters are specified, they will be used
@@ -1455,7 +1479,7 @@ class Real(base.AbstractSimpleAsn1Item):
         """
         return base.AbstractSimpleAsn1Item.clone(self, value, tagSet, subtypeSpec)
 
-    def subtype(self, value=None, implicitTag=None, explicitTag=None,
+    def subtype(self, value=noValue, implicitTag=None, explicitTag=None,
                 subtypeSpec=None):
         """Creates a copy of REAL object representing ASN.1 subtype or a value.
 
@@ -1743,7 +1767,7 @@ class Enumerated(Integer):
     #: representing symbolic aliases for numbers
     namedValues = namedval.NamedValues()
 
-    def clone(self, value=None, tagSet=None, subtypeSpec=None,
+    def clone(self, value=noValue, tagSet=None, subtypeSpec=None,
               namedValues=None):
         """Creates a copy of object representing ASN.1 ENUMERATED type or value.
 
@@ -1774,7 +1798,7 @@ class Enumerated(Integer):
         """
         return Integer.clone(self, value, tagSet, subtypeSpec, namedValues)
 
-    def subtype(self, value=None, implicitTag=None, explicitTag=None,
+    def subtype(self, value=noValue, implicitTag=None, explicitTag=None,
                 subtypeSpec=None, namedValues=None):
         """Creates a copy of ENUMERATED object representing ASN.1 subtype or a value.
 
@@ -1851,11 +1875,11 @@ class SetOf(base.AbstractConstructedAsn1Item):
     def getComponentByPosition(self, idx):
         return self._componentValues[idx]
 
-    def setComponentByPosition(self, idx, value=None, verifyConstraints=True):
+    def setComponentByPosition(self, idx, value=noValue, verifyConstraints=True):
         l = len(self._componentValues)
         if idx >= l:
             self._componentValues = self._componentValues + (idx - l + 1) * [None]
-        if value is None:
+        if self.isNoValue(value):
             if self._componentValues[idx] is None:
                 if self._componentType is None:
                     raise error.PyAsn1Error('Component type not defined')
@@ -1965,7 +1989,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             self._componentType.getPositionByName(name)
         )
 
-    def setComponentByName(self, name, value=None, verifyConstraints=True):
+    def setComponentByName(self, name, value=noValue, verifyConstraints=True):
         return self.setComponentByPosition(
             self._componentType.getPositionByName(name), value, verifyConstraints
         )
@@ -1978,7 +2002,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                 return
             raise
 
-    def setComponentByPosition(self, idx, value=None,
+    def setComponentByPosition(self, idx, value=noValue,
                                verifyConstraints=True,
                                exactTypes=False,
                                matchTags=True,
@@ -1986,7 +2010,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         l = len(self._componentValues)
         if idx >= l:
             self._componentValues = self._componentValues + (idx - l + 1) * [None]
-        if value is None:
+        if self.isNoValue(value):
             if self._componentValues[idx] is None:
                 self._componentValues[idx] = self._componentType.getTypeByPosition(idx).clone()
                 self._componentValuesSet += 1
@@ -2098,7 +2122,7 @@ class Set(SequenceAndSetBase):
             # get outer component by inner tagSet
             return c
 
-    def setComponentByType(self, tagSet, value=None, innerFlag=0,
+    def setComponentByType(self, tagSet, value=noValue, innerFlag=0,
                            verifyConstraints=True):
         idx = self._componentType.getPositionByType(tagSet)
         t = self._componentType.getTypeByPosition(idx)
@@ -2197,13 +2221,13 @@ class Choice(Set):
             else:
                 myClone.setComponentByType(tagSet, c.clone())
 
-    def setComponentByPosition(self, idx, value=None, verifyConstraints=True):
+    def setComponentByPosition(self, idx, value=noValue, verifyConstraints=True):
         l = len(self._componentValues)
         if idx >= l:
             self._componentValues = self._componentValues + (idx - l + 1) * [None]
         if self._currentIdx is not None:
             self._componentValues[self._currentIdx] = None
-        if value is None:
+        if self.isNoValue(value):
             if self._componentValues[idx] is None:
                 self._componentValues[idx] = self._componentType.getTypeByPosition(idx).clone()
                 self._componentValuesSet = 1
@@ -2322,8 +2346,8 @@ class Any(OctetString):
             self
         )
 
-    def clone(self, value=None, tagSet=None, subtypeSpec=None,
-              encoding=None, binValue=None, hexValue=None):
+    def clone(self, value=noValue, tagSet=None, subtypeSpec=None,
+              encoding=None, binValue=noValue, hexValue=noValue):
         """Creates a copy of ANY object representing ASN.1 type or value.
 
         If additional parameters are specified, they will be used
@@ -2361,9 +2385,9 @@ class Any(OctetString):
         """
         return OctetString.clone(self, value, tagSet, subtypeSpec, encoding, binValue, hexValue)
 
-    def subtype(self, value=None, implicitTag=None, explicitTag=None,
-                subtypeSpec=None, encoding=None, binValue=None,
-                hexValue=None):
+    def subtype(self, value=noValue, implicitTag=None, explicitTag=None,
+                subtypeSpec=None, encoding=None, binValue=noValue,
+                hexValue=noValue):
         """Creates a copy of ANY object representing ASN.1 subtype or a value.
 
         If additional parameters are specified, they will be merged
