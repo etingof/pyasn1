@@ -291,22 +291,22 @@ from a Python tuple of binary components.
 
    >>> from pyasn1.type import univ
    >>> publicKey = univ.BitString(
-   ...          "'1010111011110001010110101101101"
-   ...          "1011000101010000010110101100010"
-   ...          "0110101010000111101010111111110'B"
+   ...          binValue='1010111011110001010110101101101'
+   ...                   '1011000101010000010110101100010'
+   ...                   '0110101010000111101010111111110'
    )
    >>> publicKey
-   BitString("'101011101111000101011010110110110110001010100000101101011000100110101010000111101010111111110'B")
+   BitString(binValue='101011101111000101011010110110110110001010100000101101011000100110101010000111101010111111110')
    >>> signature = univ.BitString(
-   ...          "'AF01330CD932093392100B39FF00DE0'H"
+   ...          hexValue='AF01330CD932093392100B39FF00DE0'
    ... )
    >>> signature
-   BitString("'1010111100000001001100110000110011011001001100100000100100110011100100100001000000001011001110011111111100000000110111100000'B")
+   BitString(binValue='1010111100000001001100110000110011011001001100100000100100110011100100100001000000001011001110011111111100000000110111100000')
    >>> fingerprint = univ.BitString(
    ...          (1, 0, 1, 1 ,0, 1, 1, 1, 0, 1, 0, 1)
    ... )
    >>> fingerprint
-   BitString("'101101110101'B")
+   BitString(binValue='101101110101')
    >>>
 
 Another BIT STRING initialization method supported by ASN.1 notation
@@ -336,7 +336,7 @@ with Enumeration type).
    ... )
    >>> bitMask = BitMask('read-flag,run-flag')
    >>> bitMask
-   BitMask("'10001'B")
+   BitMask(binValue='10001')
    >>> tuple(bitMask)
    (1, 0, 0, 0, 1)
    >>> bitMask[4]
