@@ -115,7 +115,7 @@ class IntegerEncoder(AbstractItemEncoder):
                 return ints2octs((0,)), 0
         octets = []
         value = int(value)  # to save on ops on asn1 type
-        while 1:
+        while True:
             octets.insert(0, value & 0xff)
             if value == 0 or value == -1:
                 break
@@ -146,7 +146,7 @@ class BitStringEncoder(AbstractItemEncoder):
         else:
             pos = 0
             substrate = null
-            while 1:
+            while True:
                 # count in octets
                 v = value.clone(value[pos * 8:pos * 8 + maxChunkSize * 8])
                 if not v:
@@ -163,7 +163,7 @@ class OctetStringEncoder(AbstractItemEncoder):
         else:
             pos = 0
             substrate = null
-            while 1:
+            while True:
                 v = value.clone(value[pos:pos + maxChunkSize])
                 if not v:
                     break
@@ -250,7 +250,7 @@ class RealEncoder(AbstractItemEncoder):
             m *= 2 ** (abs(e) % 4 * es)
             e = abs(e) // 4 * es
 
-        while 1:
+        while True:
             if int(m) != m:
                 m *= encbase
                 e -= 1

@@ -726,7 +726,7 @@ class Decoder:
                     if tagId == 0x1F:
                         short = False
                         tagId = 0
-                        while 1:
+                        while True:
                             if not substrate:
                                 raise error.SubstrateUnderrunError(
                                     'Short octet stream on long tag decoding'
