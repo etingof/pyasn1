@@ -10,7 +10,7 @@ from pyasn1.compat.octets import str2octs, oct2int, isOctetsType
 from pyasn1 import debug, error
 
 
-class AbstractDecoder:
+class AbstractDecoder(object):
     protoComponent = None
 
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
@@ -664,7 +664,7 @@ typeMap = {
  stDumpRawValue, stErrorCondition, stStop) = [x for x in range(10)]
 
 
-class Decoder:
+class Decoder(object):
     defaultErrorState = stErrorCondition
     #    defaultErrorState = stDumpRawValue
     defaultRawDecoder = AnyDecoder()

@@ -11,7 +11,7 @@ from pyasn1 import error
 __all__ = ['NamedValues']
 
 
-class NamedValues:
+class NamedValues(object):
     def __init__(self, *namedValues):
         self.nameToValIdx = {}
         self.valToNameIdx = {}

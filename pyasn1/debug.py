@@ -21,7 +21,7 @@ flagMap = {
 }
 
 
-class Printer:
+class Printer(object):
     # noinspection PyShadowingNames
     def __init__(self, logger=None, handler=None, formatter=None):
         if logger is None:
@@ -52,7 +52,7 @@ else:
             pass
 
 
-class Debug:
+class Debug(object):
     defaultPrinter = None
 
     def __init__(self, *flags, **options):
@@ -112,7 +112,7 @@ def hexdump(octets):
     )
 
 
-class Scope:
+class Scope(object):
     def __init__(self):
         self._list = []
 

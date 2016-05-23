@@ -9,7 +9,7 @@ from pyasn1.type import tagmap
 from pyasn1 import error
 
 
-class NamedType:
+class NamedType(object):
     """Named type specification for constructed types
     """
     isOptional = 0
@@ -67,7 +67,7 @@ class DefaultedNamedType(NamedType):
     isDefaulted = 1
 
 
-class NamedTypes:
+class NamedTypes(object):
     def __init__(self, *namedTypes):
         self.__namedTypes = namedTypes
         self.__namedTypesLen = len(self.__namedTypes)

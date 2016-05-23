@@ -14,7 +14,7 @@ class Error(Exception):
     pass
 
 
-class AbstractItemEncoder:
+class AbstractItemEncoder(object):
     supportIndefLenMode = 1
 
     # noinspection PyMethodMayBeStatic
@@ -436,7 +436,7 @@ typeMap = {
 }
 
 
-class Encoder:
+class Encoder(object):
     supportIndefLength = True
 
     # noinspection PyDefaultArgument

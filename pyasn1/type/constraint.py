@@ -10,7 +10,7 @@ import sys
 from pyasn1.type import error
 
 
-class AbstractConstraint:
+class AbstractConstraint(object):
     """Abstract base-class for constraint objects
 
        Constraints should be stored in a simple sequence in the
