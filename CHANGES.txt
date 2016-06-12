@@ -4,6 +4,7 @@ Revision 0.1.10, released XX-XX-2016
 
 - POTENTIAL SECURITY ISSUE: fix to BER decoder improperly
   caching long tags.
+- Switched to new-style classes.
 - BitString improvements:
   * binValue and hexValue initializers added
   * defaultBinValue and defaultHexValue class-level initializers added
