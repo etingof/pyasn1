@@ -9,7 +9,7 @@ from pyasn1.type import constraint, tagmap, tag
 from pyasn1 import error
 
 
-class Asn1Item:
+class Asn1Item(object):
     pass
 
 

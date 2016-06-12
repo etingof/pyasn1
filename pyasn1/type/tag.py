@@ -20,7 +20,7 @@ tagCategoryExplicit = 0x02
 tagCategoryUntagged = 0x04
 
 
-class Tag:
+class Tag(object):
     """ASN.1 types tags"""
 
     def __init__(self, tagClass, tagFormat, tagId):
@@ -84,7 +84,7 @@ class Tag:
         return self.__tag  # __getitem__() is slow
 
 
-class TagSet:
+class TagSet(object):
     def __init__(self, baseTag=(), *superTags):
         self.__baseTag = baseTag
         self.__superTags = superTags

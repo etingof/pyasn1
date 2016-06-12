@@ -7,7 +7,7 @@
 from pyasn1 import error
 
 
-class TagMap:
+class TagMap(object):
     # noinspection PyDefaultArgument
     def __init__(self, posMap={}, negMap={}, defType=None):
         self.__posMap = posMap.copy()
