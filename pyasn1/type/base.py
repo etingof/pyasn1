@@ -133,7 +133,8 @@ class NoValue(object):
     a PyASN1 type object.
     """
     skipMethods = ('__getattribute__', '__getattr__', '__setattr__', '__delattr__',
-                   '__class__', '__init__', '__del__', '__new__', '__repr__', '__qualname__')
+                   '__class__', '__init__', '__del__', '__new__', '__repr__', 
+                   '__qualname__', '__objclass__', 'im_class')
 
     _instance = None
 
