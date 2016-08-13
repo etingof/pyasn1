@@ -268,7 +268,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         if subtypeSpec is None:
             subtypeSpec = self._subtypeSpec
         else:
-            subtypeSpec = subtypeSpec + self._subtypeSpec
+            subtypeSpec = self._subtypeSpec + subtypeSpec
         return self.__class__(value, tagSet, subtypeSpec)
 
     def prettyIn(self, value):
@@ -422,7 +422,7 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         if subtypeSpec is None:
             subtypeSpec = self._subtypeSpec
         else:
-            subtypeSpec = subtypeSpec + self._subtypeSpec
+            subtypeSpec = self._subtypeSpec + subtypeSpec
         if sizeSpec is None:
             sizeSpec = self._sizeSpec
         else:

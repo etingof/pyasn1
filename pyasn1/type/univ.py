@@ -323,7 +323,7 @@ class Integer(base.AbstractSimpleAsn1Item):
         if subtypeSpec is None:
             subtypeSpec = self._subtypeSpec
         else:
-            subtypeSpec = subtypeSpec + self._subtypeSpec
+            subtypeSpec = self._subtypeSpec + subtypeSpec
         if namedValues is None:
             namedValues = self.__namedValues
         else:
@@ -608,7 +608,7 @@ class BitString(base.AbstractSimpleAsn1Item):
         if subtypeSpec is None:
             subtypeSpec = self._subtypeSpec
         else:
-            subtypeSpec = subtypeSpec + self._subtypeSpec
+            subtypeSpec = self._subtypeSpec + subtypeSpec
         if namedValues is None:
             namedValues = self.__namedValues
         else:
@@ -937,7 +937,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
         if subtypeSpec is None:
             subtypeSpec = self._subtypeSpec
         else:
-            subtypeSpec = subtypeSpec + self._subtypeSpec
+            subtypeSpec = self._subtypeSpec + subtypeSpec
         if encoding is None:
             encoding = self._encoding
         return self.__class__(
