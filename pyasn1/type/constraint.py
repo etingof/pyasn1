@@ -199,7 +199,7 @@ class AbstractConstraintSet(AbstractConstraint):
 
     def __add__(self, value): return self.__class__(self, value)
 
-    def __radd__(self, value): return self.__class__(self, value)
+    def __radd__(self, value): return self.__class__(value, self)
 
     def __len__(self): return len(self._values)
 
