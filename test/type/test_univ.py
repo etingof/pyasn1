@@ -865,12 +865,14 @@ class Set(unittest.TestCase):
             namedtype.DefaultedNamedType('age', univ.Integer(34))
         ))
         self.s2 = self.s1.clone()
+        self.s3 = univ.Set(componentType=None)
 
     def testTag(self):
         assert self.s1.getTagSet() == tag.TagSet(
             (),
             tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x11)
         ), 'wrong tagSet'
+        assert self.s3.getComponentTagMap() is not None
 
     def testByTypeWithPythonValue(self):
         self.s1.setComponentByType(univ.OctetString.tagSet, 'abc')
