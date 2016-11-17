@@ -147,7 +147,7 @@ class PermittedAlphabetConstraint(SingleValueConstraint):
                 raise error.ValueConstraintError(value)
 
 
-# This is a bit kludgy, meaning two op modes within a single constraing
+# This is a bit kludgy, meaning two op modes within a single constraint
 class InnerTypeConstraint(AbstractConstraint):
     """Value must satisfy type and presense constraints"""
 
