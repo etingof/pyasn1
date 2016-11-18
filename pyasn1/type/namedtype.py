@@ -131,7 +131,7 @@ class NamedTypes(object):
             idx = self.__namedTypesLen
             while idx > 0:
                 idx -= 1
-                tagMap = self.__namedTypes[idx].getType().getTagMap()
+                tagMap = self.__namedTypes[idx].getType().getTagMap() or tagmap.TagMap()
                 for t in tagMap.getPosMap():
                     if t in self.__tagToPosIdx:
                         raise error.PyAsn1Error('Duplicate type %s' % (t,))
@@ -203,7 +203,7 @@ class NamedTypes(object):
             tagMap = tagmap.TagMap()
             for nt in self.__namedTypes:
                 tagMap = tagMap.clone(
-                    nt.getType(), nt.getType().getTagMap(), uniq
+                    nt.getType(), nt.getType().getTagMap() or tagmap.TagMap(), uniq
                 )
             self.__tagMap[uniq] = tagMap
         return self.__tagMap[uniq]
