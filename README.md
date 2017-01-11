@@ -128,5 +128,5 @@ If something does not work as expected, try browsing pyasn1
 or post your question
 [to Stack Overflow](http://stackoverflow.com/questions/ask).  
 
-Copyright (c) 2005-2016, [Ilya Etingof](http://ilya@glas.net).
+Copyright (c) 2005-2017, [Ilya Etingof](http://etingof@gmail.com).
 All rights reserved.

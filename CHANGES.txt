@@ -1,5 +1,5 @@
 
-Revision 0.1.10, released XX-XX-2016
+Revision 0.1.10, released XX-XX-2017
 ------------------------------------
 
 - POTENTIAL SECURITY ISSUE: fix to BER decoder improperly
@@ -27,6 +27,7 @@ Revision 0.1.10, released XX-XX-2016
   constraints being added on subtyping effectively further narrow the set of
   allowed values, which aligns well with the notion of subtyping.
 - Fix to NamedTypes methods to handle .getTagMap() returning None
+- Author's email changed, copyright extended to 2017
 
 Revision 0.1.9, released 28-09-2015
 -----------------------------------
