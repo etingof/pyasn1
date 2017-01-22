@@ -215,6 +215,10 @@ html_show_sphinx = False
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'pyasn1doc'
 
+html_context = {
+    'include_analytics': 'PYASN1DEV' in os.environ
+}
+
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
