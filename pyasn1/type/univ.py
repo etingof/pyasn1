@@ -455,7 +455,7 @@ class BitString(base.AbstractSimpleAsn1Item):
 
     hexValue: :py:class:`str`
         Hexadecimal string initializer to use instead of the *value*.
-        Example: 'DEADBEAF'.
+        Example: 'DEADBEEF'.
 
     Raises
     ------
@@ -529,7 +529,7 @@ class BitString(base.AbstractSimpleAsn1Item):
 
         hexValue: :py:class:`str`
             Hexadecimal string initializer to use instead of the *value*.
-            Example: 'DEADBEAF'.
+            Example: 'DEADBEEF'.
 
         Returns
         -------
@@ -587,7 +587,7 @@ class BitString(base.AbstractSimpleAsn1Item):
 
         hexValue: :py:class:`str`
             Hexadecimal string initializer to use instead of the *value*.
-            Example: 'DEADBEAF'.
+            Example: 'DEADBEEF'.
 
         Returns
         -------
@@ -788,7 +788,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
         
     hexValue: :py:class:`str`
         Hexadecimal string initializer to use instead of the *value*.
-        Example: 'DEADBEAF'.
+        Example: 'DEADBEEF'.
 
     Raises
     ------
@@ -857,7 +857,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
             Binary string initializer. Example: '10110011'.
         
         hexValue: :py:class:`str`
-            Hexadecimal string initializer. Example: 'DEADBEAF'.
+            Hexadecimal string initializer. Example: 'DEADBEEF'.
 
         Returns
         -------
@@ -916,7 +916,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
             Binary string initializer. Example: '10110011'.
         
         hexValue: :py:class:`str`
-            Hexadecimal string initializer. Example: 'DEADBEAF'.
+            Hexadecimal string initializer. Example: 'DEADBEEF'.
 
         Returns
         -------
@@ -2663,7 +2663,7 @@ class Any(OctetString):
         Binary string initializer. Example: '10110011'.
         
     hexValue: :py:class:`str`
-        Hexadecimal string initializer. Example: 'DEADBEAF'.
+        Hexadecimal string initializer. Example: 'DEADBEEF'.
 
     Raises
     ------
@@ -2717,7 +2717,7 @@ class Any(OctetString):
             Binary string initializer. Example: '10110011'.
         
         hexValue: :py:class:`str`
-            Hexadecimal string initializer. Example: 'DEADBEAF'.
+            Hexadecimal string initializer. Example: 'DEADBEEF'.
 
         Returns
         -------
@@ -2763,7 +2763,7 @@ class Any(OctetString):
             Binary string initializer. Example: '10110011'.
         
         hexValue: :py:class:`str`
-            Hexadecimal string initializer. Example: 'DEADBEAF'.
+            Hexadecimal string initializer. Example: 'DEADBEEF'.
 
         Returns
         -------

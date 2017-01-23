@@ -668,7 +668,7 @@ type of the value to interpret and verify it accordingly.
 Historically, the first data serialization protocol introduced in
 ASN.1 was BER (Basic Encoding Rules). According to BER, any serialized
 value is packed into a triplet of (Type, Length, Value) where Type is a 
-code that identifies the value (which is called <i>tag</i> in ASN.1),
+code that identifies the value (which is called *tag* in ASN.1),
 length is the number of bytes occupied by the value in its serialized form
 and value is ASN.1 value in a form suitable for serial transmission or storage.
 For that reason almost every ASN.1 type has a tag (which is actually a
@@ -1066,7 +1066,7 @@ associated with every pyasn1 type, constraints can never be modified
 in place. The only way to modify pyasn1 type constraint is to associate
 new constraint object to a new pyasn1 type object.
 
-A handful of different flavors of <i>constraints</i> are defined in
+A handful of different flavors of *constraints* are defined in
 ASN.1.  We will discuss them one by one in the following chapters and
 also explain how to combine and apply them to types.
 
@@ -1353,7 +1353,7 @@ Types relationships
 In the course of data processing in an application, it is sometimes
 convenient to figure out the type relationships between pyasn1 type or
 value objects. Formally, two things influence pyasn1 types
-relationship: <i>tag set</i> and <i>subtype constraints</i>. One
+relationship: *tag set* and *subtype constraints*. One
 pyasn1 type is considered to be a derivative of another if their
 TagSet and Constraint objects are a derivation of one another.
 
