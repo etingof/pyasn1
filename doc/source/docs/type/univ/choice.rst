@@ -2,6 +2,6 @@
 Choice type
 -----------
 
-.. autoclass:: pyasn1.type.univ.Choice(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection())
+.. autoclass:: pyasn1.type.univ.Choice(componentType=None, tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), sizeSpec=ConstraintsIntersection())
    :members:
    :inherited-members:

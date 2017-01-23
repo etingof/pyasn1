@@ -2081,16 +2081,69 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             raise error.PyAsn1Error('Component value is constraints-incompatible: %r vs %r' % (value, t))
 
     def getComponentByName(self, name):
+        """Returns a component by name.
+
+           Parameters
+           ----------
+           name : :class:`str`
+               component name
+
+           Returns
+           -------
+           : :py:class:`~pyasn1.type.base.PyAsn1Item`
+               a pyasn1 object
+
+           Note
+           ----
+           Equivalent to Python :class:`dict` subscription operation (e.g. `[]`).
+        """
         return self.getComponentByPosition(
             self._componentType.getPositionByName(name)
         )
 
     def setComponentByName(self, name, value=noValue, verifyConstraints=True):
+        """Assign a component by name.
+
+           Parameters
+           ----------
+           name : :class:`str`
+               component name
+
+           value : :class:`object` or :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
+               A Python or pyasn1 object to assign
+
+           verifyConstraints : :class:`bool`
+                If `False`, skip constraints validation
+
+           Returns
+           -------
+           self
+
+           Note
+           ----
+           Equivalent to Python :class:`dict` item assignment operation (e.g. `[]`).
+        """
         return self.setComponentByPosition(
             self._componentType.getPositionByName(name), value, verifyConstraints
         )
 
     def getComponentByPosition(self, idx):
+        """Returns a component by index.
+
+           Parameters
+           ----------
+           idx : :class:`int`
+               component index (zero-based)
+
+           Returns
+           -------
+           : :py:class:`~pyasn1.type.base.PyAsn1Item`
+               a pyasn1 object
+
+           Note
+           ----
+           Equivalent to Python sequence subscription operation (e.g. `[]`).
+        """
         try:
             return self._componentValues[idx]
         except IndexError:
@@ -2103,6 +2156,27 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                                exactTypes=False,
                                matchTags=True,
                                matchConstraints=True):
+        """Assign a component by position.
+
+           Parameters
+           ----------
+           idx : :class:`int`
+               component index (zero-based)
+
+           value : :class:`object` or :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
+               A Python or pyasn1 object to assign
+
+           verifyConstraints : :class:`bool`
+                If `False`, skip constraints validation
+
+           Returns
+           -------
+           self
+
+           Note
+           ----
+           Equivalent to Python sequence item assignment operation (e.g. `[]`).
+        """
         l = len(self._componentValues)
         if idx >= l:
             self._componentValues = self._componentValues + (idx - l + 1) * [None]
@@ -2139,6 +2213,12 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             return self._componentType
 
     def setDefaultComponents(self):
+        """Assign default values to all defaulted components.
+
+           Returns
+           -------
+           self
+        """
         if self._componentTypeLen == self._componentValuesSet:
             return
         idx = self._componentTypeLen
@@ -2152,8 +2232,16 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                     raise error.PyAsn1Error(
                         'Uninitialized component #%s at %r' % (idx, self)
                     )
+        return self
 
     def prettyPrint(self, scope=0):
+        """Return an object representation string.
+
+           Returns
+           -------
+           : :class:`str`
+               Human-friendly object representation.
+        """
         scope += 1
         r = self.__class__.__name__ + ':\n'
         for idx in range(len(self._componentValues)):
@@ -2182,15 +2270,15 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
 
 class Sequence(SequenceAndSetBase):
-    """Creates SET OF ASN.1 type.
+    """Creates SEQUENCE ASN.1 type.
 
-      The SET OF type resembles a collection of elements of a single ASN.1 type.
-      Ordering of the components is not preserved upon de/serialization.
+      The SEQUENCE type resembles an ordered collection of named ASN.1 values.
+      Objects of this type try to duck-type Python :class:`dict` objects.
 
       Parameters
       ----------
-      componentType : :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
-          A pyasn1 object representing ASN.1 type allowed within this collection
+      componentType : :py:class:`~pyasn1.type.namedtype.NamedType`
+          Object holding named ASN.1 types allowed within this collection
 
       tagSet: :py:class:`~pyasn1.type.tag.TagSet`
           Object representing non-default ASN.1 tag(s)
@@ -2200,10 +2288,26 @@ class Sequence(SequenceAndSetBase):
 
       sizeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
           Object representing collection size constraint
-      """
-    tagSet = baseTagSet = tag.initTagSet(
+    """
+    #: Default :py:class:`~pyasn1.type.tag.TagSet` object for ASN.1
+    #: *Sequence* objects
+    tagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x10)
     )
+    baseTagSet = tagSet
+
+    #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
+    #: object imposing constraints on collection contents
+    subtypeSpec = constraint.ConstraintsIntersection()
+
+    #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
+    #: object imposing size constraint on collection contents
+    sizeSpec = constraint.ConstraintsIntersection()
+
+    #: Default collection of ASN.1 types of component (e.g. :py:class:`~pyasn1.type.namedtype.NamedType`)
+    #: representing ASN.1 types allowed within this collection
+    componentType = namedtype.NamedTypes()
+
     typeId = 3
 
     def getComponentTagMapNearPosition(self, idx):
@@ -2218,15 +2322,62 @@ class Sequence(SequenceAndSetBase):
 
 
 class Set(SequenceAndSetBase):
-    tagSet = baseTagSet = tag.initTagSet(
+    """Creates SET ASN.1 type.
+
+      The SET type resembles an unordered collection of named ASN.1 values.
+      Objects of this type try to duck-type Python :class:`dict` objects.
+
+      Parameters
+      ----------
+      componentType : :py:class:`~pyasn1.type.namedtype.NamedType`
+          Object holding named ASN.1 types allowed within this collection
+
+      tagSet: :py:class:`~pyasn1.type.tag.TagSet`
+          Object representing non-default ASN.1 tag(s)
+
+      subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
+          Object representing non-default ASN.1 subtype constraint(s)
+
+      sizeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
+          Object representing collection size constraint
+    """
+    #: Default :py:class:`~pyasn1.type.tag.TagSet` object for ASN.1
+    #: *Set* objects
+    tagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x11)
     )
+    baseTagSet = tagSet
+
+    #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
+    #: object imposing constraints on collection contents
+    subtypeSpec = constraint.ConstraintsIntersection()
+
+    #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
+    #: object imposing size constraint on collection contents
+    sizeSpec = constraint.ConstraintsIntersection()
+
+    #: Default collection of ASN.1 types of component (e.g. :py:class:`~pyasn1.type.namedtype.NamedType`)
+    #: representing ASN.1 types allowed within this collection
+    componentType = namedtype.NamedTypes()
+
     typeId = 4
 
     def getComponent(self, innerFlag=0):
         return self
 
     def getComponentByType(self, tagSet, innerFlag=0):
+        """Returns component by ASN.1 tag.
+
+           Parameters
+           ----------
+           tagSet : :py:class:`~pyasn1.type.tag.TagSet`
+               Object representing ASN.1 tags
+
+           Returns
+           -------
+           : :py:class:`~pyasn1.type.base.PyAsn1Item`
+               a pyasn1 object
+        """
         c = self.getComponentByPosition(
             self._componentType.getPositionByType(tagSet)
         )
@@ -2239,6 +2390,23 @@ class Set(SequenceAndSetBase):
 
     def setComponentByType(self, tagSet, value=noValue, innerFlag=0,
                            verifyConstraints=True):
+        """Assign component by ASN.1 tag.
+
+            Parameters
+            ----------
+            tagSet : :py:class:`~pyasn1.type.tag.TagSet`
+               Object representing ASN.1 tags
+
+            value : :class:`object` or :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
+                A Python or pyasn1 object to assign
+
+            verifyConstraints : :class:`bool`
+                 If `False`, skip constraints validation
+
+            Returns
+            -------
+            self
+        """
         idx = self._componentType.getPositionByType(tagSet)
         t = self._componentType.getTypeByPosition(idx)
         if innerFlag:  # set inner component by inner tagSet
@@ -2266,11 +2434,42 @@ class Set(SequenceAndSetBase):
 
 
 class Choice(Set):
-    tagSet = baseTagSet = tag.TagSet()  # untagged
+    """Create CHOICE ASN.1 type.
+
+      The CHOICE type can only hold a single component belonging
+      to a list of allowed types.
+      Objects of this type try to duck-type Python :class:`dict` objects.
+
+      Parameters
+      ----------
+      componentType : :py:class:`~pyasn1.type.namedtype.NamedType`
+          Object holding named ASN.1 types allowed within this collection
+
+      tagSet: :py:class:`~pyasn1.type.tag.TagSet`
+          Object representing non-default ASN.1 tag(s)
+
+      subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
+          Object representing non-default ASN.1 subtype constraint(s)
+    """
+    #: Default :py:class:`~pyasn1.type.tag.TagSet` object for ASN.1
+    #: *Choice* objects (untagged by default)
+    tagSet = tag.TagSet()  # untagged
+    baseTagSet = tagSet
+
+    #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
+    #: object imposing constraints on collection contents
+    subtypeSpec = constraint.ConstraintsIntersection()
+
     sizeSpec = constraint.ConstraintsIntersection(
         constraint.ValueSizeConstraint(1, 1)
     )
+
+    #: Default collection of ASN.1 types of component (e.g. :py:class:`~pyasn1.type.namedtype.NamedType`)
+    #: representing ASN.1 types allowed within this collection
+    componentType = namedtype.NamedTypes()
+
     typeId = 5
+
     _currentIdx = None
 
     def __eq__(self, other):
@@ -2337,6 +2536,27 @@ class Choice(Set):
                 myClone.setComponentByType(tagSet, c.clone())
 
     def setComponentByPosition(self, idx, value=noValue, verifyConstraints=True):
+        """Assign a component by position.
+
+             Parameters
+             ----------
+             idx : :class:`int`
+                 component index (zero-based)
+
+             value : :class:`object` or :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
+                 A Python or pyasn1 object to assign
+
+             verifyConstraints : :class:`bool`
+                  If `False`, skip constraints validation
+
+             Returns
+             -------
+             self
+
+             Note
+             ----
+             Equivalent to Python sequence item assignment operation (e.g. `[]`).
+        """
         l = len(self._componentValues)
         if idx >= l:
             self._componentValues = self._componentValues + (idx - l + 1) * [None]
@@ -2384,6 +2604,13 @@ class Choice(Set):
             return Set.getComponentTagMap(self)
 
     def getComponent(self, innerFlag=0):
+        """Return component being held.
+
+            Returns
+            -------
+            : :py:class:`~pyasn1.type.base.PyAsn1Item`
+                a pyasn1 object
+        """
         if self._currentIdx is None:
             raise error.PyAsn1Error('Component not chosen')
         else:
@@ -2445,7 +2672,7 @@ class Any(OctetString):
 
     """
     #: Default :py:class:`~pyasn1.type.tag.TagSet` object for ASN.1
-    #: *OctetString* objects
+    #: *OctetString* objects (untagged by default)
     tagSet = tag.TagSet()  # untagged
     baseTagSet = tagSet
     typeId = 6
