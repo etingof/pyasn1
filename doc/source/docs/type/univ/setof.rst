@@ -2,6 +2,6 @@
 SetOf type
 ----------
 
-.. autoclass:: pyasn1.type.univ.SetOf(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection())
+.. autoclass:: pyasn1.type.univ.SetOf(componentType=None, tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), sizeSpec=ConstraintsIntersection())
    :members:
    :inherited-members:

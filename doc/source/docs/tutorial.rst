@@ -874,7 +874,7 @@ with possibly modified properties.
    >>>
 
 All pyasn1 constructed type classes have a class attribute
-<b>componentType</b> that represent default type specification. Its
+**componentType** that represent default type specification. Its
 value is a NamedTypes object.
 
 The NamedTypes class instance holds a sequence of NameType,
@@ -891,12 +891,12 @@ instantiated and initialized (continuing the above code):
 .. code-block:: python
 
    >>> record = Record()
-   >>> record.setComponentByName('id', 123)
+   >>> record['id'] = 123
    >>> print(record.prettyPrint())
    Record:
     id=123
    >>> 
-   >>> record.setComponentByPosition(1, 321)
+   >>> record[1] = 321
    >>> print(record.prettyPrint())
    Record:
     id=123
@@ -914,14 +914,14 @@ using the following methods:
 
 .. code-block:: python
 
-   >>> record.getComponentByName('id')
+   >>> record['id']
    Integer(123)
-   >>> record.getComponentByPosition(1)
+   >>> record[1]
    Integer(321)
    >>> record[2]
    Integer(0)
    >>> for idx in range(len(record)):
-   ...   print(record.getNameByPosition(idx), record.getComponentByPosition(idx))
+   ...   print(record.getNameByPosition(idx), record[idx])
    id 123
    room 321
    house 0
@@ -964,10 +964,10 @@ components.  All the components must be of the same type.
 
 :py:class:`~pyasn1.type.univ.SequenceOf` and
 :py:class:`~pyasn1.type.univ.SetOf` types are expressed by the very
-similar pyasn1 type objects. Their components can only be addressed by
+similar pyasn1 `list` type objects. Their components can only be addressed by
 position and they both have a property of automatic resize.
 
-To specify inner component type, the <b>componentType</b> class
+To specify inner component type, the **componentType** class
 attribute should refer to another pyasn1 type object.
 
 .. code-block:: python
@@ -976,17 +976,17 @@ attribute should refer to another pyasn1 type object.
    >>> class Progression(univ.SequenceOf):
    ...   componentType = univ.Integer()
    >>> arithmeticProgression = Progression()
-   >>> arithmeticProgression.setComponentByPosition(1, 111)
+   >>> arithmeticProgression[1] = 111
    >>> print(arithmeticProgression.prettyPrint())
    Progression:
    -empty- 111
-   >>> arithmeticProgression.setComponentByPosition(0, 100)
+   >>> arithmeticProgression[0] = 100
    >>> print(arithmeticProgression.prettyPrint())
    Progression:
    100 111
    >>>
    >>> for idx in range(len(arithmeticProgression)):
-   ...    arithmeticProgression.getComponentByPosition(idx)
+   ...    arithmeticProgression[idx]
    Integer(100)
    Integer(111)
    >>>
@@ -1028,11 +1028,11 @@ additional methods specific to its behaviour.
    >>> codeOrMessage = CodeOrMessage()
    >>> print(codeOrMessage.prettyPrint())
    CodeOrMessage:
-   >>> codeOrMessage.setComponentByName('code', 123)
+   >>> codeOrMessage['code'] = 123
    >>> print(codeOrMessage.prettyPrint())
    CodeOrMessage:
     code=123
-   >>> codeOrMessage.setComponentByName('message', 'my string value')
+   >>> codeOrMessage['message'] = 'my string value'
    >>> print(codeOrMessage.prettyPrint())
    CodeOrMessage:
     message=b'my string value'
@@ -1380,7 +1380,7 @@ but different constraints for simplicity):
 
 As can be seen in the above code snippet, there are two methods of any
 pyasn1 type/value object that test types for their relationship:
-<b>isSameTypeWith</b>() and <b>isSuperTypeOf</b>(). The former is
+**isSameTypeWith**() and **isSuperTypeOf**(). The former is
 self-descriptive while the latter yields true if the argument appears
 to be a pyasn1 object which has tagset and constraints derived from
 those of the object being called.
@@ -1652,7 +1652,7 @@ To explain the issue, we will first prepare a Choice object to deal with:
    ...   )
    >>>
    >>> codeOrMessage = CodeOrMessage()
-   >>> codeOrMessage.setComponentByName('message', 'my string value')
+   >>> codeOrMessage['message'] = 'my string value'
    >>> print(codeOrMessage.prettyPrint())
    CodeOrMessage:
     message=b'my string value'
