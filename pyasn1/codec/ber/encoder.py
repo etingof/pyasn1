@@ -168,7 +168,7 @@ class OctetStringEncoder(AbstractItemEncoder):
                 if not v:
                     break
                 substrate = substrate + encodeFun(v, defMode, maxChunkSize)
-                pos = pos + maxChunkSize
+                pos += maxChunkSize
             return substrate, 1
 
 
@@ -475,5 +475,19 @@ class Encoder(object):
             'built %s octets of substrate: %s\nencoder completed' % (len(substrate), debug.hexdump(substrate)))
         return substrate
 
-
+#: Turns ASN.1 object into BER octet stream.
+#:
+#: Takes any ASN.1 object (e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative)
+#: walks all its components recursively and produces a BER octet stream.
+#:
+#: Parameters
+#: ----------
+#  value: any pyasn1 type object (e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative)
+#:     A pyasn1 type object to encode
+#:
+#: defMode: :py:class:`bool`
+#:     If `False`, produces indefinite length encoding
+#:
+#: maxChunkSize: :py:class:`int`
+#:     Maximum chunk size in chunked encoding mode (0 denotes unlimited chunk size)
 encode = Encoder(tagMap, typeMap)

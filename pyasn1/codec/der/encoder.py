@@ -37,5 +37,19 @@ class Encoder(encoder.Encoder):
             raise error.PyAsn1Error('DER forbids indefinite length mode')
         return encoder.Encoder.__call__(self, client, defMode, maxChunkSize)
 
-
+#: Turns ASN.1 object into DER octet stream.
+#:
+#: Takes any ASN.1 object (e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative)
+#: walks all its components recursively and produces a DER octet stream.
+#:
+#: Parameters
+#: ----------
+#  value: any pyasn1 type object (e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative)
+#:     A pyasn1 type object to encode
+#:
+#: defMode: :py:class:`bool`
+#:     If `False`, produces indefinite length encoding
+#:
+#: maxChunkSize: :py:class:`int`
+#:     Maximum chunk size in chunked encoding mode (0 denotes unlimited chunk size)
 encode = Encoder(tagMap, typeMap)
