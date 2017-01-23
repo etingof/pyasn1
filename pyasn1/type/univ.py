@@ -40,7 +40,7 @@ class Integer(base.AbstractSimpleAsn1Item):
 
     Raises
     ------
-    PyAsn1Error :
+    : :py:class:`pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
 
     """
@@ -349,7 +349,7 @@ class Boolean(Integer):
 
     Raises
     ------
-    PyAsn1Error :
+    : :py:class:`pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
 
     """
@@ -459,7 +459,7 @@ class BitString(base.AbstractSimpleAsn1Item):
 
     Raises
     ------
-    PyAsn1Error :
+    : :py:class:`pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
 
     """
@@ -792,7 +792,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
     Raises
     ------
-    PyAsn1Error :
+    : :py:class:`pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
 
     """
@@ -1138,7 +1138,7 @@ class Null(OctetString):
 
     Raises
     ------
-    PyAsn1Error :
+    : :py:class:`pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
 
     """
@@ -1235,7 +1235,7 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
 
     Raises
     ------
-    PyAsn1Error :
+    : :py:class:`pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
 
     """
@@ -1426,8 +1426,8 @@ class Real(base.AbstractSimpleAsn1Item):
 
     Raises
     ------
-        PyAsn1Error :
-            On constraint violation or bad initializer.
+    : :py:class:`pyasn1.error.PyAsn1Error`
+        On constraint violation or bad initializer.
 
     """
     binEncBase = None  # binEncBase = 16 is recommended for large numbers
@@ -1748,7 +1748,7 @@ class Enumerated(Integer):
 
     Raises
     ------
-    PyAsn1Error :
+    : :py:class:`pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
 
     """
@@ -2667,7 +2667,7 @@ class Any(OctetString):
 
     Raises
     ------
-    PyAsn1Error :
+    : :py:class:`pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
 
     """

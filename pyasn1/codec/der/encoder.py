@@ -44,12 +44,22 @@ class Encoder(encoder.Encoder):
 #:
 #: Parameters
 #: ----------
-#  value: any pyasn1 type object (e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative)
-#:     A pyasn1 type object to encode
+#  value: any pyasn1 object (e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative)
+#:     A pyasn1 object to encode
 #:
 #: defMode: :py:class:`bool`
 #:     If `False`, produces indefinite length encoding
 #:
 #: maxChunkSize: :py:class:`int`
 #:     Maximum chunk size in chunked encoding mode (0 denotes unlimited chunk size)
+#:
+#: Returns
+#: -------
+#: : :py:class:`bytes` (Python 3) or :py:class:`str` (Python 2)
+#:     Given ASN.1 object encoded into BER octetstream
+#:
+#: Raises
+#: ------
+#: : :py:class:`pyasn1.error.PyAsn1Error`
+#:     On encoding errors
 encode = Encoder(tagMap, typeMap)

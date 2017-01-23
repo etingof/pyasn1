@@ -41,4 +41,30 @@ class Decoder(decoder.Decoder):
     pass
 
 
+#: Turns CER octet stream into an ASN.1 object.
+#:
+#: Takes CER octetstream and decode it into an ASN.1 object
+#: (e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative) which
+#: may be a scalar or an arbitrary nested structure.
+#:
+#: Parameters
+#: ----------
+#: substrate: :py:class:`bytes` (Python 3) or :py:class:`str` (Python 2)
+#:     CER octetstream
+#:
+#: asn1Spec: any pyasn1 type object e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
+#:     A pyasn1 type object to act as a template guiding the decoder. Depending on the ASN.1 structure
+#:     being decoded, *asn1Spec* may or may not be required. Most common reason for
+#:     it to require is that ASN.1 structure is encoded in *IMPLICIT* tagging mode.
+#:
+#: Returns
+#: -------
+#: : :py:class:`tuple`
+#:     A tuple of pyasn1 object recovered from CER substrate (:py:class:`~pyasn1.type.base.PyAsn1Item` derivative)
+#:     and the unprocessed trailing portion of the *substrate* (may be empty)
+#:
+#: Raises
+#: ------
+#: : :py:class:`pyasn1.error.PyAsn1Error`
+#:     On decoding errors
 decode = Decoder(tagMap, decoder.typeMap)
