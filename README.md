@@ -29,7 +29,8 @@ ASN.1 solves the data serialization problem. This solution was
 designed long ago by the wise Ancients. Back then, they did not
 have the luxury of wasting bits. That is why ASN.1 is designed
 to serialize data structures of unbounded complexity into
-something compact and robust.
+something compact and efficient when it comes to processing
+the data.
 
 That probably explains why many network protocols and file formats
 still rely upon the 30+ years old technology. Including a number of
@@ -80,8 +81,11 @@ class Record(Sequence):
     )
 ```
 
-Once you have your ASN.1 data structure defined, you can use it along
-the lines of corresponding Python type:
+It is in the spirit of ASN.1 to take abstract data description 
+and turn it into a programming language specific form.
+Once you have your ASN.1 data structure expressed in Python, you
+can use it along the lines of similar Python type (e.g. ASN.1
+`SET` is similar to Python `dict`, `SET OF` -- to `list`):
 
 ```python
 >>> record = Record()
