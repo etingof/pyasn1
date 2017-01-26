@@ -33,24 +33,24 @@ something compact and efficient when it comes to processing
 the data.
 
 That probably explains why many network protocols and file formats
-still rely upon the 30+ years old technology. Including a number of
+still rely on the 30+ years old technology. Including a number of
 high-profile Internet protocols and file formats.
 
 Quite a number of books cover the topic of ASN.1. 
 [Communication between heterogeneous systems](http://www.oss.com/asn1/dubuisson.html)
-by Olivier Dubuisson is one of high quality books freely available on
-the Internet.
+by Olivier Dubuisson is one of those high quality books freely 
+available on the Internet.
 
 The pyasn1 package is designed to help Python programmers tackling
 network protocols and file formats at the comfort of their Python
 prompt. The tool struggles to capture all aspects of a rather
-complicated ASN.1 system and to represent it on Python terms.
+complicated ASN.1 system and to represent it on the Python terms.
 
 How to use pyasn1
 -----------------
 
-With pyasn1 you can build Python objects from ASN.1 structures.
-For example, the following ASN.1 structure:
+With pyasn1 you can build Python objects from ASN.1 data structures.
+For example, the following ASN.1 data structure:
 
 ```bash
 Record ::= SEQUENCE {
@@ -85,12 +85,12 @@ It is in the spirit of ASN.1 to take abstract data description
 and turn it into a programming language specific form.
 Once you have your ASN.1 data structure expressed in Python, you
 can use it along the lines of similar Python type (e.g. ASN.1
-`SET` is similar to Python `dict`, `SET OF` -- to `list`):
+`SET` is similar to Python `dict`, `SET OF` to `list`):
 
 ```python
 >>> record = Record()
 >>> record['id'] = 123
->>> record[1] = 321
+>>> record['room'] = 321
 >>> print(record.prettyPrint())
 Record:
  id=123
@@ -128,10 +128,11 @@ True
 00000: 30 06 02 01 7B 80 01 7B
 ```
 
-In ASN.1 design, serialization codecs are decoupled from data objects,
-so you could turn your ASN.1 object into many different serialized forms.
-As of this moment, pyasn1 supports BER, DER and CER formats. PER
-support is expected to introduced in the upcoming release.
+With ASN.1 design, serialization codecs are decoupled from data objects,
+so you could turn every single ASN.1 object into many different 
+serialized forms. As of this moment, pyasn1 supports BER, DER and CER
+formats. The extremely compact PER encoding is expected to be introduced
+in the upcoming pyasn1 release.
 
 More information on pyasn1 APIs can be found in the
 [documentation](http://pyasn1.sourceforge.net),
