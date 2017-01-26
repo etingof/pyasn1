@@ -136,7 +136,8 @@ in the upcoming pyasn1 release.
 
 More information on pyasn1 APIs can be found in the
 [documentation](http://pyasn1.sourceforge.net),
-working examples are in the pyasn1-modules
+compiled ASN.1 modules for different protocols and file formats
+could be found in the pyasn1-modules 
 [repo](https://github.com/etingof/pyasn1-modules).
 
 Download
@@ -155,13 +156,14 @@ Download pyasn1 from [PyPI](https://pypi.python.org/pypi/pyasn1) or just run:
 $ pip install pyasn1
 ```
 
-Feedback
---------
+Getting help
+------------
 
-If something does not work as expected, try browsing pyasn1
-[mailing list archives](https://sourceforge.net/p/pyasn1/mailman/pyasn1-users/)
-or post your question
-[to Stack Overflow](http://stackoverflow.com/questions/ask).  
+If something does not work as expected, 
+[open an issue](https://github.com/etingof/pyasn1/issues) at Github or 
+post your question [to Stack Overflow](http://stackoverflow.com/questions/ask)
+or try browsing pyasn1 
+[mailing list archives](https://sourceforge.net/p/pyasn1/mailman/pyasn1-users/).
 
 Copyright (c) 2005-2017, [Ilya Etingof](http://etingof@gmail.com).
 All rights reserved.
