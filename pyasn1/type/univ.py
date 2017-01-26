@@ -129,24 +129,36 @@ class Integer(base.AbstractSimpleAsn1Item):
     def __rpow__(self, value):
         return self.clone(pow(value, self._value))
 
+    def __floordiv__(self, value):
+        return self.clone(self._value // value)
+
+    def __rfloordiv__(self, value):
+        return self.clone(value // self._value)
+
     if sys.version_info[0] <= 2:
         def __div__(self, value):
-            return self.clone(self._value // value)
+            if isinstance(value, float):
+                return Real(self._value / value)
+            else:
+                return self.clone(self._value / value)
 
         def __rdiv__(self, value):
-            return self.clone(value // self._value)
+            if isinstance(value, float):
+                return Real(value / self._value)
+            else:
+                return self.clone(value / self._value)
     else:
         def __truediv__(self, value):
-            return self.clone(self._value / value)
+            return Real(self._value / value)
 
         def __rtruediv__(self, value):
-            return self.clone(value / self._value)
+            return Real(value / self._value)
 
         def __divmod__(self, value):
-            return self.clone(self._value // value)
+            return self.clone(divmod(self._value, value))
 
         def __rdivmod__(self, value):
-            return self.clone(value // self._value)
+            return self.clone(divmod(value, self._value))
 
         __hash__ = base.AbstractSimpleAsn1Item.__hash__
 

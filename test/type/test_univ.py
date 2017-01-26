@@ -142,62 +142,102 @@ class NoValueTestCase(unittest.TestCase):
 
 
 class IntegerTestCase(unittest.TestCase):
-    def testStr(self): assert str(univ.Integer(1)) in ('1', '1L'), 'str() fails'
+    def testStr(self):
+        assert str(univ.Integer(1)) in ('1', '1L'), 'str() fails'
 
     def testRepr(self):
         assert eval(repr(univ.Integer(123)), {'Integer': univ.Integer}) == univ.Integer(123), 'repr() fails'
 
-    def testAnd(self): assert univ.Integer(1) & 0 == 0, '__and__() fails'
+    def testAnd(self):
+        assert univ.Integer(1) & 0 == 0, '__and__() fails'
 
-    def testOr(self): assert univ.Integer(1) | 0 == 1, '__or__() fails'
+    def testOr(self):
+        assert univ.Integer(1) | 0 == 1, '__or__() fails'
 
-    def testXor(self): assert univ.Integer(1) ^ 0 == 1, '__xor__() fails'
+    def testXor(self):
+        assert univ.Integer(1) ^ 0 == 1, '__xor__() fails'
 
-    def testRand(self): assert 0 & univ.Integer(1) == 0, '__rand__() fails'
+    def testRand(self):
+        assert 0 & univ.Integer(1) == 0, '__rand__() fails'
 
-    def testRor(self): assert 0 | univ.Integer(1) == 1, '__ror__() fails'
+    def testRor(self):
+        assert 0 | univ.Integer(1) == 1, '__ror__() fails'
 
-    def testRxor(self): assert 0 ^ univ.Integer(1) == 1, '__rxor__() fails'
+    def testRxor(self):
+        assert 0 ^ univ.Integer(1) == 1, '__rxor__() fails'
 
-    def testAdd(self): assert univ.Integer(-4) + 6 == 2, '__add__() fails'
+    def testAdd(self):
+        assert univ.Integer(-4) + 6 == 2, '__add__() fails'
 
-    def testRadd(self): assert 4 + univ.Integer(5) == 9, '__radd__() fails'
+    def testRadd(self):
+        assert 4 + univ.Integer(5) == 9, '__radd__() fails'
 
-    def testSub(self): assert univ.Integer(3) - 6 == -3, '__sub__() fails'
+    def testSub(self):
+        assert univ.Integer(3) - 6 == -3, '__sub__() fails'
 
-    def testRsub(self): assert 6 - univ.Integer(3) == 3, '__rsub__() fails'
+    def testRsub(self):
+        assert 6 - univ.Integer(3) == 3, '__rsub__() fails'
 
-    def testMul(self): assert univ.Integer(3) * -3 == -9, '__mul__() fails'
+    def testMul(self):
+        assert univ.Integer(3) * -3 == -9, '__mul__() fails'
 
-    def testRmul(self): assert 2 * univ.Integer(3) == 6, '__rmul__() fails'
+    def testRmul(self):
+        assert 2 * univ.Integer(3) == 6, '__rmul__() fails'
 
-    def testDiv(self): assert univ.Integer(3) / 2 == 1, '__div__() fails'
+    def testDivInt(self):
+        assert univ.Integer(4) / 2 == 2, '__div__() fails'
 
-    def testRdiv(self): assert 6 / univ.Integer(3) == 2, '__rdiv__() fails'
+    def testDivFloat(self):
+        assert univ.Integer(3) / 2 == 1.5, '__div__() fails'
 
-    def testMod(self): assert univ.Integer(3) % 2 == 1, '__mod__() fails'
+    def testRdivInt(self):
+        assert 6 / univ.Integer(3) == 2, '__rdiv__() fails'
 
-    def testRmod(self): assert 4 % univ.Integer(3) == 1, '__rmod__() fails'
+    def testRdivFloat(self):
+        assert 3 / univ.Integer(2) == 1.5, '__rdiv__() fails'
 
-    def testPow(self): assert univ.Integer(3) ** 2 == 9, '__pow__() fails'
+    if version_info[0] > 2:
+        def testTrueDiv(self):
+            assert univ.Integer(3) / univ.Integer(2) == 1.5, '__truediv__() fails'
 
-    def testRpow(self): assert 2 ** univ.Integer(2) == 4, '__rpow__() fails'
+    def testFloorDiv(self):
+        assert univ.Integer(3) // univ.Integer(2) == 1, '__floordiv__() fails'
 
-    def testLshift(self): assert univ.Integer(1) << 1 == 2, '<< fails'
+    def testMod(self):
+        assert univ.Integer(3) % 2 == 1, '__mod__() fails'
 
-    def testRshift(self): assert univ.Integer(2) >> 1 == 1, '>> fails'
+    def testRmod(self):
+        assert 4 % univ.Integer(3) == 1, '__rmod__() fails'
 
-    def testInt(self): assert int(univ.Integer(3)) == 3, '__int__() fails'
+    def testPow(self):
+        assert univ.Integer(3) ** 2 == 9, '__pow__() fails'
 
-    def testLong(self): assert int(univ.Integer(8)) == 8, '__long__() fails'
+    def testRpow(self):
+        assert 2 ** univ.Integer(2) == 4, '__rpow__() fails'
 
-    def testFloat(self): assert float(univ.Integer(4)) == 4.0, '__float__() fails'
+    def testLshift(self):
+        assert univ.Integer(1) << 1 == 2, '<< fails'
 
-    def testPos(self): assert +univ.Integer(1) == 1, '__pos__() fails'
+    def testRshift(self):
+        assert univ.Integer(2) >> 1 == 1, '>> fails'
 
-    def testNeg(self): assert -univ.Integer(1) == -1, '__neg__() fails'
+    def testInt(self):
+        assert int(univ.Integer(3)) == 3, '__int__() fails'
 
-    def testInvert(self): assert ~univ.Integer(1) == -2, '__invert__() fails'
+    def testLong(self):
+        assert int(univ.Integer(8)) == 8, '__long__() fails'
+
+    def testFloat(self):
+        assert float(univ.Integer(4)) == 4.0, '__float__() fails'
+
+    def testPos(self):
+        assert +univ.Integer(1) == 1, '__pos__() fails'
+
+    def testNeg(self):
+        assert -univ.Integer(1) == -1, '__neg__() fails'
+
+    def testInvert(self):
+        assert ~univ.Integer(1) == -2, '__invert__() fails'
 
     def testRound(self):
         assert round(univ.Integer(1), 3) == 1.0, '__round__() fails'
@@ -212,7 +252,8 @@ class IntegerTestCase(unittest.TestCase):
         def testTrunc(self):
             assert math.trunc(univ.Integer(1)) == 1, '__trunc__() fails'
 
-    def testPrettyIn(self): assert univ.Integer('3') == 3, 'prettyIn() fails'
+    def testPrettyIn(self):
+        assert univ.Integer('3') == 3, 'prettyIn() fails'
 
     def testTag(self):
         assert univ.Integer().getTagSet() == tag.TagSet(
