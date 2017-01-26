@@ -22,22 +22,6 @@ Features
 * MT-safe
 * Contributed ASN.1 compiler [Asn1ate](https://github.com/kimgr/asn1ate)
 
-Download
---------
-
-The pyasn1 package is distributed under terms and conditions of 2-clause
-BSD [license](http://pyasn1.sourceforge.net/license.html). Source code is freely
-available as a Github [repo](https://github.com/etingof/pyasn1).
-
-Installation
-------------
-
-Download pyasn1 from [PyPI](https://pypi.python.org/pypi/pyasn1) or just run:
-
-```bash
-$ pip install pyasn1
-```
-
 Why using pyasn1
 ----------------
 
@@ -48,12 +32,18 @@ to serialize data structures of unbounded complexity into
 something compact and robust.
 
 That probably explains why many network protocols and file formats
-still rely upon the 30+ years old technology.
+still rely upon the 30+ years old technology. Including a number of
+high-profile Internet protocols and file formats.
 
-The pyasn1 tool is designed to help Python programmers tackling
+Quite a number of books cover the topic of ASN.1. 
+[Communication between heterogeneous systems](http://www.oss.com/asn1/dubuisson.html)
+by Olivier Dubuisson is one of high quality books freely available on
+the Internet.
+
+The pyasn1 package is designed to help Python programmers tackling
 network protocols and file formats at the comfort of their Python
 prompt. The tool struggles to capture all aspects of a rather
-complicated ASN.1 system and represent it on Python terms.
+complicated ASN.1 system and to represent it on Python terms.
 
 How to use pyasn1
 -----------------
@@ -139,17 +129,26 @@ so you could turn your ASN.1 object into many different serialized forms.
 As of this moment, pyasn1 supports BER, DER and CER formats. PER
 support is expected to introduced in the upcoming release.
 
-Many high-profile Internet protocols and file formats utilize ASN.1
-serialization.
-Quite a number of books cover the topic of ASN.1. 
-[Communication between heterogeneous systems](http://www.oss.com/asn1/dubuisson.html)
-by Olivier Dubuisson is one of high quality books freely available on
-the Internet.
-
-Detailed information on pyasn1 APIs can be found in the
+More information on pyasn1 APIs can be found in the
 [documentation](http://pyasn1.sourceforge.net),
 working examples are in the pyasn1-modules
 [repo](https://github.com/etingof/pyasn1-modules).
+
+Download
+--------
+
+The pyasn1 package is distributed under terms and conditions of 2-clause
+BSD [license](http://pyasn1.sourceforge.net/license.html). Source code is freely
+available as a Github [repo](https://github.com/etingof/pyasn1).
+
+Installation
+------------
+
+Download pyasn1 from [PyPI](https://pypi.python.org/pypi/pyasn1) or just run:
+
+```bash
+$ pip install pyasn1
+```
 
 Feedback
 --------
