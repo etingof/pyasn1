@@ -10,10 +10,6 @@ from pyasn1.compat.octets import int2oct, oct2int, ints2octs, null, str2octs
 from pyasn1 import debug, error
 
 
-class Error(Exception):
-    pass
-
-
 class AbstractItemEncoder(object):
     supportIndefLenMode = 1
 
@@ -45,11 +41,11 @@ class AbstractItemEncoder(object):
                 length >>= 8
             substrateLen = len(substrate)
             if substrateLen > 126:
-                raise Error('Length octets overflow (%d)' % substrateLen)
+                raise error.PyAsn1Error('Length octets overflow (%d)' % substrateLen)
             return int2oct(0x80 | substrateLen) + substrate
 
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
-        raise Error('Not implemented')
+        raise error.PyAsn1Error('Not implemented')
 
     def _encodeEndOfOctets(self, encodeFun, defMode):
         if defMode or not self.supportIndefLenMode:
@@ -465,7 +461,7 @@ class Encoder(object):
                 if tagSet in self.__tagMap:
                     concreteEncoder = self.__tagMap[tagSet]
                 else:
-                    raise Error('No encoder for %s' % (value,))
+                    raise error.PyAsn1Error('No encoder for %s' % (value,))
         debug.logger & debug.flagEncoder and debug.logger(
             'using value codec %s chosen by %s' % (concreteEncoder.__class__.__name__, tagSet))
         substrate = concreteEncoder.encode(
