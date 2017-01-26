@@ -38,11 +38,28 @@ Download pyasn1 from [PyPI](https://pypi.python.org/pypi/pyasn1) or just run:
 $ pip install pyasn1
 ```
 
+Why using pyasn1
+----------------
+
+ASN.1 solves the data serialization problem. This solution was
+designed long ago by the wise Ancients. Back then, they did not
+have the luxury of wasting bits. That is why ASN.1 is designed
+to serialize data structures of unbounded complexity into
+something compact and robust.
+
+That probably explains why many network protocols and file formats
+still rely upon the 30+ years old technology.
+
+The pyasn1 tool is designed to help Python programmers tackling
+network protocols and file formats at the comfort of their Python
+prompt. The tool struggles to capture all aspects of a rather
+complicated ASN.1 system and represent it on Python terms.
+
 How to use pyasn1
 -----------------
 
-With pyasn1 you can build ASN.1 structures from Python objects. For example, the
-following ASN.1 structure:
+With pyasn1 you can build Python objects from ASN.1 structures.
+For example, the following ASN.1 structure:
 
 ```bash
 Record ::= SEQUENCE {
@@ -73,8 +90,8 @@ class Record(Sequence):
     )
 ```
 
-Once you have your ASN.1 data structure defined, you can use it as a conventional
-data structure:
+Once you have your ASN.1 data structure defined, you can use it along
+the lines of corresponding Python type:
 
 ```python
 >>> record = Record()
@@ -87,33 +104,47 @@ Record:
 >>>
 ```
 
-The power of ASN.1 comes with its serialization features. You can serialize your
-initialized data structure and send it over the network. Conversely, you can
-turn serialized ASN.1 content, as received from network or read from a file,
-into a fully-fledged, initialized data structure.
+Part of the power of ASN.1 comes from its serialization features. You
+can serialize your data structure and send it over the network.
 
 ```python
 >>> substrate = encode(record)
->>> substrate
-b'0\x07\x02\x01{\x80\x02\x01A'
+>>> hexdump(substrate)
+00000: 30 07 02 01 7B 80 02 01 41
+```
+
+Conversely, you can turn serialized ASN.1 content, as received from
+network or read from a file, into a Python object which you can
+introspect, modify, encode and send back.
+
+```python
+>>> received_record, rest_of_substrate = decode(substrate, asn1Spec=Record())
 >>>
->>> decoded_record, rest_of_substrate = decode(substrate, asn1Spec=Record())
->>>
->>> print(decoded_record.prettyPrint())
+>>> print(received_record.prettyPrint())
 Record:
  id=123
  room=321
  house=0
 >>>
->>> record == decoded_record
+>>> record == received_record
 True
->>>
+>>> received_record['room'] = 123
+>>> substrate = encode(received_record)
+>>> hexdump(substrate)
+00000: 30 06 02 01 7B 80 01 7B
 ```
 
-Many high-profile Internet protocols and file formats utilize ASN.1 serialization.
+In ASN.1 design, serialization codecs are decoupled from data objects,
+so you could turn your ASN.1 object into many different serialized forms.
+As of this moment, pyasn1 supports BER, DER and CER formats. PER
+support is expected to introduced in the upcoming release.
+
+Many high-profile Internet protocols and file formats utilize ASN.1
+serialization.
 Quite a number of books cover the topic of ASN.1. 
 [Communication between heterogeneous systems](http://www.oss.com/asn1/dubuisson.html)
-by Olivier Dubuisson is one of high quality books freely available on the Internet.
+by Olivier Dubuisson is one of high quality books freely available on
+the Internet.
 
 Detailed information on pyasn1 APIs can be found in the
 [documentation](http://pyasn1.sourceforge.net),
