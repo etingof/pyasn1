@@ -187,14 +187,21 @@ class IntegerTestCase(unittest.TestCase):
     def testDivInt(self):
         assert univ.Integer(4) / 2 == 2, '__div__() fails'
 
-    def testDivFloat(self):
-        assert univ.Integer(3) / 2 == 1.5, '__div__() fails'
+    if version_info[0] > 2:
+        def testDivFloat(self):
+            assert univ.Integer(3) / 2 == 1.5, '__div__() fails'
+
+        def testRdivFloat(self):
+            assert 3 / univ.Integer(2) == 1.5, '__rdiv__() fails'
+    else:
+        def testDivFloat(self):
+            assert univ.Integer(3) / 2 == 1, '__div__() fails'
+
+        def testRdivFloat(self):
+            assert 3 / univ.Integer(2) == 1, '__rdiv__() fails'
 
     def testRdivInt(self):
         assert 6 / univ.Integer(3) == 2, '__rdiv__() fails'
-
-    def testRdivFloat(self):
-        assert 3 / univ.Integer(2) == 1.5, '__rdiv__() fails'
 
     if version_info[0] > 2:
         def testTrueDiv(self):
