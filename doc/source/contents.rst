@@ -67,16 +67,17 @@ post-1995, revision (X.680) introduced significant changes most of
 which have not yet been supported by pyasn1. Aside from data types
 a collection of data serialization codecs comes with pyasn1 package.
 
-As for ASN.1 data definition language support, pyasn1 package does
-not support that. However, there's a tool called
+As for ASN.1 data definition language, pyasn1 package does
+not ship any compiler for it. However, there's a tool called
 `asn1late <https://github.com/kimgr/asn1ate>`_ which is an ASN.1
 grammar parser paired to code generator capable of generating pyasn1
 code. So this is an alternative (or at least a good start) to manual
 implementation of pyasn1 classes from ASN.1 specification.
 
-Both pyasn1 and pyasn1-modules libraries can be used out-of-the-box
-with Python versions 2.4 through 3.5. No external dependencies
-required.
+Both `pyasn1 <https://github.com/etingof/pyasn1>`_ and
+`pyasn1-modules <https://github.com/etingof/pyasn1-modules>`_ libraries
+can be used out-of-the-box with Python versions 2.4 through 3.6.
+No external dependencies required.
 
 Documentation
 -------------
@@ -99,16 +100,15 @@ Implemented protocols
 ---------------------
 
 Typically, pyasn1 is used for building arbitrary protocol support into
-various applications. This involves manual translation of ASN.1 data
-structures into their pyasn1 implementations. To save time and effort,
-data structures for some of the popular protocols are pre-programmed
-and kept for further re-use in form of the `pyasn1-modules package
-<http://sourceforge.net/projects/pyasn1/files/pyasn1-modules>`_ For
-instance, many structures for PKI (X.509, PKCS#*, CRMF, OCSP), LDAP
-and SNMP are present.  Applications authors are advised to import and
+various applications. This involves ASN.1 data description translation
+into corresponding pyasn1 classes. The translation could be done
+woth the `asn1late <https://github.com/kimgr/asn1ate>`_ tool.
+Also, to save time and effort, some of the protocol modules are
+distributed within the `pyasn1-modules <https://github.com/etingof/pyasn1-module>`_
+package. For instance, many structures for PKI (X.509, PKCS#*, CRMF, OCSP), LDAP
+and SNMP are present there.  Applications authors are advised to import and
 use relevant modules from that package whenever needed protocol
-structures are already there. New protocol modules contributions are
-welcome.
+structures are already there.
 
 Download
 --------
