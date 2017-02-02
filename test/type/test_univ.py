@@ -804,6 +804,46 @@ class SequenceOf(unittest.TestCase):
         assert self.s1.clone().setComponents('abc', 'def') == \
                self.s1.setComponentByPosition(0, 'abc').setComponentByPosition(1, 'def')
 
+    def testAppend(self):
+        self.s1.clear()
+        self.s1.setComponentByPosition(0, univ.OctetString('abc'))
+        assert len(self.s1) == 1
+        self.s1.append('def')
+        assert len(self.s1) == 2
+        assert list(self.s1) == [str2octs(x) for x in ['abc', 'def']]
+
+    def testExtend(self):
+        self.s1.clear()
+        self.s1.setComponentByPosition(0, univ.OctetString('abc'))
+        assert len(self.s1) == 1
+        self.s1.extend(['def', 'ghi'])
+        assert len(self.s1) == 3
+        assert list(self.s1) == [str2octs(x) for x in ['abc', 'def', 'ghi']]
+
+    def testCount(self):
+        self.s1.clear()
+        for x in ['abc', 'def', 'abc']:
+            self.s1.append(x)
+        assert self.s1.count(str2octs('abc')) == 2
+        assert self.s1.count(str2octs('def')) == 1
+        assert self.s1.count(str2octs('ghi')) == 0
+
+    def testIndex(self):
+        self.s1.clear()
+        for x in ['abc', 'def', 'abc']:
+            self.s1.append(x)
+        assert self.s1.index(str2octs('abc')) == 0
+        assert self.s1.index(str2octs('def')) == 1
+        assert self.s1.index(str2octs('abc'), 1) == 2
+
+    def testSort(self):
+        self.s1.clear()
+        self.s1[0] = 'b'
+        self.s1[1] = 'a'
+        assert list(self.s1) == [str2octs('b'), str2octs('a')]
+        self.s1.sort()
+        assert list(self.s1) == [str2octs('a'), str2octs('b')]
+
 
 class Sequence(unittest.TestCase):
     def setUp(self):
@@ -915,6 +955,30 @@ class Sequence(unittest.TestCase):
 
     def testIter(self):
         assert list(self.s1) == ['name', 'nick', 'age']
+
+    def testKeys(self):
+        self.s1.setComponentByPosition(0, univ.OctetString('abc'))
+        self.s1.setComponentByPosition(1, univ.OctetString('def'))
+        self.s1.setComponentByPosition(2, univ.Integer(123))
+        assert list(self.s1.keys()) == ['name', 'nick', 'age']
+
+    def testValues(self):
+        self.s1.setComponentByPosition(0, univ.OctetString('abc'))
+        self.s1.setComponentByPosition(1, univ.OctetString('def'))
+        self.s1.setComponentByPosition(2, univ.Integer(123))
+        assert list(self.s1.values()) == [str2octs('abc'), str2octs('def'), 123]
+
+    def testItems(self):
+        self.s1.setComponentByPosition(0, univ.OctetString('abc'))
+        self.s1.setComponentByPosition(1, univ.OctetString('def'))
+        self.s1.setComponentByPosition(2, univ.Integer(123))
+        assert list(self.s1.items()) == [(x[0], str2octs(x[1])) for x in [('name', 'abc'), ('nick', 'def')]] + [('age', 123)]
+
+    def testUpdate(self):
+        self.s1.clear()
+        assert list(self.s1.values()) == [None, None, None]
+        self.s1.update({'name': 'abc', 'nick': 'def', 'age': 123})
+        assert list(self.s1.items()) == [(x[0], str2octs(x[1])) for x in [('name', 'abc'), ('nick', 'def')]] + [('age', 123)]
 
 
 class SetOf(unittest.TestCase):

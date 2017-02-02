@@ -1920,6 +1920,33 @@ class SetOf(base.AbstractConstructedAsn1Item):
     typeId = 1
     strictConstraints = False
 
+    # Python list protocol
+
+    def clear(self):
+        self._componentValues = []
+        self._componentValuesSet = 0
+
+    def append(self, value):
+        self[len(self)] = value
+
+    def count(self, value):
+        return self._componentValues.count(value)
+
+    def extend(self, values):
+        for value in values:
+            self.append(value)
+
+    def index(self, value, start=0, stop=None):
+        if stop is None:
+            stop = len(self)
+        return self._componentValues.index(value, start, stop)
+
+    def reverse(self):
+        self._componentValues.reverse()
+
+    def sort(self, key=None, reverse=False):
+        self._componentValues.sort(key=key, reverse=reverse)
+
     def __iter__(self):
         return iter(self._componentValues)
 
@@ -2099,6 +2126,33 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
     def __iter__(self):
         return iter(self._componentType)
+
+    # Python dict protocol
+
+    def values(self):
+        for idx in range(self._componentTypeLen):
+            yield self[idx]
+
+    def keys(self):
+        return iter(self._componentType)
+
+    def items(self):
+        for idx in range(self._componentTypeLen):
+            yield self._componentType[idx].getName(), self._componentValues[idx]
+
+    def update(self, iterValue, **mappingValue):
+        if hasattr(iterValue, 'keys'):
+            for k in iterValue.keys():
+                self[k] = iterValue[k]
+        else:
+            for k, v in iterValue:
+                self[k] = v
+        for k in mappingValue:
+            self[k] = mappingValue[k]
+
+    def clear(self):
+        self._componentValues = []
+        self._componentValuesSet = 0
 
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         idx = 0
