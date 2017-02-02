@@ -114,15 +114,15 @@ introspect, modify, encode and send back.
 ```python
 >>> received_record, rest_of_substrate = decode(substrate, asn1Spec=Record())
 >>>
->>> print(received_record.prettyPrint())
-Record:
- id=123
- room=321
- house=0
+>>> for field in received_record:
+>>>    print('{} is {}'.format(field, received_record[field]))
+id is 123
+room is 321
+house is 0
 >>>
 >>> record == received_record
 True
->>> received_record['room'] = 123
+>>> received_record.update(room=123)
 >>> substrate = encode(received_record)
 >>> hexdump(substrate)
 00000: 30 06 02 01 7B 80 01 7B
