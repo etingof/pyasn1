@@ -1,4 +1,4 @@
-include *.rst
+include *.rst *.md
 recursive-include test *.py
 recursive-include doc Makefile *.rst
 prune doc/build
