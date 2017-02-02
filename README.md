@@ -67,14 +67,12 @@ class Record(Sequence):
     componentType = NamedTypes(
         NamedType('id', Integer()),
         OptionalNamedType(
-            'room',
-            Integer().subtype(
+            'room', Integer().subtype(
                 implicitTag=Tag(tagClassContext, tagFormatSimple, 0)
             )
         ),
         DefaultedNamedType(
-            'house', 
-            Integer(0).subtype(
+            'house', Integer(0).subtype(
                 implicitTag=Tag(tagClassContext, tagFormatSimple, 1)
             )
         )
@@ -140,27 +138,17 @@ compiled ASN.1 modules for different protocols and file formats
 could be found in the pyasn1-modules 
 [repo](https://github.com/etingof/pyasn1-modules).
 
-Download
---------
+How to get pyasn1
+-----------------
 
 The pyasn1 package is distributed under terms and conditions of 2-clause
 BSD [license](http://pyasn1.sourceforge.net/license.html). Source code is freely
-available as a Github [repo](https://github.com/etingof/pyasn1).
+available as a GitHub [repo](https://github.com/etingof/pyasn1).
 
-Installation
-------------
-
-Download pyasn1 from [PyPI](https://pypi.python.org/pypi/pyasn1) or just run:
-
-```bash
-$ pip install pyasn1
-```
-
-Getting help
-------------
+You could `pip install pyasn1` or download it from [PyPI](https://pypi.python.org/pypi/pyasn1).
 
 If something does not work as expected, 
-[open an issue](https://github.com/etingof/pyasn1/issues) at Github or 
+[open an issue](https://github.com/etingof/pyasn1/issues) at GitHub or
 post your question [to Stack Overflow](http://stackoverflow.com/questions/ask)
 or try browsing pyasn1 
 [mailing list archives](https://sourceforge.net/p/pyasn1/mailman/pyasn1-users/).
