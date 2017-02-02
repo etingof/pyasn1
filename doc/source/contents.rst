@@ -7,46 +7,58 @@ ASN.1 library for Python
 
 Abstract Syntax Notation One (`ASN.1
 <http://en.wikipedia.org/wiki/Abstract_Syntax_Notation_1x>`_) is a
-well established and heavily used technology for storing and
-exchanging structured data between programs and systems.  Many
-Internet, encryption and telephony protocols carry out their
-operations basing on ASN.1-defined data structures.
+technology for exchanging structured data in a universally understood,
+hardware agnostic way. Many industrial, security and telephony
+applications heavily rely on ASN.1.
 
-The pyasn1 library makes it easier for programmers and network
-engineers to develop, debug and experiment with ASN.1-based protocols
-using Python programming language as a tool.
+The `pyasn1 <https://pypi.python.org/pypi/pyasn1/>`_ library implements
+ASN.1 support in pure-Python.
 
-ASN.1 overview
---------------
+What is ASN.1
+-------------
 
-ASN.1 is a set of standards concered with provisioning instrumentation
-for developing data exchange protocols in a robust, clear and
-interoperabable way for various IT systems and applications. Most of
-the efforts are targeting the following areas:
+ASN.1 is a large, arguably over-engineered and extremely old data modelling and
+serialization tool. It is probably among the first serialization protocols in
+the history of computer science and technology.
 
-* Data structures: the standard introduces a collection of basic data types
-  (similar to integers, bits, strings, arrays and records in a programming
-  language) that can be used for defining complex, possibly nested data
-  structures representing domain-specific data units.
+ASN.1 started its life over 30 years ago as a serialization mechanism for the first
+electronic mail (known as X.400). Later on if was split off the e-mail application
+and become a stand-alone tech still being actively supported by its designers
+and widely used in industry and technology.
 
-* Serialization protocols: domain-specific data units expressed in ASN.1
-  types could be converted into a series of octets for storage or transmission
-  over the wire and then recovered back into their structured form on the
-  receiving end. This process is immune to various hardware and software
-  related dependencies.
+Since then ASN.1 is sort of haunted by its relations with the OSI model -- the
+first, unsuccessful, version of the Internet. You can read many interesting
+`discussions <https://news.ycombinator.com/item?id=8871453>`_ on that topic.
 
-* Data description language: could be used to describe particular set of
-  domain-specific data structures and their relationships. Such a description
-  could be passed to an ASN.1 compiler for automated generation of program
-  code that represents ASN.1 data structures in language-native environment
-  and handles data serialization issues.
+In the following years, generations of software engineers tackled the serialization
+problem many times. We can see that in Google's `ProtoBuffers <https://developers.google.com/protocol-buffers/>`_
+or `FlatBuffers <https://google.github.io/flatbuffers/>`_, for example.
+Interestingly, many new takes on binary protocol design do not depart
+far from ASN.1 from technical perspective. It's more of a matter of striking
+a balance between processing overhead, wire format overhead and human
+readability.
+
+Looking at what ASN.1 has to offer, it has three loosely coupled parts:
+
+* Data types: the standard introduces a collection of basic data types
+  (integers, bits, strings, arrays and records) that can be used for describing
+  arbitrarily complex, nested data structures.
+
+* Serialization protocols: the above data structures could be converted into a
+  series of octets for storage or transmission over the wire as well as
+  recovered back into their structured form. The system is fully agnostic
+  to hardware architectures differences.
+
+* Schema language: ASN.1 data structures could be described in terms
+  of a schema language for ASN.1 compiler to turn it into platform-specific
+  implementation.
 
 ASN.1 applications
 ------------------
 
 Being an old and generally successful standard, ASN.1 is widely
-adopted for many uses. To give you an example, some ASN.1-based
-protocols:
+adopted for many uses. To give you an example, these technologies
+use ASN.1 for their data exchange needs:
 
 * Signaling standards for the public switched telephone network (SS7 family)
 * Network management standards (SNMP, CMIP)
@@ -63,11 +75,11 @@ Library capabilities
 
 As of this moment, pyasn1 library implements all ASN.1 data
 types as Python objects in accordance with X.208 standard. Later,
-post-1995, revision (X.680) introduced significant changes most of
-which have not yet been supported by pyasn1. Aside from data types
-a collection of data serialization codecs comes with pyasn1 package.
+post-1995, revision (X.680) introduced some changes to the schema
+language which may not be fully supported by pyasn1. Aside from data
+types a collection of data serialization codecs comes with pyasn1 package.
 
-As for ASN.1 data definition language, pyasn1 package does
+As for ASN.1 schema language, pyasn1 package does
 not ship any compiler for it. However, there's a tool called
 `asn1late <https://github.com/kimgr/asn1ate>`_ which is an ASN.1
 grammar parser paired to code generator capable of generating pyasn1
@@ -88,44 +100,42 @@ Documentation
    /docs/tutorial
    /docs/api-reference
 
-Examples
+Use case
 --------
 
    .. toctree::
       :maxdepth: 2
 
-      /examples
+      /example-use-case
 
-Implemented protocols
----------------------
+Download & Install
+------------------
 
-Typically, pyasn1 is used for building arbitrary protocol support into
-various applications. This involves ASN.1 data description translation
-into corresponding pyasn1 classes. The translation could be done
-woth the `asn1late <https://github.com/kimgr/asn1ate>`_ tool.
-Also, to save time and effort, some of the protocol modules are
-distributed within the `pyasn1-modules <https://github.com/etingof/pyasn1-module>`_
-package. For instance, many structures for PKI (X.509, PKCS#*, CRMF, OCSP), LDAP
-and SNMP are present there.  Applications authors are advised to import and
-use relevant modules from that package whenever needed protocol
-structures are already there.
+The PyASN1 software is provided under terms and conditions of BSD-style
+:ref:`license`, and can be freely downloaded from `Github <https://github.com/etingof/pyasn1>`_
+or `PyPI <http://pypi.python.org/pypi/pyasn1/>`_.
 
-Download
---------
+It is pure-Python and has no dependencies. Considering how much industrial or finance
+software can be stuck with an old platform (think RHEL 5), we struggle to maintain its
+compatibility back to the very pre-historic Python (which is 2.4!).
 
-Best way to obtain and install pyasn1 is usually to:
+The best way to obtain PyASN1 is by running `pip`:
 
 .. code-block:: bash
 
-   # pip install pyasn1
-   
-If that does not work for you for some reason, you might need to read the 
-following page.
+   $ pip install pyasn1
 
-   .. toctree::
-      :maxdepth: 2
+or
 
-      /download
+.. code-block:: bash
+
+   $ easy_install pyasn1
+
+You may also want to use `pyasn1-modules`:
+
+.. code-block:: bash
+
+   $ pip install pyasn1-modules
 
 Changes
 -------
@@ -139,36 +149,34 @@ the latest fixes and improvements.
 
       /changelog
 
-License
--------
-
-   .. toctree::
-      :maxdepth: 2
-
-      /license
-
 Getting help
 ------------
 
-Although pyasn1 software is almost a decade old and used in many production
-environments, it still may have bugs and non-implemented pieces. Anyone
-who happens to run into such defect is welcome to search or complain to
+Please, file your `issues <https://github.com/etingof/pyasn1/issues>`_
+and `PRs <https://github.com/etingof/pyasn1/pulls>`_ at GitHub.
+Alternatively, you could ask for help at
+`Stack Overflow <http://stackoverflow.com/questions/tagged/pyasn1>`_
+or search
 `pyasn1-users <https://lists.sourceforge.net/lists/listinfo/pyasn1-users>`_
-mailing list or ask for help from
-`Stack Overflow <http://stackoverflow.com/questions/tagged/pyasn1>`_ 
-community.
+mailing list archive.
 
 Books on ASN.1
 --------------
 
-The algorithms implemented in the pyasn1 library are
-largely based on the information from the following sources:
+The pyasn1 implementation is largely based on reading up the following awesome
+books:
 
-* `ITU standards <http://www.itu.int/ITU-T/studygroups/com17/languages/X.680-X.693-0207w.zip>`_
 * `ASN.1 - Communication between heterogeneous systems <http://www.oss.com/asn1/dubuisson.html>`_ by Olivier Dubuisson
 * `ASN.1 Complete <http://www.oss.com/asn1/resources/books-whitepapers-pubs/larmouth-asn1-book.pdf>`_ by Prof John Larmouth
+
+Here you can get the official standards which is hard to read:
+
+* `ITU standards <http://www.itu.int/ITU-T/studygroups/com17/languages/X.680-X.693-0207w.zip>`_
+
+On the other end of the readability spectrum, here is a quick and sweet write up:
+
 * `A Layman's Guide to a Subset of ASN.1, BER, and DER <ftp://ftp.rsasecurity.com/pub/pkcs/ascii/layman.asc>`_ by Burton S. Kaliski
 
-Please refer to books above for getting proper understanding of ASN.1
-design and internals.
+If you are working with ASN.1, we'd highly recommend reading a proper
+book on the subject.
 
