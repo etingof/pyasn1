@@ -70,6 +70,18 @@ use ASN.1 for their data exchange needs:
 * Intelligent transportation (SAE J2735)
 * Cellular telephony (GSM, GPRS/EDGE, UMTS, LTE)
 
+ASN.1 gotchas
+-------------
+
+Apparently, ASN.1 is hard to implement properly. Quality open-source
+ASN.1 tools are rare, but ad-hoc implementations are numerous. Judging from the
+`statistics <http://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=ASN.1>`_ on discovered
+security vulnerabilities, many people have implemented ASN.1 parsers
+and oftentimes fell victim to its edge cases.
+
+On the bright side, ASN.1 has been around for a long time, it is well understood
+and security reviewed.
+
 Library capabilities
 --------------------
 
