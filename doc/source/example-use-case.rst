@@ -137,6 +137,9 @@ As well as use them nearly as we do with native Python types:
     >>> pk['exponent2'] == pk['privateExponent'] % (pk['prime2'] - 1)
     True
 
+Technically, pyasn1 classes `emulate <https://docs.python.org/3/reference/datamodel.html#emulating-container-types>`_
+Python built-in types.
+
 Write it back
 -------------
 
