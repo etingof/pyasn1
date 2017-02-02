@@ -643,6 +643,9 @@ class BitString(base.AbstractSimpleAsn1Item):
         else:
             return self._value[i]
 
+    def __contains__(self, bit):
+        return bit in self._value
+
     def __add__(self, value):
         return self.clone(self._value + value)
 

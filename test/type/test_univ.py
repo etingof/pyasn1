@@ -365,6 +365,10 @@ class BitStringTestCase(unittest.TestCase):
         assert self.b.clone("'A98A'H")[1] == 0
         assert self.b.clone("'A98A'H")[2] == 1
 
+    def testContains(self):
+        assert 1 in univ.BitString([0, 0, 0, 0, 1])
+        assert 0 not in univ.BitString([1, 1])
+
     def testAsOctets(self):
         assert self.b.clone(hexValue='A98A').asOctets() == ints2octs((0xa9, 0x8a)), 'testAsOctets() fails'
 
