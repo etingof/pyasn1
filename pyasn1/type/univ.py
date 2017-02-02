@@ -1116,6 +1116,9 @@ class OctetString(base.AbstractSimpleAsn1Item):
         else:
             return self._value[i]
 
+    def __contains__(self, value):
+        return value in self._value
+
     def __add__(self, value):
         return self.clone(self._value + self.prettyIn(value))
 
@@ -1347,6 +1350,9 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
             )
         else:
             return self._value[i]
+
+    def __contains__(self, value):
+        return value in self._value
 
     def __str__(self):
         return self.prettyPrint()
@@ -2066,6 +2072,9 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         else:
             base.AbstractConstructedAsn1Item.__setitem__(self, idx, value)
 
+    def __contains__(self, key):
+        return key in self._componentType
+
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         idx = 0
         l = len(self._componentValues)
@@ -2523,6 +2532,11 @@ class Choice(Set):
 
     def __len__(self):
         return self._currentIdx is not None and 1 or 0
+
+    def __contains__(self, key):
+        if self._currentIdx is None:
+            return False
+        return key == self._componentType[self._currentIdx].getName()
 
     def verifySizeSpec(self):
         if self._currentIdx is None:

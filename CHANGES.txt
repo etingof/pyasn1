@@ -22,6 +22,7 @@ Revision 0.1.10, released XX-XX-2017
 - Copyright notice added to non-trivial source code files.
 - Integer changed to emit Real instance if division produces a float.
 - True division operation now supported by Integer type.
+- The __contains__() method implemented for containers types
 - Fix to divmod operation implementation in Integer type.
 - Fix to IntegerDecoder's precomputed value map on Python 3.
 - Fix to base ASN.1 types to run in "unicode_literals" mode.

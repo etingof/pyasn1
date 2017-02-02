@@ -6,6 +6,7 @@
 #
 import sys
 from pyasn1.type import tagmap
+from pyasn1.compat import octets
 from pyasn1 import error
 
 
@@ -105,7 +106,15 @@ class NamedTypes(object):
         return hash(tuple(self))
 
     def __getitem__(self, idx):
-        return self.__namedTypes[idx]
+        if octets.isStringType(idx):
+            nameToPosIdx = self.__getNameToPosIdx()
+            return self.__namedTypes[nameToPosIdx[idx]]
+        else:
+            return self.__namedTypes[idx]
+
+    def __contains__(self, key):
+        nameToPosIdx = self.__getNameToPosIdx()
+        return key in nameToPosIdx
 
     if sys.version_info[0] <= 2:
         def __nonzero__(self):
@@ -147,7 +156,7 @@ class NamedTypes(object):
         except IndexError:
             raise error.PyAsn1Error('Type position out of range')
 
-    def getPositionByName(self, name):
+    def __getNameToPosIdx(self):
         if not self.__nameToPosIdx:
             idx = self.__namedTypesLen
             while idx > 0:
@@ -156,8 +165,13 @@ class NamedTypes(object):
                 if n in self.__nameToPosIdx:
                     raise error.PyAsn1Error('Duplicate name %s' % (n,))
                 self.__nameToPosIdx[n] = idx
+        return self.__nameToPosIdx
+
+    def getPositionByName(self, name):
+        nameToPosIdx = self.__getNameToPosIdx()
+
         try:
-            return self.__nameToPosIdx[name]
+            return nameToPosIdx[name]
         except KeyError:
             raise error.PyAsn1Error('Name %s not found' % (name,))
 

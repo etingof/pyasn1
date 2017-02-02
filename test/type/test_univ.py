@@ -459,6 +459,11 @@ class OctetStringTestCase(unittest.TestCase):
             tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x04)
         )
 
+    def testContains(self):
+        s = univ.OctetString('abcd')
+        assert str2octs('b') in s
+        assert str2octs('B') not in s
+
 
 class Null(unittest.TestCase):
     def testStr(self):
@@ -655,6 +660,11 @@ class ObjectIdentifier(unittest.TestCase):
             tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x06)
         )
 
+    def testContains(self):
+        s = univ.ObjectIdentifier('1.3.6.1234.99999')
+        assert 1234 in s
+        assert 4321 not in s
+
 
 class SequenceOf(unittest.TestCase):
     def setUp(self):
@@ -811,6 +821,10 @@ class Sequence(unittest.TestCase):
     def testByKey(self):
         self.s1['name'] = 'abc'
         assert self.s1['name'] == str2octs('abc'), 'set by key fails'
+
+    def testContains(self):
+        assert 'name' in self.s1
+        assert '<missing>' not in self.s1
 
     def testGetNearPosition(self):
         assert self.s1.getComponentTagMapNearPosition(1).getPosMap() == {
@@ -981,6 +995,15 @@ class Choice(unittest.TestCase):
                      'NamedType': namedtype.NamedType}) == self.s1.clone().setComponents(
             sex=self.s1.setComponentByPosition(1).getComponentByPosition(1).clone().setComponents(
                 count=univ.Integer(123))), 'repr() fails'
+
+    def testContains(self):
+        self.s1.setComponentByType(univ.OctetString.tagSet, 'abc')
+        assert 'name' in self.s1
+        assert 'sex' not in self.s1
+
+        self.s1.setComponentByType(univ.Integer.tagSet, 123, 1)
+        assert 'name' not in self.s1
+        assert 'sex' in self.s1
 
     def testOuterByTypeWithPythonValue(self):
         self.s1.setComponentByType(univ.OctetString.tagSet, 'abc')

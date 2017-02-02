@@ -43,6 +43,10 @@ class NamedTypesCaseBase(unittest.TestCase):
                                    'OptionalNamedType': namedtype.OptionalNamedType, 'Integer': univ.Integer,
                                    'OctetString': univ.OctetString}) == self.e, 'repr() fails'
 
+    def testContains(self):
+        assert 'first-name' in self.e
+        assert '<missing>' not in self.e
+
     # noinspection PyUnusedLocal
     def testIter(self):
         for t in self.e:
