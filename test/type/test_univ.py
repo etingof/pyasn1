@@ -977,8 +977,12 @@ class Sequence(unittest.TestCase):
     def testUpdate(self):
         self.s1.clear()
         assert list(self.s1.values()) == [None, None, None]
-        self.s1.update({'name': 'abc', 'nick': 'def', 'age': 123})
+        self.s1.update(**{'name': 'abc', 'nick': 'def', 'age': 123})
         assert list(self.s1.items()) == [(x[0], str2octs(x[1])) for x in [('name', 'abc'), ('nick', 'def')]] + [('age', 123)]
+        self.s1.update(('name', 'ABC'))
+        assert list(self.s1.items()) == [(x[0], str2octs(x[1])) for x in [('name', 'ABC'), ('nick', 'def')]] + [('age', 123)]
+        self.s1.update(name='CBA')
+        assert list(self.s1.items()) == [(x[0], str2octs(x[1])) for x in [('name', 'CBA'), ('nick', 'def')]] + [('age', 123)]
 
 
 class SetOf(unittest.TestCase):

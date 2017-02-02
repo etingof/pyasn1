@@ -2140,13 +2140,9 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         for idx in range(self._componentTypeLen):
             yield self._componentType[idx].getName(), self._componentValues[idx]
 
-    def update(self, iterValue, **mappingValue):
-        if hasattr(iterValue, 'keys'):
-            for k in iterValue.keys():
-                self[k] = iterValue[k]
-        else:
-            for k, v in iterValue:
-                self[k] = v
+    def update(self, *iterValue, **mappingValue):
+        for k, v in iterValue:
+            self[k] = v
         for k in mappingValue:
             self[k] = mappingValue[k]
 
