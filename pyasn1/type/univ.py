@@ -646,6 +646,11 @@ class BitString(base.AbstractSimpleAsn1Item):
     def __contains__(self, bit):
         return bit in self._value
 
+    def __reversed__(self):
+        reversed_value = list(self._value)
+        reversed_value.reverse()
+        return self.clone(reversed_value)
+
     def __add__(self, value):
         return self.clone(self._value + value)
 
@@ -1121,6 +1126,11 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
     def __contains__(self, value):
         return value in self._value
+
+    def __reversed__(self):
+        reversed_value = list(self.asNumbers())
+        reversed_value.reverse()
+        return self.clone(reversed_value)
 
     def __add__(self, value):
         return self.clone(self._value + self.prettyIn(value))

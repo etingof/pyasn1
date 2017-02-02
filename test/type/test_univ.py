@@ -369,6 +369,10 @@ class BitStringTestCase(unittest.TestCase):
         assert 1 in univ.BitString([0, 0, 0, 0, 1])
         assert 0 not in univ.BitString([1, 1])
 
+    if version_info[:2] > (2, 4):
+        def testReverse(self):
+            assert reversed(univ.BitString([0, 0, 1])) == univ.BitString([1, 0, 0])
+
     def testAsOctets(self):
         assert self.b.clone(hexValue='A98A').asOctets() == ints2octs((0xa9, 0x8a)), 'testAsOctets() fails'
 
@@ -467,6 +471,10 @@ class OctetStringTestCase(unittest.TestCase):
         s = univ.OctetString('abcd')
         assert str2octs('b') in s
         assert str2octs('B') not in s
+
+    if version_info[:2] > (2, 4):
+        def testReverse(self):
+            assert reversed(univ.OctetString('abcd')) == univ.OctetString('dcba')
 
 
 class Null(unittest.TestCase):
