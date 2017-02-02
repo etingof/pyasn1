@@ -48,11 +48,11 @@ class NamedTypesCaseBase(unittest.TestCase):
         assert '<missing>' not in self.e
 
     # noinspection PyUnusedLocal
+    def testGetItem(self):
+        assert self.e[0] == namedtype.NamedType('first-name', univ.OctetString(''))
+
     def testIter(self):
-        for t in self.e:
-            break
-        else:
-            assert 0, '__getitem__() fails'
+        assert list(self.e) == ['first-name', 'age', 'family-name']
 
     def testGetTypeByPosition(self):
         assert self.e.getTypeByPosition(0) == univ.OctetString(''), \

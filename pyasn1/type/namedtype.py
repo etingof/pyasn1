@@ -116,6 +116,9 @@ class NamedTypes(object):
         nameToPosIdx = self.__getNameToPosIdx()
         return key in nameToPosIdx
 
+    def __iter__(self):
+        return (x[0] for x in self.__namedTypes)
+
     if sys.version_info[0] <= 2:
         def __nonzero__(self):
             return bool(self.__namedTypesLen)

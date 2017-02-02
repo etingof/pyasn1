@@ -360,7 +360,7 @@ class BitStringTestCase(unittest.TestCase):
     def testLen(self):
         assert len(self.b.clone("'A98A'H")) == 16
 
-    def testIter(self):
+    def testGetItem(self):
         assert self.b.clone("'A98A'H")[0] == 1
         assert self.b.clone("'A98A'H")[1] == 0
         assert self.b.clone("'A98A'H")[2] == 1
@@ -913,6 +913,9 @@ class Sequence(unittest.TestCase):
         assert s[0] == univ.OctetString('')
         assert s[2] == univ.Integer(34)
 
+    def testIter(self):
+        assert list(self.s1) == ['name', 'nick', 'age']
+
 
 class SetOf(unittest.TestCase):
     def setUp(self):
@@ -979,6 +982,9 @@ class Set(unittest.TestCase):
         self.s1.setComponentByName('name', univ.noValue)
         assert self.s1['name'] == univ.OctetString('')
 
+    def testIter(self):
+        assert list(self.s1) == ['name', 'null', 'age']
+
 
 class Choice(unittest.TestCase):
     def setUp(self):
@@ -1016,6 +1022,12 @@ class Choice(unittest.TestCase):
         self.s1.setComponentByType(univ.Integer.tagSet, 123, 1)
         assert 'name' not in self.s1
         assert 'sex' in self.s1
+
+    def testIter(self):
+        self.s1.setComponentByType(univ.OctetString.tagSet, 'abc')
+        assert list(self.s1) == ['name']
+        self.s1.setComponentByType(univ.Integer.tagSet, 123, 1)
+        assert list(self.s1) == ['sex']
 
     def testOuterByTypeWithPythonValue(self):
         self.s1.setComponentByType(univ.OctetString.tagSet, 'abc')

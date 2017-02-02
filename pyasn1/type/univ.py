@@ -1124,6 +1124,9 @@ class OctetString(base.AbstractSimpleAsn1Item):
         else:
             return self._value[i]
 
+    def __iter__(self):
+        return iter(self._value)
+
     def __contains__(self, value):
         return value in self._value
 
@@ -1363,6 +1366,9 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
             )
         else:
             return self._value[i]
+
+    def __iter__(self):
+        return iter(self._value)
 
     def __contains__(self, value):
         return value in self._value
@@ -1914,6 +1920,9 @@ class SetOf(base.AbstractConstructedAsn1Item):
     typeId = 1
     strictConstraints = False
 
+    def __iter__(self):
+        return iter(self._componentValues)
+
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         idx = 0
         l = len(self._componentValues)
@@ -2087,6 +2096,9 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
     def __contains__(self, key):
         return key in self._componentType
+
+    def __iter__(self):
+        return iter(self._componentType)
 
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         idx = 0
@@ -2472,7 +2484,8 @@ class Choice(Set):
 
       The CHOICE type can only hold a single component belonging
       to a list of allowed types.
-      Objects of this type try to duck-type Python :class:`dict` objects.
+      Objects of this type try to duck-type Python :class:`dict` objects except
+      that they pretend to contain a single key-value at a time.
 
       Parameters
       ----------
@@ -2550,6 +2563,11 @@ class Choice(Set):
         if self._currentIdx is None:
             return False
         return key == self._componentType[self._currentIdx].getName()
+
+    def __iter__(self):
+        if self._currentIdx is None:
+            raise StopIteration
+        yield self._componentType[self._currentIdx].getName()
 
     def verifySizeSpec(self):
         if self._currentIdx is None:
