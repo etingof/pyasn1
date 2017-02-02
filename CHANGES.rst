@@ -1,5 +1,5 @@
 
-Revision 0.1.10, released XX-XX-2017
+Revision 0.1.10, released 05-02-2017
 ------------------------------------
 
 - POTENTIAL SECURITY ISSUE: fix to BER decoder improperly
@@ -17,7 +17,7 @@ Revision 0.1.10, released XX-XX-2017
   This should improve code readability.
 - NoValue class improved to become a singleton and catch more kinds
   of access to it.
-- Compat wrappers str2octs() and oct2strs() fixed to run over
+- Compatibility wrappers str2octs() and oct2strs() fixed to run over
   iso-8859-1 encoding.
 - Copyright notice added to non-trivial source code files.
 - Integer changed to emit Real instance if division produces a float.

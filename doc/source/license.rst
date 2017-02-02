@@ -3,4 +3,4 @@
 License
 =======
 
-.. include:: ../../LICENSE.txt
+.. include:: ../../LICENSE.rst
