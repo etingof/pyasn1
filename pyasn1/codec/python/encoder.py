@@ -94,9 +94,8 @@ class SequenceOfEncoder(AbstractItemEncoder):
         return [encodeFun(x) for x in value]
 
 
-class ChoiceEncoder(AbstractItemEncoder):
-    def encode(self, encodeFun, value):
-        return encodeFun(value.getComponent())
+class ChoiceEncoder(SequenceEncoder):
+    pass
 
 
 class AnyEncoder(AbstractItemEncoder):
