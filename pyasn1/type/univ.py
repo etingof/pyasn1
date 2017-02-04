@@ -507,7 +507,7 @@ class BitString(base.AbstractSimpleAsn1Item):
                 value = self.fromBinaryString(self.defaultBinValue)
             elif self.defaultHexValue is not noValue:
                 value = self.fromHexString(self.defaultHexValue)
-        self.__asNumbersCache = None
+        self.__asNumbersCache = {}
         base.AbstractSimpleAsn1Item.__init__(
             self, value, tagSet, subtypeSpec
         )
@@ -663,38 +663,74 @@ class BitString(base.AbstractSimpleAsn1Item):
     def __rmul__(self, value):
         return self * value
 
-    def asOctets(self):
-        """Convenience method for getting BIT STRING value as a sequence of octets.
+    def asNumbers(self, padding=True):
+        """Get BIT STRING as a sequence of 8-bit integers.
 
-        This method will raise an exception in case of BIT STRING which is
-        not multiples of 8 in length.
+        Parameters
+        ----------
+        padding: :class:`bool`
+            Allow left-padding if BIT STRING length is not a multiples of eight.
+
+        Raises
+        ------
+        : :py:class:`pyasn1.error.PyAsn1Error`
+            If BIT STRING length is not multiples of eight and no padding is allowed.
         """
-        return octets.ints2octs(self.asNumbers())
-
-    def asNumbers(self):
-        """Convenience method for getting BIT STRING value as a sequence of integers.
-
-        This method will raise an exception in case of BIT STRING which is
-        not multiples of 8 in length.
-        """
-        if self.__asNumbersCache is not None:
-            return self.__asNumbersCache
-
-        if len(self) % 8 != 0:
+        if not padding and len(self) % 8 != 0:
             raise error.PyAsn1Error('BIT STRING length is not a multiple of 8')
 
+        if padding in self.__asNumbersCache:
+            return self.__asNumbersCache[padding]
+
         result = []
-        i = 0
-        while i < len(self):
+        bitstring = list(self)
+        while len(bitstring) % 8:
+            bitstring.insert(0, 0)
+        bitIndex = 0
+        while bitIndex < len(bitstring):
             byte = 0
             for x in range(8):
-                byte |= self[i + x] << (7 - x)
+                byte |= bitstring[bitIndex + x] << (7 - x)
             result.append(byte)
-            i += 8
+            bitIndex += 8
 
-        self.__asNumbersCache = tuple(result)
+        self.__asNumbersCache[padding] = tuple(result)
 
-        return self.__asNumbersCache
+        return self.__asNumbersCache[padding]
+
+    def asOctets(self, padding=True):
+        """Get BIT STRING as a sequence of octets.
+
+        Parameters
+        ----------
+        padding: :class:`bool`
+            Allow left-padding if BIT STRING length is not a multiples of eight.
+
+        Raises
+        ------
+        : :py:class:`pyasn1.error.PyAsn1Error`
+            If BIT STRING length is not multiples of eight and no padding is allowed.
+        """
+        return octets.ints2octs(self.asNumbers(padding))
+
+    def asInteger(self, padding=True):
+        """Get BIT STRING as a single integer value.
+
+        Parameters
+        ----------
+        padding: :class:`bool`
+            Allow left-padding if BIT STRING length is not a multiples of eight.
+
+        Raises
+        ------
+        : :py:class:`pyasn1.error.PyAsn1Error`
+            If BIT STRING length is not multiples of eight and no padding is allowed.
+        """
+        accumulator = 0
+        for byte in self.asNumbers(padding):
+            accumulator <<= 8
+            accumulator |= byte
+        return accumulator
 
     @staticmethod
     def fromHexString(value):
@@ -1091,10 +1127,10 @@ class OctetString(base.AbstractSimpleAsn1Item):
         def __unicode__(self):
             return self._value.decode(self._encoding, 'ignore')
 
-        def asOctets(self):
+        def asOctets(self, padding=True):
             return self._value
 
-        def asNumbers(self):
+        def asNumbers(self, padding=True):
             if self.__asNumbersCache is None:
                 self.__asNumbersCache = tuple([ord(x) for x in self._value])
             return self.__asNumbersCache
@@ -1105,10 +1141,10 @@ class OctetString(base.AbstractSimpleAsn1Item):
         def __bytes__(self):
             return self._value
 
-        def asOctets(self):
+        def asOctets(self, padding=True):
             return self._value
 
-        def asNumbers(self):
+        def asNumbers(self, padding=True):
             if self.__asNumbersCache is None:
                 self.__asNumbersCache = tuple(self._value)
             return self.__asNumbersCache

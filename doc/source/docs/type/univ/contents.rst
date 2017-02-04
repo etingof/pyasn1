@@ -1,6 +1,6 @@
 
-Universal ASN.1 types
----------------------
+Universal types
+---------------
 
 .. autoclass:: pyasn1.type.univ.NoValue()
 

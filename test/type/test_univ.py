@@ -380,14 +380,20 @@ class BitStringTestCase(unittest.TestCase):
     def testAsInts(self):
         assert self.b.clone(hexValue='A98A').asNumbers() == (0xa9, 0x8a), 'testAsNumbers() fails'
 
-    def testMultipleOfEight(self):
+    def testMultipleOfEightNoPadding(self):
         try:
-            self.b.clone((1, 0, 1)).asOctets()
+            self.b.clone((1, 0, 1)).asOctets(padding=False)
         except PyAsn1Error:
             pass
         else:
             assert 0, "non 8-bit bitstring didn't fail"
 
+    def testMultipleOfEightPadding(self):
+        assert self.b.clone((1, 0, 1)).asNumbers(padding=True) == (5,)
+
+    def testAsInteger(self):
+        assert self.b.clone('11000000011001').asInteger(padding=True) == 12313
+        assert self.b.clone('1100110011011111').asInteger(padding=False) == 52447
 
 class OctetStringTestCase(unittest.TestCase):
 
