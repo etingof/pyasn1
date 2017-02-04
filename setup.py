@@ -86,7 +86,7 @@ params.update({
                  'pyasn1.codec.ber',
                  'pyasn1.codec.cer',
                  'pyasn1.codec.der',
-                 'pyasn1.codec.python']})
+                 'pyasn1.codec.native']})
 
 # handle unittest discovery feature
 if sys.version_info[0:2] < (2, 7) or \

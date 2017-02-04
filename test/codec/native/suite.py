@@ -7,7 +7,7 @@
 from sys import path, version_info
 from os.path import sep
 
-path.insert(1, path[0] + sep + 'python')
+path.insert(1, path[0] + sep + 'native')
 import test_encoder, test_decoder
 
 if version_info[0:2] < (2, 7) or \

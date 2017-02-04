@@ -5,7 +5,7 @@
 # License: http://pyasn1.sf.net/license.html
 #
 from pyasn1.type import tag, namedtype, univ, char
-from pyasn1.codec.python import decoder
+from pyasn1.codec.native import decoder
 from pyasn1.error import PyAsn1Error
 from sys import version_info
 

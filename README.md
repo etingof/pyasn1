@@ -134,7 +134,7 @@ To make life easier for a Pythonista, they can turn their pyasn1
 classes into Python built-ins:
 
 ```python
->>> from pyasn1.codec.python.encoder import encode
+>>> from pyasn1.codec.native.encoder import encode
 >>> encode(record)
 {'id': 123, 'room': 321, 'house': 0}
 ```
@@ -143,7 +143,7 @@ Or vice-versa -- you can initialize an ASN.1 structure from a tree of
 Python objects:
 
 ```python
->>> from pyasn1.codec.python.decoder import decode
+>>> from pyasn1.codec.native.decoder import decode
 >>> record = decode({'id': 123, 'room': 321, 'house': 0}, asn1Spec=Record())
 >>> print(record.prettyPrint())
 Record:

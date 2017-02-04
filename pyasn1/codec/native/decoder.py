@@ -130,7 +130,7 @@ class Decoder(object):
         return value
 
 
-#: Turns Python objects of built-in into ASN.1 objects.
+#: Turns Python objects of built-in types into ASN.1 objects.
 #:
 #: Takes Python objects of built-in types and turns them into a tree of
 #: ASN.1 objects (e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative) which

@@ -149,7 +149,7 @@ pyasn1 objects into an analogous tree made of base Python types:
 
 .. code-block:: python
 
-    >>> from pyasn1.codec.python.encoder import encode
+    >>> from pyasn1.codec.native.encoder import encode
     >>> ...
     >>> py_private_key = encode(private_key)
     >>> py_private_key
@@ -162,7 +162,7 @@ You can do vice-versa: initialize ASN.1 structure from a dict:
 
 .. code-block:: python
 
-    >>> from pyasn1.codec.python.decoder import decode
+    >>> from pyasn1.codec.native.decoder import decode
     >>> py_private_key = {'modulus': 280789907761334970323210643584308373}
     >>> private_key = decode(py_private_key, asn1Spec=RSAPrivateKey())
 

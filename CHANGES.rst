@@ -3,7 +3,7 @@ Revision 0.1.10, released 05-02-2017
 ------------------------------------
 
 - FIX TO A SECURITY WEAKNESS: BER decoder improperly cached long tags.
-- New codec implemented to transform pyasn1 types to Python built-in types and back.
+- New "native" codec implemented to transform pyasn1 types to Python built-in types and back.
 - Switched to new-style classes.
 - BitString improvements:
 

@@ -16,8 +16,8 @@ import cer.suite
 path.insert(1, path[0] + sep + 'codec' + sep + 'der')
 import der.suite
 
-path.insert(1, path[0] + sep + 'codec' + sep + 'python')
-import python.suite
+path.insert(1, path[0] + sep + 'codec' + sep + 'native')
+import native.suite
 
 if version_info[0:2] < (2, 7) or \
         version_info[0:2] in ((3, 0), (3, 1)):
@@ -29,7 +29,7 @@ else:
     import unittest
 
 suite = unittest.TestSuite()
-for m in (ber.suite, cer.suite, der.suite, python.suite):
+for m in (ber.suite, cer.suite, der.suite, native.suite):
     suite.addTest(getattr(m, 'suite'))
 
 
