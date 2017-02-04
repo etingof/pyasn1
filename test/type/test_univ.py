@@ -342,10 +342,11 @@ class BitStringTestCase(unittest.TestCase):
         assert self.b.clone("'A98A'H") == (1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0)
         assert self.b.clone(binValue='1010100110001010') == (1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0)
         assert self.b.clone(hexValue='A98A') == (1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0)
+        assert self.b.clone('1010100110001010') == (1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0)
         assert self.b.clone((1, 0, 1)) == (1, 0, 1)
 
     def testStr(self):
-        assert str(self.b.clone('Urgent,Active')) == '(1, 1)'
+        assert str(self.b.clone('Urgent,Active')) == '11'
 
     def testRepr(self):
         assert eval(repr(self.b.clone('Urgent,Active')), {'BitString': univ.BitString}) == self.b.clone(

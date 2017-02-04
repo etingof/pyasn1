@@ -7,6 +7,8 @@ Revision 0.1.10, released 05-02-2017
 - Switched to new-style classes.
 - BitString improvements:
 
+  * simple string of binary digits is now supported as initializer
+  * default str() yields string of binary digits (used to be str(tuple())
   * binValue and hexValue initializers added
   * defaultBinValue and defaultHexValue class-level initializers added
   * .asNumbers() and .asOctets() representation builders added

@@ -628,7 +628,7 @@ class BitString(base.AbstractSimpleAsn1Item):
         return self.__class__(value, tagSet, subtypeSpec, namedValues, binValue, hexValue)
 
     def __str__(self):
-        return str(tuple(self))
+        return ''.join([str(x) for x in self._value])
 
     # Immutable sequence object protocol
 
@@ -725,7 +725,7 @@ class BitString(base.AbstractSimpleAsn1Item):
             return ()
 
         elif octets.isStringType(value):
-            if value[0] == '\'':
+            if value[0] == '\'':  # "'1011'B" -- ASN.1 schema representation
                 if value[-2:] == '\'B':
                     return self.fromBinaryString(value[1:-2])
                 elif value[-2:] == '\'H':
@@ -734,7 +734,7 @@ class BitString(base.AbstractSimpleAsn1Item):
                     raise error.PyAsn1Error(
                         'Bad BIT STRING value notation %s' % (value,)
                     )
-            else:
+            elif self.__namedValues and not value.isdigit():  # named bits like 'Urgent, Active'
                 for i in value.split(','):
                     j = self.__namedValues.getValue(i)
                     if j is None:
@@ -745,6 +745,8 @@ class BitString(base.AbstractSimpleAsn1Item):
                         r.extend([0] * (j - len(r) + 1))
                     r[j] = 1
                 return tuple(r)
+            else:  # assume plain binary string like '1011'
+                return self.fromBinaryString(value)
 
         elif isinstance(value, (tuple, list)):
             r = tuple(value)
@@ -764,7 +766,7 @@ class BitString(base.AbstractSimpleAsn1Item):
             )
 
     def prettyOut(self, value):
-        return '\"\'%s\'B\"' % ''.join([str(x) for x in value])
+        return '\'%s\'' % str(self)
 
 
 try:

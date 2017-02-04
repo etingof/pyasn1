@@ -43,7 +43,7 @@ class IntegerEncoder(AbstractItemEncoder):
 
 class BitStringEncoder(AbstractItemEncoder):
     def encode(self, encodeFun, value):
-        return ''.join([str(x) for x in value])
+        return str(value)
 
 
 class OctetStringEncoder(AbstractItemEncoder):
