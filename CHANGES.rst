@@ -5,6 +5,7 @@ Revision 0.2.1, released 05-02-2017
 - FIX TO A SECURITY WEAKNESS: BER decoder improperly cached long tags.
 - New "native" codec implemented to transform pyasn1 types to Python built-in types and back.
 - Switched to new-style classes.
+- Sphinx documentation added.
 - BitString improvements:
 
   * simple string of binary digits is now supported as initializer
