@@ -8,7 +8,7 @@ try:
     from collections import OrderedDict
 
 except ImportError:
-    from ordereddict import OrderedDict
+    OrderedDict = dict
 
 from pyasn1.type import base, univ, char, useful
 from pyasn1 import debug, error
@@ -155,8 +155,11 @@ class Encoder(object):
     def __call__(self, value):
         if not isinstance(value, base.Asn1Item):
             raise error.PyAsn1Error('value is not valid (should be an instance of an ASN.1 Item)')
-        debug.logger & debug.flagEncoder and debug.logger(
-            'encoder called for type %s, value:\n%s' % (value.prettyPrintType(), value.prettyPrint()))
+
+        if debug.logger & debug.flagEncoder:
+            debug.scope.push(type(value).__name__)
+            debug.logger('encoder called for type %s <%s>' % (type(value).__name__, value.prettyPrint()))
+
         tagSet = value.getTagSet()
         if len(tagSet) > 1:
             concreteEncoder = explicitlyTaggedItemEncoder
@@ -171,11 +174,15 @@ class Encoder(object):
                     concreteEncoder = self.__tagMap[tagSet]
                 else:
                     raise error.PyAsn1Error('No encoder for %s' % (value,))
-        debug.logger & debug.flagEncoder and debug.logger(
-            'using value codec %s chosen by %s' % (concreteEncoder.__class__.__name__, tagSet))
+
+        debug.logger & debug.flagEncoder and debug.logger('using value codec %s chosen by %s' % (type(concreteEncoder).__name__, tagSet))
+
         substrate = concreteEncoder.encode(self, value)
-        debug.logger & debug.flagEncoder and debug.logger(
-            'encoder produced: %s\nencoder completed' % repr(substrate))
+
+        if debug.logger & debug.flagEncoder:
+            debug.logger('encoder %s produced: %s' % (type(concreteEncoder).__name__, repr(substrate)))
+            debug.scope.pop()
+
         return substrate
 
 
@@ -185,8 +192,9 @@ class Encoder(object):
 #: walks all its components recursively and produces a Python built-in type or a tree
 #: of those.
 #:
-#: One important exception is that instead of :py:class:`dict`, the :py:class:`OrderedDict`
-#: is produced to preserve ordering of the components in ASN.1 SEQUENCE.
+#: One exception is that instead of :py:class:`dict`, the :py:class:`OrderedDict`
+#: can be produced (whenever available) to preserve ordering of the components
+#: in ASN.1 SEQUENCE.
 #:
 #: Parameters
 #: ----------

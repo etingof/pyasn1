@@ -105,7 +105,9 @@ class Decoder(object):
 
     def __call__(self, substrate, asn1Spec):
         if debug.logger & debug.flagDecoder:
+            debug.scope.push(type(substrate).__name__)
             debug.logger('decoder called at scope %s, working with type %s' % (debug.scope, type(substrate).__name__))
+
         if asn1Spec is None or not isinstance(asn1Spec, base.Asn1Item):
             raise error.PyAsn1Error('asn1Spec is not valid (should be an instance of an ASN.1 Item, not %s)' % asn1Spec.__class__.__name__)
 
@@ -117,13 +119,12 @@ class Decoder(object):
             raise error.PyAsn1Error('Unknown ASN.1 tag %s' % asn1Spec.tagSet)
 
         if debug.logger & debug.flagDecoder:
-            debug.logger('calling decoder %s on Python type %s' % (valueDecoder, type(substrate).__name__))
-            debug.scope.push(type(substrate).__name__)
+            debug.logger('calling decoder %s on Python type %s <%s>' % (type(valueDecoder).__name__, type(substrate).__name__, repr(substrate)))
 
         value = valueDecoder(substrate, asn1Spec, self)
 
         if debug.logger & debug.flagDecoder:
-            debug.logger('decoder %s produced ASN.1 type %s' % (valueDecoder, type(value).__name__))
+            debug.logger('decoder %s produced ASN.1 type %s <%s>' % (type(valueDecoder).__name__, type(value).__name__, repr(value)))
             debug.scope.pop()
 
         return value

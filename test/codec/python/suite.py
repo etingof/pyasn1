@@ -7,17 +7,8 @@
 from sys import path, version_info
 from os.path import sep
 
-path.insert(1, path[0] + sep + 'codec' + sep + 'ber')
-import ber.suite
-
-path.insert(1, path[0] + sep + 'codec' + sep + 'cer')
-import cer.suite
-
-path.insert(1, path[0] + sep + 'codec' + sep + 'der')
-import der.suite
-
-path.insert(1, path[0] + sep + 'codec' + sep + 'python')
-import python.suite
+path.insert(1, path[0] + sep + 'python')
+import test_encoder, test_decoder
 
 if version_info[0:2] < (2, 7) or \
         version_info[0:2] in ((3, 0), (3, 1)):
@@ -29,8 +20,9 @@ else:
     import unittest
 
 suite = unittest.TestSuite()
-for m in (ber.suite, cer.suite, der.suite, python.suite):
-    suite.addTest(getattr(m, 'suite'))
+loader = unittest.TestLoader()
+for m in (test_encoder, test_decoder):
+    suite.addTest(loader.loadTestsFromModule(m))
 
 
 def runTests():
