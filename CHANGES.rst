@@ -8,10 +8,9 @@ Revision 0.2.1, released 05-02-2017
 - BitString improvements:
 
   * simple string of binary digits is now supported as initializer
-  * default str() yields string of binary digits (used to be str(tuple())
+  * default str() yields string of binary digits (used to yield str(tuple())
   * binValue and hexValue initializers added
-  * defaultBinValue and defaultHexValue class-level initializers added
-  * .asNumbers() and .asOctets() representation builders added
+  * .asNumbers(), .asOctets() and asInteger() representation added
 
 - Components of constructed ASN.1 types can now be populated with
   uninitialized ASN.1 objects by assigning either noValue sentinel or
@@ -21,7 +20,6 @@ Revision 0.2.1, released 05-02-2017
   of access to it.
 - Compatibility wrappers str2octs() and oct2strs() fixed to run over
   iso-8859-1 encoding.
-- Copyright notice added to non-trivial source code files.
 - Integer changed to emit Real instance if division produces a float.
 - True division operation now supported by Integer type.
 - The __contains__(), __reverse__() methods implemented for container types
@@ -45,6 +43,7 @@ Revision 0.2.1, released 05-02-2017
   allowed values, which aligns well with the notion of subtyping.
 - Fix to NamedTypes methods to handle .getTagMap() returning None
 - Fix to Set/Sequence.setDefaultComponents() to return self
+- Copyright notice added to non-trivial source code files.
 - Author's email changed, copyright extended to 2017
 
 Revision 0.1.9, released 28-09-2015
