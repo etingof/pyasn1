@@ -152,38 +152,38 @@ class Encoder(object):
         self.__tagMap = tagMap
         self.__typeMap = typeMap
 
-    def __call__(self, value):
-        if not isinstance(value, base.Asn1Item):
+    def __call__(self, asn1Value):
+        if not isinstance(asn1Value, base.Asn1Item):
             raise error.PyAsn1Error('value is not valid (should be an instance of an ASN.1 Item)')
 
         if debug.logger & debug.flagEncoder:
-            debug.scope.push(type(value).__name__)
-            debug.logger('encoder called for type %s <%s>' % (type(value).__name__, value.prettyPrint()))
+            debug.scope.push(type(asn1Value).__name__)
+            debug.logger('encoder called for type %s <%s>' % (type(asn1Value).__name__, asn1Value.prettyPrint()))
 
-        tagSet = value.getTagSet()
+        tagSet = asn1Value.getTagSet()
         if len(tagSet) > 1:
             concreteEncoder = explicitlyTaggedItemEncoder
         else:
-            if value.typeId is not None and value.typeId in self.__typeMap:
-                concreteEncoder = self.__typeMap[value.typeId]
+            if asn1Value.typeId is not None and asn1Value.typeId in self.__typeMap:
+                concreteEncoder = self.__typeMap[asn1Value.typeId]
             elif tagSet in self.__tagMap:
                 concreteEncoder = self.__tagMap[tagSet]
             else:
-                tagSet = value.baseTagSet
+                tagSet = asn1Value.baseTagSet
                 if tagSet in self.__tagMap:
                     concreteEncoder = self.__tagMap[tagSet]
                 else:
-                    raise error.PyAsn1Error('No encoder for %s' % (value,))
+                    raise error.PyAsn1Error('No encoder for %s' % (asn1Value,))
 
         debug.logger & debug.flagEncoder and debug.logger('using value codec %s chosen by %s' % (type(concreteEncoder).__name__, tagSet))
 
-        substrate = concreteEncoder.encode(self, value)
+        pyObject = concreteEncoder.encode(self, asn1Value)
 
         if debug.logger & debug.flagEncoder:
-            debug.logger('encoder %s produced: %s' % (type(concreteEncoder).__name__, repr(substrate)))
+            debug.logger('encoder %s produced: %s' % (type(concreteEncoder).__name__, repr(pyObject)))
             debug.scope.pop()
 
-        return substrate
+        return pyObject
 
 
 #: Turns ASN.1 object into a Python built-in type object(s).
@@ -198,8 +198,8 @@ class Encoder(object):
 #:
 #: Parameters
 #: ----------
-#  asn1Object: any pyasn1 object (e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative)
-#:     A pyasn1 object to encode
+#  asn1Value: any pyasn1 object (e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative)
+#:     pyasn1 object to encode (or a tree of them)
 #:
 #: Returns
 #: -------

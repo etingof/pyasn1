@@ -9,47 +9,47 @@ from pyasn1 import debug, error
 
 
 class AbstractScalarDecoder(object):
-    def __call__(self, substrate, asn1Spec, decoderFunc=None):
-        return asn1Spec.clone(substrate)
+    def __call__(self, pyObject, asn1Spec, decoderFunc=None):
+        return asn1Spec.clone(pyObject)
 
 
 class BitStringDecoder(AbstractScalarDecoder):
-    def __call__(self, substrate, asn1Spec, decoderFunc=None):
-        return asn1Spec.clone(univ.BitString.fromBinaryString(substrate))
+    def __call__(self, pyObject, asn1Spec, decoderFunc=None):
+        return asn1Spec.clone(univ.BitString.fromBinaryString(pyObject))
 
 
 class SequenceOrSetDecoder(object):
-    def __call__(self, substrate, asn1Spec, decoderFunc):
+    def __call__(self, pyObject, asn1Spec, decoderFunc):
         asn1Value = asn1Spec.clone()
 
         componentsTypes = asn1Spec.getComponentType()
 
         for field in asn1Value:
-            if field in substrate:
-                asn1Value[field] = decoderFunc(substrate[field], componentsTypes[field].getType())
+            if field in pyObject:
+                asn1Value[field] = decoderFunc(pyObject[field], componentsTypes[field].getType())
 
         return asn1Value
 
 
 class SequenceOfOrSetOfDecoder(object):
-    def __call__(self, substrate, asn1Spec, decoderFunc):
+    def __call__(self, pyObject, asn1Spec, decoderFunc):
         asn1Value = asn1Spec.clone()
 
-        for pyValue in substrate:
+        for pyValue in pyObject:
             asn1Value.append(decoderFunc(pyValue, asn1Spec.getComponentType()))
 
         return asn1Value
 
 
 class ChoiceDecoder(object):
-    def __call__(self, substrate, asn1Spec, decoderFunc):
+    def __call__(self, pyObject, asn1Spec, decoderFunc):
         asn1Value = asn1Spec.clone()
 
         componentsTypes = asn1Spec.getComponentType()
 
-        for field in substrate:
+        for field in pyObject:
             if field in componentsTypes:
-                asn1Value[field] = decoderFunc(substrate[field], componentsTypes[field].getType())
+                asn1Value[field] = decoderFunc(pyObject[field], componentsTypes[field].getType())
                 break
 
         return asn1Value
@@ -103,10 +103,10 @@ class Decoder(object):
         self.__tagMap = tagMap
         self.__typeMap = typeMap
 
-    def __call__(self, substrate, asn1Spec):
+    def __call__(self, pyObject, asn1Spec):
         if debug.logger & debug.flagDecoder:
-            debug.scope.push(type(substrate).__name__)
-            debug.logger('decoder called at scope %s, working with type %s' % (debug.scope, type(substrate).__name__))
+            debug.scope.push(type(pyObject).__name__)
+            debug.logger('decoder called at scope %s, working with type %s' % (debug.scope, type(pyObject).__name__))
 
         if asn1Spec is None or not isinstance(asn1Spec, base.Asn1Item):
             raise error.PyAsn1Error('asn1Spec is not valid (should be an instance of an ASN.1 Item, not %s)' % asn1Spec.__class__.__name__)
@@ -119,9 +119,9 @@ class Decoder(object):
             raise error.PyAsn1Error('Unknown ASN.1 tag %s' % asn1Spec.tagSet)
 
         if debug.logger & debug.flagDecoder:
-            debug.logger('calling decoder %s on Python type %s <%s>' % (type(valueDecoder).__name__, type(substrate).__name__, repr(substrate)))
+            debug.logger('calling decoder %s on Python type %s <%s>' % (type(valueDecoder).__name__, type(pyObject).__name__, repr(pyObject)))
 
-        value = valueDecoder(substrate, asn1Spec, self)
+        value = valueDecoder(pyObject, asn1Spec, self)
 
         if debug.logger & debug.flagDecoder:
             debug.logger('decoder %s produced ASN.1 type %s <%s>' % (type(valueDecoder).__name__, type(value).__name__, repr(value)))
