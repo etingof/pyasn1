@@ -1,6 +1,6 @@
 
-Revision 0.1.10, released 05-02-2017
-------------------------------------
+Revision 0.2.1, released 05-02-2017
+-----------------------------------
 
 - FIX TO A SECURITY WEAKNESS: BER decoder improperly cached long tags.
 - New "native" codec implemented to transform pyasn1 types to Python built-in types and back.
@@ -25,7 +25,13 @@ Revision 0.1.10, released 05-02-2017
 - Integer changed to emit Real instance if division produces a float.
 - True division operation now supported by Integer type.
 - The __contains__(), __reverse__() methods implemented for container types
-- Iterator protocol support implemented for all container types
+- Iterator protocol support implemented for all container types.
+  Warning, warning, warning: this change may potentially affect backward
+  compatibility when:
+
+  * user class overrides __getitem__() without overriding __iter__()
+  * when user code iterates over SEQUENCE object to get its components (now keys will be yielded)
+
 - Almost complete Python list and dict protocols added to SequenceOf/SetOf and
   Sequence/Set respectively
 - Fix to divmod operation implementation in Integer type.
