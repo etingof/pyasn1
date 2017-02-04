@@ -17,5 +17,5 @@ install:
 script:
   - python test/suite.py
 after_success:
-  - coverage run test/suite.py
+  - coverage run --omit=*test* test/suite.py
   - codecov
