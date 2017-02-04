@@ -22,3 +22,4 @@ Serialization codecs
    /docs/codec/ber/contents
    /docs/codec/cer/contents
    /docs/codec/der/contents
+   /docs/codec/python/contents

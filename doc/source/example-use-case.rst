@@ -140,6 +140,32 @@ As well as use them nearly as we do with native Python types:
 Technically, pyasn1 classes `emulate <https://docs.python.org/3/reference/datamodel.html#emulating-container-types>`_
 Python built-in types.
 
+Transform to built-ins
+----------------------
+
+ASN.1 data structures exhibit a way more complicated behaviour compared to
+Python types. You may wish to simplify things by turning the whole tree of
+pyasn1 objects into an analogous tree made of base Python types:
+
+.. code-block:: python
+
+    >>> from pyasn1.codec.python.encoder import encode
+    >>> ...
+    >>> py_private_key = encode(private_key)
+    >>> py_private_key
+    {'version': 0, 'modulus': 280789907761334970323210643584308373, 'publicExponent': 65537,
+     'privateExponent': 1704567874679144879123080924, 'prime1': 1780178536719561265324798296279384073,
+     'prime2': 1577313184995269616049017780493740138, 'exponent1': 1193974819720845247396384239609024,
+     'exponent2': 9240965721817961178848297404494811, 'coefficient': 10207364473358910343346707141115}
+
+You can do vice-versa: initialize ASN.1 structure from a dict:
+
+.. code-block:: python
+
+    >>> from pyasn1.codec.python.decoder import decode
+    >>> py_private_key = {'modulus': 280789907761334970323210643584308373}
+    >>> private_key = decode(py_private_key, asn1Spec=RSAPrivateKey())
+
 Write it back
 -------------
 

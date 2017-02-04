@@ -138,7 +138,7 @@ class Decoder(object):
 #:
 #: Parameters
 #: ----------
-#: pyObj: :py:class:`object`
+#: pyObject: :py:class:`object`
 #:     A scalar or nested Python objects
 #:
 #: asn1Spec: any pyasn1 type object e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative

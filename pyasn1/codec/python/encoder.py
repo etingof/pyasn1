@@ -198,7 +198,7 @@ class Encoder(object):
 #:
 #: Parameters
 #: ----------
-#  value: any pyasn1 object (e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative)
+#  asn1Object: any pyasn1 object (e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative)
 #:     A pyasn1 object to encode
 #:
 #: Returns
