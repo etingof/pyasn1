@@ -89,7 +89,7 @@ As of this moment, pyasn1 library implements all ASN.1 data
 types as Python objects in accordance with X.208 standard. Later,
 post-1995, revision (X.680) introduced some changes to the schema
 language which may not be fully supported by pyasn1. Aside from data
-types a collection of data serialization codecs comes with pyasn1 package.
+types a collection of data transformation codecs comes with pyasn1 package.
 
 As for ASN.1 schema language, pyasn1 package does
 not ship any compiler for it. However, there's a tool called

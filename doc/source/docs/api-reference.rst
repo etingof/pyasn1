@@ -13,8 +13,8 @@ ASN.1 types
 
    /docs/type/univ/contents
 
-Serialization codecs
---------------------
+Transformation codecs
+---------------------
 
 .. toctree::
    :maxdepth: 2
