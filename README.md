@@ -17,7 +17,7 @@ Features
 --------
 
 * Generic implementation of ASN.1 types (X.208)
-* Fully standard compliant BER/CER/DER codecs
+* Standards compliant BER/CER/DER codecs
 * 100% Python, works with Python 2.4 up to Python 3.6
 * MT-safe
 * Contributed ASN.1 compiler [Asn1ate](https://github.com/kimgr/asn1ate)
@@ -100,6 +100,7 @@ Part of the power of ASN.1 comes from its serialization features. You
 can serialize your data structure and send it over the network.
 
 ```python
+>>> from pyasn1.codec.der.encoder import encode
 >>> substrate = encode(record)
 >>> hexdump(substrate)
 00000: 30 07 02 01 7B 80 02 01 41
@@ -110,6 +111,7 @@ network or read from a file, into a Python object which you can
 introspect, modify, encode and send back.
 
 ```python
+>>> from pyasn1.codec.der.decoder import decode
 >>> received_record, rest_of_substrate = decode(substrate, asn1Spec=Record())
 >>>
 >>> for field in received_record:
@@ -126,11 +128,35 @@ True
 00000: 30 06 02 01 7B 80 01 7B
 ```
 
+The pyasn1 classes struggle to emulate their Python prototypes (e.g. int,
+list, dict etc.). But ASN.1 types exhibit more complicated behaviour.
+To make life easier for a Pythonista, they can turn their pyasn1
+classes into Python built-ins:
+
+```python
+>>> from pyasn1.codec.python.encoder import encode
+>>> encode(record)
+{'id': 123, 'room': 321, 'house': 0}
+```
+
+Or vice-versa -- you can initialize an ASN.1 structure from a tree of
+Python objects:
+
+```python
+>>> from pyasn1.codec.python.decoder import decode
+>>> record = decode({'id': 123, 'room': 321, 'house': 0}, asn1Spec=Record())
+>>> print(record.prettyPrint())
+Record:
+ id=123
+ room=321
+>>>
+```
+
 With ASN.1 design, serialization codecs are decoupled from data objects,
 so you could turn every single ASN.1 object into many different 
-serialized forms. As of this moment, pyasn1 supports BER, DER and CER
-formats. The extremely compact PER encoding is expected to be introduced
-in the upcoming pyasn1 release.
+serialized forms. As of this moment, pyasn1 supports BER, DER, CER and
+Python built-ins codecs. The extremely compact PER encoding is expected
+to be introduced in the upcoming pyasn1 release.
 
 More information on pyasn1 APIs can be found in the
 [documentation](http://pyasn1.sourceforge.net),
@@ -149,7 +175,7 @@ You could `pip install pyasn1` or download it from [PyPI](https://pypi.python.or
 
 If something does not work as expected, 
 [open an issue](https://github.com/etingof/pyasn1/issues) at GitHub or
-post your question [to Stack Overflow](http://stackoverflow.com/questions/ask)
+post your question [on Stack Overflow](http://stackoverflow.com/questions/ask)
 or try browsing pyasn1 
 [mailing list archives](https://sourceforge.net/p/pyasn1/mailman/pyasn1-users/).
 

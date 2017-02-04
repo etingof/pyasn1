@@ -2138,7 +2138,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
     def items(self):
         for idx in range(self._componentTypeLen):
-            yield self._componentType[idx].getName(), self._componentValues[idx]
+            yield self._componentType[idx].getName(), self[idx]
 
     def update(self, *iterValue, **mappingValue):
         for k, v in iterValue:
