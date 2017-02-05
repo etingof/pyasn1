@@ -1,7 +1,6 @@
 
 ASN.1 library for Python
 ------------------------
-[![PyPI](https://img.shields.io/pypi/v/pyasn1.svg?maxAge=2592000)](https://pypi.python.org/pypi/pyasn1)
 [![Python Versions](https://img.shields.io/pypi/pyversions/pyasn1.svg)](https://pypi.python.org/pypi/pyasn1/)
 [![Build status](https://travis-ci.org/etingof/pyasn1.svg?branch=master)](https://secure.travis-ci.org/etingof/pyasn1)
 [![Coverage Status](https://img.shields.io/codecov/c/github/etingof/pyasn1.svg)](https://codecov.io/github/etingof/pyasn1)
