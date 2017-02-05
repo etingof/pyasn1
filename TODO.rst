@@ -48,6 +48,13 @@ Documentation
 
 Document more API, add notes and example snippets.
 
+More fresh modules
+------------------
+
+Compile and ship more Pythonized ASN.1 modules for
+various ASN.1-based protocols (e.g. Kerberos etc).
+Refresh outdated modules in pyasn1-packages.
+
 Minor, housekeeping things
 --------------------------
 
