@@ -31,8 +31,8 @@ class BooleanEncoderTestCase(unittest.TestCase):
 class BitStringEncoderTestCase(unittest.TestCase):
     def testShortMode(self):
         assert encoder.encode(
-            univ.BitString((1, 0) * 501)
-        ) == ints2octs((3, 127, 6) + (170,) * 125 + (128,))
+            univ.BitString((1, 0) * 5)
+        ) == ints2octs((3, 3, 6, 170, 128))
 
     def testLongMode(self):
         assert encoder.encode(

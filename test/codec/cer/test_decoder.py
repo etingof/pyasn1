@@ -4,7 +4,6 @@
 # Copyright (c) 2005-2017, Ilya Etingof <etingof@gmail.com>
 # License: http://pyasn1.sf.net/license.html
 #
-from pyasn1.type import univ
 from pyasn1.codec.cer import decoder
 from pyasn1.compat.octets import ints2octs, str2octs, null
 from pyasn1.error import PyAsn1Error
@@ -39,6 +38,19 @@ class BooleanDecoderTestCase(unittest.TestCase):
         except PyAsn1Error:
             pass
 
+class BitStringDecoderTestCase(unittest.TestCase):
+    def testShortMode(self):
+        assert decoder.decode(
+            ints2octs((3, 3, 6, 170, 128))
+        ) == (((1, 0) * 5), null)
+
+    def testLongMode(self):
+        assert decoder.decode(
+            ints2octs((3, 127, 6) + (170,) * 125 + (128,))
+        ) == (((1, 0) * 501), null)
+
+    # TODO: test failures on short chunked and long unchunked substrate samples
+
 
 class OctetStringDecoderTestCase(unittest.TestCase):
     def testShortMode(self):
@@ -50,6 +62,8 @@ class OctetStringDecoderTestCase(unittest.TestCase):
         assert decoder.decode(
             ints2octs((36, 128, 4, 130, 3, 232) + (81,) * 1000 + (4, 1, 81, 0, 0))
         ) == (str2octs('Q' * 1001), null)
+
+    # TODO: test failures on short chunked and long unchunked substrate samples
 
 
 if __name__ == '__main__':
