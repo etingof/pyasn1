@@ -6,6 +6,7 @@ Revision 0.2.2, released XX-XX-2017
   processed indefinite length serialization.
 - FIX TO A SECURITY WEAKNESS: canonical decoders (CER/DER) may have successfully
   consumed non-canonical variations of (otherwise valid) serialization.
+- Broken Enumeratated subtyping fixed.
 
 Revision 0.2.1, released 05-02-2017
 -----------------------------------
