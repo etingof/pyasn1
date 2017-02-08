@@ -2561,7 +2561,8 @@ class Set(SequenceAndSetBase):
     def getComponentTagMap(self):
         if self._componentType:
             return self._componentType.getTagMap(True)
-
+        return tagmap.TagMap()
+        
     def getComponentPositionByType(self, tagSet):
         if self._componentType:
             return self._componentType.getPositionByType(tagSet)
