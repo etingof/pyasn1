@@ -2143,7 +2143,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         if componentType is None:
             componentType = self.componentType
         base.AbstractConstructedAsn1Item.__init__(
-            self, componentType.clone(), tagSet, subtypeSpec, sizeSpec
+            self, componentType, tagSet, subtypeSpec, sizeSpec
         )
         self._componentTypeLen = len(self._componentType)
 

@@ -1,4 +1,10 @@
 
+Revision 0.2.3, released XX-02-2017
+-----------------------------------
+
+- Decoding performance improvement by maintaining a single shared
+  NamedType object for all instances of SEQUENCE/SET object.
+
 Revision 0.2.2, released 07-02-2017
 -----------------------------------
 
