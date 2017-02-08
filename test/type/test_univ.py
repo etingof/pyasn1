@@ -7,7 +7,7 @@
 from pyasn1.type import univ, tag, constraint, namedtype, namedval, error
 from pyasn1.compat.octets import str2octs, ints2octs
 from pyasn1.error import PyAsn1Error
-from sys import version_info
+from sys import getsizeof, version_info
 import math
 
 if version_info[0:2] < (2, 7) or \
@@ -128,7 +128,6 @@ class NoValueTestCase(unittest.TestCase):
         else:
             assert False, 'bitshift works for NoValue object'
 
-
     def testBooleanEvaluation(self):
         try:
             if univ.noValue:
@@ -139,6 +138,13 @@ class NoValueTestCase(unittest.TestCase):
 
         else:
             assert False, 'boolean evaluation works for NoValue object'
+    
+    def testSizeOf(self):
+        try:
+            getsizeof(univ.noValue)
+
+        except PyAsn1Error:
+            assert False, 'sizeof failed for NoValue object'
 
 
 class IntegerTestCase(unittest.TestCase):
