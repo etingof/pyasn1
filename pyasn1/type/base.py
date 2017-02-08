@@ -134,7 +134,7 @@ class NoValue(object):
     """
     skipMethods = ('__getattribute__', '__getattr__', '__setattr__', '__delattr__',
                    '__class__', '__init__', '__del__', '__new__', '__repr__', 
-                   '__qualname__', '__objclass__', 'im_class')
+                   '__qualname__', '__objclass__', 'im_class', '__sizeof__')
 
     _instance = None
 
