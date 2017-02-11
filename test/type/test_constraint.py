@@ -4,18 +4,14 @@
 # Copyright (c) 2005-2017, Ilya Etingof <etingof@gmail.com>
 # License: http://pyasn1.sf.net/license.html
 #
-from pyasn1.type import constraint, error
-from pyasn1.error import PyAsn1Error
-from sys import version_info
+import sys
+try:
+    import unittest2 as unittest
 
-if version_info[0:2] < (2, 7) or \
-        version_info[0:2] in ((3, 0), (3, 1)):
-    try:
-        import unittest2 as unittest
-    except ImportError:
-        import unittest
-else:
+except ImportError:
     import unittest
+
+from pyasn1.type import constraint, error
 
 
 class SingleValueConstraintTestCase(unittest.TestCase):
@@ -311,8 +307,9 @@ class IndirectDerivationTestCase(unittest.TestCase):
         assert not self.c2.isSuperTypeOf(self.c1), 'isSuperTypeOf failed'
         assert self.c2.isSubTypeOf(self.c1), 'isSubTypeOf failed'
 
+# TODO: how to apply size constriants to constructed types?
+
+suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])
 
 if __name__ == '__main__':
-    unittest.main()
-
-# how to apply size constriants to constructed types?
+    unittest.TextTestRunner(verbosity=2).run(suite)

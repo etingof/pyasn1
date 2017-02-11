@@ -2,6 +2,7 @@
 Revision 0.2.3, released XX-02-2017
 -----------------------------------
 
+- Test suite simplified and unified.
 - Missing support for NoValue.__sizeof__ added.
 
 Revision 0.2.2, released 07-02-2017

@@ -4,20 +4,16 @@
 # Copyright (c) 2005-2017, Ilya Etingof <etingof@gmail.com>
 # License: http://pyasn1.sf.net/license.html
 #
+import sys
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
+
 from pyasn1.type import namedtype, univ
 from pyasn1.codec.der import encoder
 from pyasn1.compat.octets import ints2octs
 from pyasn1.error import PyAsn1Error
-from sys import version_info
-
-if version_info[0:2] < (2, 7) or \
-        version_info[0:2] in ((3, 0), (3, 1)):
-    try:
-        import unittest2 as unittest
-    except ImportError:
-        import unittest
-else:
-    import unittest
 
 
 class OctetStringEncoderTestCase(unittest.TestCase):
@@ -68,5 +64,7 @@ class SetWithChoiceEncoderTestCase(unittest.TestCase):
         assert encoder.encode(self.s) == ints2octs((49, 7, 4, 3, 97, 110, 110, 5, 0))
 
 
+suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])
+
 if __name__ == '__main__':
-    unittest.main()
+    unittest.TextTestRunner(verbosity=2).run(suite)

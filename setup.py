@@ -58,6 +58,7 @@ try:
     params = {
         'zip_safe': True
     }
+
 except ImportError:
     for arg in sys.argv:
         if 'egg' in arg:
@@ -89,30 +90,28 @@ params.update({
                  'pyasn1.codec.native']})
 
 # handle unittest discovery feature
-if sys.version_info[0:2] < (2, 7) or \
-                sys.version_info[0:2] in ((3, 0), (3, 1)):
-    try:
-        import unittest2 as unittest
-    except ImportError:
-        unittest = None
-else:
+try:
+    import unittest2 as unittest
+except ImportError:
     import unittest
 
-if unittest:
-    class PyTest(Command):
-        user_options = []
 
-        def initialize_options(self):
-            pass
+class PyTest(Command):
+    user_options = []
 
-        def finalize_options(self):
-            pass
+    def initialize_options(self):
+        pass
 
-        def run(self):
-            suite = unittest.defaultTestLoader.discover('.')
-            unittest.TextTestRunner(verbosity=2).run(suite)
+    def finalize_options(self):
+        pass
 
+    def run(self):
+        suite = unittest.TestLoader().loadTestsFromNames(
+            ['test.__main__.suite']
+        )
 
-    params['cmdclass'] = {'test': PyTest}
+        unittest.TextTestRunner(verbosity=2).run(suite)
+
+params['cmdclass'] = {'test': PyTest}
 
 setup(**params)
