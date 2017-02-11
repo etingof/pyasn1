@@ -382,7 +382,9 @@ class SequenceDecoder(AbstractConstructedDecoder):
             idx = self._getComponentPositionByType(
                 r, component.getEffectiveTagSet(), idx
             )
-            r.setComponentByPosition(idx, component, asn1Spec is None)
+            r.setComponentByPosition(idx, component,
+                                     verifyConstraints=False,
+                                     matchTags=False, matchConstraints=False)
             idx += 1
         r.setDefaultComponents()
         r.verifySizeSpec()
@@ -403,7 +405,9 @@ class SequenceDecoder(AbstractConstructedDecoder):
             idx = self._getComponentPositionByType(
                 r, component.getEffectiveTagSet(), idx
             )
-            r.setComponentByPosition(idx, component, asn1Spec is None)
+            r.setComponentByPosition(idx, component,
+                                     verifyConstraints=False,
+                                     matchTags=False, matchConstraints=False)
             idx += 1
         else:
             raise error.SubstrateUnderrunError(
@@ -427,7 +431,9 @@ class SequenceOfDecoder(AbstractConstructedDecoder):
         idx = 0
         while head:
             component, head = decodeFun(head, asn1Spec)
-            r.setComponentByPosition(idx, component, asn1Spec is None)
+            r.setComponentByPosition(idx, component,
+                                     verifyConstraints=False,
+                                     matchTags=False, matchConstraints=False)
             idx += 1
         r.verifySizeSpec()
         return r, tail
@@ -444,7 +450,9 @@ class SequenceOfDecoder(AbstractConstructedDecoder):
             if eoo.endOfOctets.isSameTypeWith(component) and \
                     component == eoo.endOfOctets:
                 break
-            r.setComponentByPosition(idx, component, asn1Spec is None)
+            r.setComponentByPosition(idx, component,
+                                     verifyConstraints=False,
+                                     matchTags=False, matchConstraints=False)
             idx += 1
         else:
             raise error.SubstrateUnderrunError(
@@ -494,7 +502,10 @@ class ChoiceDecoder(AbstractConstructedDecoder):
             effectiveTagSet = component.getEffectiveTagSet()
         else:
             effectiveTagSet = component.getTagSet()
-        r.setComponentByType(effectiveTagSet, component, 0, asn1Spec is None)
+        r.setComponentByType(effectiveTagSet, component,
+                             verifyConstraints=False,
+                             matchTags=False, matchConstraints=False,
+                             innerFlag=False)
         return r, tail
 
     def indefLenValueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
@@ -517,7 +528,10 @@ class ChoiceDecoder(AbstractConstructedDecoder):
             effectiveTagSet = component.getEffectiveTagSet()
         else:
             effectiveTagSet = component.getTagSet()
-        r.setComponentByType(effectiveTagSet, component, 0, asn1Spec is None)
+        r.setComponentByType(effectiveTagSet, component,
+                             verifyConstraints=False,
+                             matchTags=False, matchConstraints=False,
+                             innerFlag=False)
         return r, substrate
 
 

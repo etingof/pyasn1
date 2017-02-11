@@ -1989,28 +1989,14 @@ class SetOf(base.AbstractConstructedAsn1Item):
         return iter(self._componentValues)
 
     def _cloneComponentValues(self, myClone, cloneValueFlag):
-        idx = 0
-        l = len(self._componentValues)
-        while idx < l:
-            c = self._componentValues[idx]
-            if c is not None:
-                if isinstance(c, base.AbstractConstructedAsn1Item):
+        for idx, componentValue in enumerate(self._componentValues):
+            if componentValue is not None:
+                if isinstance(componentValue, base.AbstractConstructedAsn1Item):
                     myClone.setComponentByPosition(
-                        idx, c.clone(cloneValueFlag=cloneValueFlag)
+                        idx, componentValue.clone(cloneValueFlag=cloneValueFlag)
                     )
                 else:
-                    myClone.setComponentByPosition(idx, c.clone())
-            idx += 1
-
-    def _verifyComponent(self, idx, value):
-        t = self._componentType
-        if t is None:
-            return
-        if not t.isSameTypeWith(value, matchConstraints=self.strictConstraints):
-            raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, t))
-        if self.strictConstraints and \
-                not t.isSuperTypeOf(value, matchTags=False):
-            raise error.PyAsn1Error('Component value is constraints-incompatible: %r vs %r' % (value, t))
+                    myClone.setComponentByPosition(idx, componentValue.clone())
 
     def getComponentByPosition(self, idx):
         """Returns a component by index.
@@ -2031,7 +2017,10 @@ class SetOf(base.AbstractConstructedAsn1Item):
         """
         return self._componentValues[idx]
 
-    def setComponentByPosition(self, idx, value=noValue, verifyConstraints=True):
+    def setComponentByPosition(self, idx, value=noValue,
+                               verifyConstraints=True,
+                               matchTags=True,
+                               matchConstraints=True):
         """Assign a component by position.
 
            Parameters
@@ -2045,6 +2034,12 @@ class SetOf(base.AbstractConstructedAsn1Item):
            verifyConstraints : :class:`bool`
                 If `False`, skip constraints validation
 
+           matchTags: :class:`bool`
+                If `False`, skip component tags matching
+
+           matchConstraints: :class:`bool`
+                If `False`, skip component constraints matching
+
            Returns
            -------
            self
@@ -2053,30 +2048,45 @@ class SetOf(base.AbstractConstructedAsn1Item):
            ----
            Equivalent to Python sequence item assignment operation (e.g. `[]`).
         """
-        l = len(self._componentValues)
-        if idx >= l:
-            self._componentValues = self._componentValues + (idx - l + 1) * [None]
+        componentType = self._componentType
+
+        componentValuesLength = len(self._componentValues)
+
+        if idx == componentValuesLength:
+            self._componentValues.append(None)
+        elif idx >= componentValuesLength:
+            self._componentValues.extend([None for x in range((idx - componentValuesLength + 1))])
+
         if self.isNoValue(value):
             if self._componentValues[idx] is None:
-                if self._componentType is None:
+                if componentType is None:
                     raise error.PyAsn1Error('Component type not defined')
-                self._componentValues[idx] = self._componentType.clone()
+                self._componentValues[idx] = componentType.clone()
                 self._componentValuesSet += 1
             return self
         elif not isinstance(value, base.Asn1Item):
-            if self._componentType is None:
+            if componentType is None:
                 raise error.PyAsn1Error('Component type not defined')
-            if isinstance(self._componentType, base.AbstractSimpleAsn1Item):
-                value = self._componentType.clone(value=value)
+            if isinstance(componentType, base.AbstractSimpleAsn1Item):
+                value = componentType.clone(value=value)
             else:
-                raise error.PyAsn1Error('Instance value required')
+                raise error.PyAsn1Error('%s instance value required' % componentType.__class__.__name__)
+        elif componentType is not None:
+            if self.strictConstraints:
+                if not componentType.isSameTypeWith(value, matchTags, matchConstraints):
+                    raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
+            else:
+                if not componentType.isSuperTypeOf(value, matchTags, matchConstraints):
+                    raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
+
         if verifyConstraints:
-            if self._componentType is not None:
-                self._verifyComponent(idx, value)
             self._verifySubtypeSpec(value, idx)
+
         if self._componentValues[idx] is None:
             self._componentValuesSet += 1
+
         self._componentValues[idx] = value
+
         return self
 
     def getComponentTagMap(self):
@@ -2125,7 +2135,7 @@ class SequenceOf(SetOf):
           Object representing collection size constraint
     """
     #: Default :py:class:`~pyasn1.type.tag.TagSet` object for ASN.1
-    #: *SeeuqnceOf* objects
+    #: *SequenceOf* objects
     tagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x10)
     )
@@ -2189,30 +2199,14 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         self._componentValuesSet = 0
 
     def _cloneComponentValues(self, myClone, cloneValueFlag):
-        idx = 0
-        l = len(self._componentValues)
-        while idx < l:
-            c = self._componentValues[idx]
-            if c is not None:
-                if isinstance(c, base.AbstractConstructedAsn1Item):
+        for idx, componentValue in enumerate(self._componentValues):
+            if componentValue is not None:
+                if isinstance(componentValue, base.AbstractConstructedAsn1Item):
                     myClone.setComponentByPosition(
-                        idx, c.clone(cloneValueFlag=cloneValueFlag)
+                        idx, componentValue.clone(cloneValueFlag=cloneValueFlag)
                     )
                 else:
-                    myClone.setComponentByPosition(idx, c.clone())
-            idx += 1
-
-    def _verifyComponent(self, idx, value):
-        if idx >= self._componentTypeLen:
-            raise error.PyAsn1Error(
-                'Component type error out of range'
-            )
-        t = self._componentType[idx].getType()
-        if not t.isSameTypeWith(value, matchConstraints=self.strictConstraints):
-            raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, t))
-        if self.strictConstraints and \
-                not t.isSuperTypeOf(value, matchTags=False):
-            raise error.PyAsn1Error('Component value is constraints-incompatible: %r vs %r' % (value, t))
+                    myClone.setComponentByPosition(idx, componentValue.clone())
 
     def getComponentByName(self, name):
         """Returns a component by name.
@@ -2235,7 +2229,10 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             self._componentType.getPositionByName(name)
         )
 
-    def setComponentByName(self, name, value=noValue, verifyConstraints=True):
+    def setComponentByName(self, name, value=noValue,
+                           verifyConstraints=True,
+                           matchTags=True,
+                           matchConstraints=True):
         """Assign a component by name.
 
            Parameters
@@ -2246,8 +2243,14 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
            value : :class:`object` or :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
                A Python or pyasn1 object to assign
 
-           verifyConstraints : :class:`bool`
+           verifyConstraints: :class:`bool`
                 If `False`, skip constraints validation
+
+           matchTags: :class:`bool`
+                If `False`, skip component tags matching
+
+           matchConstraints: :class:`bool`
+                If `False`, skip component constraints matching
 
            Returns
            -------
@@ -2258,7 +2261,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
            Equivalent to Python :class:`dict` item assignment operation (e.g. `[]`).
         """
         return self.setComponentByPosition(
-            self._componentType.getPositionByName(name), value, verifyConstraints
+            self._componentType.getPositionByName(name), value, verifyConstraints, matchTags, matchConstraints
         )
 
     def getComponentByPosition(self, idx):
@@ -2287,7 +2290,6 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
     def setComponentByPosition(self, idx, value=noValue,
                                verifyConstraints=True,
-                               exactTypes=False,
                                matchTags=True,
                                matchConstraints=True):
         """Assign a component by position.
@@ -2303,6 +2305,12 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
            verifyConstraints : :class:`bool`
                 If `False`, skip constraints validation
 
+           matchTags: :class:`bool`
+                If `False`, skip component tags matching
+
+           matchConstraints: :class:`bool`
+                If `False`, skip component constraints matching
+
            Returns
            -------
            self
@@ -2311,27 +2319,48 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
            ----
            Equivalent to Python sequence item assignment operation (e.g. `[]`).
         """
-        l = len(self._componentValues)
-        if idx >= l:
-            self._componentValues = self._componentValues + (idx - l + 1) * [None]
+        if self._componentType:
+            componentType = self._componentType.getTypeByPosition(idx)
+        else:
+            componentType = None
+
+        componentValuesLength = len(self._componentValues)
+
+        if idx == componentValuesLength:
+            self._componentValues.append(None)
+        elif idx > componentValuesLength:
+            self._componentValues.extend([None for x in range(idx - componentValuesLength + 1)])
+
         if self.isNoValue(value):
             if self._componentValues[idx] is None:
-                self._componentValues[idx] = self._componentType.getTypeByPosition(idx).clone()
+                if componentType is None:
+                    raise error.PyAsn1Error('%s instance value required' % componentType.__class__.__name__)
+                self._componentValues[idx] = componentType.clone()
                 self._componentValuesSet += 1
             return self
         elif not isinstance(value, base.Asn1Item):
-            t = self._componentType.getTypeByPosition(idx)
-            if isinstance(t, base.AbstractSimpleAsn1Item):
-                value = t.clone(value=value)
+            if componentType is None:
+                raise error.PyAsn1Error('Component type not defined')
+            if isinstance(componentType, base.AbstractSimpleAsn1Item):
+                value = componentType.clone(value=value)
             else:
-                raise error.PyAsn1Error('Instance value required')
+                raise error.PyAsn1Error('%s instance value required' % componentType.__class__.__name__)
+        elif componentType is not None:
+            if self.strictConstraints:
+                if not componentType.isSameTypeWith(value, matchTags, matchConstraints):
+                    raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
+            else:
+                if not componentType.isSuperTypeOf(value, matchTags, matchConstraints):
+                    raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
+
         if verifyConstraints:
-            if self._componentTypeLen:
-                self._verifyComponent(idx, value)
             self._verifySubtypeSpec(value, idx)
+
         if self._componentValues[idx] is None:
             self._componentValuesSet += 1
+
         self._componentValues[idx] = value
+
         return self
 
     def getNameByPosition(self, idx):
@@ -2496,10 +2525,10 @@ class Set(SequenceAndSetBase):
 
     typeId = 4
 
-    def getComponent(self, innerFlag=0):
+    def getComponent(self, innerFlag=False):
         return self
 
-    def getComponentByType(self, tagSet, innerFlag=0):
+    def getComponentByType(self, tagSet, innerFlag=False):
         """Returns component by ASN.1 tag.
 
            Parameters
@@ -2512,18 +2541,21 @@ class Set(SequenceAndSetBase):
            : :py:class:`~pyasn1.type.base.PyAsn1Item`
                a pyasn1 object
         """
-        c = self.getComponentByPosition(
+        component = self.getComponentByPosition(
             self._componentType.getPositionByType(tagSet)
         )
-        if innerFlag and isinstance(c, Set):
+        if innerFlag and isinstance(component, Set):
             # get inner component by inner tagSet
-            return c.getComponent(1)
+            return component.getComponent(innerFlag=True)
         else:
             # get outer component by inner tagSet
-            return c
+            return component
 
-    def setComponentByType(self, tagSet, value=noValue, innerFlag=0,
-                           verifyConstraints=True):
+    def setComponentByType(self, tagSet, value=noValue,
+                           verifyConstraints=True,
+                           matchTags=True,
+                           matchConstraints=True,
+                           innerFlag=False):
         """Assign component by ASN.1 tag.
 
             Parameters
@@ -2537,25 +2569,33 @@ class Set(SequenceAndSetBase):
             verifyConstraints : :class:`bool`
                  If `False`, skip constraints validation
 
+            matchTags: :class:`bool`
+                 If `False`, skip component tags matching
+
+            matchConstraints: :class:`bool`
+                 If `False`, skip component constraints matching
+
             Returns
             -------
             self
         """
         idx = self._componentType.getPositionByType(tagSet)
-        t = self._componentType.getTypeByPosition(idx)
+
+        componentType = self._componentType.getTypeByPosition(idx)
+
         if innerFlag:  # set inner component by inner tagSet
-            if t.getTagSet():
+            if componentType.getTagSet():
                 return self.setComponentByPosition(
-                    idx, value, verifyConstraints
+                    idx, value, verifyConstraints, matchTags, matchConstraints
                 )
             else:
-                t = self.setComponentByPosition(idx).getComponentByPosition(idx)
-                return t.setComponentByType(
-                    tagSet, value, innerFlag, verifyConstraints
+                componentType = self.setComponentByPosition(idx).getComponentByPosition(idx)
+                return componentType.setComponentByType(
+                    tagSet, value, verifyConstraints, matchTags, matchConstraints, innerFlag=innerFlag
                 )
         else:  # set outer component by inner tagSet
             return self.setComponentByPosition(
-                idx, value, verifyConstraints
+                idx, value, verifyConstraints, matchTags, matchConstraints
             )
 
     def getComponentTagMap(self):
@@ -2660,8 +2700,6 @@ class Choice(Set):
     def verifySizeSpec(self):
         if self._currentIdx is None:
             raise error.PyAsn1Error('Component not chosen')
-        else:
-            self._sizeSpec(' ')
 
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         try:
@@ -2680,7 +2718,10 @@ class Choice(Set):
             else:
                 myClone.setComponentByType(tagSet, c.clone())
 
-    def setComponentByPosition(self, idx, value=noValue, verifyConstraints=True):
+    def setComponentByPosition(self, idx, value=noValue,
+                               verifyConstraints=True,
+                               matchTags=True,
+                               matchConstraints=True):
         """Assign a component by position.
 
              Parameters
@@ -2694,6 +2735,12 @@ class Choice(Set):
              verifyConstraints : :class:`bool`
                   If `False`, skip constraints validation
 
+             matchTags: :class:`bool`
+                  If `False`, skip component tags matching
+
+             matchConstraints: :class:`bool`
+                  If `False`, skip component constraints matching
+
              Returns
              -------
              self
@@ -2702,11 +2749,18 @@ class Choice(Set):
              ----
              Equivalent to Python sequence item assignment operation (e.g. `[]`).
         """
-        l = len(self._componentValues)
-        if idx >= l:
-            self._componentValues = self._componentValues + (idx - l + 1) * [None]
+        componentType = self._componentType.getTypeByPosition(idx)
+
+        componentValuesLength = len(self._componentValues)
+
+        if idx == componentValuesLength:
+            self._componentValues.append(None)
+        elif idx > componentValuesLength:
+            self._componentValues.extend([None for x in range(idx - componentValuesLength + 1)])
+
         if self._currentIdx is not None:
             self._componentValues[self._currentIdx] = None
+
         if self.isNoValue(value):
             if self._componentValues[idx] is None:
                 self._componentValues[idx] = self._componentType.getTypeByPosition(idx).clone()
@@ -2714,16 +2768,21 @@ class Choice(Set):
                 self._currentIdx = idx
             return self
         elif not isinstance(value, base.Asn1Item):
-            value = self._componentType.getTypeByPosition(idx).clone(
-                value=value
-            )
+            value = self._componentType.getTypeByPosition(idx).clone(value=value)
+        elif self.strictConstraints:
+            if not componentType.isSameTypeWith(value, matchTags, matchConstraints):
+                raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
+        else:
+            if not componentType.isSuperTypeOf(value, matchTags, matchConstraints):
+                raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
+
         if verifyConstraints:
-            if self._componentTypeLen:
-                self._verifyComponent(idx, value)
             self._verifySubtypeSpec(value, idx)
+
         self._componentValues[idx] = value
         self._currentIdx = idx
         self._componentValuesSet = 1
+
         return self
 
     def getMinTagSet(self):
@@ -2765,7 +2824,7 @@ class Choice(Set):
             else:
                 return c
 
-    def getName(self, innerFlag=0):
+    def getName(self, innerFlag=False):
         if self._currentIdx is None:
             raise error.PyAsn1Error('Component not chosen')
         else:

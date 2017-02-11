@@ -6,6 +6,11 @@ Revision 0.2.3, released XX-02-2017
   NamedType object for all instances of SEQUENCE/SET object.
 - Test suite simplified and unified.
 - Missing support for NoValue.__sizeof__ added.
+- Added checks to make sure SEQUENCE/SET components being assigned
+  match the prototypes.
+- Setter methods for constructed types consistently accept matchTags
+  and matchConstraints flags to control the strictness of inner
+  components compatibility verification.
 
 Revision 0.2.2, released 07-02-2017
 -----------------------------------

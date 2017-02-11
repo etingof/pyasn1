@@ -740,6 +740,7 @@ class SequenceOf(unittest.TestCase):
 
     def testComponentTagsMatching(self):
         s = self.s1.clone()
+        s.strictConstraints = True  # This requires types equality
         o = univ.OctetString('abc').subtype(explicitTag=tag.Tag(tag.tagClassPrivate, tag.tagFormatSimple, 12))
         try:
             s.setComponentByPosition(0, o)
@@ -752,14 +753,14 @@ class SequenceOf(unittest.TestCase):
         s = self.s1.clone()
         o = univ.OctetString().subtype(
             subtypeSpec=constraint.ConstraintsUnion(constraint.SingleValueConstraint(str2octs('cba'))))
-        s.strictConstraints = True
+        s.strictConstraints = True  # This requires types equality
         try:
             s.setComponentByPosition(0, o.clone('cba'))
         except PyAsn1Error:
             pass
         else:
             assert 0, 'inner supertype constraint allowed'
-        s.strictConstraints = False
+        s.strictConstraints = False  # This requires subtype relationships
         try:
             s.setComponentByPosition(0, o.clone('cba'))
         except PyAsn1Error:
@@ -925,6 +926,7 @@ class Sequence(unittest.TestCase):
 
     def testComponentTagsMatching(self):
         s = self.s1.clone()
+        s.strictConstraints = True  # This requires types equality
         o = univ.OctetString('abc').subtype(explicitTag=tag.Tag(tag.tagClassPrivate, tag.tagFormatSimple, 12))
         try:
             s.setComponentByName('name', o)
@@ -937,14 +939,14 @@ class Sequence(unittest.TestCase):
         s = self.s1.clone()
         o = univ.OctetString().subtype(
             subtypeSpec=constraint.ConstraintsUnion(constraint.SingleValueConstraint(str2octs('cba'))))
-        s.strictConstraints = True
+        s.strictConstraints = True  # This requires types equality
         try:
             s.setComponentByName('name', o.clone('cba'))
         except PyAsn1Error:
             pass
         else:
             assert 0, 'inner supertype constraint allowed'
-        s.strictConstraints = False
+        s.strictConstraints = False  # This requires subtype relationships
         try:
             s.setComponentByName('name', o.clone('cba'))
         except PyAsn1Error:
@@ -1097,14 +1099,14 @@ class Choice(unittest.TestCase):
         assert 'name' in self.s1
         assert 'sex' not in self.s1
 
-        self.s1.setComponentByType(univ.Integer.tagSet, 123, 1)
+        self.s1.setComponentByType(univ.Integer.tagSet, 123, innerFlag=True)
         assert 'name' not in self.s1
         assert 'sex' in self.s1
 
     def testIter(self):
         self.s1.setComponentByType(univ.OctetString.tagSet, 'abc')
         assert list(self.s1) == ['name']
-        self.s1.setComponentByType(univ.Integer.tagSet, 123, 1)
+        self.s1.setComponentByType(univ.Integer.tagSet, 123, innerFlag=True)
         assert list(self.s1) == ['sex']
 
     def testOuterByTypeWithPythonValue(self):
@@ -1122,14 +1124,14 @@ class Choice(unittest.TestCase):
         ) == str2octs('abc')
 
     def testInnerByTypeWithPythonValue(self):
-        self.s1.setComponentByType(univ.Integer.tagSet, 123, 1)
+        self.s1.setComponentByType(univ.Integer.tagSet, 123, innerFlag=True)
         assert self.s1.getComponentByType(
             univ.Integer.tagSet, 1
         ) == 123
 
     def testInnerByTypeWithInstanceValue(self):
         self.s1.setComponentByType(
-            univ.Integer.tagSet, univ.Integer(123), 1
+            univ.Integer.tagSet, univ.Integer(123), innerFlag=True
         )
         assert self.s1.getComponentByType(
             univ.Integer.tagSet, 1
