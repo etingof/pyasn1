@@ -4,19 +4,14 @@
 # Copyright (c) 2005-2017, Ilya Etingof <etingof@gmail.com>
 # License: http://pyasn1.sf.net/license.html
 #
-from pyasn1 import debug
-from pyasn1 import error
-from sys import version_info
-
-if version_info[0:2] < (2, 7) or \
-        version_info[0:2] in ((3, 0), (3, 1)):
-    try:
-        import unittest2 as unittest
-    except ImportError:
-        import unittest
-else:
+import sys
+try:
+    import unittest2 as unittest
+except ImportError:
     import unittest
 
+from pyasn1 import debug
+from pyasn1 import error
 
 class DebugCaseBase(unittest.TestCase):
     def testKnownFlags(self):
@@ -36,6 +31,7 @@ class DebugCaseBase(unittest.TestCase):
             assert 0, 'unknown debug flag tolerated'
 
 
+suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.TextTestRunner(verbosity=2).run(suite)

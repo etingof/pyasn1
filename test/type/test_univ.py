@@ -4,19 +4,15 @@
 # Copyright (c) 2005-2017, Ilya Etingof <etingof@gmail.com>
 # License: http://pyasn1.sf.net/license.html
 #
+import sys
+import math
 from pyasn1.type import univ, tag, constraint, namedtype, namedval, error
 from pyasn1.compat.octets import str2octs, ints2octs
 from pyasn1.error import PyAsn1Error
-from sys import version_info
-import math
 
-if version_info[0:2] < (2, 7) or \
-        version_info[0:2] in ((3, 0), (3, 1)):
-    try:
-        import unittest2 as unittest
-    except ImportError:
-        import unittest
-else:
+try:
+    import unittest2 as unittest
+except ImportError:
     import unittest
 
 
@@ -128,7 +124,6 @@ class NoValueTestCase(unittest.TestCase):
         else:
             assert False, 'bitshift works for NoValue object'
 
-
     def testBooleanEvaluation(self):
         try:
             if univ.noValue:
@@ -139,6 +134,14 @@ class NoValueTestCase(unittest.TestCase):
 
         else:
             assert False, 'boolean evaluation works for NoValue object'
+    
+    def testSizeOf(self):
+        try:
+            if hasattr(sys, 'getsizeof'):
+                sys.getsizeof(univ.noValue)
+
+        except PyAsn1Error:
+            assert False, 'sizeof failed for NoValue object'
 
 
 class IntegerTestCase(unittest.TestCase):
@@ -187,7 +190,7 @@ class IntegerTestCase(unittest.TestCase):
     def testDivInt(self):
         assert univ.Integer(4) / 2 == 2, '__div__() fails'
 
-    if version_info[0] > 2:
+    if sys.version_info[0] > 2:
         def testDivFloat(self):
             assert univ.Integer(3) / 2 == 1.5, '__div__() fails'
 
@@ -203,7 +206,7 @@ class IntegerTestCase(unittest.TestCase):
     def testRdivInt(self):
         assert 6 / univ.Integer(3) == 2, '__rdiv__() fails'
 
-    if version_info[0] > 2:
+    if sys.version_info[0] > 2:
         def testTrueDiv(self):
             assert univ.Integer(3) / univ.Integer(2) == 1.5, '__truediv__() fails'
 
@@ -255,7 +258,7 @@ class IntegerTestCase(unittest.TestCase):
     def testCeil(self):
         assert math.ceil(univ.Integer(1)) == 1, '__ceil__() fails'
 
-    if version_info[0:2] > (2, 5):
+    if sys.version_info[0:2] > (2, 5):
         def testTrunc(self):
             assert math.trunc(univ.Integer(1)) == 1, '__trunc__() fails'
 
@@ -370,7 +373,7 @@ class BitStringTestCase(unittest.TestCase):
         assert 1 in univ.BitString([0, 0, 0, 0, 1])
         assert 0 not in univ.BitString([1, 1])
 
-    if version_info[:2] > (2, 4):
+    if sys.version_info[:2] > (2, 4):
         def testReverse(self):
             assert reversed(univ.BitString([0, 0, 1])) == univ.BitString([1, 0, 0])
 
@@ -425,7 +428,7 @@ class OctetStringTestCase(unittest.TestCase):
     def testTuple(self):
         assert univ.OctetString((1, 2, 3, 4, 5)) == ints2octs((1, 2, 3, 4, 5)), 'tuple init failed'
 
-    if version_info[0] <= 2:
+    if sys.version_info[0] <= 2:
         def testUnicode(self):
             assert univ.OctetString(unicode('q')) == 'q', 'unicode init fails'
     else:
@@ -479,7 +482,7 @@ class OctetStringTestCase(unittest.TestCase):
         assert str2octs('b') in s
         assert str2octs('B') not in s
 
-    if version_info[:2] > (2, 4):
+    if sys.version_info[:2] > (2, 4):
         def testReverse(self):
             assert reversed(univ.OctetString('abcd')) == univ.OctetString('dcba')
 
@@ -621,7 +624,7 @@ class RealTestCase(unittest.TestCase):
     def testCeil(self):
         assert math.ceil(univ.Real(1.2)) == 2.0, '__ceil__() fails'
 
-    if version_info[0:2] > (2, 5):
+    if sys.version_info[0:2] > (2, 5):
         def testTrunc(self):
             assert math.trunc(univ.Real(1.1)) == 1.0, '__trunc__() fails'
 
@@ -669,7 +672,7 @@ class ObjectIdentifier(unittest.TestCase):
 
     def testUnicode(self):
         s = '1.3.6'
-        if version_info[0] < 3:
+        if sys.version_info[0] < 3:
             s = s.decode()
         assert univ.ObjectIdentifier(s) == (1, 3, 6), 'unicode init fails'
 
@@ -1161,5 +1164,8 @@ class Choice(unittest.TestCase):
         s.setComponentByName('sex', univ.noValue)
         assert s['sex'] is not univ.noValue
 
+
+suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])
+
 if __name__ == '__main__':
-    unittest.main()
+    unittest.TextTestRunner(verbosity=2).run(suite)

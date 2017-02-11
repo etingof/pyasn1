@@ -4,20 +4,16 @@
 # Copyright (c) 2005-2017, Ilya Etingof <etingof@gmail.com>
 # License: http://pyasn1.sf.net/license.html
 #
+import sys
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
+
 from pyasn1.type import tag, namedtype, univ, char
 from pyasn1.codec.ber import decoder, eoo
 from pyasn1.compat.octets import ints2octs, str2octs, null
 from pyasn1.error import PyAsn1Error
-from sys import version_info
-
-if version_info[0:2] < (2, 7) or \
-                version_info[0:2] in ((3, 0), (3, 1)):
-    try:
-        import unittest2 as unittest
-    except ImportError:
-        import unittest
-else:
-    import unittest
 
 
 class BadAsn1SpecTestCase(unittest.TestCase):
@@ -468,20 +464,20 @@ class RealDecoderTestCase(unittest.TestCase):
             assert 0, 'accepted too-short real'
 
 
-if version_info[0:2] > (2, 5):
+if sys.version_info[0:2] > (2, 5):
     class UniversalStringDecoderTestCase(unittest.TestCase):
         def testDecoder(self):
-            assert decoder.decode(ints2octs((28, 12, 0, 0, 0, 97, 0, 0, 0, 98, 0, 0, 0, 99))) == (char.UniversalString(version_info[0] == 3 and 'abc' or unicode('abc')), null)
+            assert decoder.decode(ints2octs((28, 12, 0, 0, 0, 97, 0, 0, 0, 98, 0, 0, 0, 99))) == (char.UniversalString(sys.version_info[0] == 3 and 'abc' or unicode('abc')), null)
 
 
 class BMPStringDecoderTestCase(unittest.TestCase):
     def testDecoder(self):
-        assert decoder.decode(ints2octs((30, 6, 0, 97, 0, 98, 0, 99))) == (char.BMPString(version_info[0] == 3 and 'abc' or unicode('abc')), null)
+        assert decoder.decode(ints2octs((30, 6, 0, 97, 0, 98, 0, 99))) == (char.BMPString(sys.version_info[0] == 3 and 'abc' or unicode('abc')), null)
 
 
 class UTF8StringDecoderTestCase(unittest.TestCase):
     def testDecoder(self):
-        assert decoder.decode(ints2octs((12, 3, 97, 98, 99))) == (char.UTF8String(version_info[0] == 3 and 'abc' or unicode('abc')), null)
+        assert decoder.decode(ints2octs((12, 3, 97, 98, 99))) == (char.UTF8String(sys.version_info[0] == 3 and 'abc' or unicode('abc')), null)
 
 
 class SequenceDecoderTestCase(unittest.TestCase):
@@ -815,5 +811,7 @@ class EndOfOctetsTestCase(unittest.TestCase):
             assert 0, 'end-of-contents octets accepted with unexpected data'
 
 
+suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])
+
 if __name__ == '__main__':
-    unittest.main()
+    unittest.TextTestRunner(verbosity=2).run(suite)

@@ -4,19 +4,16 @@
 # Copyright (c) 2005-2017, Ilya Etingof <etingof@gmail.com>
 # License: http://pyasn1.sf.net/license.html
 #
-from pyasn1.type import tag, namedtype, univ, char
-from pyasn1.codec.native import encoder
-from pyasn1.error import PyAsn1Error
-from sys import version_info
-
-if version_info[0:2] < (2, 7) or \
-                version_info[0:2] in ((3, 0), (3, 1)):
-    try:
-        import unittest2 as unittest
-    except ImportError:
-        import unittest
-else:
+import sys
+try:
+    import unittest2 as unittest
+except ImportError:
     import unittest
+
+from pyasn1.type import tag, namedtype, univ
+from pyasn1.codec.native import encoder
+from pyasn1.compat.octets import str2octs
+from pyasn1.error import PyAsn1Error
 
 
 class BadAsn1SpecTestCase(unittest.TestCase):
@@ -58,7 +55,7 @@ class OctetStringEncoderTestCase(unittest.TestCase):
         self.o = univ.OctetString('Quick brown fox')
 
     def testValue(self):
-        assert encoder.encode(self.o) == 'Quick brown fox'
+        assert encoder.encode(self.o) == str2octs('Quick brown fox')
 
 
 class NullEncoderTestCase(unittest.TestCase):
@@ -95,7 +92,7 @@ class SequenceEncoderTestCase(unittest.TestCase):
         s[0] = univ.Null('')
         s[1] = 'abc'
         s[2] = 123
-        assert encoder.encode(s) == {'place-holder': None, 'first-name': 'abc', 'age': 123}
+        assert encoder.encode(s) == {'place-holder': None, 'first-name': str2octs('abc'), 'age': 123}
 
 
 class ChoiceEncoderTestCase(unittest.TestCase):
@@ -124,8 +121,10 @@ class AnyEncoderTestCase(unittest.TestCase):
         self.s = univ.Any(encoder.encode(univ.OctetString('fox')))
 
     def testSimple(self):
-        assert encoder.encode(self.s) == 'fox'
+        assert encoder.encode(self.s) == str2octs('fox')
 
+
+suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.TextTestRunner(verbosity=2).run(suite)

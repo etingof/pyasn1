@@ -4,6 +4,8 @@ Revision 0.2.3, released XX-02-2017
 
 - Decoding performance improvement by maintaining a single shared
   NamedType object for all instances of SEQUENCE/SET object.
+- Test suite simplified and unified.
+- Missing support for NoValue.__sizeof__ added.
 
 Revision 0.2.2, released 07-02-2017
 -----------------------------------
@@ -136,7 +138,6 @@ Revision 0.1.8, released 22-06-2015
   + require strict two-zeros sentinel encoding
   + recognize EOO sentinel only when explicitly requested by caller
     of the decoder via allowEoo=True parameter (warning: API change)
-
 
 Revision 0.1.7
 --------------
