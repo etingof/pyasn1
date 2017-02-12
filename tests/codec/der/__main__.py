@@ -11,8 +11,8 @@ except ImportError:
     import unittest
 
 suite = unittest.TestLoader().loadTestsFromNames(
-    ['test.codec.ber.test_encoder.suite',
-     'test.codec.ber.test_decoder.suite']
+    ['tests.codec.der.test_encoder.suite',
+     'tests.codec.der.test_decoder.suite']
 )
 
 

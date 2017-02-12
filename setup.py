@@ -107,7 +107,7 @@ class PyTest(Command):
 
     def run(self):
         suite = unittest.TestLoader().loadTestsFromNames(
-            ['test.__main__.suite']
+            ['tests.__main__.suite']
         )
 
         unittest.TextTestRunner(verbosity=2).run(suite)

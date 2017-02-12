@@ -1,5 +1,5 @@
 include *.rst *.md
-recursive-include test *.py
+recursive-include tests *.py
 recursive-include doc Makefile *.rst
 prune doc/build
 prune doc/source/.templates

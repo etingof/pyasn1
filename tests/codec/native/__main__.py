@@ -11,12 +11,9 @@ except ImportError:
     import unittest
 
 suite = unittest.TestLoader().loadTestsFromNames(
-    ['test.codec.ber.__main__.suite',
-     'test.codec.cer.__main__.suite',
-     'test.codec.der.__main__.suite',
-     'test.codec.native.__main__.suite']
+    ['tests.codec.native.test_encoder.suite',
+     'tests.codec.native.test_decoder.suite']
 )
-
 
 if __name__ == '__main__':
     unittest.TextTestRunner(verbosity=2).run(suite)
