@@ -69,6 +69,12 @@ class UniversalString(univ.OctetString):
     )
     encoding = "utf-32-be"
 
+    def _verifySubtypeSpec(self, value):
+        univ.OctetString._verifySubtypeSpec(self, self.prettyOut(value))
+
+    def prettyOut(self, value):
+        return value.decode(self._encoding, 'ignore')
+
 
 class BMPString(univ.OctetString):
     tagSet = univ.OctetString.tagSet.tagImplicitly(
@@ -76,9 +82,21 @@ class BMPString(univ.OctetString):
     )
     encoding = "utf-16-be"
 
+    def _verifySubtypeSpec(self, value):
+        univ.OctetString._verifySubtypeSpec(self, self.prettyOut(value))
+
+    def prettyOut(self, value):
+        return value.decode(self._encoding, 'ignore')
+
 
 class UTF8String(univ.OctetString):
     tagSet = univ.OctetString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 12)
     )
     encoding = "utf-8"
+
+    def _verifySubtypeSpec(self, value):
+        univ.OctetString._verifySubtypeSpec(self, self.prettyOut(value))
+
+    def prettyOut(self, value):
+        return value.decode(self._encoding, 'ignore')
