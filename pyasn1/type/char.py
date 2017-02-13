@@ -21,7 +21,7 @@ class AbstractCharacterString(univ.OctetString):
                 )
 
         def __unicode__(self):
-            return self._value
+            return unicode(self._value)
 
         def prettyIn(self, value):
             if isinstance(value, unicode):
@@ -51,7 +51,7 @@ class AbstractCharacterString(univ.OctetString):
 
     else:
         def __str__(self):
-            return self._value
+            return str(self._value)
 
         def __bytes__(self):
             try:
@@ -89,6 +89,9 @@ class AbstractCharacterString(univ.OctetString):
 
     def prettyOut(self, value):
         return value
+
+    def __reversed__(self):
+        return reversed(self._value)
 
 
 class NumericString(AbstractCharacterString):

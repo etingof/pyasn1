@@ -77,13 +77,13 @@ class AbstractStringTestCase:
     def testSeq(self):
         assert self.asn1String[0] == self.pythonString[0], '__getitem__() fails'
 
-    # def testEmpty(self):
-    #     try:
-    #         str(self.asn1Type())
-    #     except PyAsn1Error:
-    #         pass
-    #     else:
-    #         assert 0, 'Value operation on ASN1 type tolerated'
+    def testEmpty(self):
+        try:
+            str(self.asn1Type())
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'Value operation on ASN1 type tolerated'
 
     def testAdd(self):
         assert self.asn1String + self.pythonString.encode(self.encoding) == self.pythonString + self.pythonString, '__add__() fails'
@@ -101,9 +101,9 @@ class AbstractStringTestCase:
         assert self.pythonString in self.asn1String
         assert self.pythonString + self.pythonString not in self.asn1String
 
-#    if sys.version_info[:2] > (2, 4):
-#        def testReverse(self):
-#            assert reversed(self.asn1String) == self.pythonString[1] + self.pythonString[0]
+    if sys.version_info[:2] > (2, 4):
+        def testReverse(self):
+            assert list(reversed(self.asn1String)) == list(reversed(self.pythonString))
 
 
 class VisibleStringTestCase(AbstractStringTestCase, unittest.TestCase):
