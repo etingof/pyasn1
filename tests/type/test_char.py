@@ -61,12 +61,11 @@ class AbstractStringTestCase:
     def testInit(self):
         assert self.asn1Type(self.pythonString) == self.pythonString
         assert self.asn1Type(self.pythonString.encode(self.encoding)) == self.pythonString
-        assert self.asn1Type(self.initializer) == self.pythonString
-#            assert self.asn1Type(map(lambda x: x, [97, 98, 99])) == 'abc'
+        assert self.asn1Type(self.initializer, encoding=self.encoding) == self.pythonString
 
     def testInitFromAsn1(self):
             assert self.asn1Type(self.asn1Type(self.pythonString)) == self.pythonString
-            assert self.asn1Type(univ.OctetString(self.pythonString.encode(self.encoding))) == self.pythonString
+            assert self.asn1Type(univ.OctetString(self.pythonString.encode(self.encoding), encoding=self.encoding)) == self.pythonString
 
     def testAsOctets(self):
         assert self.asn1String.asOctets() == self.pythonString.encode(self.encoding), 'testAsOctets() fails'

@@ -41,7 +41,12 @@ class AbstractCharacterString(univ.OctetString):
                         'Bad %s initializer \'%s\'' % (self.__class__.__name__, value)
                     )
             else:
-                return self.prettyIn(str(value))
+                try:
+                    return unicode(value)
+                except UnicodeDecodeError:
+                    raise error.PyAsn1Error(
+                        'Can\'t turn object \'%s\' into unicode' % (value,)
+                    )
 
         def asOctets(self, padding=True):
             return str(self)
@@ -72,14 +77,14 @@ class AbstractCharacterString(univ.OctetString):
                         'Can\'t decode string \'%s\' with \'%s\' codec' % (value, self._encoding)
                     )
             elif isinstance(value, (tuple, list)):
-                try:
-                    return self.prettyIn(bytes(value))
-                except ValueError:
-                    raise error.PyAsn1Error(
-                        'Bad %s initializer \'%s\'' % (self.__class__.__name__, value)
-                    )
-            else:
                 return self.prettyIn(bytes(value))
+            else:
+                try:
+                    return str(value)
+                except (UnicodeDecodeError, ValueError):
+                    raise error.PyAsn1Error(
+                        'Can\'t turn object \'%s\' into unicode' % (value,)
+                    )
 
         def asOctets(self, padding=True):
             return bytes(self)
