@@ -15,7 +15,8 @@ suite = unittest.TestLoader().loadTestsFromNames(
      'tests.type.test_namedtype.suite',
      'tests.type.test_namedval.suite',
      'tests.type.test_tag.suite',
-     'tests.type.test_univ.suite']
+     'tests.type.test_univ.suite',
+     'tests.type.test_char.suite']
 )
 
 
