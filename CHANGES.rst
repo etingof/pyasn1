@@ -4,6 +4,8 @@ Revision 0.2.3, released XX-02-2017
 
 - Decoding performance improvement by maintaining a single shared
   NamedType object for all instances of SEQUENCE/SET object.
+- ASN.1 character types refactored to keep unicode contents internally
+  (rather than serialized octet stream) and duck-type it directly.
 - Test suite simplified and unified.
 - Missing support for NoValue.__sizeof__ added.
 - Added checks to make sure SEQUENCE/SET components being assigned

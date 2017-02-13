@@ -27,7 +27,12 @@ class AbstractCharacterString(univ.OctetString):
             if isinstance(value, unicode):
                 return value
             elif isinstance(value, str):
-                return value.decode(self._encoding)
+                try:
+                    return value.decode(self._encoding)
+                except (LookupError, UnicodeDecodeError):
+                    raise error.PyAsn1Error(
+                        'Can\'t decode string \'%s\' with \'%s\' codec' % (value, self._encoding)
+                    )
             elif isinstance(value, (tuple, list)):
                 try:
                     return self.prettyIn(''.join([chr(x) for x in value]))
@@ -36,12 +41,7 @@ class AbstractCharacterString(univ.OctetString):
                         'Bad %s initializer \'%s\'' % (self.__class__.__name__, value)
                     )
             else:
-                try:
-                    return unicode(value)
-                except (LookupError, UnicodeDecodeError):
-                    raise error.PyAsn1Error(
-                        'Can\'t decode string \'%s\' with \'%s\' codec' % (value, self._encoding)
-                    )
+                return self.prettyIn(str(value))
 
         def asOctets(self, padding=True):
             return str(self)
@@ -79,12 +79,7 @@ class AbstractCharacterString(univ.OctetString):
                         'Bad %s initializer \'%s\'' % (self.__class__.__name__, value)
                     )
             else:
-                try:
-                    return str(value)
-                except UnicodeDecodeError:
-                    raise error.PyAsn1Error(
-                        'Can\'t decode string \'%s\' with \'%s\' codec' % (value, self._encoding)
-                    )
+                return self.prettyIn(bytes(value))
 
         def asOctets(self, padding=True):
             return bytes(self)
@@ -100,18 +95,21 @@ class NumericString(AbstractCharacterString):
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 18)
     )
+    encoding = 'us-ascii'
 
 
 class PrintableString(AbstractCharacterString):
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 19)
     )
+    encoding = 'us-ascii'
 
 
 class TeletexString(AbstractCharacterString):
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 20)
     )
+    encoding = 'us-ascii'
 
 
 class T61String(TeletexString):
@@ -122,24 +120,28 @@ class VideotexString(AbstractCharacterString):
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 21)
     )
+    encoding = 'iso-8859-1'
 
 
 class IA5String(AbstractCharacterString):
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 22)
     )
+    encoding = 'us-ascii'
 
 
 class GraphicString(AbstractCharacterString):
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 25)
     )
+    encoding = 'iso-8859-1'
 
 
 class VisibleString(AbstractCharacterString):
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 26)
     )
+    encoding = 'us-ascii'
 
 
 class ISO646String(VisibleString):
@@ -150,6 +152,7 @@ class GeneralString(AbstractCharacterString):
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 27)
     )
+    encoding = 'iso-8859-1'
 
 
 class UniversalString(AbstractCharacterString):

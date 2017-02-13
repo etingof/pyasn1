@@ -15,11 +15,15 @@ except ImportError:
     import unittest
 
 
-class UTF8StringTestCase(unittest.TestCase):
+class AbstractStringTestCase:
+
+    initializer = ()
+    encoding = 'us-ascii'
+    asn1Type = None
 
     def setUp(self):
-        self.asn1String = char.UTF8String(ints2octs([209, 132, 208, 176]))
-        self.pythonString = ints2octs([209, 132, 208, 176]).decode('utf-8')
+        self.asn1String = self.asn1Type(ints2octs(self.initializer))
+        self.pythonString = ints2octs(self.initializer).decode(self.encoding)
 
     def testUnicode(self):
         assert self.asn1String == self.pythonString, 'unicode init fails'
@@ -28,65 +32,64 @@ class UTF8StringTestCase(unittest.TestCase):
         assert len(self.asn1String) == len(self.pythonString), 'unicode len() fails'
 
     def testSizeConstraint(self):
-        asn1Spec = char.UTF8String(subtypeSpec=constraint.ValueSizeConstraint(1, 1))
+        asn1Spec = self.asn1Type(subtypeSpec=constraint.ValueSizeConstraint(1, 1))
 
         try:
-            asn1Spec.clone(ints2octs([0xd1, 0x84, 0xd1, 0x84]))
+            asn1Spec.clone(self.pythonString)
         except PyAsn1Error:
             pass
         else:
             assert False, 'Size constraint tolerated'
 
         try:
-            asn1Spec.clone(ints2octs([0xd1, 0x84]))
+            asn1Spec.clone(self.pythonString[0])
         except PyAsn1Error:
             assert False, 'Size constraint failed'
 
-    if sys.version_info[0] <= 2:
-        def testStr(self):
-            assert str(self.asn1String) == self.pythonString.encode('utf-8'), '__str__() fails'
+    def testSerialized(self):
+        if sys.version_info[:2] < (3, 0):
+            assert str(self.asn1String) == self.pythonString.encode(self.encoding), '__str__() fails'
+        else:
+            assert bytes(self.asn1String) == self.pythonString.encode(self.encoding), '__str__() fails'
 
-        def testInit(self):
-            assert char.UTF8String(unicode('abc')) == 'abc'
-            assert char.UTF8String('abc') == 'abc'
-            assert char.UTF8String([97, 98, 99]) == 'abc'
-#            assert char.UTF8String(map(lambda x: x, [97, 98, 99])) == 'abc'
-    else:
-        def testStr(self):
+    def testPrintable(self):
+        if sys.version_info[:2] < (3, 0):
+            assert unicode(self.asn1String) == self.pythonString, '__str__() fails'
+        else:
             assert str(self.asn1String) == self.pythonString, '__str__() fails'
 
-        def testInit(self):
-            assert char.UTF8String(bytes('abc', 'utf-8')) == 'abc'
-            assert char.UTF8String('abc') == 'abc'
-            assert char.UTF8String([97, 98, 99]) == 'abc'
-#            assert char.UTF8String(map(lambda x: x, [97, 98, 99])) == 'abc'
+    def testInit(self):
+        assert self.asn1Type(self.pythonString) == self.pythonString
+        assert self.asn1Type(self.pythonString.encode(self.encoding)) == self.pythonString
+        assert self.asn1Type(self.initializer) == self.pythonString
+#            assert self.asn1Type(map(lambda x: x, [97, 98, 99])) == 'abc'
 
     def testInitFromAsn1(self):
-            assert char.UTF8String(char.UTF8String('abc')) == 'abc'
-            assert char.UTF8String(univ.OctetString('abc')) == 'abc'
+            assert self.asn1Type(self.asn1Type(self.pythonString)) == self.pythonString
+            assert self.asn1Type(univ.OctetString(self.pythonString.encode(self.encoding))) == self.pythonString
 
     def testAsOctets(self):
-        assert self.asn1String.asOctets() == self.pythonString.encode('utf-8'), 'testAsOctets() fails'
+        assert self.asn1String.asOctets() == self.pythonString.encode(self.encoding), 'testAsOctets() fails'
 
     def testAsNumbers(self):
-        assert self.asn1String.asNumbers() == (209, 132, 208, 176), 'testAsNumbers() fails'
+        assert self.asn1String.asNumbers() == self.initializer, 'testAsNumbers() fails'
 
     def testSeq(self):
         assert self.asn1String[0] == self.pythonString[0], '__getitem__() fails'
 
     # def testEmpty(self):
     #     try:
-    #         str(char.UTF8String())
+    #         str(self.asn1Type())
     #     except PyAsn1Error:
     #         pass
     #     else:
     #         assert 0, 'Value operation on ASN1 type tolerated'
 
     def testAdd(self):
-        assert self.asn1String + 'q' == self.pythonString + 'q', '__add__() fails'
+        assert self.asn1String + self.pythonString.encode(self.encoding) == self.pythonString + self.pythonString, '__add__() fails'
 
     def testRadd(self):
-        assert 'q' + self.asn1String == 'q' + self.pythonString, '__radd__() fails'
+        assert self.pythonString.encode(self.encoding) + self.asn1String == self.pythonString + self.pythonString, '__radd__() fails'
 
     def testMul(self):
         assert self.asn1String * 2 == self.pythonString * 2, '__mul__() fails'
@@ -96,11 +99,49 @@ class UTF8StringTestCase(unittest.TestCase):
 
     def testContains(self):
         assert self.pythonString in self.asn1String
-        assert 'q' + self.pythonString not in self.asn1String
+        assert self.pythonString + self.pythonString not in self.asn1String
 
 #    if sys.version_info[:2] > (2, 4):
 #        def testReverse(self):
 #            assert reversed(self.asn1String) == self.pythonString[1] + self.pythonString[0]
+
+
+class VisibleStringTestCase(AbstractStringTestCase, unittest.TestCase):
+
+    initializer = (97, 102)
+    encoding = 'us-ascii'
+    asn1Type = char.VisibleString
+
+
+class GeneralStringTestCase(AbstractStringTestCase, unittest.TestCase):
+
+    initializer = (169, 174)
+    encoding = 'iso-8859-1'
+    asn1Type = char.GeneralString
+
+
+class UTF8StringTestCase(AbstractStringTestCase, unittest.TestCase):
+
+    initializer = (209, 132, 208, 176)
+    encoding = 'utf-8'
+    asn1Type = char.UTF8String
+
+
+class BMPStringTestCase(AbstractStringTestCase, unittest.TestCase):
+
+    initializer = (4, 48, 4, 68)
+    encoding = 'utf-16-be'
+    asn1Type = char.BMPString
+
+
+if sys.version_info[:2] > (2, 7):
+
+    # Somehow comparison of UTF-32 encoded strings does not work in Py2
+
+    class UniversalStringTestCase(AbstractStringTestCase, unittest.TestCase):
+        initializer = (0, 0, 4, 48, 0, 0, 4, 68)
+        encoding = 'utf-32-be'
+        asn1Type = char.UniversalString
 
 
 suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])
