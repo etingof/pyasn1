@@ -647,9 +647,7 @@ class BitString(base.AbstractSimpleAsn1Item):
         return bit in self._value
 
     def __reversed__(self):
-        reversed_value = list(self._value)
-        reversed_value.reverse()
-        return self.clone(reversed_value)
+        return reversed(self._value)
 
     def __add__(self, value):
         return self.clone(self._value + value)
@@ -1018,7 +1016,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
                     return ''.join([chr(x) for x in value])
                 except ValueError:
                     raise error.PyAsn1Error(
-                        'Bad OctetString initializer \'%s\'' % (value,)
+                        'Bad %s initializer \'%s\'' % (self.__class__.__name__, value)
                     )
             else:
                 return str(value)
@@ -1040,7 +1038,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
                     return bytes(value)
                 except ValueError:
                     raise error.PyAsn1Error(
-                        'Bad OctetString initializer \'%s\'' % (value,)
+                        'Bad %s initializer \'%s\'' % (self.__class__.__name__, value)
                     )
             else:
                 try:
@@ -1168,11 +1166,6 @@ class OctetString(base.AbstractSimpleAsn1Item):
     def __contains__(self, value):
         return value in self._value
 
-    def __reversed__(self):
-        reversed_value = list(self.asNumbers())
-        reversed_value.reverse()
-        return self.clone(reversed_value)
-
     def __add__(self, value):
         return self.clone(self._value + self.prettyIn(value))
 
@@ -1190,6 +1183,9 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
     def __float__(self):
         return float(self._value)
+
+    def __reversed__(self):
+        return reversed(self._value)
 
 
 class Null(OctetString):

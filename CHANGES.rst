@@ -13,6 +13,7 @@ Revision 0.2.3, released XX-02-2017
 - Setter methods for constructed types consistently accept matchTags
   and matchConstraints flags to control the strictness of inner
   components compatibility verification.
+- Fix to __reversed__() magic to make it returning an iterator.
 - The "test" directory renamed into "tests" not to collide with
   the "test" module.
 
