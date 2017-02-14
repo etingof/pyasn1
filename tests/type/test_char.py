@@ -22,7 +22,7 @@ class AbstractStringTestCase:
     asn1Type = None
 
     def setUp(self):
-        self.asn1String = self.asn1Type(ints2octs(self.initializer))
+        self.asn1String = self.asn1Type(ints2octs(self.initializer), encoding=self.encoding)
         self.pythonString = ints2octs(self.initializer).decode(self.encoding)
 
     def testUnicode(self):
@@ -47,13 +47,13 @@ class AbstractStringTestCase:
             assert False, 'Size constraint failed'
 
     def testSerialized(self):
-        if sys.version_info[:2] < (3, 0):
+        if sys.version_info[0] < 3:
             assert str(self.asn1String) == self.pythonString.encode(self.encoding), '__str__() fails'
         else:
             assert bytes(self.asn1String) == self.pythonString.encode(self.encoding), '__str__() fails'
 
     def testPrintable(self):
-        if sys.version_info[:2] < (3, 0):
+        if sys.version_info[0] < 3:
             assert unicode(self.asn1String) == self.pythonString, '__str__() fails'
         else:
             assert str(self.asn1String) == self.pythonString, '__str__() fails'
@@ -133,7 +133,7 @@ class BMPStringTestCase(AbstractStringTestCase, unittest.TestCase):
     asn1Type = char.BMPString
 
 
-if sys.version_info[:2] > (2, 7):
+if sys.version_info[0] > 2:
 
     # Somehow comparison of UTF-32 encoded strings does not work in Py2
 

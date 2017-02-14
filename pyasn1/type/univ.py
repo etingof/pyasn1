@@ -1020,6 +1020,27 @@ class OctetString(base.AbstractSimpleAsn1Item):
                     )
             else:
                 return str(value)
+
+        def __str__(self):
+            return str(self._value)
+
+        def __unicode__(self):
+            try:
+                return self._value.decode(self._encoding)
+
+            except UnicodeDecodeError:
+                raise error.PyAsn1Error(
+                    'Can\'t decode string \'%s\' with \'%s\' codec' % (self._value, self._encoding)
+                )
+
+        def asOctets(self, padding=True):
+            return str(self._value)
+
+        def asNumbers(self, padding=True):
+            if self.__asNumbersCache is None:
+                self.__asNumbersCache = tuple([ord(x) for x in self._value])
+            return self.__asNumbersCache
+
     else:
         def prettyIn(self, value):
             if isinstance(value, bytes):
@@ -1031,22 +1052,34 @@ class OctetString(base.AbstractSimpleAsn1Item):
                     raise error.PyAsn1Error(
                         'Can\'t encode string \'%s\' with \'%s\' codec' % (value, self._encoding)
                     )
-            elif isinstance(value, OctetString):
+            elif isinstance(value, OctetString):  # a shortcut, bytes() would work the same way
                 return value.asOctets()
-            elif isinstance(value, (tuple, list, map)):
-                try:
-                    return bytes(value)
-                except ValueError:
-                    raise error.PyAsn1Error(
-                        'Bad %s initializer \'%s\'' % (self.__class__.__name__, value)
-                    )
+            elif isinstance(value, base.AbstractSimpleAsn1Item):  # this mostly targets Integer objects
+                return self.prettyIn(str(value))
+            elif isinstance(value, (tuple, list)):
+                return self.prettyIn(bytes(value))
             else:
-                try:
-                    return str(value).encode(self._encoding)
-                except UnicodeEncodeError:
-                    raise error.PyAsn1Error(
-                        'Can\'t encode string \'%s\' with \'%s\' codec' % (value, self._encoding)
-                    )
+                return bytes(value)
+
+        def __str__(self):
+            try:
+                return self._value.decode(self._encoding)
+
+            except UnicodeDecodeError:
+                raise error.PyAsn1Error(
+                    'Can\'t decode string \'%s\' with \'%s\' codec at \'%s\'' % (self._value, self._encoding, self.__class__.__name__)
+                )
+
+        def __bytes__(self):
+            return bytes(self._value)
+
+        def asOctets(self, padding=True):
+            return bytes(self._value)
+
+        def asNumbers(self, padding=True):
+            if self.__asNumbersCache is None:
+                self.__asNumbersCache = tuple(self._value)
+            return self.__asNumbersCache
 
     def prettyOut(self, value):
         if sys.version_info[0] <= 2:
@@ -1117,35 +1150,6 @@ class OctetString(base.AbstractSimpleAsn1Item):
         if doHex:
             r.append('hexValue=%r' % ''.join(['%.2x' % x for x in self.asNumbers()]))
         return '%s(%s)' % (self.__class__.__name__, ', '.join(r))
-
-    if sys.version_info[0] <= 2:
-        def __str__(self):
-            return str(self._value)
-
-        def __unicode__(self):
-            return self._value.decode(self._encoding, 'ignore')
-
-        def asOctets(self, padding=True):
-            return self._value
-
-        def asNumbers(self, padding=True):
-            if self.__asNumbersCache is None:
-                self.__asNumbersCache = tuple([ord(x) for x in self._value])
-            return self.__asNumbersCache
-    else:
-        def __str__(self):
-            return self._value.decode(self._encoding, 'ignore')
-
-        def __bytes__(self):
-            return self._value
-
-        def asOctets(self, padding=True):
-            return self._value
-
-        def asNumbers(self, padding=True):
-            if self.__asNumbersCache is None:
-                self.__asNumbersCache = tuple(self._value)
-            return self.__asNumbersCache
 
     # Immutable sequence object protocol
 
