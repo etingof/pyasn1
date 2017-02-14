@@ -7,7 +7,7 @@
 import sys
 import math
 from pyasn1.type import univ, tag, constraint, namedtype, namedval, error
-from pyasn1.compat.octets import str2octs, ints2octs
+from pyasn1.compat.octets import str2octs, ints2octs, octs2ints
 from pyasn1.error import PyAsn1Error
 
 try:
@@ -375,7 +375,7 @@ class BitStringTestCase(unittest.TestCase):
 
     if sys.version_info[:2] > (2, 4):
         def testReverse(self):
-            assert reversed(univ.BitString([0, 0, 1])) == univ.BitString([1, 0, 0])
+            assert list(reversed(univ.BitString([0, 0, 1]))) == list(univ.BitString([1, 0, 0]))
 
     def testAsOctets(self):
         assert self.b.clone(hexValue='A98A').asOctets() == ints2octs((0xa9, 0x8a)), 'testAsOctets() fails'
@@ -398,6 +398,95 @@ class BitStringTestCase(unittest.TestCase):
         assert self.b.clone('11000000011001').asInteger(padding=True) == 12313
         assert self.b.clone('1100110011011111').asInteger(padding=False) == 52447
 
+
+class OctetStringWithUnicodeMixIn(object):
+
+    initializer = ()
+    encoding = 'us-ascii'
+
+    def setUp(self):
+        self.pythonString = ints2octs(self.initializer).decode(self.encoding)
+        self.encodedPythonString = self.pythonString.encode(self.encoding)
+        self.numbersString = tuple(octs2ints(self.encodedPythonString))
+
+    def testInit(self):
+        assert univ.OctetString(self.encodedPythonString) == self.encodedPythonString, '__init__() fails'
+
+    def testInitFromAsn1(self):
+            assert univ.OctetString(univ.OctetString(self.encodedPythonString)) == self.encodedPythonString
+            assert univ.OctetString(univ.Integer(123)) == univ.OctetString('123')
+
+    def testSerialized(self):
+        if sys.version_info[0] < 3:
+            assert str(univ.OctetString(self.encodedPythonString, encoding=self.encoding)) == self.encodedPythonString, '__str__() fails'
+        else:
+            assert bytes(univ.OctetString(self.encodedPythonString, encoding=self.encoding)) == self.encodedPythonString, '__str__() fails'
+
+    def testPrintable(self):
+        if sys.version_info[0] < 3:
+            assert str(univ.OctetString(self.encodedPythonString, encoding=self.encoding)) == self.encodedPythonString, '__str__() fails'
+            assert unicode(univ.OctetString(self.pythonString, encoding=self.encoding)) == self.pythonString, 'unicode init fails'
+        else:
+            assert str(univ.OctetString(self.pythonString, encoding=self.encoding)) == self.pythonString, 'unicode init fails'
+
+    def testSeq(self):
+        assert univ.OctetString(self.encodedPythonString)[0] == self.encodedPythonString[0], '__getitem__() fails'
+
+    def testRepr(self):
+        assert eval(repr(univ.OctetString('abc')), {'OctetString': univ.OctetString}) == univ.OctetString('abc'), 'repr() fails'
+
+    def testAsOctets(self):
+        assert univ.OctetString(self.encodedPythonString).asOctets() == self.encodedPythonString, 'testAsOctets() fails'
+
+    def testAsInts(self):
+        assert univ.OctetString(self.encodedPythonString).asNumbers() == self.numbersString, 'testAsNumbers() fails'
+
+    def testAdd(self):
+        assert univ.OctetString(self.encodedPythonString) + self.encodedPythonString == self.encodedPythonString + self.encodedPythonString, '__add__() fails'
+
+    def testRadd(self):
+        assert self.encodedPythonString + univ.OctetString(self.encodedPythonString) == self.encodedPythonString + self.encodedPythonString, '__radd__() fails'
+
+    def testMul(self):
+        assert univ.OctetString(self.encodedPythonString) * 2 == self.encodedPythonString * 2, '__mul__() fails'
+
+    def testRmul(self):
+        assert 2 * univ.OctetString(self.encodedPythonString) == 2 * self.encodedPythonString, '__rmul__() fails'
+
+    def testContains(self):
+        s = univ.OctetString(self.encodedPythonString)
+        assert self.encodedPythonString in s
+        assert self.encodedPythonString * 2 not in s
+
+    if sys.version_info[:2] > (2, 4):
+       def testReverse(self):
+           assert list(reversed(univ.OctetString(self.encodedPythonString))) == list(reversed(self.encodedPythonString))
+
+
+class OctetStringWithAsciiTestCase(OctetStringWithUnicodeMixIn, unittest.TestCase):
+    initializer = (97, 102)
+    encoding = 'us-ascii'
+
+
+class OctetStringWithUtf8TestCase(OctetStringWithUnicodeMixIn, unittest.TestCase):
+    initializer = (208, 176, 208, 177, 208, 178)
+    encoding = 'utf-8'
+
+
+class OctetStringWithUtf16TestCase(OctetStringWithUnicodeMixIn, unittest.TestCase):
+    initializer = (4, 48, 4, 49, 4, 50)
+    encoding = 'utf-16-be'
+
+
+if sys.version_info[0] > 2:
+
+    # Somehow comparison of UTF-32 encoded strings does not work in Py2
+
+    class OctetStringWithUtf32TestCase(OctetStringWithUnicodeMixIn, unittest.TestCase):
+        initializer = (0, 0, 4, 48, 0, 0, 4, 49, 0, 0, 4, 50)
+        encoding = 'utf-32-be'
+
+
 class OctetStringTestCase(unittest.TestCase):
 
     def testBinDefault(self):
@@ -414,42 +503,17 @@ class OctetStringTestCase(unittest.TestCase):
 
         assert HexDefault() == univ.OctetString(hexValue='FA9823C43E43510DE3422')
 
-    def testInit(self):
-        assert univ.OctetString(str2octs('abcd')) == str2octs('abcd'), '__init__() fails'
-
     def testBinStr(self):
-        assert univ.OctetString(binValue="1000010111101110101111000000111011") == ints2octs(
-            (133, 238, 188, 14, 192)), 'bin init fails'
+        assert univ.OctetString(binValue="1000010111101110101111000000111011") == ints2octs((133, 238, 188, 14, 192)), 'bin init fails'
 
     def testHexStr(self):
-        assert univ.OctetString(hexValue="FA9823C43E43510DE3422") == ints2octs(
-            (250, 152, 35, 196, 62, 67, 81, 13, 227, 66, 32)), 'hex init fails'
+        assert univ.OctetString(hexValue="FA9823C43E43510DE3422") == ints2octs((250, 152, 35, 196, 62, 67, 81, 13, 227, 66, 32)), 'hex init fails'
 
     def testTuple(self):
         assert univ.OctetString((1, 2, 3, 4, 5)) == ints2octs((1, 2, 3, 4, 5)), 'tuple init failed'
 
-    if sys.version_info[0] <= 2:
-        def testUnicode(self):
-            assert univ.OctetString(unicode('q')) == 'q', 'unicode init fails'
-    else:
-        def testUnicode(self):
-            assert univ.OctetString('q') == str2octs('q'), 'unicode init fails'
-
-    def testStr(self):
-        assert str(univ.OctetString('q')) == 'q', '__str__() fails'
-
-    def testSeq(self):
-        assert univ.OctetString('q')[0] == str2octs('q')[0], '__getitem__() fails'
-
     def testRepr(self):
-        assert eval(repr(univ.OctetString('abc')), {'OctetString': univ.OctetString}) == univ.OctetString(
-            'abc'), 'repr() fails'
-
-    def testAsOctets(self):
-        assert univ.OctetString('abcd').asOctets() == str2octs('abcd'), 'testAsOctets() fails'
-
-    def testAsInts(self):
-        assert univ.OctetString('abcd').asNumbers() == (97, 98, 99, 100), 'testAsNumbers() fails'
+        assert eval(repr(univ.OctetString('abc')), {'OctetString': univ.OctetString}) == univ.OctetString('abc'), 'repr() fails'
 
     def testEmpty(self):
         try:
@@ -459,32 +523,11 @@ class OctetStringTestCase(unittest.TestCase):
         else:
             assert 0, 'empty OctetString() not reported'
 
-    def testAdd(self):
-        assert univ.OctetString('') + 'q' == str2octs('q'), '__add__() fails'
-
-    def testRadd(self):
-        assert 'b' + univ.OctetString('q') == str2octs('bq'), '__radd__() fails'
-
-    def testMul(self):
-        assert univ.OctetString('a') * 2 == str2octs('aa'), '__mul__() fails'
-
-    def testRmul(self):
-        assert 2 * univ.OctetString('b') == str2octs('bb'), '__rmul__() fails'
-
     def testTag(self):
         assert univ.OctetString().getTagSet() == tag.TagSet(
             (),
             tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x04)
         )
-
-    def testContains(self):
-        s = univ.OctetString('abcd')
-        assert str2octs('b') in s
-        assert str2octs('B') not in s
-
-    if sys.version_info[:2] > (2, 4):
-        def testReverse(self):
-            assert reversed(univ.OctetString('abcd')) == univ.OctetString('dcba')
 
 
 class Null(unittest.TestCase):

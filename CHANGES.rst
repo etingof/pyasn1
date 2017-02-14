@@ -4,13 +4,19 @@ Revision 0.2.3, released XX-02-2017
 
 - Decoding performance improvement by maintaining a single shared
   NamedType object for all instances of SEQUENCE/SET object.
-- Test suite simplified and unified.
+- ASN.1 character types refactored to keep unicode contents internally
+  (rather than serialized octet stream) and duck-type it directly.
+- ASN.1 OctetString initialized from a Python object performs bytes()
+  on it when running on Python 3 (used to do str() which is probably
+  less logical).
 - Missing support for NoValue.__sizeof__ added.
 - Added checks to make sure SEQUENCE/SET components being assigned
   match the prototypes.
 - Setter methods for constructed types consistently accept matchTags
   and matchConstraints flags to control the strictness of inner
   components compatibility verification.
+- Fix to __reversed__() magic to make it returning an iterator.
+- Test suite simplified and unified.
 - The "test" directory renamed into "tests" not to collide with
   the "test" module.
 
