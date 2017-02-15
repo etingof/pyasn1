@@ -106,6 +106,9 @@ class NumericString(AbstractCharacterString):
     be entered from a telephone handset. NumericString objects
     behave like Python 2 :class:`unicode` or Python 3 :class:`str`.
 
+    From Unicode prospective, this type work with *us-ascii* code
+    points.
+
     Parameters
     ----------
     value: :class:`unicode`, :class:`str`, :class:`bytes` or :py:class:`~pyasn1.type.char.NumericString` object
@@ -145,6 +148,9 @@ class PrintableString(AbstractCharacterString):
     digits and punctuation marks. PrintableString objects
     behave like Python 2 :class:`unicode` or Python 3 :class:`str`.
 
+    From Unicode prospective, this type work with *us-ascii* code
+    points.
+
     Parameters
     ----------
     value: :class:`unicode`, :class:`str`, :class:`bytes` or :py:class:`~pyasn1.type.char.PrintableString` object
@@ -182,9 +188,13 @@ class TeletexString(AbstractCharacterString):
     The TeletexString models character string that can
     be entered from a sophisticated text processing machines
     (by 20-th century standards) featuring letters from multiple
-    alphabets (308 characters!), digits and punctuation marks.
+    alphabets (308 characters!), digits, punctuation marks and
+    escape sequences.
     TeletexString objects behave like Python 2 :class:`unicode`
     or Python 3 :class:`str`.
+
+    From Unicode prospective, this type work with *iso-8859-1* code
+    points.
 
     Parameters
     ----------
@@ -214,7 +224,7 @@ class TeletexString(AbstractCharacterString):
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 20)
     )
-    encoding = 'us-ascii'
+    encoding = 'iso-8859-1'
 
 
 class T61String(TeletexString):
@@ -232,6 +242,9 @@ class VideotexString(AbstractCharacterString):
     standards) to render ascii-art style pictures and animations.
     VideotexString objects behave like Python 2 :class:`unicode`
     or Python 3 :class:`str`.
+
+    From Unicode prospective, this type work with *iso-8859-1* code
+    points.
 
     Parameters
     ----------
@@ -271,6 +284,9 @@ class IA5String(AbstractCharacterString):
     in 1963 as an ISO/ITU standard, then it turned into ASCII.
     IA5String objects behave like Python 2 :class:`unicode`
     or Python 3 :class:`str`.
+
+    From Unicode prospective, this type work with *us-ascii* code
+    points.
 
     Parameters
     ----------
@@ -312,6 +328,9 @@ class GraphicString(AbstractCharacterString):
     GraphicString objects behave like Python 2 :class:`unicode`
     or Python 3 :class:`str`.
 
+    From Unicode prospective, this type work with *iso-8859-1* code
+    points.
+
     Parameters
     ----------
     value: :class:`unicode`, :class:`str`, :class:`bytes` or :py:class:`~pyasn1.type.char.GraphicString` object
@@ -350,6 +369,9 @@ class VisibleString(AbstractCharacterString):
     printable symbols, no spaces and newlines.
     VisibleString objects behave like Python 2 :class:`unicode`
     or Python 3 :class:`str`.
+
+    From Unicode prospective, this type work with *us-ascii* code
+    points.
 
     Parameters
     ----------
@@ -398,6 +420,9 @@ class GeneralString(AbstractCharacterString):
     GeneralString objects behave like Python 2 :class:`unicode`
     or Python 3 :class:`str`.
 
+    From Unicode prospective, this type work with *iso-8859-1* code
+    points.
+
     Parameters
     ----------
     value: :class:`unicode`, :class:`str`, :class:`bytes` or :py:class:`~pyasn1.type.char.GeneralString` object
@@ -432,8 +457,8 @@ class GeneralString(AbstractCharacterString):
 class UniversalString(AbstractCharacterString):
     """Creates ASN.1 UniversalString type or object.
 
-    The UniversalString models a Unicode character string implicitly
-    serialized into UTF-32 big endian.
+    The UniversalString models a Unicode (ISO10646-1) character string
+    implicitly serialized into UTF-32 big endian.
     UniversalString objects behave like Python 2 :class:`unicode`
     or Python 3 :class:`str`.
 
@@ -471,8 +496,8 @@ class UniversalString(AbstractCharacterString):
 class BMPString(AbstractCharacterString):
     """Creates ASN.1 BMPString type or object.
 
-    The BMPString models a Unicode character string implicitly
-    serialized into UTF-16 big endian.
+    The BMPString models a Unicode (ISO10646-1) character string
+    implicitly serialized into UTF-16 big endian.
     BMPString objects behave like Python 2 :class:`unicode`
     or Python 3 :class:`str`.
 
@@ -510,8 +535,8 @@ class BMPString(AbstractCharacterString):
 class UTF8String(AbstractCharacterString):
     """Creates ASN.1 UniversalString type or object.
 
-    The UTF8String models a Unicode character string implicitly
-    serialized into UTF-8.
+    The UTF8String models a Unicode (ISO10646-1) character string
+    implicitly serialized into UTF-8.
     UTF8String objects behave like Python 2 :class:`unicode`
     or Python 3 :class:`str`.
 

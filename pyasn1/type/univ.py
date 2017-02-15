@@ -840,7 +840,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
     encoding: :py:class:`str`
         Unicode codec ID to encode/decode :class:`unicode` (Python 2) or
         :class:`str` (Python 3) the payload when *OctetString* object is used
-        in string context.
+        in text string context.
 
     binValue: :py:class:`str`
         Binary string initializer to use instead of the *value*.
