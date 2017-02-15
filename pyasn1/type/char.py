@@ -100,6 +100,37 @@ class AbstractCharacterString(univ.OctetString):
 
 
 class NumericString(AbstractCharacterString):
+    """Creates ASN.1 NumericString type or object.
+
+    The NumericString models character string that can
+    be entered from a telephone handset. NumericString objects
+    behave like Python 2 :class:`unicode` or Python 3 :class:`str`.
+
+    Parameters
+    ----------
+    value: :class:`unicode`, :class:`str`, :class:`bytes` or :py:class:`~pyasn1.type.char.NumericString` object
+        unicode object (Python 2) or string (Python 3), alternatively string
+        (Python 2) or bytes (Python 3) representing octet-stream of serializied
+        unicode string (note `encoding` parameter) or *NumericString* class instance.
+
+    tagSet: :py:class:`~pyasn1.type.tag.TagSet`
+        Object representing non-default ASN.1 tag(s)
+
+    subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
+        Object representing non-default ASN.1 subtype constraint(s)
+
+    encoding: :py:class:`str`
+        Unicode codec ID to encode/decode :class:`unicode` (Python 2) or
+        :class:`str` (Python 3) the payload when *NumericString* object is used
+        in octet-stream context.
+
+    Raises
+    ------
+    : :py:class:`pyasn1.error.PyAsn1Error`
+        On constraint violation or bad initializer.
+    """
+    #: Default :py:class:`~pyasn1.type.tag.TagSet` object for ASN.1
+    #: *NumericString* objects
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 18)
     )
