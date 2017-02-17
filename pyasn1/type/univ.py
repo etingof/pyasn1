@@ -898,7 +898,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
         Parameters
         ----------
-        value : :class:`str`, :class:`bytes` or :py:class:`~pyasn1.type.univ.OctetString` object
+        value: :class:`str`, :class:`bytes` or :py:class:`~pyasn1.type.univ.OctetString` object
             Initialization value to pass to new ASN.1 object instead of 
             inheriting one from the caller.
 
@@ -949,7 +949,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
         Parameters
         ----------
-        value : :class:`str`, :class:`bytes` or :py:class:`~pyasn1.type.univ.OctetString` object
+        value: :class:`str`, :class:`bytes` or :py:class:`~pyasn1.type.univ.OctetString` object
             Initialization value to pass to new ASN.1 object instead of 
             inheriting one from the caller.
 
