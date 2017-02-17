@@ -1,7 +1,18 @@
 
-VideotexString type
--------------------
+.. |ASN.1| replace:: VideotexString
 
-.. autoclass:: pyasn1.type.char.VideotexString(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection())
-   :members:
-   :inherited-members:
+.. |encoding| replace:: iso-8859-1
+
+|ASN.1| type
+------------
+
+.. autoclass:: pyasn1.type.char.VideotexString(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
+   :members: hasValue, isSameTypeWith, isSuperTypeOf, tagSet
+
+   .. note::
+
+       The |ASN.1| type models character string that can be consumed by sophisticated video
+       terminals (by 20-th century standards) to render ascii-art style pictures and animations.
+
+   .. automethod:: pyasn1.type.char.VideotexString.clone(self, value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
+   .. automethod:: pyasn1.type.char.VideotexString.subtype(self, value=NoValue(), implicitTag=TagSet(), explicitTag=TagSet(),subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')

@@ -1,7 +1,17 @@
 
-ISO646String type
------------------
+.. |ASN.1| replace:: ISO646String
 
-.. autoclass:: pyasn1.type.char.ISO646String(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection())
-   :members:
-   :inherited-members:
+.. |encoding| replace:: us-ascii
+
+|ASN.1| type
+------------
+
+.. autoclass:: pyasn1.type.char.ISO646String(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
+   :members: hasValue, isSameTypeWith, isSuperTypeOf, tagSet
+
+   .. note::
+
+       The |ASN.1| type is an alias to the :py:class:`VisibleString` type
+       
+   .. automethod:: pyasn1.type.char.ISO646String.clone(self, value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
+   .. automethod:: pyasn1.type.char.ISO646String.subtype(self, value=NoValue(), implicitTag=TagSet(), explicitTag=TagSet(),subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')

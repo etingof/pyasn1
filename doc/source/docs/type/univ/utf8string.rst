@@ -1,7 +1,17 @@
 
-UTF8String type
----------------
+.. |ASN.1| replace:: UTF8String
 
-.. autoclass:: pyasn1.type.char.UTF8String(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection())
-   :members:
-   :inherited-members:
+.. |encoding| replace:: utf-8
+
+|ASN.1| type
+------------
+
+.. autoclass:: pyasn1.type.char.UTF8String(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
+   :members: hasValue, isSameTypeWith, isSuperTypeOf, tagSet
+
+   .. note::
+
+       The |ASN.1| type models a Unicode (ISO10646-1) character string implicitly serialized into UTF-8.
+       
+   .. automethod:: pyasn1.type.char.UTF8String.clone(self, value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
+   .. automethod:: pyasn1.type.char.UTF8String.subtype(self, value=NoValue(), implicitTag=TagSet(), explicitTag=TagSet(),subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')

@@ -14,7 +14,8 @@ Revision 0.2.3, released XX-02-2017
   match the prototypes.
 - Setter methods for constructed types consistently accept matchTags
   and matchConstraints flags to control the strictness of inner
-  components compatibility verification.
+  components compatibility verification. Previously, these checks
+  were tied to verifyConstraints flag, now they are all independent.
 - Fix to __reversed__() magic to make it returning an iterator.
 - Test suite simplified and unified.
 - The "test" directory renamed into "tests" not to collide with

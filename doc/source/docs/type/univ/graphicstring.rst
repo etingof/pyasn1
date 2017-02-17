@@ -1,7 +1,18 @@
 
-GraphicString type
-------------------
+.. |ASN.1| replace:: GraphicString
 
-.. autoclass:: pyasn1.type.char.GraphicString(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection())
-   :members:
-   :inherited-members:
+.. |encoding| replace:: iso-8859-1
+
+|ASN.1| type
+------------
+
+.. autoclass:: pyasn1.type.char.GraphicString(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
+   :members: hasValue, isSameTypeWith, isSuperTypeOf, tagSet
+
+   .. note::
+
+       The |ASN.1| type models a character string that can hold any "graphical" characters
+       mixed with control ones to select particular alphabet.
+
+   .. automethod:: pyasn1.type.char.GraphicString.clone(self, value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
+   .. automethod:: pyasn1.type.char.GraphicString.subtype(self, value=NoValue(), implicitTag=TagSet(), explicitTag=TagSet(),subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')

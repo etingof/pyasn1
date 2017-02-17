@@ -1,7 +1,17 @@
 
-T61String type
---------------
+.. |ASN.1| replace:: T61String
 
-.. autoclass:: pyasn1.type.char.T61String(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection())
-   :members:
-   :inherited-members:
+.. |encoding| replace:: iso-8859-1
+
+|ASN.1| type
+------------
+
+.. autoclass:: pyasn1.type.char.T61String(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
+   :members: hasValue, isSameTypeWith, isSuperTypeOf, tagSet
+
+   .. note::
+
+       The |ASN.1| type is an alias to :py:class:`TeletexString` type.
+
+   .. automethod:: pyasn1.type.char.T61String.clone(self, value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
+   .. automethod:: pyasn1.type.char.T61String.subtype(self, value=NoValue(), implicitTag=TagSet(), explicitTag=TagSet(),subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')

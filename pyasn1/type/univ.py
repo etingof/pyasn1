@@ -820,12 +820,16 @@ class OctetString(base.AbstractSimpleAsn1Item):
     """Creates ASN.1 OCTET STRING type or object.
 
     The OCTET STRING type denotes an arbitrary string of octets (eight-bit
-    numbers). An OCTET STRING value can have any length.
+    numbers). The OctetString objects behave like :class:`str`
+    (Python 2) or :class:`bytes` (Python 3).
 
     Parameters
     ----------
     value : :class:`str`, :class:`bytes` or :py:class:`~pyasn1.type.univ.OctetString` object
-        Python string literal or bytes or *OctetString* class instance.
+        string (Python 2) or bytes (Python 3), alternatively unicode object
+        (Python 2) or string (Python 3) representing character string to be
+        serialized into octets (note `encoding` parameter) or *OctetString*
+        class instance.
 
     tagSet: :py:class:`~pyasn1.type.tag.TagSet`
         Object representing non-default ASN.1 tag(s)
@@ -836,7 +840,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
     encoding: :py:class:`str`
         Unicode codec ID to encode/decode :class:`unicode` (Python 2) or
         :class:`str` (Python 3) the payload when *OctetString* object is used
-        in string context.
+        in text string context.
 
     binValue: :py:class:`str`
         Binary string initializer to use instead of the *value*.
@@ -894,7 +898,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
         Parameters
         ----------
-        value : :class:`str`, :class:`bytes` or :py:class:`~pyasn1.type.univ.OctetString` object
+        value: :class:`str`, :class:`bytes` or :py:class:`~pyasn1.type.univ.OctetString` object
             Initialization value to pass to new ASN.1 object instead of 
             inheriting one from the caller.
 
@@ -945,7 +949,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
         Parameters
         ----------
-        value : :class:`str`, :class:`bytes` or :py:class:`~pyasn1.type.univ.OctetString` object
+        value: :class:`str`, :class:`bytes` or :py:class:`~pyasn1.type.univ.OctetString` object
             Initialization value to pass to new ASN.1 object instead of 
             inheriting one from the caller.
 

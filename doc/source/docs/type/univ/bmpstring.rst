@@ -1,7 +1,17 @@
 
-BMPString type
---------------
+.. |ASN.1| replace:: BMPString
 
-.. autoclass:: pyasn1.type.char.BMPString(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection())
-   :members:
-   :inherited-members:
+.. |encoding| replace:: utf-16-be
+
+|ASN.1| type
+------------
+
+.. autoclass:: pyasn1.type.char.BMPString(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
+   :members: hasValue, isSameTypeWith, isSuperTypeOf, tagSet
+
+   .. note::
+
+       The |ASN.1| type models a Unicode (ISO10646-1) character string implicitly serialized into UTF-16 big endian.
+       
+   .. automethod:: pyasn1.type.char.BMPString.clone(self, value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
+   .. automethod:: pyasn1.type.char.BMPString.subtype(self, value=NoValue(), implicitTag=TagSet(), explicitTag=TagSet(),subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
