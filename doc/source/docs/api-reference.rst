@@ -12,6 +12,7 @@ ASN.1 types
    :maxdepth: 2
 
    /docs/type/univ/contents
+   /docs/type/char/contents
 
 Transformation codecs
 ---------------------
