@@ -13,6 +13,7 @@ ASN.1 types
 
    /docs/type/univ/contents
    /docs/type/char/contents
+   /docs/type/useful/contents
 
 Transformation codecs
 ---------------------
