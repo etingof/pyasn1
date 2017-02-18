@@ -15,4 +15,4 @@
        terminals (by 20-th century standards) to render ascii-art style pictures and animations.
 
    .. automethod:: pyasn1.type.char.VideotexString.clone(self, value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
-   .. automethod:: pyasn1.type.char.VideotexString.subtype(self, value=NoValue(), implicitTag=TagSet(), explicitTag=TagSet(),subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
+   .. automethod:: pyasn1.type.char.VideotexString.subtype(self, value=NoValue(), implicitTag=Tag(), explicitTag=Tag(),subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')

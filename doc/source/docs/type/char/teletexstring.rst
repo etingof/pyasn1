@@ -16,4 +16,4 @@
        punctuation marks and escape sequences.
 
    .. automethod:: pyasn1.type.char.TeletexString.clone(self, value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
-   .. automethod:: pyasn1.type.char.TeletexString.subtype(self, value=NoValue(), implicitTag=TagSet(), explicitTag=TagSet(),subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
+   .. automethod:: pyasn1.type.char.TeletexString.subtype(self, value=NoValue(), implicitTag=Tag(), explicitTag=Tag(),subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')

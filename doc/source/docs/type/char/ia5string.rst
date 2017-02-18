@@ -14,4 +14,4 @@
        The |ASN.1| type models a basic character string first published in 1963 as an ISO/ITU standard, then it turned into ASCII.
 
    .. automethod:: pyasn1.type.char.IA5String.clone(self, value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
-   .. automethod:: pyasn1.type.char.IA5String.subtype(self, value=NoValue(), implicitTag=TagSet(), explicitTag=TagSet(),subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
+   .. automethod:: pyasn1.type.char.IA5String.subtype(self, value=NoValue(), implicitTag=Tag(), explicitTag=Tag(),subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
