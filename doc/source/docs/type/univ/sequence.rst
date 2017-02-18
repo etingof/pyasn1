@@ -1,7 +1,17 @@
 
-Sequence type
--------------
+.. |ASN.1| replace:: Sequence
 
-.. autoclass:: pyasn1.type.univ.Sequence(componentType=None, tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), sizeSpec=ConstraintsIntersection())
-   :members:
-   :inherited-members:
+|ASN.1| type
+------------
+
+.. autoclass:: pyasn1.type.univ.Sequence(componentType=None, tagSet=tagSet(), subtypeSpec=ConstraintsIntersection(), sizeSpec=ConstraintsIntersection())
+   :members: isSameTypeWith, isSuperTypeOf, tagSet, componentType, subtypeSpec, sizeSpec, getComponentByPosition,
+             setComponentByPosition, getComponentByName, setComponentByName, setDefaultComponents
+
+   .. note::
+
+        The |ASN.1| type models a collection of named ASN.1 components.
+        Ordering of the components **is** preserved upon de/serialization.
+
+   .. automethod:: pyasn1.type.univ.Sequence.clone(componentType=None, tagSet=tagSet(), subtypeSpec=ConstraintsIntersection())
+   .. automethod:: pyasn1.type.univ.Sequence.subtype(componentType=None, implicitTag=Tag(), explicitTag=Tag(),subtypeSpec=ConstraintsIntersection())

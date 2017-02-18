@@ -14,5 +14,5 @@
        The |ASN.1| type models character string that can be consumed by sophisticated video
        terminals (by 20-th century standards) to render ascii-art style pictures and animations.
 
-   .. automethod:: pyasn1.type.char.VideotexString.clone(self, value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
-   .. automethod:: pyasn1.type.char.VideotexString.subtype(self, value=NoValue(), implicitTag=Tag(), explicitTag=Tag(),subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
+   .. automethod:: pyasn1.type.char.VideotexString.clone(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
+   .. automethod:: pyasn1.type.char.VideotexString.subtype(value=NoValue(), implicitTag=Tag(), explicitTag=Tag(),subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')

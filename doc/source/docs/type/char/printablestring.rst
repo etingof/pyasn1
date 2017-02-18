@@ -14,5 +14,5 @@
        The |ASN.1| models character string that can be entered from a very rudimentary terminals featuring letters,
        digits and punctuation marks.
 
-   .. automethod:: pyasn1.type.char.PrintableString.clone(self, value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
-   .. automethod:: pyasn1.type.char.PrintableString.subtype(self, value=NoValue(), implicitTag=Tag(), explicitTag=Tag(),subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
+   .. automethod:: pyasn1.type.char.PrintableString.clone(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
+   .. automethod:: pyasn1.type.char.PrintableString.subtype(value=NoValue(), implicitTag=Tag(), explicitTag=Tag(),subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
