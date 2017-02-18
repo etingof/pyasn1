@@ -9,6 +9,8 @@ from pyasn1.codec.ber import eoo
 from pyasn1.compat.octets import str2octs, oct2int, isOctetsType
 from pyasn1 import debug, error
 
+__all__ = ['decode']
+
 
 class AbstractDecoder(object):
     protoComponent = None

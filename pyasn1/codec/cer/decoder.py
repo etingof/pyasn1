@@ -9,6 +9,8 @@ from pyasn1.codec.ber import decoder
 from pyasn1.compat.octets import oct2int
 from pyasn1 import error
 
+__all__ = ['decode']
+
 
 class BooleanDecoder(decoder.AbstractSimpleDecoder):
     protoComponent = univ.Boolean(0)

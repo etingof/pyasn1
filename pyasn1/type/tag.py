@@ -7,6 +7,11 @@
 from operator import getitem
 from pyasn1 import error
 
+__all__ = ['tagClassUniversal', 'tagClassApplication', 'tagClassContext',
+           'tagClassPrivate', 'tagFormatSimple', 'tagFormatConstructed',
+           'tagCategoryImplicit', 'tagCategoryExplicit', 'tagCategoryUntagged',
+           'Tag', 'TagSet']
+
 tagClassUniversal = 0x00
 tagClassApplication = 0x40
 tagClassContext = 0x80

@@ -6,6 +6,8 @@
 #
 from pyasn1 import error
 
+__all__ = ['TagMap']
+
 
 class TagMap(object):
     # noinspection PyDefaultArgument

@@ -9,6 +9,8 @@ from pyasn1.compat.octets import octs2ints
 from pyasn1 import error
 from pyasn1 import __version__
 
+__all__ = ['Debug', 'setLogger', 'hexdump']
+
 flagNone = 0x0000
 flagEncoder = 0x0001
 flagDecoder = 0x0002

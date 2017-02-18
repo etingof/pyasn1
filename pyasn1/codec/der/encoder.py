@@ -8,6 +8,8 @@ from pyasn1.type import univ
 from pyasn1.codec.cer import encoder
 from pyasn1 import error
 
+__all__ = ['encode']
+
 
 class SetOfEncoder(encoder.SetOfEncoder):
     @staticmethod

@@ -9,6 +9,8 @@ from pyasn1.codec.ber import eoo
 from pyasn1.compat.octets import int2oct, oct2int, ints2octs, null, str2octs
 from pyasn1 import debug, error
 
+__all__ = ['encode']
+
 
 class AbstractItemEncoder(object):
     supportIndefLenMode = 1

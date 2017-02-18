@@ -9,6 +9,8 @@ from pyasn1.type import tagmap
 from pyasn1.compat import octets
 from pyasn1 import error
 
+__all__ = ['NamedType', 'OptionalNamedType', 'DefaultedNamedType', 'NamedTypes']
+
 
 class NamedType(object):
     """Named type specification for constructed types

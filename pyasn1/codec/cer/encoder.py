@@ -10,6 +10,8 @@ from pyasn1.codec.ber import encoder
 from pyasn1.compat.octets import int2oct, str2octs, null
 from pyasn1 import error
 
+__all__ = ['encode']
+
 
 class BooleanEncoder(encoder.IntegerEncoder):
     def encodeValue(self, encodeFun, client, defMode, maxChunkSize):

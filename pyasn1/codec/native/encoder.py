@@ -13,6 +13,8 @@ except ImportError:
 from pyasn1.type import base, univ, char, useful
 from pyasn1 import debug, error
 
+__all__ = ['encode']
+
 
 class AbstractItemEncoder(object):
     def encode(self, encodeFun, value):

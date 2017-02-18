@@ -19,6 +19,7 @@ Revision 0.2.3, released XX-02-2017
 - General documentation improvements here and there.
 - Fix to __reversed__() magic to make it returning an iterator.
 - Test suite simplified and unified.
+- The __all__ variable added to most of the Python modules.
 - The "test" directory renamed into "tests" not to collide with
   the "test" module.
 

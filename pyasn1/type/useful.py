@@ -6,6 +6,8 @@
 #
 from pyasn1.type import univ, char, tag
 
+__all__ = ['ObjectDescriptor', 'GeneralizedTime', 'UTCTime']
+
 NoValue = univ.NoValue
 noValue = univ.noValue
 
