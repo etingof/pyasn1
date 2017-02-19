@@ -25,6 +25,8 @@ __all__ = ['Integer', 'Boolean', 'BitString', 'OctetString', 'Null',
 class Integer(base.AbstractSimpleAsn1Item):
     """Create |ASN.1| type or object.
 
+    |ASN.1| objects are immutable and duck-type Python :class:`int` objects.
+
     Parameters
     ----------
     value : :class:`int`, :class:`str` or |ASN.1| object
@@ -357,15 +359,14 @@ class Boolean(Integer):
 
 
 class BitString(base.AbstractSimpleAsn1Item):
-    """Create ASN.1 BIT STRING type or object.
+    """Create |ASN.1| type or object.
 
-    The BIT STRING type denotes an arbitrary string of bits. A BIT STRING
-    value can have any length.
+    |ASN.1| objects are immutable and duck-type Python :class:`tuple` objects (tuple of bits).
 
     Parameters
     ----------
-    value : :class:`int`, :class:`str` or :py:class:`~pyasn1.type.univ.BitString` object
-        Python integer or string literal or *BitString* class instance.
+    value : :class:`int`, :class:`str` or |ASN.1| object
+        Python integer or string literal or |ASN.1| object.
 
     tagSet: :py:class:`~pyasn1.type.tag.TagSet`
         Object representing non-default ASN.1 tag(s)
@@ -389,8 +390,7 @@ class BitString(base.AbstractSimpleAsn1Item):
     : :py:class:`pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
     """
-    #: Default :py:class:`~pyasn1.type.tag.TagSet` object for ASN.1
-    #: *BitString* objects
+    #: Default :py:class:`~pyasn1.type.tag.TagSet` object for |ASN.1| objects
     tagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x03)
     )
@@ -730,7 +730,8 @@ except NameError:  # Python 2.4
 class OctetString(base.AbstractSimpleAsn1Item):
     """Create |ASN.1| type or object.
 
-    The |ASN.1| objects behave like :class:`str` (Python 2) or :class:`bytes` (Python 3).
+    |ASN.1| objects are immutable and duck-type Python 2 :class:`str` or Python 3 :class:`bytes`.
+    When used in Unicode context, |ASN.1| type assumes "|encoding|" serialization.
 
     Parameters
     ----------
@@ -1102,7 +1103,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
 class Null(OctetString):
     """Create |ASN.1| type or object.
 
-    The NULL type denotes a null value.
+    |ASN.1| objects are immutable and duck-type Python :class:`str` objects (always empty).
 
     Parameters
     ----------
@@ -1190,9 +1191,7 @@ numericTypes = intTypes + (float,)
 class ObjectIdentifier(base.AbstractSimpleAsn1Item):
     """Create |ASN.1| type or object.
 
-    The |ASN.1| type denotes an identifier that takes shape of
-    a sequence of integers. An |ASN.1| value can have any number
-    of non-negative integers.
+    |ASN.1| objects are immutable and duck-type Python :class:`tuple` objects (tuple of non-negative integers).
 
     Parameters
     ----------
@@ -1379,10 +1378,9 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
 class Real(base.AbstractSimpleAsn1Item):
     """Create |ASN.1| type or object.
 
-    The |ASN.1| type denotes a real number that is represented by mantissa,
-    base and exponent. Objects of |ASN.1| type can participate in all
-    arithmetic operations but additionally can behave like a sequence
-    in which case its elements are mantissa, base and exponent.
+    |ASN.1| objects are immutable and duck-type Python :class:`float` objects.
+    Additionally, |ASN.1| objects behave like a :class:`tuple` in which case its
+    elements are mantissa, base and exponent.
 
     Parameters
     ----------
@@ -1715,7 +1713,7 @@ class Enumerated(Integer):
 class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
     """Create |ASN.1| type.
 
-    Objects of this type try to duck-type Python :class:`list` objects.
+    |ASN.1| objects are mutable and duck-type Python :class:`list` objects.
 
     Parameters
     ----------
@@ -1934,7 +1932,7 @@ class SetOf(SequenceOfAndSetOfBase):
 class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
     """Create |ASN.1| type.
 
-    Objects of this type try to duck-type Python :class:`dict` objects.
+    |ASN.1| objects are mutable and duck-type Python :class:`dict` objects.
 
     Parameters
     ----------

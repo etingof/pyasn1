@@ -20,9 +20,8 @@ noValue = univ.noValue
 class AbstractCharacterString(univ.OctetString):
     """Creates |ASN.1| type or object.
 
-    |ASN.1| objects behave like Python 2 :class:`unicode` or Python 3 :class:`str`.
-
-    From Unicode prospective, this type work with "|encoding|" code points.
+    |ASN.1| objects are immutable and duck-type Python 2 :class:`unicode` or Python 3 :class:`str`.
+    When used in octet-stream context, |ASN.1| type assumes "|encoding|" encoding.
 
     Parameters
     ----------
