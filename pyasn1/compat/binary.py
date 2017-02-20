@@ -8,10 +8,20 @@ from sys import version_info
 
 if version_info[0:2] < (2, 6):
     def bin(value):
-        if value <= 1:
-            return '0b' + str(value)
-        else:
-            # TODO: convert recursion into iteration
-            return bin(value >> 1) + str(value & 1)
+        bitstring = []
+
+        while value:
+            if value & 1 == 1:
+                bitstring.append('1')
+            else:
+                bitstring.append('0')
+
+            value >>= 1
+
+        bitstring.reverse()
+
+        return '0b' + ''.join(bitstring)
 else:
     bin = bin
+
+print(bin(0), bin(0xff), bin(16))
