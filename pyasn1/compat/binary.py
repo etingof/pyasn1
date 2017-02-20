@@ -7,10 +7,11 @@
 from sys import version_info
 
 if version_info[0:2] < (2, 6):
-    def bin(x):
-        if x <= 1:
-            return '0b' + str(x)
+    def bin(value):
+        if value <= 1:
+            return '0b' + str(value)
         else:
-            return bin(x >> 1) + str(x & 1)
+            # TODO: convert recursion into iteration
+            return bin(value >> 1) + str(value & 1)
 else:
     bin = bin

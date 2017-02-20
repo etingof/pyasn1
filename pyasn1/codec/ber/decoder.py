@@ -4,6 +4,7 @@
 # Copyright (c) 2005-2017, Ilya Etingof <etingof@gmail.com>
 # License: http://pyasn1.sf.net/license.html
 #
+from sys import version_info
 from pyasn1.type import base, tag, univ, char, useful, tagmap
 from pyasn1.codec.ber import eoo
 from pyasn1.compat.octets import str2octs, oct2int, isOctetsType
@@ -87,39 +88,31 @@ explicitTagDecoder = ExplicitTagDecoder()
 
 class IntegerDecoder(AbstractSimpleDecoder):
     protoComponent = univ.Integer(0)
-    precomputedValues = {
-        str2octs('\x00'): 0,
-        str2octs('\x01'): 1,
-        str2octs('\x02'): 2,
-        str2octs('\x03'): 3,
-        str2octs('\x04'): 4,
-        str2octs('\x05'): 5,
-        str2octs('\x06'): 6,
-        str2octs('\x07'): 7,
-        str2octs('\x08'): 8,
-        str2octs('\x09'): 9,
-        str2octs('\xff'): -1,
-        str2octs('\xfe'): -2,
-        str2octs('\xfd'): -3,
-        str2octs('\xfc'): -4,
-        str2octs('\xfb'): -5
-    }
+
+    if version_info[0:2] < (3, 2):
+        @staticmethod
+        def _from_octets(octets, signed=False):
+            value = long(octets.encode('hex'), 16)
+
+            if signed and oct2int(octets[0]) & 0x80:
+                return value - (1 << len(octets) * 8)
+
+            return value
+
+    else:
+        @staticmethod
+        def _from_octets(octets, signed=False):
+            return int.from_bytes(octets, 'big', signed=signed)
 
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet, length,
                      state, decodeFun, substrateFun):
         head, tail = substrate[:length], substrate[length:]
+
         if not head:
             return self._createComponent(asn1Spec, tagSet, 0), tail
-        if head in self.precomputedValues:
-            value = self.precomputedValues[head]
-        else:
-            firstOctet = oct2int(head[0])
-            if firstOctet & 0x80:
-                value = -1
-            else:
-                value = 0
-            for octet in head:
-                value = value << 8 | oct2int(octet)
+
+        value = self._from_octets(head, signed=True)
+
         return self._createComponent(asn1Spec, tagSet, value), tail
 
 
