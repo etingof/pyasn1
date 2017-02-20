@@ -2,8 +2,10 @@
 Revision 0.2.3, released XX-02-2017
 -----------------------------------
 
-- Decoding performance improvement by maintaining a single shared
+- Improved SEQUENCE/SET/CHOICE decoding performance by maintaining a single shared
   NamedType object for all instances of SEQUENCE/SET object.
+- Improved INTEGER encoding/decoding by switching to Python's built-in
+  integer serialization functions.
 - ASN.1 character types refactored to keep unicode contents internally
   (rather than serialized octet stream) and duck-type it directly.
 - ASN.1 OctetString initialized from a Python object performs bytes()

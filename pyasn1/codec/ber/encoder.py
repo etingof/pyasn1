@@ -4,6 +4,9 @@
 # Copyright (c) 2005-2017, Ilya Etingof <etingof@gmail.com>
 # License: http://pyasn1.sf.net/license.html
 #
+from sys import version_info
+if version_info[0] < 3:
+    from binascii import a2b_hex
 from pyasn1.type import base, tag, univ, char, useful
 from pyasn1.codec.ber import eoo
 from pyasn1.compat.octets import int2oct, oct2int, ints2octs, null, str2octs
@@ -102,29 +105,79 @@ class BooleanEncoder(AbstractItemEncoder):
 class IntegerEncoder(AbstractItemEncoder):
     supportIndefLenMode = 0
     supportCompactZero = False
+    encodedZero = ints2octs((0,))
+
+    if version_info[0:2] > (3, 1):
+        @staticmethod
+        def _to_octets(value, signed=False):
+            length = value.bit_length()
+
+            if signed and length % 8 == 0:
+                length += 1
+
+            return value.to_bytes(length // 8 + 1, 'big', signed=signed)
+
+    else:
+        @staticmethod
+        def _to_octets(value, signed=False):
+            if value < 0:
+                if signed:
+                    # bits in unsigned number
+                    hexValue = hex(abs(value))
+                    bits = len(hexValue) - 2
+                    if hexValue.endswith('L'):
+                        bits -= 1
+                    if bits & 1:
+                        bits += 1
+                    bits *= 4
+
+                    # two's complement form
+                    maxValue = 1 << bits
+                    valueToEncode = (value + maxValue) % maxValue
+
+                else:
+                    raise OverflowError('can\'t convert negative int to unsigned')
+            else:
+                valueToEncode = value
+
+            hexValue = hex(valueToEncode)[2:]
+            if hexValue.endswith('L'):
+                hexValue = hexValue[:-1]
+
+            if len(hexValue) & 1:
+                hexValue = '0' + hexValue
+
+            # padding may be needed for two's complement encoding
+            if value != valueToEncode:
+                hexLength = len(hexValue) // 2
+
+                padLength = bits // 8
+
+                if padLength > hexLength:
+                    hexValue = '00' * (padLength - hexLength) + hexValue
+
+            firstOctet = int(hexValue[:2], 16)
+
+            if signed:
+                if firstOctet & 0x80:
+                    if value >= 0:
+                        hexValue = '00' + hexValue
+                elif value < 0:
+                    hexValue = 'ff' + hexValue
+
+            octets_value = a2b_hex(hexValue)
+
+            return octets_value
 
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
-        if value == 0:  # shortcut for zero value
+        if value == 0:
+            # de-facto way to encode zero
             if self.supportCompactZero:
-                # this seems to be a correct way for encoding zeros
                 return null, 0
             else:
-                # this seems to be a widespread way for encoding zeros
-                return ints2octs((0,)), 0
-        octets = []
-        value = int(value)  # to save on ops on asn1 type
-        while True:
-            octets.insert(0, value & 0xff)
-            if value == 0 or value == -1:
-                break
-            value >>= 8
-        if value == 0 and octets[0] & 0x80:
-            octets.insert(0, 0)
-        while len(octets) > 1 and \
-                (octets[0] == 0 and octets[1] & 0x80 == 0 or
-                 octets[0] == 0xff and octets[1] & 0x80 != 0):
-            del octets[0]
-        return ints2octs(octets), 0
+                return self.encodedZero, 0
+
+        return self._to_octets(int(value), signed=True), 0
 
 
 class BitStringEncoder(AbstractItemEncoder):
