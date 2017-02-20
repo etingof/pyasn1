@@ -23,5 +23,3 @@ if version_info[0:2] < (2, 6):
         return '0b' + ''.join(bitstring)
 else:
     bin = bin
-
-print(bin(0), bin(0xff), bin(16))
