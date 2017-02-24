@@ -24,7 +24,7 @@ class OctetStringEncoderTestCase(unittest.TestCase):
 
     def testIndefMode(self):
         try:
-            encoder.encode(univ.OctetString('Quick brown'), defMode=0)
+            encoder.encode(univ.OctetString('Quick brown'), defMode=False)
         except PyAsn1Error:
             pass
         else:
