@@ -4,10 +4,10 @@
 # Copyright (c) 2005-2017, Ilya Etingof <etingof@gmail.com>
 # License: http://pyasn1.sf.net/license.html
 #
-from sys import version_info
 from pyasn1.type import base, tag, univ, char, useful, tagmap
 from pyasn1.codec.ber import eoo
-from pyasn1.compat.octets import str2octs, oct2int, isOctetsType
+from pyasn1.compat.octets import oct2int, isOctetsType
+from pyasn1.compat.integer import from_bytes
 from pyasn1 import debug, error
 
 __all__ = ['decode']
@@ -89,21 +89,6 @@ explicitTagDecoder = ExplicitTagDecoder()
 class IntegerDecoder(AbstractSimpleDecoder):
     protoComponent = univ.Integer(0)
 
-    if version_info[0:2] < (3, 2):
-        @staticmethod
-        def _from_octets(octets, signed=False):
-            value = long(octets.encode('hex'), 16)
-
-            if signed and oct2int(octets[0]) & 0x80:
-                return value - (1 << len(octets) * 8)
-
-            return value
-
-    else:
-        @staticmethod
-        def _from_octets(octets, signed=False):
-            return int.from_bytes(octets, 'big', signed=signed)
-
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet, length,
                      state, decodeFun, substrateFun):
         head, tail = substrate[:length], substrate[length:]
@@ -111,7 +96,7 @@ class IntegerDecoder(AbstractSimpleDecoder):
         if not head:
             return self._createComponent(asn1Spec, tagSet, 0), tail
 
-        value = self._from_octets(head, signed=True)
+        value = from_bytes(head, signed=True)
 
         return self._createComponent(asn1Spec, tagSet, value), tail
 
@@ -140,46 +125,41 @@ class BitStringDecoder(AbstractSimpleDecoder):
                     'Trailing bits overflow %s' % trailingBits
                 )
             head = head[1:]
-            lsb = p = 0
-            l = len(head) - 1
-            b = []
-            while p <= l:
-                if p == l:
-                    lsb = trailingBits
-                j = 7
-                o = oct2int(head[p])
-                while j >= lsb:
-                    b.append((o >> j) & 0x01)
-                    j -= 1
-                p += 1
-            return self._createComponent(asn1Spec, tagSet, b), tail
+            value = self.protoComponent.fromOctetString(head, trailingBits)
+            return self._createComponent(asn1Spec, tagSet, value), tail
+
         if not self.supportConstructedForm:
             raise error.PyAsn1Error('Constructed encoding form prohibited at %s' % self.__class__.__name__)
-        r = self._createComponent(asn1Spec, tagSet, ())
+
+        bitString = self._createComponent(asn1Spec, tagSet)
+
         if substrateFun:
-            return substrateFun(r, substrate, length)
+            return substrateFun(bitString, substrate, length)
+
         while head:
             component, head = decodeFun(head, self.protoComponent)
-            r = r + component
-        return r, tail
+            bitString += component
+
+        return bitString, tail
 
     def indefLenValueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                              length, state, decodeFun, substrateFun):
-        r = self._createComponent(asn1Spec, tagSet, '')
+        bitString = self._createComponent(asn1Spec, tagSet)
+
         if substrateFun:
-            return substrateFun(r, substrate, length)
+            return substrateFun(bitString, substrate, length)
+
         while substrate:
-            component, substrate = decodeFun(substrate, self.protoComponent,
-                                             allowEoo=True)
-            if eoo.endOfOctets.isSameTypeWith(component) and \
-                    component == eoo.endOfOctets:
+            component, substrate = decodeFun(substrate, self.protoComponent, allowEoo=True)
+            if eoo.endOfOctets.isSameTypeWith(component) and component == eoo.endOfOctets:
                 break
-            r = r + component
+
+            bitString += component
+
         else:
-            raise error.SubstrateUnderrunError(
-                'No EOO seen before substrate ends'
-            )
-        return r, substrate
+            raise error.SubstrateUnderrunError('No EOO seen before substrate ends')
+
+        return bitString, substrate
 
 
 class OctetStringDecoder(AbstractSimpleDecoder):

@@ -9,7 +9,7 @@ import sys
 import math
 from pyasn1.type import base, tag, constraint, namedtype, namedval, tagmap
 from pyasn1.codec.ber import eoo
-from pyasn1.compat import octets
+from pyasn1.compat import octets, integer, binary
 from pyasn1 import error
 
 NoValue = base.NoValue
@@ -361,12 +361,18 @@ class Boolean(Integer):
 class BitString(base.AbstractSimpleAsn1Item):
     """Create |ASN.1| type or object.
 
-    |ASN.1| objects are immutable and duck-type Python :class:`tuple` objects (tuple of bits).
+    |ASN.1| objects are immutable and duck-type both Python :class:`tuple` (as a tuple
+    of bits) and :class:`int` objects.
+
+    |ASN.1| objects can be initialized from a string literal or a sequence of bits
+    or an integer. Then |ASN.1| objects can be worked as with a sequence (including
+    concatenation) or a number (including bitshifting).
 
     Parameters
     ----------
     value : :class:`int`, :class:`str` or |ASN.1| object
-        Python integer or string literal or |ASN.1| object.
+        Python integer or string literal representing binary or hexadecimal
+        number or sequence of integer bits or |ASN.1| object.
 
     tagSet: :py:class:`~pyasn1.type.tag.TagSet`
         Object representing non-default ASN.1 tag(s)
@@ -405,6 +411,25 @@ class BitString(base.AbstractSimpleAsn1Item):
     namedValues = namedval.NamedValues()
 
     defaultBinValue = defaultHexValue = noValue
+
+    if sys.version_info[0] < 3:
+        SizedIntegerBase = long
+    else:
+        SizedIntegerBase = int
+
+    class SizedInteger(SizedIntegerBase):
+        bitLength = leadingZeroBits = None
+
+        def setBitLength(self, bitLength):
+            self.bitLength = bitLength
+            self.leadingZeroBits = max(bitLength - integer.bitLength(self), 0)
+            return self
+
+        def __len__(self):
+            if self.bitLength is None:
+                self.setBitLength(integer.bitLength(self))
+
+            return self.bitLength
 
     def __init__(self, value=noValue, tagSet=None, subtypeSpec=None,
                  namedValues=None, binValue=noValue, hexValue=noValue):
@@ -539,138 +564,145 @@ class BitString(base.AbstractSimpleAsn1Item):
         return self.__class__(value, tagSet, subtypeSpec, namedValues, binValue, hexValue)
 
     def __str__(self):
-        return ''.join([str(x) for x in self._value])
+        return self.asBinary()
+
+    def __eq__(self, other):
+        other = self.prettyIn(other)
+        return self is other or self._value == other and len(self._value) == len(other)
+
+    def __ne__(self, other):
+        other = self.prettyIn(other)
+        return self._value != other or len(self._value) != len(other)
+
+    def __lt__(self, other):
+        other = self.prettyIn(other)
+        return len(self._value) < len(other) or len(self._value) == len(other) and self._value < other
+
+    def __le__(self, other):
+        other = self.prettyIn(other)
+        return len(self._value) <= len(other) or len(self._value) == len(other) and self._value <= other
+
+    def __gt__(self, other):
+        other = self.prettyIn(other)
+        return len(self._value) > len(other) or len(self._value) == len(other) and self._value > other
+
+    def __ge__(self, other):
+        other = self.prettyIn(other)
+        return len(self._value) >= len(other) or len(self._value) == len(other) and self._value >= other
 
     # Immutable sequence object protocol
 
     def __len__(self):
-        if self._len is None:
-            self._len = len(self._value)
-        return self._len
+        return len(self._value)
 
     def __getitem__(self, i):
         if isinstance(i, slice):
-            return self.clone(operator.getitem(self._value, i))
+            return self.clone([self[x] for x in range(*i.indices(len(self)))])
         else:
-            return self._value[i]
+            length = len(self._value) - 1
+            if i > length or i < 0:
+                raise IndexError('bit index out of range')
+            return (self._value >> (length - i)) & 1
 
-    def __contains__(self, bit):
-        return bit in self._value
+    def __iter__(self):
+        length = len(self._value)
+        while length:
+            length -= 1
+            yield (self._value >> length) & 1
 
     def __reversed__(self):
-        return reversed(self._value)
+        return reversed(tuple(self))
+
+    # arithmetic operators
 
     def __add__(self, value):
-        return self.clone(self._value + value)
+        value = self.prettyIn(value)
+        return self.clone(self.SizedInteger(self._value << len(value) | value).setBitLength(len(self._value) + len(value)))
 
     def __radd__(self, value):
-        return self.clone(value + self._value)
+        value = self.prettyIn(value)
+        return self.clone(self.SizedInteger(value << len(self._value) | self._value).setBitLength(len(self._value) + len(value)))
 
     def __mul__(self, value):
-        return self.clone(self._value * value)
+        bitString = self._value
+        while value > 1:
+            bitString <<= len(self._value)
+            bitString |= self._value
+            value -= 1
+        return self.clone(bitString)
 
     def __rmul__(self, value):
         return self * value
 
-    def asNumbers(self, padding=True):
+    def __lshift__(self, count):
+        return self.clone(self.SizedInteger(self._value << count).setBitLength(len(self._value) + count))
+
+    def __rshift__(self, count):
+        return self.clone(self.SizedInteger(self._value >> count).setBitLength(max(0, len(self._value) - count)))
+
+    def __int__(self):
+        return self._value
+
+    def __float__(self):
+        return float(self._value)
+
+    if sys.version_info[0] < 3:
+        def __long__(self):
+            return self._value
+
+    def asNumbers(self):
         """Get |ASN.1| value as a sequence of 8-bit integers.
 
-        Parameters
-        ----------
-        padding: :class:`bool`
-            Allow left-padding if |ASN.1| value length is not a multiples of eight.
-
-        Raises
-        ------
-        : :py:class:`pyasn1.error.PyAsn1Error`
-            If |ASN.1| value length is not multiples of eight and no padding is allowed.
+        If |ASN.1| object length is not a multiple of 8, result
+        will be left-padded with zeros.
         """
-        if not padding and len(self) % 8 != 0:
-            raise error.PyAsn1Error('BIT STRING length is not a multiple of 8')
+        return tuple(octets.octs2ints(self.asOctets()))
 
-        if padding in self.__asNumbersCache:
-            return self.__asNumbersCache[padding]
-
-        result = []
-        bitstring = list(self)
-        while len(bitstring) % 8:
-            bitstring.insert(0, 0)
-        bitIndex = 0
-        while bitIndex < len(bitstring):
-            byte = 0
-            for x in range(8):
-                byte |= bitstring[bitIndex + x] << (7 - x)
-            result.append(byte)
-            bitIndex += 8
-
-        self.__asNumbersCache[padding] = tuple(result)
-
-        return self.__asNumbersCache[padding]
-
-    def asOctets(self, padding=True):
+    def asOctets(self):
         """Get |ASN.1| value as a sequence of octets.
 
-        Parameters
-        ----------
-        padding: :class:`bool`
-            Allow left-padding if |ASN.1| value length is not a multiples of eight.
-
-        Raises
-        ------
-        : :py:class:`pyasn1.error.PyAsn1Error`
-            If |ASN.1| value length is not multiples of eight and no padding is allowed.
+        If |ASN.1| object length is not a multiple of 8, result
+        will be left-padded with zeros.
         """
-        return octets.ints2octs(self.asNumbers(padding))
+        return integer.to_bytes(self._value, length=len(self))
 
-    def asInteger(self, padding=True):
+    def asInteger(self):
         """Get |ASN.1| value as a single integer value.
-
-        Parameters
-        ----------
-        padding: :class:`bool`
-            Allow left-padding if |ASN.1| value length is not a multiples of eight.
-
-        Raises
-        ------
-        : :py:class:`pyasn1.error.PyAsn1Error`
-            If |ASN.1| value length is not multiples of eight and no padding is allowed.
         """
-        accumulator = 0
-        for byte in self.asNumbers(padding):
-            accumulator <<= 8
-            accumulator |= byte
-        return accumulator
+        return self._value
 
-    @staticmethod
-    def fromHexString(value):
-        r = []
-        for v in value:
-            v = int(v, 16)
-            i = 4
-            while i:
-                i -= 1
-                r.append((v >> i) & 0x01)
-        return tuple(r)
+    def asBinary(self):
+        """Get |ASN.1| value as a text string of bits.
+        """
+        binString = binary.bin(self._value)[2:]
+        return '0'*(len(self._value) - len(binString)) + binString
 
-    @staticmethod
-    def fromBinaryString(value):
-        r = []
-        for v in value:
-            if v in ('0', '1'):
-                r.append(int(v))
-            else:
-                raise error.PyAsn1Error(
-                    'Non-binary BIT STRING initializer %s' % (v,)
-                )
-        return tuple(r)
+    @classmethod
+    def fromHexString(cls, value):
+        try:
+            return cls.SizedInteger(value, 16).setBitLength(len(value) * 4)
+
+        except ValueError:
+            raise error.PyAsn1Error('%s.fromHexString() error: %s' % (cls.__name__, sys.exc_info()[1]))
+
+    @classmethod
+    def fromBinaryString(cls, value):
+        try:
+            return cls.SizedInteger(value or '0', 2).setBitLength(len(value))
+
+        except ValueError:
+            raise error.PyAsn1Error('%s.fromBinaryString() error: %s' % (cls.__name__, sys.exc_info()[1]))
+
+    @classmethod
+    def fromOctetString(cls, value, padding=0):
+        return cls(cls.SizedInteger(integer.from_bytes(value) >> padding).setBitLength(len(value) * 8 - padding))
 
     def prettyIn(self, value):
-        r = []
-        if not value:
-            return ()
+        if octets.isStringType(value):
+            if not value:
+                return self.SizedInteger(0).setBitLength(0)
 
-        elif octets.isStringType(value):
-            if value[0] == '\'':  # "'1011'B" -- ASN.1 schema representation
+            elif value[0] == '\'':  # "'1011'B" -- ASN.1 schema representation (deprecated)
                 if value[-2:] == '\'B':
                     return self.fromBinaryString(value[1:-2])
                 elif value[-2:] == '\'H':
@@ -679,31 +711,40 @@ class BitString(base.AbstractSimpleAsn1Item):
                     raise error.PyAsn1Error(
                         'Bad BIT STRING value notation %s' % (value,)
                     )
+
             elif self.__namedValues and not value.isdigit():  # named bits like 'Urgent, Active'
-                for i in value.split(','):
-                    j = self.__namedValues.getValue(i)
-                    if j is None:
+                number = 0
+                highestBitPosition = 0
+                for namedBit in value.split(','):
+                    bitPosition = self.__namedValues.getValue(namedBit)
+                    if bitPosition is None:
                         raise error.PyAsn1Error(
-                            'Unknown bit identifier \'%s\'' % (i,)
+                            'Unknown bit identifier \'%s\'' % (namedBit,)
                         )
-                    if j >= len(r):
-                        r.extend([0] * (j - len(r) + 1))
-                    r[j] = 1
-                return tuple(r)
+
+                    number |= (1 << bitPosition)
+
+                    highestBitPosition = max(highestBitPosition, bitPosition)
+
+                return self.SizedInteger(number).setBitLength(highestBitPosition + 1)
+
+            elif value.startswith('0x'):
+                return self.fromHexString(value[2:])
+
+            elif value.startswith('0b'):
+                return self.fromBinaryString(value[2:])
+
             else:  # assume plain binary string like '1011'
                 return self.fromBinaryString(value)
 
         elif isinstance(value, (tuple, list)):
-            r = tuple(value)
-            for b in r:
-                if b and b != 1:
-                    raise error.PyAsn1Error(
-                        'Non-binary BitString initializer \'%s\'' % (r,)
-                    )
-            return r
+            return self.fromBinaryString(''.join([b and '1' or '0' for b in value]))
 
-        elif isinstance(value, BitString):
-            return tuple(value)
+        elif isinstance(value, (self.SizedInteger, BitString)):
+            return self.SizedInteger(value).setBitLength(len(value))
+
+        elif isinstance(value, intTypes):
+            return self.SizedInteger(value)
 
         else:
             raise error.PyAsn1Error(
@@ -941,10 +982,10 @@ class OctetString(base.AbstractSimpleAsn1Item):
                     'Can\'t decode string \'%s\' with \'%s\' codec' % (self._value, self._encoding)
                 )
 
-        def asOctets(self, padding=True):
+        def asOctets(self):
             return str(self._value)
 
-        def asNumbers(self, padding=True):
+        def asNumbers(self):
             if self.__asNumbersCache is None:
                 self.__asNumbersCache = tuple([ord(x) for x in self._value])
             return self.__asNumbersCache
@@ -981,10 +1022,10 @@ class OctetString(base.AbstractSimpleAsn1Item):
         def __bytes__(self):
             return bytes(self._value)
 
-        def asOctets(self, padding=True):
+        def asOctets(self):
             return bytes(self._value)
 
-        def asNumbers(self, padding=True):
+        def asNumbers(self):
             if self.__asNumbersCache is None:
                 self.__asNumbersCache = tuple(self._value)
             return self.__asNumbersCache

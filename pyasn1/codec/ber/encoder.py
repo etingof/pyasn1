@@ -4,12 +4,10 @@
 # Copyright (c) 2005-2017, Ilya Etingof <etingof@gmail.com>
 # License: http://pyasn1.sf.net/license.html
 #
-from sys import version_info
-if version_info[0] < 3:
-    from binascii import a2b_hex
 from pyasn1.type import base, tag, univ, char, useful
 from pyasn1.codec.ber import eoo
 from pyasn1.compat.octets import int2oct, oct2int, ints2octs, null, str2octs
+from pyasn1.compat.integer import to_bytes
 from pyasn1 import debug, error
 
 __all__ = ['encode']
@@ -107,68 +105,6 @@ class IntegerEncoder(AbstractItemEncoder):
     supportCompactZero = False
     encodedZero = ints2octs((0,))
 
-    if version_info[0:2] > (3, 1):
-        @staticmethod
-        def _to_octets(value, signed=False):
-            length = value.bit_length()
-
-            if signed and length % 8 == 0:
-                length += 1
-
-            return value.to_bytes(length // 8 + 1, 'big', signed=signed)
-
-    else:
-        @staticmethod
-        def _to_octets(value, signed=False):
-            if value < 0:
-                if signed:
-                    # bits in unsigned number
-                    hexValue = hex(abs(value))
-                    bits = len(hexValue) - 2
-                    if hexValue.endswith('L'):
-                        bits -= 1
-                    if bits & 1:
-                        bits += 1
-                    bits *= 4
-
-                    # two's complement form
-                    maxValue = 1 << bits
-                    valueToEncode = (value + maxValue) % maxValue
-
-                else:
-                    raise OverflowError('can\'t convert negative int to unsigned')
-            else:
-                valueToEncode = value
-
-            hexValue = hex(valueToEncode)[2:]
-            if hexValue.endswith('L'):
-                hexValue = hexValue[:-1]
-
-            if len(hexValue) & 1:
-                hexValue = '0' + hexValue
-
-            # padding may be needed for two's complement encoding
-            if value != valueToEncode:
-                hexLength = len(hexValue) // 2
-
-                padLength = bits // 8
-
-                if padLength > hexLength:
-                    hexValue = '00' * (padLength - hexLength) + hexValue
-
-            firstOctet = int(hexValue[:2], 16)
-
-            if signed:
-                if firstOctet & 0x80:
-                    if value >= 0:
-                        hexValue = '00' + hexValue
-                elif value < 0:
-                    hexValue = 'ff' + hexValue
-
-            octets_value = a2b_hex(hexValue)
-
-            return octets_value
-
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         if value == 0:
             # de-facto way to encode zero
@@ -177,34 +113,27 @@ class IntegerEncoder(AbstractItemEncoder):
             else:
                 return self.encodedZero, 0
 
-        return self._to_octets(int(value), signed=True), 0
+        return to_bytes(int(value), signed=True), 0
 
 
 class BitStringEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
-        if not maxChunkSize or len(value) <= maxChunkSize * 8:
-            out_len = (len(value) + 7) // 8
-            out_list = out_len * [0]
-            j = 7
-            i = -1
-            for val in value:
-                j += 1
-                if j == 8:
-                    i += 1
-                    j = 0
-                out_list[i] |= val << (7 - j)
-            return int2oct(7 - j) + ints2octs(out_list), 0
+        if len(value) % 8:
+            alignedValue = value << (8 - len(value) % 8)
         else:
-            pos = 0
-            substrate = null
-            while True:
-                # count in octets
-                v = value.clone(value[pos * 8:pos * 8 + maxChunkSize * 8])
-                if not v:
-                    break
-                substrate = substrate + encodeFun(v, defMode, maxChunkSize)
-                pos += maxChunkSize
-            return substrate, 1
+            alignedValue = value
+
+        if not maxChunkSize or len(alignedValue) <= maxChunkSize * 8:
+            substrate = alignedValue.asOctets()
+            return int2oct(len(substrate) * 8 - len(value)) + substrate, 0
+
+        stop = 0
+        substrate = null
+        while stop < len(value):
+            start = stop
+            stop = min(start + maxChunkSize * 8, len(value))
+            substrate += encodeFun(alignedValue[start:stop], defMode, maxChunkSize)
+        return substrate, 1
 
 
 class OctetStringEncoder(AbstractItemEncoder):

@@ -1,11 +1,15 @@
 
-Revision 0.2.3, released XX-02-2017
+Revision 0.2.3, released XX-03-2017
 -----------------------------------
 
 - Improved SEQUENCE/SET/CHOICE decoding performance by maintaining a single shared
   NamedType object for all instances of SEQUENCE/SET object.
 - Improved INTEGER encoding/decoding by switching to Python's built-in
   integer serialization functions.
+- Improved BitString performance by rebasing it onto Python int type and leveraging
+  fast Integer serialization functions.
+- BitString type usability improved in many ways: for example bitshifting and
+  numeric operation on BitString is now possible.
 - ASN.1 character types refactored to keep unicode contents internally
   (rather than serialized octet stream) and duck-type it directly.
 - ASN.1 OctetString initialized from a Python object performs bytes()

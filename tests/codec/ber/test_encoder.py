@@ -84,7 +84,7 @@ class BitStringEncoderTestCase(unittest.TestCase):
 
     def testIndefMode(self):
         assert encoder.encode(
-            self.b, defMode=0
+            self.b, defMode=False
         ) == ints2octs((3, 3, 1, 169, 138))
 
     def testDefModeChunked(self):
@@ -94,11 +94,11 @@ class BitStringEncoderTestCase(unittest.TestCase):
 
     def testIndefModeChunked(self):
         assert encoder.encode(
-            self.b, defMode=0, maxChunkSize=1
+            self.b, defMode=False, maxChunkSize=1
         ) == ints2octs((35, 128, 3, 2, 0, 169, 3, 2, 1, 138, 0, 0))
 
     def testEmptyValue(self):
-        assert encoder.encode(univ.BitString(())) == ints2octs((3, 1, 0))
+        assert encoder.encode(univ.BitString([])) == ints2octs((3, 1, 0))
 
 
 class OctetStringEncoderTestCase(unittest.TestCase):
@@ -111,21 +111,20 @@ class OctetStringEncoderTestCase(unittest.TestCase):
 
     def testIndefMode(self):
         assert encoder.encode(
-            self.o, defMode=0
+            self.o, defMode=False
         ) == ints2octs((4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120))
 
     def testDefModeChunked(self):
         assert encoder.encode(
             self.o, maxChunkSize=4
-        ) == ints2octs(
-            (36, 23, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120))
+        ) == ints2octs((36, 23, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119,
+                        110, 32, 4, 3, 102, 111, 120))
 
     def testIndefModeChunked(self):
         assert encoder.encode(
-            self.o, defMode=0, maxChunkSize=4
-        ) == ints2octs((
-                       36, 128, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111,
-                       120, 0, 0))
+            self.o, defMode=False, maxChunkSize=4
+        ) == ints2octs((36, 128, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110,
+                        32, 4, 3, 102,  111, 120, 0, 0))
 
 
 class ExpTaggedOctetStringEncoderTestCase(unittest.TestCase):
@@ -141,21 +140,20 @@ class ExpTaggedOctetStringEncoderTestCase(unittest.TestCase):
 
     def testIndefMode(self):
         assert encoder.encode(
-            self.o, defMode=0
+            self.o, defMode=False
         ) == ints2octs((101, 128, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120, 0, 0))
 
     def testDefModeChunked(self):
         assert encoder.encode(
-            self.o, defMode=1, maxChunkSize=4
+            self.o, defMode=True, maxChunkSize=4
         ) == ints2octs((101, 25, 36, 23, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3,
                         102, 111, 120))
 
     def testIndefModeChunked(self):
         assert encoder.encode(
-            self.o, defMode=0, maxChunkSize=4
-        ) == ints2octs((
-                       101, 128, 36, 128, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3,
-                       102, 111, 120, 0, 0, 0, 0))
+            self.o, defMode=False, maxChunkSize=4
+        ) == ints2octs((101, 128, 36, 128, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3,
+                        102, 111, 120, 0, 0, 0, 0))
 
 
 class NullEncoderTestCase(unittest.TestCase):
@@ -382,19 +380,19 @@ class SequenceEncoderTestCase(unittest.TestCase):
     def testIndefMode(self):
         self.__init()
         assert encoder.encode(
-            self.s, defMode=0
+            self.s, defMode=False
         ) == ints2octs((48, 128, 5, 0, 0, 0))
 
     def testDefModeChunked(self):
         self.__init()
         assert encoder.encode(
-            self.s, defMode=1, maxChunkSize=4
+            self.s, defMode=True, maxChunkSize=4
         ) == ints2octs((48, 2, 5, 0))
 
     def testIndefModeChunked(self):
         self.__init()
         assert encoder.encode(
-            self.s, defMode=0, maxChunkSize=4
+            self.s, defMode=False, maxChunkSize=4
         ) == ints2octs((48, 128, 5, 0, 0, 0))
 
     def testWithOptionalDefMode(self):
@@ -405,19 +403,19 @@ class SequenceEncoderTestCase(unittest.TestCase):
     def testWithOptionalIndefMode(self):
         self.__initWithOptional()
         assert encoder.encode(
-            self.s, defMode=0
+            self.s, defMode=False
         ) == ints2octs((48, 128, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0))
 
     def testWithOptionalDefModeChunked(self):
         self.__initWithOptional()
         assert encoder.encode(
-            self.s, defMode=1, maxChunkSize=4
+            self.s, defMode=True, maxChunkSize=4
         ) == ints2octs((48, 21, 5, 0, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110))
 
     def testWithOptionalIndefModeChunked(self):
         self.__initWithOptional()
         assert encoder.encode(
-            self.s, defMode=0, maxChunkSize=4
+            self.s, defMode=False, maxChunkSize=4
         ) == ints2octs(
             (48, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 0, 0))
 
@@ -428,19 +426,19 @@ class SequenceEncoderTestCase(unittest.TestCase):
     def testWithDefaultedIndefMode(self):
         self.__initWithDefaulted()
         assert encoder.encode(
-            self.s, defMode=0
+            self.s, defMode=False
         ) == ints2octs((48, 128, 5, 0, 2, 1, 1, 0, 0))
 
     def testWithDefaultedDefModeChunked(self):
         self.__initWithDefaulted()
         assert encoder.encode(
-            self.s, defMode=1, maxChunkSize=4
+            self.s, defMode=True, maxChunkSize=4
         ) == ints2octs((48, 5, 5, 0, 2, 1, 1))
 
     def testWithDefaultedIndefModeChunked(self):
         self.__initWithDefaulted()
         assert encoder.encode(
-            self.s, defMode=0, maxChunkSize=4
+            self.s, defMode=False, maxChunkSize=4
         ) == ints2octs((48, 128, 5, 0, 2, 1, 1, 0, 0))
 
     def testWithOptionalAndDefaultedDefMode(self):
@@ -451,20 +449,20 @@ class SequenceEncoderTestCase(unittest.TestCase):
     def testWithOptionalAndDefaultedIndefMode(self):
         self.__initWithOptionalAndDefaulted()
         assert encoder.encode(
-            self.s, defMode=0
+            self.s, defMode=False
         ) == ints2octs((48, 128, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1, 0, 0))
 
     def testWithOptionalAndDefaultedDefModeChunked(self):
         self.__initWithOptionalAndDefaulted()
         assert encoder.encode(
-            self.s, defMode=1, maxChunkSize=4
+            self.s, defMode=True, maxChunkSize=4
         ) == ints2octs(
             (48, 24, 5, 0, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 2, 1, 1))
 
     def testWithOptionalAndDefaultedIndefModeChunked(self):
         self.__initWithOptionalAndDefaulted()
         assert encoder.encode(
-            self.s, defMode=0, maxChunkSize=4
+            self.s, defMode=False, maxChunkSize=4
         ) == ints2octs((48, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0,
                         0, 2, 1, 1, 0, 0))
 
