@@ -10,6 +10,7 @@ Revision 0.2.3, released XX-03-2017
   fast Integer serialization functions.
 - BitString type usability improved in many ways: for example bitshifting and
   numeric operation on BitString is now possible.
+- Minor ObjectIdentifier type performance optimization.
 - ASN.1 character types refactored to keep unicode contents internally
   (rather than serialized octet stream) and duck-type it directly.
 - ASN.1 OctetString initialized from a Python object performs bytes()

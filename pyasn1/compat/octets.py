@@ -30,7 +30,7 @@ else:
     # noinspection PyPep8
     oct2int = lambda x: x
     # noinspection PyPep8
-    octs2ints = lambda s: [x for x in s]
+    octs2ints = lambda x: x
     # noinspection PyPep8
     str2octs = lambda x: x.encode('iso-8859-1')
     # noinspection PyPep8

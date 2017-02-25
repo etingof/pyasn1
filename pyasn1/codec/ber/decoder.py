@@ -6,7 +6,7 @@
 #
 from pyasn1.type import base, tag, univ, char, useful, tagmap
 from pyasn1.codec.ber import eoo
-from pyasn1.compat.octets import oct2int, isOctetsType
+from pyasn1.compat.octets import oct2int, octs2ints, isOctetsType
 from pyasn1.compat.integer import from_bytes
 from pyasn1 import debug, error
 
@@ -222,11 +222,13 @@ class ObjectIdentifierDecoder(AbstractSimpleDecoder):
         if not head:
             raise error.PyAsn1Error('Empty substrate')
 
+        head = octs2ints(head)
+
         oid = ()
         index = 0
         substrateLen = len(head)
         while index < substrateLen:
-            subId = oct2int(head[index])
+            subId = head[index]
             index += 1
             if subId < 128:
                 oid = oid + (subId,)
@@ -240,9 +242,9 @@ class ObjectIdentifierDecoder(AbstractSimpleDecoder):
                         raise error.SubstrateUnderrunError(
                             'Short substrate for sub-OID past %s' % (oid,)
                         )
-                    nextSubId = oct2int(head[index])
+                    nextSubId = head[index]
                     index += 1
-                oid = oid + ((subId << 7) + nextSubId,)
+                oid += ((subId << 7) + nextSubId,)
             elif subId == 128:
                 # ASN.1 spec forbids leading zeros (0x80) in OID
                 # encoding, tolerating it opens a vulnerability. See

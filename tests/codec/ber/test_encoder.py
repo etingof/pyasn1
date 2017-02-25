@@ -219,6 +219,11 @@ class ObjectIdentifierEncoderTestCase(unittest.TestCase):
             univ.ObjectIdentifier((2, 16843570))
         ) == ints2octs((6, 4, 0x88, 0x84, 0x87, 0x02))
 
+    def testEdgeA(self):
+        assert encoder.encode(
+            univ.ObjectIdentifier((2, 5))
+        ) == ints2octs((6, 1, 85))
+
     def testImpossible1(self):
         try:
             encoder.encode(univ.ObjectIdentifier((3, 1, 2)))
