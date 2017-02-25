@@ -1,5 +1,5 @@
 
-Revision 0.2.3, released XX-03-2017
+Revision 0.2.3, released 25-02-2017
 -----------------------------------
 
 - Improved SEQUENCE/SET/CHOICE decoding performance by maintaining a single shared
