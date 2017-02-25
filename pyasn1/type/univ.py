@@ -364,10 +364,6 @@ class BitString(base.AbstractSimpleAsn1Item):
     |ASN.1| objects are immutable and duck-type both Python :class:`tuple` (as a tuple
     of bits) and :class:`int` objects.
 
-    |ASN.1| objects can be initialized from a string literal or a sequence of bits
-    or an integer. Then |ASN.1| objects can be worked as with a sequence (including
-    concatenation) or a number (including bitshifting).
-
     Parameters
     ----------
     value : :class:`int`, :class:`str` or |ASN.1| object
@@ -1260,67 +1256,6 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
     #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
     #: object imposing constraints on initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
-
-    # TODO: move docstring to base class
-
-    def clone(self, value=noValue, tagSet=None, subtypeSpec=None):
-        """Create a copy of a |ASN.1| type or object.
-
-        Any parameters to the *clone()* method will replace corresponding
-        properties of the |ASN.1| object.
-
-        Parameters
-        ----------
-        value: :class:`tuple`, :class:`str` or |ASN.1| object
-            Initialization value to pass to new ASN.1 object instead of
-            inheriting one from the caller.
-
-        tagSet: :py:class:`~pyasn1.type.tag.TagSet`
-            Object representing ASN.1 tag(s) to use in new object instead of inheriting from the caller
-
-        subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-            Object representing ASN.1 subtype constraint(s) to use in new object instead of inheriting from the caller
-
-        Returns
-        -------
-        :
-            new instance of |ASN.1| type/value
-        """
-        return base.AbstractSimpleAsn1Item.clone(self, value, tagSet, subtypeSpec)
-
-    def subtype(self, value=noValue, implicitTag=None, explicitTag=None,
-                subtypeSpec=None):
-        """Create a copy of a |ASN.1| type or object.
-
-        Any parameters to the *subtype()* method will be added to the corresponding
-        properties of the |ASN.1| object.
-
-        Parameters
-        ----------
-        value: :class:`tuple`, :class:`str` or |ASN.1| object
-            Initialization value to pass to new ASN.1 object instead of
-            inheriting one from the caller.
-
-        implicitTag: :py:class:`~pyasn1.type.tag.Tag`
-            Implicitly apply given ASN.1 tag object to caller's 
-            :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
-            new object's ASN.1 tag(s).
-
-        explicitTag: :py:class:`~pyasn1.type.tag.Tag`
-            Explicitly apply given ASN.1 tag object to caller's 
-            :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
-            new object's ASN.1 tag(s).
-
-        subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-            Add ASN.1 constraints object to one of the caller, then
-            use the result as new object's ASN.1 constraints.
-
-        Returns
-        -------
-        :
-            new instance of |ASN.1| type/value
-        """
-        return base.AbstractSimpleAsn1Item.subtype(self, value, implicitTag, explicitTag)
 
     def __add__(self, other):
         return self.clone(self._value + other)

@@ -4,6 +4,12 @@
 |ASN.1| type
 ------------
 
-.. autoclass:: pyasn1.type.univ.BitString(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), namedValues=NamedValues())
-   :members:
-   :inherited-members:
+.. autoclass:: pyasn1.type.univ.BitString(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), namedValues=NamedValues(),binValue=NoValue(), hexValue=NoValue())
+   :members: hasValue, isSameTypeWith, isSuperTypeOf, tagSet, subtypeSpec, asInteger, asNumbers, asOctets, asBinary
+
+   .. note::
+
+        The |ASN.1| type models an arbitrary sequence of bits.
+
+   .. automethod:: pyasn1.type.univ.BitString.clone(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), namedValues=NamedValues(),binValue=NoValue(), hexValue=NoValue())
+   .. automethod:: pyasn1.type.univ.BitString.subtype(value=NoValue(), implicitTag=Tag(), explicitTag=Tag(),subtypeSpec=ConstraintsIntersection(), , namedValues=NamedValues(),binValue=NoValue(), hexValue=NoValue())

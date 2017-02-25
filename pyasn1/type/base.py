@@ -240,6 +240,28 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         return self._value is not noValue
 
     def clone(self, value=noValue, tagSet=None, subtypeSpec=None):
+        """Create a copy of a |ASN.1| type or object.
+
+          Any parameters to the *clone()* method will replace corresponding
+          properties of the |ASN.1| object.
+
+          Parameters
+          ----------
+          value: :class:`tuple`, :class:`str` or |ASN.1| object
+              Initialization value to pass to new ASN.1 object instead of
+              inheriting one from the caller.
+
+          tagSet: :py:class:`~pyasn1.type.tag.TagSet`
+              Object representing ASN.1 tag(s) to use in new object instead of inheriting from the caller
+
+          subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
+              Object representing ASN.1 subtype constraint(s) to use in new object instead of inheriting from the caller
+
+          Returns
+          -------
+          :
+              new instance of |ASN.1| type/value
+        """
         if self.isNoValue(value):
             if self.isNoValue(tagSet, subtypeSpec):
                 return self
@@ -252,6 +274,36 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
 
     def subtype(self, value=noValue, implicitTag=None, explicitTag=None,
                 subtypeSpec=None):
+        """Create a copy of a |ASN.1| type or object.
+
+         Any parameters to the *subtype()* method will be added to the corresponding
+         properties of the |ASN.1| object.
+
+         Parameters
+         ----------
+         value: :class:`tuple`, :class:`str` or |ASN.1| object
+             Initialization value to pass to new ASN.1 object instead of
+             inheriting one from the caller.
+
+         implicitTag: :py:class:`~pyasn1.type.tag.Tag`
+             Implicitly apply given ASN.1 tag object to caller's
+             :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
+             new object's ASN.1 tag(s).
+
+         explicitTag: :py:class:`~pyasn1.type.tag.Tag`
+             Explicitly apply given ASN.1 tag object to caller's
+             :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
+             new object's ASN.1 tag(s).
+
+         subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
+             Add ASN.1 constraints object to one of the caller, then
+             use the result as new object's ASN.1 constraints.
+
+         Returns
+         -------
+         :
+             new instance of |ASN.1| type/value
+        """
         if self.isNoValue(value):
             value = self._value
         if implicitTag is not None:

@@ -9,7 +9,6 @@
              getComponentByPosition, setComponentByPosition, getComponentByName, setComponentByName, setDefaultComponents,
              getComponentByType, setComponentByType
 
-
    .. note::
 
         The |ASN.1| type models a collection of named ASN.1 components.
