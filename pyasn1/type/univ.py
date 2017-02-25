@@ -1261,6 +1261,8 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
     #: object imposing constraints on initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
 
+    # TODO: move docstring to base class
+
     def clone(self, value=noValue, tagSet=None, subtypeSpec=None):
         """Create a copy of a |ASN.1| type or object.
 
@@ -1380,37 +1382,32 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
         return False
 
     def prettyIn(self, value):
-        if isinstance(value, tuple):
-            pass
-        elif isinstance(value, ObjectIdentifier):
+        if isinstance(value, ObjectIdentifier):
             return tuple(value)
         elif octets.isStringType(value):
-            r = []
-            for element in [x for x in value.split('.') if x != '']:
-                try:
-                    r.append(int(element, 0))
-                except ValueError:
-                    raise error.PyAsn1Error(
-                        'Malformed Object ID %s at %s: %s' %
-                        (str(value), self.__class__.__name__, sys.exc_info()[1])
-                    )
-            value = tuple(r)
-        else:
+            if '-' in value:
+                raise error.PyAsn1Error(
+                    'Malformed Object ID %s at %s: %s' % (value, self.__class__.__name__, sys.exc_info()[1])
+                )
             try:
-                value = tuple(value)
-            except TypeError:
+                return tuple([int(subOid) for subOid in value.split('.') if subOid])
+            except ValueError:
                 raise error.PyAsn1Error(
-                    'Malformed Object ID %s at %s: %s' %
-                    (str(value), self.__class__.__name__, sys.exc_info()[1])
+                    'Malformed Object ID %s at %s: %s' % (value, self.__class__.__name__, sys.exc_info()[1])
                 )
 
-        for x in value:
-            if not isinstance(x, intTypes) or x < 0:
-                raise error.PyAsn1Error(
-                    'Invalid sub-ID in %s at %s' % (value, self.__class__.__name__)
-                )
+        try:
+            tupleOfInts = tuple([int(subOid) for subOid in value if subOid >= 0])
 
-        return value
+        except (ValueError, TypeError):
+            raise error.PyAsn1Error(
+                'Malformed Object ID %s at %s: %s' % (value, self.__class__.__name__, sys.exc_info()[1])
+            )
+
+        if len(tupleOfInts) == len(value):
+            return tupleOfInts
+
+        raise error.PyAsn1Error('Malformed Object ID %s at %s' % (value, self.__class__.__name__))
 
     def prettyOut(self, value):
         return '.'.join([str(x) for x in value])

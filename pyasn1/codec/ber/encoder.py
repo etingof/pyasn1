@@ -21,7 +21,7 @@ class AbstractItemEncoder(object):
         tagClass, tagFormat, tagId = t.asTuple()  # this is a hotspot
         v = tagClass | tagFormat
         if isConstructed:
-            v = v | tag.tagFormatConstructed
+            v |= tag.tagFormatConstructed
         if tagId < 31:
             return int2oct(v | tagId)
         else:
@@ -63,7 +63,7 @@ class AbstractItemEncoder(object):
         tagSet = value.getTagSet()
         if tagSet:
             if not isConstructed:  # primitive form implies definite mode
-                defMode = 1
+                defMode = True
             return self.encodeTag(
                 tagSet[-1], isConstructed
             ) + self.encodeLength(
@@ -161,52 +161,45 @@ class NullEncoder(AbstractItemEncoder):
 
 class ObjectIdentifierEncoder(AbstractItemEncoder):
     supportIndefLenMode = 0
-    precomputedValues = {
-        (1, 3, 6, 1, 2): (43, 6, 1, 2),
-        (1, 3, 6, 1, 4): (43, 6, 1, 4)
-    }
 
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         oid = value.asTuple()
-        if oid[:5] in self.precomputedValues:
-            octets = self.precomputedValues[oid[:5]]
-            oid = oid[5:]
-        else:
-            if len(oid) < 2:
-                raise error.PyAsn1Error('Short OID %s' % (value,))
+        if len(oid) < 2:
+            raise error.PyAsn1Error('Short OID %s' % (value,))
 
-            octets = ()
+        octets = ()
 
-            # Build the first twos
-            if oid[0] == 0 and 0 <= oid[1] <= 39:
-                oid = (oid[1],) + oid[2:]
-            elif oid[0] == 1 and 0 <= oid[1] <= 39:
-                oid = (oid[1] + 40,) + oid[2:]
-            elif oid[0] == 2:
-                oid = (oid[1] + 80,) + oid[2:]
+        # Build the first pair
+        first = oid[0]
+        second = oid[1]
+        if 0 <= second <= 39:
+            if first == 1:
+                oid = (second + 40,) + oid[2:]
+            elif first == 0:
+                oid = (second,) + oid[2:]
             else:
-                raise error.PyAsn1Error(
-                    'Impossible initial arcs %s at %s' % (oid[:2], value)
-                )
+                raise error.PyAsn1Error('Impossible first/second arcs at %s' % (value,))
+        elif first == 2:
+            oid = (second + 80,) + oid[2:]
+        else:
+            raise error.PyAsn1Error('Impossible first/second arcs at %s' % (value,))
 
         # Cycle through subIds
-        for subId in oid:
-            if -1 < subId < 128:
+        for subOid in oid:
+            if 0 <= subOid <= 127:
                 # Optimize for the common case
-                octets = octets + (subId & 0x7f,)
-            elif subId < 0:
-                raise error.PyAsn1Error(
-                    'Negative OID arc %s at %s' % (subId, value)
-                )
-            else:
+                octets += (subOid,)
+            elif subOid > 127:
                 # Pack large Sub-Object IDs
-                res = (subId & 0x7f,)
-                subId >>= 7
-                while subId > 0:
-                    res = (0x80 | (subId & 0x7f),) + res
-                    subId >>= 7
+                res = (subOid & 0x7f,)
+                subOid >>= 7
+                while subOid:
+                    res = (0x80 | (subOid & 0x7f),) + res
+                    subOid >>= 7
                 # Add packed Sub-Object ID to resulted Object ID
                 octets += res
+            else:
+                raise error.PyAsn1Error('Negative OID arc %s at %s' % (subOid, value))
 
         return ints2octs(octets), 0
 
