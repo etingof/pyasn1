@@ -177,6 +177,8 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
                 oid = (second + 40,) + oid[2:]
             elif first == 0:
                 oid = (second,) + oid[2:]
+            elif first == 2:
+                oid = (second + 80,) + oid[2:]
             else:
                 raise error.PyAsn1Error('Impossible first/second arcs at %s' % (value,))
         elif first == 2:
