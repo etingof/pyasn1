@@ -272,17 +272,29 @@ class Integer(base.AbstractSimpleAsn1Item):
         :
             new instance of |ASN.1| type/value
         """
-        if self.isNoValue(value):
-            if self.isNoValue(tagSet, subtypeSpec, namedValues):
-                return self
+        isModified = False
+
+        if value is None or value is noValue:
             value = self._value
-        if tagSet is None:
+        else:
+            isModified = True
+        if tagSet is None or tagSet is noValue:
             tagSet = self._tagSet
-        if subtypeSpec is None:
+        else:
+            isModified = True
+        if subtypeSpec is None or subtypeSpec is noValue:
             subtypeSpec = self._subtypeSpec
-        if namedValues is None:
+        else:
+            isModified = True
+        if namedValues is None or namedValues is noValue:
             namedValues = self.__namedValues
-        return self.__class__(value, tagSet, subtypeSpec, namedValues)
+        else:
+            isModified = True
+
+        if isModified:
+            return self.__class__(value, tagSet, subtypeSpec, namedValues)
+        else:
+            return self
 
     def subtype(self, value=noValue, implicitTag=None, explicitTag=None,
                 subtypeSpec=None, namedValues=None):
@@ -321,23 +333,35 @@ class Integer(base.AbstractSimpleAsn1Item):
         :
             new instance of |ASN.1| type/value
         """
-        if self.isNoValue(value):
+        isModified = False
+
+        if value is None or value is noValue:
             value = self._value
-        if implicitTag is not None:
+        else:
+            isModified = True
+        if implicitTag is not None and implicitTag is not noValue:
             tagSet = self._tagSet.tagImplicitly(implicitTag)
-        elif explicitTag is not None:
+            isModified = True
+        elif explicitTag is not None and explicitTag is not noValue:
             tagSet = self._tagSet.tagExplicitly(explicitTag)
+            isModified = True
         else:
             tagSet = self._tagSet
-        if subtypeSpec is None:
+        if subtypeSpec is None or subtypeSpec is noValue:
             subtypeSpec = self._subtypeSpec
         else:
             subtypeSpec = self._subtypeSpec + subtypeSpec
-        if namedValues is None:
+            isModified = True
+        if namedValues is None or namedValues is noValue:
             namedValues = self.__namedValues
         else:
             namedValues = namedValues + self.__namedValues
-        return self.__class__(value, tagSet, subtypeSpec, namedValues)
+            isModified = True
+
+        if isModified:
+            return self.__class__(value, tagSet, subtypeSpec, namedValues)
+        else:
+            return self
 
 
 class Boolean(Integer):
@@ -433,19 +457,16 @@ class BitString(base.AbstractSimpleAsn1Item):
             self.__namedValues = self.namedValues
         else:
             self.__namedValues = namedValues
-        if not self.isNoValue(binValue):
+        if binValue is not noValue:
             value = self.fromBinaryString(binValue)
-        if not self.isNoValue(hexValue):
+        elif hexValue is not noValue:
             value = self.fromHexString(hexValue)
-        if self.isNoValue(value):
+        elif value is None or value is noValue:
             if self.defaultBinValue is not noValue:
                 value = self.fromBinaryString(self.defaultBinValue)
             elif self.defaultHexValue is not noValue:
                 value = self.fromHexString(self.defaultHexValue)
-        self.__asNumbersCache = {}
-        base.AbstractSimpleAsn1Item.__init__(
-            self, value, tagSet, subtypeSpec
-        )
+        base.AbstractSimpleAsn1Item.__init__(self, value, tagSet, subtypeSpec)
 
     def clone(self, value=noValue, tagSet=None, subtypeSpec=None,
               namedValues=None, binValue=noValue, hexValue=noValue):
@@ -482,17 +503,29 @@ class BitString(base.AbstractSimpleAsn1Item):
         :
             new instance of |ASN.1| type/value
         """
-        if self.isNoValue(value, binValue, hexValue):
-            if self.isNoValue(tagSet, subtypeSpec, namedValues):
-                return self
+        isModified = False
+
+        if (value is None or value is noValue) and binValue is noValue and hexValue is noValue:
             value = self._value
-        if tagSet is None:
+        else:
+            isModified = True
+        if tagSet is None or tagSet is noValue:
             tagSet = self._tagSet
-        if subtypeSpec is None:
+        else:
+            isModified = True
+        if subtypeSpec is None or subtypeSpec is noValue:
             subtypeSpec = self._subtypeSpec
-        if namedValues is None:
+        else:
+            isModified = True
+        if namedValues is None or namedValues is noValue:
             namedValues = self.__namedValues
-        return self.__class__(value, tagSet, subtypeSpec, namedValues, binValue, hexValue)
+        else:
+            isModified = True
+
+        if isModified:
+            return self.__class__(value, tagSet, subtypeSpec, namedValues, binValue, hexValue)
+        else:
+            return self
 
     def subtype(self, value=noValue, implicitTag=None, explicitTag=None,
                 subtypeSpec=None, namedValues=None, binValue=noValue, hexValue=noValue):
@@ -539,25 +572,35 @@ class BitString(base.AbstractSimpleAsn1Item):
         :
             new instance of |ASN.1| type/value
         """
-        if self.isNoValue(value, binValue, hexValue):
-            if self.isNoValue(implicitTag, explicitTag, subtypeSpec, namedValues):
-                return self
+        isModified = False
+
+        if (value is None or value is noValue) and binValue is noValue and hexValue is noValue:
             value = self._value
-        if implicitTag is not None:
+        else:
+            isModified = True
+        if implicitTag is not None and implicitTag is not noValue:
             tagSet = self._tagSet.tagImplicitly(implicitTag)
-        elif explicitTag is not None:
+            isModified = True
+        elif explicitTag is not None and explicitTag is not noValue:
             tagSet = self._tagSet.tagExplicitly(explicitTag)
+            isModified = True
         else:
             tagSet = self._tagSet
-        if subtypeSpec is None:
+        if subtypeSpec is None or subtypeSpec is noValue:
             subtypeSpec = self._subtypeSpec
         else:
             subtypeSpec = self._subtypeSpec + subtypeSpec
-        if namedValues is None:
+            isModified = True
+        if namedValues is None or namedValues is noValue:
             namedValues = self.__namedValues
         else:
             namedValues = namedValues + self.__namedValues
-        return self.__class__(value, tagSet, subtypeSpec, namedValues, binValue, hexValue)
+            isModified = True
+
+        if isModified:
+            return self.__class__(value, tagSet, subtypeSpec, namedValues, binValue, hexValue)
+        else:
+            return self
 
     def __str__(self):
         return self.asBinary()
@@ -820,11 +863,11 @@ class OctetString(base.AbstractSimpleAsn1Item):
             self._encoding = self.encoding
         else:
             self._encoding = encoding
-        if not self.isNoValue(binValue):
+        if binValue is not noValue:
             value = self.fromBinaryString(binValue)
-        if not self.isNoValue(hexValue):
+        elif hexValue is not noValue:
             value = self.fromHexString(hexValue)
-        if self.isNoValue(value):
+        elif value is None or value is noValue:
             if self.defaultBinValue is not noValue:
                 value = self.fromBinaryString(self.defaultBinValue)
             elif self.defaultHexValue is not noValue:
@@ -867,19 +910,29 @@ class OctetString(base.AbstractSimpleAsn1Item):
         :
             new instance of |ASN.1| type/value
         """
-        if self.isNoValue(value, binValue, hexValue):
-            if self.isNoValue(tagSet, subtypeSpec, encoding):
-                return self
+        isModified = False
+
+        if (value is None or value is noValue) and binValue is noValue and hexValue is noValue:
             value = self._value
-        if tagSet is None:
+        else:
+            isModified = True
+        if tagSet is None or tagSet is noValue:
             tagSet = self._tagSet
-        if subtypeSpec is None:
+        else:
+            isModified = True
+        if subtypeSpec is None or subtypeSpec is noValue:
             subtypeSpec = self._subtypeSpec
-        if encoding is None:
+        else:
+            isModified = True
+        if encoding is None or encoding is noValue:
             encoding = self._encoding
-        return self.__class__(
-            value, tagSet, subtypeSpec, encoding, binValue, hexValue
-        )
+        else:
+            isModified = True
+
+        if isModified:
+            return self.__class__(value, tagSet, subtypeSpec, encoding, binValue, hexValue)
+        else:
+            return self
 
     def subtype(self, value=noValue, implicitTag=None, explicitTag=None,
                 subtypeSpec=None, encoding=None, binValue=noValue,
@@ -925,25 +978,34 @@ class OctetString(base.AbstractSimpleAsn1Item):
         :
              new instance of |ASN.1| type/value
         """
-        if self.isNoValue(value, binValue, hexValue):
-            if self.isNoValue(implicitTag, explicitTag, subtypeSpec, encoding):
-                return self
+        isModified = False
+
+        if (value is None or value is noValue) and binValue is noValue and hexValue is noValue:
             value = self._value
-        if implicitTag is not None:
+        else:
+            isModified = True
+        if implicitTag is not None and implicitTag is not noValue:
             tagSet = self._tagSet.tagImplicitly(implicitTag)
-        elif explicitTag is not None:
+            isModified = True
+        elif explicitTag is not None and explicitTag is not noValue:
             tagSet = self._tagSet.tagExplicitly(explicitTag)
+            isModified = True
         else:
             tagSet = self._tagSet
-        if subtypeSpec is None:
+        if subtypeSpec is None or subtypeSpec is noValue:
             subtypeSpec = self._subtypeSpec
         else:
             subtypeSpec = self._subtypeSpec + subtypeSpec
-        if encoding is None:
+            isModified = True
+        if encoding is None or encoding is noValue:
             encoding = self._encoding
-        return self.__class__(
-            value, tagSet, subtypeSpec, encoding, binValue, hexValue
-        )
+        else:
+            isModified = True
+
+        if isModified:
+            return self.__class__(value, tagSet, subtypeSpec, encoding, binValue, hexValue)
+        else:
+            return self
 
     if sys.version_info[0] <= 2:
         def prettyIn(self, value):
@@ -1799,7 +1861,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         elif idx >= componentValuesLength:
             self._componentValues.extend([None for x in range((idx - componentValuesLength + 1))])
 
-        if self.isNoValue(value):
+        if value is None or value is noValue:
             if self._componentValues[idx] is None:
                 if componentType is None:
                     raise error.PyAsn1Error('Component type not defined')
@@ -2101,7 +2163,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             else:
                 self._componentValues.extend([None] * (idx - componentValuesLength + 1))
 
-        if self.isNoValue(value):
+        if value is None or value is noValue:
             if self._componentValues[idx] is None:
                 if componentType is None:
                     raise error.PyAsn1Error('%s instance value required' % componentType.__class__.__name__)
@@ -2483,7 +2545,7 @@ class Choice(Set):
         if self._currentIdx is not None:
             self._componentValues[self._currentIdx] = None
 
-        if self.isNoValue(value):
+        if value is None or value is noValue:
             if self._componentValues[idx] is None:
                 self._componentValues[idx] = self._componentType.getTypeByPosition(idx).clone()
                 self._componentValuesSet = 1

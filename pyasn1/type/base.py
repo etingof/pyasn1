@@ -168,10 +168,8 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
 
     def __init__(self, value=noValue, tagSet=None, subtypeSpec=None):
         Asn1ItemBase.__init__(self, tagSet, subtypeSpec)
-        if self.isNoValue(value):
+        if value is None or value is noValue:
             value = self.defaultValue
-        if self.isNoValue(value):
-            self.__hashedValue = value = noValue
         else:
             value = self.prettyIn(value)
             self._verifySubtypeSpec(value)
@@ -218,7 +216,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
             return bool(self._value)
 
     def __hash__(self):
-        return self.__hashedValue is noValue and hash(noValue) or self.__hashedValue
+        return self._value is noValue and hash(noValue) or self.__hashedValue
 
     def hasValue(self):
         """Indicate if |ASN.1| object represents ASN.1 value or ASN.1 type.
@@ -262,15 +260,25 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
           :
               new instance of |ASN.1| type/value
         """
-        if self.isNoValue(value):
-            if self.isNoValue(tagSet, subtypeSpec):
-                return self
+        isModified = False
+
+        if value is None or value is noValue:
             value = self._value
-        if tagSet is None:
+        else:
+            isModified = True
+        if tagSet is None or tagSet is noValue:
             tagSet = self._tagSet
-        if subtypeSpec is None:
+        else:
+            isModified = True
+        if subtypeSpec is None or subtypeSpec is noValue:
             subtypeSpec = self._subtypeSpec
-        return self.__class__(value, tagSet, subtypeSpec)
+        else:
+            isModified = True
+
+        if isModified:
+            return self.__class__(value, tagSet, subtypeSpec)
+        else:
+            return self
 
     def subtype(self, value=noValue, implicitTag=None, explicitTag=None,
                 subtypeSpec=None):
@@ -304,19 +312,30 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
          :
              new instance of |ASN.1| type/value
          """
-        if self.isNoValue(value):
+        isModified = False
+
+        if value is None or value is noValue:
             value = self._value
-        if implicitTag is not None:
+        else:
+            isModified = True
+        if implicitTag is not None and implicitTag is not noValue:
             tagSet = self._tagSet.tagImplicitly(implicitTag)
-        elif explicitTag is not None:
+            isModified = True
+        elif explicitTag is not None and explicitTag is not noValue:
             tagSet = self._tagSet.tagExplicitly(explicitTag)
+            isModified = True
         else:
             tagSet = self._tagSet
-        if subtypeSpec is None:
+        if subtypeSpec is None or subtypeSpec is noValue:
             subtypeSpec = self._subtypeSpec
         else:
             subtypeSpec = self._subtypeSpec + subtypeSpec
-        return self.__class__(value, tagSet, subtypeSpec)
+            isModified = True
+
+        if isModified:
+            return self.__class__(value, tagSet, subtypeSpec)
+        else:
+            return self
 
     def prettyIn(self, value):
         return value
@@ -413,7 +432,7 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         representation = '%s(%s)' % (self.__class__.__name__, ', '.join(representation))
         if self._componentValues:
             for idx, component in enumerate(self._componentValues):
-                if self.isNoValue(component):
+                if component is None or component is noValue:
                     continue
                 representation += '.setComponentByPosition(%d, %s)' % (idx, repr(component))
         return representation
@@ -507,17 +526,17 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
             new instance of |ASN.1| type/value
 
         """
-        if implicitTag is not None:
+        if implicitTag is not None and implicitTag is not noValue:
             tagSet = self._tagSet.tagImplicitly(implicitTag)
-        elif explicitTag is not None:
+        elif explicitTag is not None and explicitTag is not noValue:
             tagSet = self._tagSet.tagExplicitly(explicitTag)
         else:
             tagSet = self._tagSet
-        if subtypeSpec is None:
+        if subtypeSpec is None or subtypeSpec is noValue:
             subtypeSpec = self._subtypeSpec
         else:
             subtypeSpec = self._subtypeSpec + subtypeSpec
-        if sizeSpec is None:
+        if sizeSpec is None or sizeSpec is noValue:
             sizeSpec = self._sizeSpec
         else:
             sizeSpec = sizeSpec + self._sizeSpec
