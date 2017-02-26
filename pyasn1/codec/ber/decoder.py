@@ -6,7 +6,7 @@
 #
 from pyasn1.type import base, tag, univ, char, useful, tagmap
 from pyasn1.codec.ber import eoo
-from pyasn1.compat.octets import oct2int, octs2ints, isOctetsType
+from pyasn1.compat.octets import oct2int, octs2ints, isOctetsType, ensureString
 from pyasn1.compat.integer import from_bytes
 from pyasn1 import debug, error
 
@@ -553,8 +553,7 @@ class AnyDecoder(AbstractSimpleDecoder):
             return substrateFun(asn1Object, substrate, length)
         while substrate:
             component, substrate = decodeFun(substrate, asn1Spec, allowEoo=True)
-            if eoo.endOfOctets.isSameTypeWith(component) and \
-                    component == eoo.endOfOctets:
+            if eoo.endOfOctets.isSameTypeWith(component) and component == eoo.endOfOctets:
                 break
             asn1Object = asn1Object + component
         else:
@@ -686,10 +685,8 @@ class Decoder(object):
                  substrateFun=None, allowEoo=False):
         if debug.logger & debug.flagDecoder:
             debug.logger('decoder called at scope %s with state %d, working with up to %d octets of substrate: %s' % (debug.scope, state, len(substrate), debug.hexdump(substrate)))
-        if asn1Spec is not None and not isinstance(asn1Spec, (base.Asn1Item, tagmap.TagMap)):
-            raise error.PyAsn1Error(
-                'asn1Spec is not valid (should be an instance of an ASN.1 Item, not %s)' % asn1Spec.__class__.__name__)
 
+        substrate = ensureString(substrate)
         value = base.noValue
 
         fullSubstrate = substrate
@@ -699,8 +696,6 @@ class Decoder(object):
                     raise error.SubstrateUnderrunError(
                         'Short octet stream on tag decoding'
                     )
-                if not isOctetsType(substrate) and not isinstance(substrate, univ.OctetString):
-                    raise error.PyAsn1Error('Bad octet stream type')
                 # Decode tag
                 firstOctet = substrate[0]
                 substrate = substrate[1:]
@@ -838,7 +833,7 @@ class Decoder(object):
                     debug.scope.push(
                         concreteDecoder is None and '?' or concreteDecoder.protoComponent.__class__.__name__)
             if state == stGetValueDecoderByAsn1Spec:
-                if isinstance(asn1Spec, (dict, tagmap.TagMap)):
+                if asn1Spec.__class__ is dict or asn1Spec.__class__ is tagmap.TagMap:
                     if tagSet in asn1Spec:
                         __chosenSpec = asn1Spec[tagSet]
                     else:

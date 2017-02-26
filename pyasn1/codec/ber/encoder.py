@@ -421,8 +421,6 @@ class Encoder(object):
         self.__typeMap = typeMap
 
     def __call__(self, value, defMode=True, maxChunkSize=0):
-        if not isinstance(value, base.Asn1Item):
-            raise error.PyAsn1Error('value is not valid (should be an instance of an ASN.1 Item)')
         if not defMode and not self.supportIndefLength:
             raise error.PyAsn1Error('Indefinite length encoding not supported by this codec')
         debug.logger & debug.flagEncoder and debug.logger(

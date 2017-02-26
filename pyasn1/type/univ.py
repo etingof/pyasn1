@@ -222,26 +222,21 @@ class Integer(base.AbstractSimpleAsn1Item):
         return self._value >= value
 
     def prettyIn(self, value):
-        if not octets.isStringType(value):
-            try:
-                return int(value)
-            except:
-                raise error.PyAsn1Error(
-                    'Can\'t coerce %r into integer: %s' % (value, sys.exc_info()[1])
-                )
-        r = self.__namedValues.getValue(value)
-        if r is not None:
-            return r
         try:
             return int(value)
-        except:
+
+        except ValueError:
+            valueOfName = self.__namedValues.getValue(value)
+            if valueOfName is not None:
+                return valueOfName
+
             raise error.PyAsn1Error(
                 'Can\'t coerce %r into integer: %s' % (value, sys.exc_info()[1])
             )
 
     def prettyOut(self, value):
-        r = self.__namedValues.getName(value)
-        return r is None and str(value) or repr(r)
+        nameOfValue = self.__namedValues.getName(value)
+        return nameOfValue is None and str(value) or repr(nameOfValue)
 
     def getNamedValues(self):
         return self.__namedValues

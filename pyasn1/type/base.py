@@ -173,7 +173,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         else:
             value = self.prettyIn(value)
             self._verifySubtypeSpec(value)
-            self.__hashedValue = hash(value)
+            self.__hashedValue = None
         self._value = value
         self._len = None
 
@@ -216,7 +216,9 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
             return bool(self._value)
 
     def __hash__(self):
-        return self._value is noValue and hash(noValue) or self.__hashedValue
+        if self.__hashedValue is None:
+            self.__hashedValue = hash(self._value)
+        return self.__hashedValue
 
     def hasValue(self):
         """Indicate if |ASN.1| object represents ASN.1 value or ASN.1 type.
