@@ -2,6 +2,7 @@
 Revision 0.2.4, released XX-03-2017
 -----------------------------------
 
+- A bunch of minor performance improvement at many places.
 
 Revision 0.2.3, released 25-02-2017
 -----------------------------------
