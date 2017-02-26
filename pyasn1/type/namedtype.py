@@ -139,10 +139,11 @@ class NamedTypes(object):
         return self.__class__(*self.__namedTypes)
 
     def getTypeByPosition(self, idx):
-        if idx < 0 or idx >= self.__namedTypesLen:
-            raise error.PyAsn1Error('Type position out of range')
-        else:
+        try:
             return self.__namedTypes[idx].getType()
+
+        except IndexError:
+            raise error.PyAsn1Error('Type position out of range')
 
     def getPositionByType(self, tagSet):
         if not self.__tagToPosIdx:

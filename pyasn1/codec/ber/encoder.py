@@ -344,7 +344,7 @@ class SequenceEncoder(AbstractItemEncoder):
         idx = len(value)
         while idx > 0:
             idx -= 1
-            if value[idx] is None:  # Optional component
+            if value.getComponentByPosition(idx) is None:  # Optional component
                 continue
             component = value.getDefaultComponentByPosition(idx)
             if component is not None and component == value[idx]:
