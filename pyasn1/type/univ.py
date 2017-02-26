@@ -2156,10 +2156,10 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         componentValuesLength = len(self._componentValues)
 
         if idx >= componentValuesLength:
-            if componentValuesLength < self._componentTypeLen:
-                self._componentValues = [None] * self._componentTypeLen
-            else:
+            if componentValuesLength or not self._componentTypeLen:
                 self._componentValues.extend([None] * (idx - componentValuesLength + 1))
+            else:
+                self._componentValues = [None] * self._componentTypeLen
 
         if value is None or value is noValue:
             if self._componentValues[idx] is None:
@@ -2535,10 +2535,10 @@ class Choice(Set):
         componentValuesLength = len(self._componentValues)
 
         if idx >= componentValuesLength:
-            if componentValuesLength < self._componentTypeLen:
-                self._componentValues = [None] * self._componentTypeLen
-            else:
+            if componentValuesLength or not self._componentTypeLen:
                 self._componentValues.extend([None] * (idx - componentValuesLength + 1))
+            else:
+                self._componentValues = [None] * self._componentTypeLen
 
         if self._currentIdx is not None:
             self._componentValues[self._currentIdx] = None
