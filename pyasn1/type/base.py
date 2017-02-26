@@ -180,14 +180,14 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         self._len = None
 
     def __repr__(self):
-        r = []
+        representation = []
         if self._value is not self.defaultValue:
-            r.append(self.prettyOut(self._value))
+            representation.append(self.prettyOut(self._value))
         if self._tagSet is not self.tagSet:
-            r.append('tagSet=%r' % (self._tagSet,))
+            representation.append('tagSet=%r' % (self._tagSet,))
         if self._subtypeSpec is not self.subtypeSpec:
-            r.append('subtypeSpec=%r' % (self._subtypeSpec,))
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(r))
+            representation.append('subtypeSpec=%r' % (self._subtypeSpec,))
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(representation))
 
     def __str__(self):
         return str(self._value)
@@ -303,7 +303,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
          -------
          :
              new instance of |ASN.1| type/value
-        """
+         """
         if self.isNoValue(value):
             value = self._value
         if implicitTag is not None:
@@ -403,17 +403,20 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         self._componentValuesSet = 0
 
     def __repr__(self):
-        r = []
+        representation = []
         if self._componentType is not self.componentType:
-            r.append('componentType=%r' % (self._componentType,))
+            representation.append('componentType=%r' % (self._componentType,))
         if self._tagSet is not self.tagSet:
-            r.append('tagSet=%r' % (self._tagSet,))
+            representation.append('tagSet=%r' % (self._tagSet,))
         if self._subtypeSpec is not self.subtypeSpec:
-            r.append('subtypeSpec=%r' % (self._subtypeSpec,))
-        r = '%s(%s)' % (self.__class__.__name__, ', '.join(r))
+            representation.append('subtypeSpec=%r' % (self._subtypeSpec,))
+        representation = '%s(%s)' % (self.__class__.__name__, ', '.join(representation))
         if self._componentValues:
-            r += '.setComponents(%s)' % ', '.join([repr(x) for x in self._componentValues])
-        return r
+            for idx, component in enumerate(self._componentValues):
+                if self.isNoValue(component):
+                    continue
+                representation += '.setComponentByPosition(%d, %s)' % (idx, repr(component))
+        return representation
 
     def __eq__(self, other):
         return self is other and True or self._componentValues == other

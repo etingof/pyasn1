@@ -1085,9 +1085,7 @@ class Set(unittest.TestCase):
         }
 
     def testGetPositionByType(self):
-        assert self.s1.getComponentPositionByType(
-            univ.Null().getTagSet()
-        ) == 1
+        assert self.s1.getComponentPositionByType(univ.Null().getTagSet()) == 1
 
     def testSetToDefault(self):
         self.s1.setComponentByName('name', univ.noValue)

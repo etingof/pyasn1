@@ -28,25 +28,25 @@ class NamedType(object):
         )
 
     def __eq__(self, other):
-        return tuple(self) == tuple(other)
+        return (self.__name, self.__type) == other
 
     def __ne__(self, other):
-        return tuple(self) != tuple(other)
+        return (self.__name, self.__type) != other
 
     def __lt__(self, other):
-        return tuple(self) < tuple(other)
+        return (self.__name, self.__type) < other
 
     def __le__(self, other):
-        return tuple(self) <= tuple(other)
+        return (self.__name, self.__type) <= other
 
     def __gt__(self, other):
-        return tuple(self) > tuple(other)
+        return (self.__name, self.__type) > other
 
     def __ge__(self, other):
-        return tuple(self) >= tuple(other)
+        return (self.__name, self.__type) >= other
 
     def __hash__(self):
-        return hash(tuple(self))
+        return hash((self.__name, self.__type))
 
     def getType(self):
         return self.__type
@@ -60,6 +60,10 @@ class NamedType(object):
         if idx == 1:
             return self.__type
         raise IndexError()
+
+    def __iter__(self):
+        yield self.__name
+        yield self.__type
 
 
 class OptionalNamedType(NamedType):
@@ -87,25 +91,25 @@ class NamedTypes(object):
         )
 
     def __eq__(self, other):
-        return tuple(self) == tuple(other)
+        return self.__namedTypes == other
 
     def __ne__(self, other):
-        return tuple(self) != tuple(other)
+        return self.__namedTypes != other
 
     def __lt__(self, other):
-        return tuple(self) < tuple(other)
+        return self.__namedTypes < other
 
     def __le__(self, other):
-        return tuple(self) <= tuple(other)
+        return self.__namedTypes <= other
 
     def __gt__(self, other):
-        return tuple(self) > tuple(other)
+        return self.__namedTypes > other
 
     def __ge__(self, other):
-        return tuple(self) >= tuple(other)
+        return self.__namedTypes >= other
 
     def __hash__(self):
-        return hash(tuple(self))
+        return hash(self.__namedTypes)
 
     def __getitem__(self, idx):
         if octets.isStringType(idx):
@@ -123,10 +127,10 @@ class NamedTypes(object):
 
     if sys.version_info[0] <= 2:
         def __nonzero__(self):
-            return bool(self.__namedTypesLen)
+            return self.__namedTypesLen > 0
     else:
         def __bool__(self):
-            return bool(self.__namedTypesLen)
+            return self.__namedTypesLen > 0
 
     def __len__(self):
         return self.__namedTypesLen

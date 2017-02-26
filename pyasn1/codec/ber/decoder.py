@@ -692,8 +692,7 @@ class Decoder(object):
                     raise error.SubstrateUnderrunError(
                         'Short octet stream on tag decoding'
                     )
-                if not isOctetsType(substrate) and \
-                        not isinstance(substrate, univ.OctetString):
+                if not isOctetsType(substrate) and not isinstance(substrate, univ.OctetString):
                     raise error.PyAsn1Error('Bad octet stream type')
                 # Decode tag
                 firstOctet = substrate[0]
