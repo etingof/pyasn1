@@ -16,10 +16,10 @@ __all__ = ['encode']
 class BooleanEncoder(encoder.IntegerEncoder):
     def encodeValue(self, encodeFun, client, defMode, maxChunkSize):
         if client == 0:
-            substrate = int2oct(0)
+            substrate = (0,)
         else:
-            substrate = int2oct(255)
-        return substrate, 0
+            substrate = (255,)
+        return substrate, False, False
 
 
 class BitStringEncoder(encoder.BitStringEncoder):
@@ -118,7 +118,7 @@ class SetOfEncoder(encoder.SequenceOfEncoder):
             substrate = null
             for compSub in compSubs:
                 substrate += compSub
-        return substrate, 1
+        return substrate, True, True
 
 
 tagMap = encoder.tagMap.copy()

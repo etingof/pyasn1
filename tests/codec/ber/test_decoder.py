@@ -16,16 +16,6 @@ from pyasn1.compat.octets import ints2octs, str2octs, null
 from pyasn1.error import PyAsn1Error
 
 
-class BadAsn1SpecTestCase(unittest.TestCase):
-    def testBadSpec(self):
-        try:
-            decoder.decode(ints2octs((48, 2, 5, 0)), asn1Spec='not an Asn1Item')
-        except PyAsn1Error:
-            pass
-        else:
-            assert 0, 'Invalid asn1Spec accepted'
-
-
 class LargeTagDecoderTestCase(unittest.TestCase):
     def testLargeTag(self):
         assert decoder.decode(ints2octs((127, 141, 245, 182, 253, 47, 3, 2, 1, 1))) == (1, null)
