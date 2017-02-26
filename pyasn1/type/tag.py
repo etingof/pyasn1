@@ -4,7 +4,6 @@
 # Copyright (c) 2005-2017, Ilya Etingof <etingof@gmail.com>
 # License: http://pyasn1.sf.net/license.html
 #
-from operator import getitem
 from pyasn1 import error
 
 __all__ = ['tagClassUniversal', 'tagClassApplication', 'tagClassContext',
@@ -138,12 +137,11 @@ class TagSet(object):
     def getBaseTag(self):
         return self.__baseTag
 
-    def __getitem__(self, idx):
-        if isinstance(idx, slice):
-            return self.__class__(
-                self.__baseTag, *getitem(self.__superTags, idx)
-            )
-        return self.__superTags[idx]
+    def __getitem__(self, i):
+        if i.__class__ is slice:
+            return self.__class__(self.__baseTag, *self.__superTags[i])
+        else:
+            return self.__superTags[i]
 
     def __eq__(self, other):
         return self.uniq == other.uniq

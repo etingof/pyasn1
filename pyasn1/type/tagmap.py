@@ -17,18 +17,18 @@ class TagMap(object):
         self.__defType = defType
 
     def __contains__(self, tagSet):
-        return tagSet in self.__posMap or \
-               self.__defType is not None and tagSet not in self.__negMap
+        return tagSet in self.__posMap or self.__defType is not None and tagSet not in self.__negMap
 
     def __getitem__(self, tagSet):
-        if tagSet in self.__posMap:
+        try:
             return self.__posMap[tagSet]
-        elif tagSet in self.__negMap:
-            raise error.PyAsn1Error('Key in negative map')
-        elif self.__defType is not None:
-            return self.__defType
-        else:
-            raise KeyError()
+        except KeyError:
+            if tagSet in self.__negMap:
+                raise error.PyAsn1Error('Key in negative map')
+            elif self.__defType is not None:
+                return self.__defType
+            else:
+                raise KeyError()
 
     def __repr__(self):
         s = self.__class__.__name__ + '('
