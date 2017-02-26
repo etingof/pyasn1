@@ -2162,6 +2162,9 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                     raise error.PyAsn1Error('%s instance value required' % componentType.__class__.__name__)
                 self._componentValues[idx] = componentType.clone()
                 self._componentValuesSet += 1
+            else:
+                self._componentValues[idx] = None
+                self._componentValuesSet -= 1
             return self
         elif not isinstance(value, base.Asn1Item):
             if componentType is None:
@@ -2543,6 +2546,10 @@ class Choice(Set):
                 self._componentValues[idx] = self._componentType.getTypeByPosition(idx).clone()
                 self._componentValuesSet = 1
                 self._currentIdx = idx
+            else:
+                self._componentValues[idx] = None
+                self._currentIdx = None
+                self._componentValuesSet = 0
             return self
         elif not isinstance(value, base.Asn1Item):
             value = self._componentType.getTypeByPosition(idx).clone(value=value)
