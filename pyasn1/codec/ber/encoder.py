@@ -17,8 +17,8 @@ class AbstractItemEncoder(object):
     supportIndefLenMode = 1
 
     # noinspection PyMethodMayBeStatic
-    def encodeTag(self, t, isConstructed):
-        tagClass, tagFormat, tagId = t.asTuple()  # this is a hotspot
+    def encodeTag(self, singleTag, isConstructed):
+        tagClass, tagFormat, tagId = singleTag.asTuple()
         v = tagClass | tagFormat
         if isConstructed:
             v |= tag.tagFormatConstructed
@@ -121,20 +121,21 @@ class IntegerEncoder(AbstractItemEncoder):
 
 class BitStringEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
-        if len(value) % 8:
-            alignedValue = value << (8 - len(value) % 8)
+        valueLength = len(value)
+        if valueLength % 8:
+            alignedValue = value << (8 - valueLength % 8)
         else:
             alignedValue = value
 
         if not maxChunkSize or len(alignedValue) <= maxChunkSize * 8:
             substrate = alignedValue.asOctets()
-            return int2oct(len(substrate) * 8 - len(value)) + substrate, False, True
+            return int2oct(len(substrate) * 8 - valueLength) + substrate, False, True
 
         stop = 0
         substrate = null
-        while stop < len(value):
+        while stop < valueLength:
             start = stop
-            stop = min(start + maxChunkSize * 8, len(value))
+            stop = min(start + maxChunkSize * 8, valueLength)
             substrate += encodeFun(alignedValue[start:stop], defMode, maxChunkSize)
 
         return substrate, True, True
@@ -169,14 +170,15 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
 
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         oid = value.asTuple()
-        if len(oid) < 2:
-            raise error.PyAsn1Error('Short OID %s' % (value,))
-
-        octets = ()
 
         # Build the first pair
-        first = oid[0]
-        second = oid[1]
+        try:
+            first = oid[0]
+            second = oid[1]
+
+        except IndexError:
+            raise error.PyAsn1Error('Short OID %s' % (value,))
+
         if 0 <= second <= 39:
             if first == 1:
                 oid = (second + 40,) + oid[2:]
@@ -190,6 +192,8 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
             oid = (second + 80,) + oid[2:]
         else:
             raise error.PyAsn1Error('Impossible first/second arcs at %s' % (value,))
+
+        octets = ()
 
         # Cycle through subIds
         for subOid in oid:
@@ -431,15 +435,17 @@ class Encoder(object):
         if len(tagSet) > 1:
             concreteEncoder = explicitlyTaggedItemEncoder
         else:
-            if value.typeId is not None and value.typeId in self.__typeMap:
-                concreteEncoder = self.__typeMap[value.typeId]
-            elif tagSet in self.__tagMap:
-                concreteEncoder = self.__tagMap[tagSet]
+            if value.typeId is None:
+                concreteEncoder = None
             else:
+                concreteEncoder = self.__typeMap.get(value.typeId, None)
+            if concreteEncoder is None:
+                concreteEncoder = self.__tagMap.get(tagSet, None)
+            if concreteEncoder is None:
                 tagSet = value.baseTagSet
-                if tagSet in self.__tagMap:
+                try:
                     concreteEncoder = self.__tagMap[tagSet]
-                else:
+                except KeyError:
                     raise error.PyAsn1Error('No encoder for %s' % (value,))
         debug.logger & debug.flagEncoder and debug.logger(
             'using value codec %s chosen by %s' % (concreteEncoder.__class__.__name__, tagSet))

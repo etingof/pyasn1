@@ -4,7 +4,6 @@
 # Copyright (c) 2005-2017, Ilya Etingof <etingof@gmail.com>
 # License: http://pyasn1.sf.net/license.html
 #
-import operator
 import sys
 import math
 from pyasn1.type import base, tag, constraint, namedtype, namedval, tagmap
@@ -201,7 +200,8 @@ class Integer(base.AbstractSimpleAsn1Item):
         return math.ceil(self._value)
 
     if sys.version_info[0:2] > (2, 5):
-        def __trunc__(self): return self.clone(math.trunc(self._value))
+        def __trunc__(self):
+            return self.clone(math.trunc(self._value))
 
     def __lt__(self, value):
         return self._value < value
