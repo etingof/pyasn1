@@ -2143,7 +2143,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         -------
         self
         """
-        if self._componentType:
+        if (matchTags or matchConstraints) and self._componentType:
             componentType = self._componentType.getTypeByPosition(idx)
         else:
             componentType = None
@@ -2528,7 +2528,10 @@ class Choice(Set):
         -------
         self
         """
-        componentType = self._componentType.getTypeByPosition(idx)
+        if matchTags or matchConstraints:
+            componentType = self._componentType.getTypeByPosition(idx)
+        else:
+            componentType = None
 
         componentValuesLength = len(self._componentValues)
 
@@ -2553,12 +2556,13 @@ class Choice(Set):
             return self
         elif not isinstance(value, base.Asn1Item):
             value = self._componentType.getTypeByPosition(idx).clone(value=value)
-        elif self.strictConstraints:
-            if not componentType.isSameTypeWith(value, matchTags, matchConstraints):
-                raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
-        else:
-            if not componentType.isSuperTypeOf(value, matchTags, matchConstraints):
-                raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
+        elif componentType is not None:
+            if self.strictConstraints:
+                if not componentType.isSameTypeWith(value, matchTags, matchConstraints):
+                    raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
+            else:
+                if not componentType.isSuperTypeOf(value, matchTags, matchConstraints):
+                    raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
 
         if verifyConstraints:
             self._verifySubtypeSpec(value, idx)
