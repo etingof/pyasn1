@@ -247,10 +247,11 @@ class RealEncoder(AbstractItemEncoder):
         encbase = 2
         e = float('inf')
         for i in range(3):
-            sign, mantissa[i], encBase[i], exponenta[i] = \
-                self._dropFloatingPoint(mantissa[i], encBase[i], exponenta[i])
-            if abs(exponenta[i]) < abs(e) or \
-                    (abs(exponenta[i]) == abs(e) and mantissa[i] < m):
+            (sign,
+             mantissa[i],
+             encBase[i],
+             exponenta[i]) = self._dropFloatingPoint(mantissa[i], encBase[i], exponenta[i])
+            if abs(exponenta[i]) < abs(e) or (abs(exponenta[i]) == abs(e) and mantissa[i] < m):
                 e = exponenta[i]
                 m = int(mantissa[i])
                 encbase = encBase[i]
@@ -365,7 +366,7 @@ class ChoiceEncoder(AbstractItemEncoder):
 
 class AnyEncoder(OctetStringEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
-        return value.asOctets(), defMode == 0
+        return value.asOctets(), defMode == False
 
 
 tagMap = {

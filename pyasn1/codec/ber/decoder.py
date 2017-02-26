@@ -76,8 +76,7 @@ class ExplicitTagDecoder(AbstractSimpleDecoder):
             )
         value, substrate = decodeFun(substrate, asn1Spec, tagSet, length)
         terminator, substrate = decodeFun(substrate, allowEoo=True)
-        if eoo.endOfOctets.isSameTypeWith(terminator) and \
-                terminator == eoo.endOfOctets:
+        if eoo.endOfOctets.isSameTypeWith(terminator) and terminator == eoo.endOfOctets:
             return value, substrate
         else:
             raise error.PyAsn1Error('Missing end-of-octets terminator')
@@ -174,31 +173,30 @@ class OctetStringDecoder(AbstractSimpleDecoder):
             return self._createComponent(asn1Spec, tagSet, head), tail
         if not self.supportConstructedForm:
             raise error.PyAsn1Error('Constructed encoding form prohibited at %s' % self.__class__.__name__)
-        r = self._createComponent(asn1Spec, tagSet, '')
+        asn1Object = self._createComponent(asn1Spec, tagSet, '')
         if substrateFun:
-            return substrateFun(r, substrate, length)
+            return substrateFun(asn1Object, substrate, length)
         while head:
             component, head = decodeFun(head, self.protoComponent)
-            r = r + component
-        return r, tail
+            asn1Object += component
+        return asn1Object, tail
 
     def indefLenValueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                              length, state, decodeFun, substrateFun):
-        r = self._createComponent(asn1Spec, tagSet, '')
+        asn1Object = self._createComponent(asn1Spec, tagSet, '')
         if substrateFun:
-            return substrateFun(r, substrate, length)
+            return substrateFun(asn1Object, substrate, length)
         while substrate:
             component, substrate = decodeFun(substrate, self.protoComponent,
                                              allowEoo=True)
-            if eoo.endOfOctets.isSameTypeWith(component) and \
-                    component == eoo.endOfOctets:
+            if eoo.endOfOctets.isSameTypeWith(component) and component == eoo.endOfOctets:
                 break
-            r = r + component
+            asn1Object += component
         else:
             raise error.SubstrateUnderrunError(
                 'No EOO seen before substrate ends'
             )
-        return r, substrate
+        return asn1Object, substrate
 
 
 class NullDecoder(AbstractSimpleDecoder):
@@ -337,62 +335,65 @@ class RealDecoder(AbstractSimpleDecoder):
 class SequenceDecoder(AbstractConstructedDecoder):
     protoComponent = univ.Sequence()
 
-    def _getComponentTagMap(self, r, idx):
+    def _getComponentTagMap(self, asn1Object, idx):
         try:
-            return r.getComponentTagMapNearPosition(idx)
+            return asn1Object.getComponentTagMapNearPosition(idx)
         except error.PyAsn1Error:
             return
 
-    def _getComponentPositionByType(self, r, t, idx):
-        return r.getComponentPositionNearType(t, idx)
+    def _getComponentPositionByType(self, asn1Object, tagSet, idx):
+        return asn1Object.getComponentPositionNearType(tagSet, idx)
 
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                      length, state, decodeFun, substrateFun):
         head, tail = substrate[:length], substrate[length:]
-        r = self._createComponent(asn1Spec, tagSet)
+        asn1Object = self._createComponent(asn1Spec, tagSet)
         idx = 0
         if substrateFun:
-            return substrateFun(r, substrate, length)
+            return substrateFun(asn1Object, substrate, length)
         while head:
-            asn1Spec = self._getComponentTagMap(r, idx)
+            asn1Spec = self._getComponentTagMap(asn1Object, idx)
             component, head = decodeFun(head, asn1Spec)
             idx = self._getComponentPositionByType(
-                r, component.getEffectiveTagSet(), idx
+                asn1Object, component.getEffectiveTagSet(), idx
             )
-            r.setComponentByPosition(idx, component,
-                                     verifyConstraints=False,
-                                     matchTags=False, matchConstraints=False)
+            asn1Object.setComponentByPosition(
+                idx, component,
+                verifyConstraints=False,
+                matchTags=False, matchConstraints=False
+            )
             idx += 1
-        r.setDefaultComponents()
-        r.verifySizeSpec()
-        return r, tail
+        asn1Object.setDefaultComponents()
+        asn1Object.verifySizeSpec()
+        return asn1Object, tail
 
     def indefLenValueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                              length, state, decodeFun, substrateFun):
-        r = self._createComponent(asn1Spec, tagSet)
+        asn1Object = self._createComponent(asn1Spec, tagSet)
         if substrateFun:
-            return substrateFun(r, substrate, length)
+            return substrateFun(asn1Object, substrate, length)
         idx = 0
         while substrate:
-            asn1Spec = self._getComponentTagMap(r, idx)
+            asn1Spec = self._getComponentTagMap(asn1Object, idx)
             component, substrate = decodeFun(substrate, asn1Spec, allowEoo=True)
-            if eoo.endOfOctets.isSameTypeWith(component) and \
-                    component == eoo.endOfOctets:
+            if eoo.endOfOctets.isSameTypeWith(component) and component == eoo.endOfOctets:
                 break
             idx = self._getComponentPositionByType(
-                r, component.getEffectiveTagSet(), idx
+                asn1Object, component.getEffectiveTagSet(), idx
             )
-            r.setComponentByPosition(idx, component,
-                                     verifyConstraints=False,
-                                     matchTags=False, matchConstraints=False)
+            asn1Object.setComponentByPosition(
+                idx, component,
+                verifyConstraints=False,
+                matchTags=False, matchConstraints=False
+            )
             idx += 1
         else:
             raise error.SubstrateUnderrunError(
                 'No EOO seen before substrate ends'
             )
-        r.setDefaultComponents()
-        r.verifySizeSpec()
-        return r, substrate
+        asn1Object.setDefaultComponents()
+        asn1Object.verifySizeSpec()
+        return asn1Object, substrate
 
 
 class SequenceOfDecoder(AbstractConstructedDecoder):
@@ -401,52 +402,55 @@ class SequenceOfDecoder(AbstractConstructedDecoder):
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                      length, state, decodeFun, substrateFun):
         head, tail = substrate[:length], substrate[length:]
-        r = self._createComponent(asn1Spec, tagSet)
+        asn1Object = self._createComponent(asn1Spec, tagSet)
         if substrateFun:
-            return substrateFun(r, substrate, length)
-        asn1Spec = r.getComponentType()
+            return substrateFun(asn1Object, substrate, length)
+        asn1Spec = asn1Object.getComponentType()
         idx = 0
         while head:
             component, head = decodeFun(head, asn1Spec)
-            r.setComponentByPosition(idx, component,
-                                     verifyConstraints=False,
-                                     matchTags=False, matchConstraints=False)
+            asn1Object.setComponentByPosition(
+                idx, component,
+                verifyConstraints=False,
+                matchTags=False, matchConstraints=False
+            )
             idx += 1
-        r.verifySizeSpec()
-        return r, tail
+        asn1Object.verifySizeSpec()
+        return asn1Object, tail
 
     def indefLenValueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                              length, state, decodeFun, substrateFun):
-        r = self._createComponent(asn1Spec, tagSet)
+        asn1Object = self._createComponent(asn1Spec, tagSet)
         if substrateFun:
-            return substrateFun(r, substrate, length)
-        asn1Spec = r.getComponentType()
+            return substrateFun(asn1Object, substrate, length)
+        asn1Spec = asn1Object.getComponentType()
         idx = 0
         while substrate:
             component, substrate = decodeFun(substrate, asn1Spec, allowEoo=True)
-            if eoo.endOfOctets.isSameTypeWith(component) and \
-                    component == eoo.endOfOctets:
+            if eoo.endOfOctets.isSameTypeWith(component) and component == eoo.endOfOctets:
                 break
-            r.setComponentByPosition(idx, component,
-                                     verifyConstraints=False,
-                                     matchTags=False, matchConstraints=False)
+            asn1Object.setComponentByPosition(
+                idx, component,
+                verifyConstraints=False,
+                matchTags=False, matchConstraints=False
+            )
             idx += 1
         else:
             raise error.SubstrateUnderrunError(
                 'No EOO seen before substrate ends'
             )
-        r.verifySizeSpec()
-        return r, substrate
+        asn1Object.verifySizeSpec()
+        return asn1Object, substrate
 
 
 class SetDecoder(SequenceDecoder):
     protoComponent = univ.Set()
 
-    def _getComponentTagMap(self, r, idx):
-        return r.getComponentTagMap()
+    def _getComponentTagMap(self, asn1Object, idx):
+        return asn1Object.getComponentTagMap()
 
-    def _getComponentPositionByType(self, r, t, idx):
-        nextIdx = r.getComponentPositionByType(t)
+    def _getComponentPositionByType(self, asn1Object, tagSet, idx):
+        nextIdx = asn1Object.getComponentPositionByType(tagSet)
         if nextIdx is None:
             return idx
         else:
@@ -464,52 +468,55 @@ class ChoiceDecoder(AbstractConstructedDecoder):
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                      length, state, decodeFun, substrateFun):
         head, tail = substrate[:length], substrate[length:]
-        r = self._createComponent(asn1Spec, tagSet)
+        asn1Object = self._createComponent(asn1Spec, tagSet)
         if substrateFun:
-            return substrateFun(r, substrate, length)
-        if r.getTagSet() == tagSet:  # explicitly tagged Choice
+            return substrateFun(asn1Object, substrate, length)
+        if asn1Object.getTagSet() == tagSet:  # explicitly tagged Choice
             component, head = decodeFun(
-                head, r.getComponentTagMap()
+                head, asn1Object.getComponentTagMap()
             )
         else:
             component, head = decodeFun(
-                head, r.getComponentTagMap(), tagSet, length, state
+                head, asn1Object.getComponentTagMap(), tagSet, length, state
             )
         if isinstance(component, univ.Choice):
             effectiveTagSet = component.getEffectiveTagSet()
         else:
             effectiveTagSet = component.getTagSet()
-        r.setComponentByType(effectiveTagSet, component,
-                             verifyConstraints=False,
-                             matchTags=False, matchConstraints=False,
-                             innerFlag=False)
-        return r, tail
+        asn1Object.setComponentByType(
+            effectiveTagSet, component,
+            verifyConstraints=False,
+            matchTags=False, matchConstraints=False,
+            innerFlag=False
+        )
+        return asn1Object, tail
 
     def indefLenValueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                              length, state, decodeFun, substrateFun):
-        r = self._createComponent(asn1Spec, tagSet)
+        asn1Object = self._createComponent(asn1Spec, tagSet)
         if substrateFun:
-            return substrateFun(r, substrate, length)
-        if r.getTagSet() == tagSet:  # explicitly tagged Choice
-            component, substrate = decodeFun(substrate, r.getComponentTagMap())
+            return substrateFun(asn1Object, substrate, length)
+        if asn1Object.getTagSet() == tagSet:  # explicitly tagged Choice
+            component, substrate = decodeFun(substrate, asn1Object.getComponentTagMap())
             # eat up EOO marker
             eooMarker, substrate = decodeFun(substrate, allowEoo=True)
-            if not eoo.endOfOctets.isSameTypeWith(eooMarker) or \
-                    eooMarker != eoo.endOfOctets:
+            if not eoo.endOfOctets.isSameTypeWith(eooMarker) or eooMarker != eoo.endOfOctets:
                 raise error.PyAsn1Error('No EOO seen before substrate ends')
         else:
             component, substrate = decodeFun(
-                substrate, r.getComponentTagMap(), tagSet, length, state
+                substrate, asn1Object.getComponentTagMap(), tagSet, length, state
             )
         if isinstance(component, univ.Choice):
             effectiveTagSet = component.getEffectiveTagSet()
         else:
             effectiveTagSet = component.getTagSet()
-        r.setComponentByType(effectiveTagSet, component,
-                             verifyConstraints=False,
-                             matchTags=False, matchConstraints=False,
-                             innerFlag=False)
-        return r, substrate
+        asn1Object.setComponentByType(
+            effectiveTagSet, component,
+            verifyConstraints=False,
+            matchTags=False, matchConstraints=False,
+            innerFlag=False
+        )
+        return asn1Object, substrate
 
 
 class AnyDecoder(AbstractSimpleDecoder):
@@ -537,24 +544,24 @@ class AnyDecoder(AbstractSimpleDecoder):
             # untagged Any, recover header substrate
             header = fullSubstrate[:-len(substrate)]
 
-        r = self._createComponent(asn1Spec, tagSet, header)
+        asn1Object = self._createComponent(asn1Spec, tagSet, header)
 
         # Any components do not inherit initial tag
         asn1Spec = self.protoComponent
 
         if substrateFun:
-            return substrateFun(r, substrate, length)
+            return substrateFun(asn1Object, substrate, length)
         while substrate:
             component, substrate = decodeFun(substrate, asn1Spec, allowEoo=True)
             if eoo.endOfOctets.isSameTypeWith(component) and \
                     component == eoo.endOfOctets:
                 break
-            r = r + component
+            asn1Object = asn1Object + component
         else:
             raise error.SubstrateUnderrunError(
                 'No EOO seen before substrate ends'
             )
-        return r, substrate
+        return asn1Object, substrate
 
 
 # character string types
