@@ -173,7 +173,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         else:
             value = self.prettyIn(value)
             self._verifySubtypeSpec(value)
-            self.__hashedValue = None
+        self.__hashedValue = None
         self._value = value
         self._len = None
 
