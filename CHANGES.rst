@@ -2,7 +2,15 @@
 Revision 0.2.4, released XX-03-2017
 -----------------------------------
 
-- A bunch of minor performance improvement at many places.
+- ASN.1 types initialization refactored to minimize the use of
+  relatively expensive isNoValue() call
+- Lazily pre-populate list of values of Sequence/Set/Choice types
+- NamedTypes comparison made more efficient
+- The __getitem__() implementation of some ASN.1 types & tag object
+  refactored for better performance
+- BER/CER/DER value encoders refactored to produce either tuple of
+  bytes or octetstream depending on what is more optimal
+- Reduced the frequency of expensive isinstance() calls
 
 Revision 0.2.3, released 25-02-2017
 -----------------------------------
