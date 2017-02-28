@@ -210,10 +210,10 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
 
     if sys.version_info[0] <= 2:
         def __nonzero__(self):
-            return bool(self._value)
+            return self._value and True or False
     else:
         def __bool__(self):
-            return bool(self._value)
+            return self._value and True or False
 
     def __hash__(self):
         if self.__hashedValue is None:
@@ -459,10 +459,10 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
 
     if sys.version_info[0] <= 2:
         def __nonzero__(self):
-            return bool(self._componentValues)
+            return self._componentValues and True or False
     else:
         def __bool__(self):
-            return bool(self._componentValues)
+            return self._componentValues and True or False
 
     def getComponentTagMap(self):
         raise error.PyAsn1Error('Method not implemented')

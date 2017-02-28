@@ -2458,10 +2458,10 @@ class Choice(Set):
 
     if sys.version_info[0] <= 2:
         def __nonzero__(self):
-            return bool(self._componentValues)
+            return self._componentValues and True or False
     else:
         def __bool__(self):
-            return bool(self._componentValues)
+            return self._componentValues and True or False
 
     def __len__(self):
         return self._currentIdx is not None and 1 or 0

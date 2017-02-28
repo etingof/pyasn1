@@ -61,10 +61,10 @@ class AbstractConstraint(object):
 
     if sys.version_info[0] <= 2:
         def __nonzero__(self):
-            return bool(self._values)
+            return self._values and True or False
     else:
         def __bool__(self):
-            return bool(self._values)
+            return self._values and True or False
 
     def __hash__(self):
         if self.__hashedValues is None:
