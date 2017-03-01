@@ -23,13 +23,17 @@ class AbstractConstraint(object):
     """
 
     def __init__(self, *values):
-        self._valueMap = {}
+        self._valueMap = set()
         self._setValues(values)
         self.__hashedValues = None
 
     def __call__(self, value, idx=None):
+        if not self._values:
+            return
+
         try:
             self._testValue(value, idx)
+
         except error.ValueConstraintError:
             raise error.ValueConstraintError(
                 '%s failed at: %r' % (self, sys.exc_info()[1])
@@ -82,20 +86,26 @@ class AbstractConstraint(object):
         return self._valueMap
 
     def isSuperTypeOf(self, otherConstraint):
-        return self in otherConstraint.getValueMap() or \
-               otherConstraint is self or otherConstraint == self
+        return (otherConstraint is self or
+                not self._values or
+                otherConstraint == self or
+                self in otherConstraint.getValueMap())
 
     def isSubTypeOf(self, otherConstraint):
-        return otherConstraint in self._valueMap or \
-               otherConstraint is self or otherConstraint == self
-
+        return (otherConstraint is self or
+                not self or
+                otherConstraint == self or
+                otherConstraint in self._valueMap)
 
 class SingleValueConstraint(AbstractConstraint):
     """Value must be part of defined values constraint"""
 
+    def _setValues(self, values):
+        self._values = values
+        self._set = set(values)
+
     def _testValue(self, value, idx):
-        # XXX index vals for performance?
-        if value not in self._values:
+        if value not in self._set:
             raise error.ValueConstraintError(value)
 
 
@@ -134,21 +144,19 @@ class ValueSizeConstraint(ValueRangeConstraint):
     """len(value) must be within start and stop values (inclusive)"""
 
     def _testValue(self, value, idx):
-        l = len(value)
-        if l < self.start or l > self.stop:
+        valueSize = len(value)
+        if valueSize < self.start or valueSize > self.stop:
             raise error.ValueConstraintError(value)
 
 
 class PermittedAlphabetConstraint(SingleValueConstraint):
     def _setValues(self, values):
-        self._values = ()
-        for v in values:
-            self._values = self._values + tuple(v)
+        self._values = values
+        self._set = set(values)
 
     def _testValue(self, value, idx):
-        for v in value:
-            if v not in self._values:
-                raise error.ValueConstraintError(value)
+        if not self._set.issuperset(value):
+            raise error.ValueConstraintError(value)
 
 
 # This is a bit kludgy, meaning two op modes within a single constraint
@@ -199,38 +207,46 @@ class ConstraintsExclusion(AbstractConstraint):
 class AbstractConstraintSet(AbstractConstraint):
     """Value must not satisfy the single constraint"""
 
-    def __getitem__(self, idx): return self._values[idx]
+    def __getitem__(self, idx):
+        return self._values[idx]
 
-    def __add__(self, value): return self.__class__(self, value)
+    def __iter__(self):
+        return iter(self._values)
 
-    def __radd__(self, value): return self.__class__(value, self)
+    def __add__(self, value):
+        return self.__class__(*(self._values + (value,)))
 
-    def __len__(self): return len(self._values)
+    def __radd__(self, value):
+        return self.__class__(*((value,) + self._values))
+
+    def __len__(self):
+        return len(self._values)
 
     # Constraints inclusion in sets
 
     def _setValues(self, values):
         self._values = values
-        for v in values:
-            self._valueMap[v] = 1
-            self._valueMap.update(v.getValueMap())
+        for constraint in values:
+            if constraint:
+                self._valueMap.add(constraint)
+                self._valueMap.update(constraint.getValueMap())
 
 
 class ConstraintsIntersection(AbstractConstraintSet):
     """Value must satisfy all constraints"""
 
     def _testValue(self, value, idx):
-        for v in self._values:
-            v(value, idx)
+        for constraint in self._values:
+            constraint(value, idx)
 
 
 class ConstraintsUnion(AbstractConstraintSet):
     """Value must satisfy at least one constraint"""
 
     def _testValue(self, value, idx):
-        for v in self._values:
+        for constraint in self._values:
             try:
-                v(value, idx)
+                constraint(value, idx)
             except error.ValueConstraintError:
                 pass
             else:

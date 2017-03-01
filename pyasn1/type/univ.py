@@ -1877,7 +1877,12 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
                     raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
 
         if verifyConstraints:
-            self._verifySubtypeSpec(value, idx)
+            try:
+                self._subtypeSpec(value, idx)
+
+            except error.PyAsn1Error:
+                exType, exValue, exTb = sys.exc_info()
+                raise exType('%s at %s' % (exValue, self.__class__.__name__))
 
         if self._componentValues[idx] is None:
             self._componentValuesSet += 1
@@ -2180,7 +2185,12 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                         raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
 
         if verifyConstraints:
-            self._verifySubtypeSpec(value, idx)
+            try:
+                self._subtypeSpec(value, idx)
+
+            except error.PyAsn1Error:
+                exType, exValue, exTb = sys.exc_info()
+                raise exType('%s at %s' % (exValue, self.__class__.__name__))
 
         if self._componentValues[idx] is None:
             self._componentValuesSet += 1
@@ -2563,7 +2573,12 @@ class Choice(Set):
                         raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
 
         if verifyConstraints:
-            self._verifySubtypeSpec(value, idx)
+            try:
+                self._subtypeSpec(value, idx)
+
+            except error.PyAsn1Error:
+                exType, exValue, exTb = sys.exc_info()
+                raise exType('%s at %s' % (exValue, self.__class__.__name__))
 
         self._componentValues[idx] = value
         self._currentIdx = idx

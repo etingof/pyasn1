@@ -6,6 +6,7 @@ Revision 0.2.4, released XX-03-2017
   relatively expensive isNoValue() call
 - Lazily pre-populate list of values of Sequence/Set/Choice types
 - NamedTypes comparison made more efficient
+- More efficient constraints computation and code clean up
 - The __getitem__() implementation of some ASN.1 types & tag object
   refactored for better performance
 - BER/CER/DER value encoders refactored to produce either tuple of

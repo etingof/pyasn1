@@ -37,13 +37,6 @@ class Asn1ItemBase(Asn1Item):
         else:
             self._subtypeSpec = subtypeSpec
 
-    def _verifySubtypeSpec(self, value, idx=None):
-        try:
-            self._subtypeSpec(value, idx)
-        except error.PyAsn1Error:
-            c, i, t = sys.exc_info()
-            raise c('%s at %s' % (i, self.__class__.__name__))
-
     def getSubtypeSpec(self):
         return self._subtypeSpec
 
@@ -172,7 +165,13 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
             value = self.defaultValue
         else:
             value = self.prettyIn(value)
-            self._verifySubtypeSpec(value)
+            try:
+                self._subtypeSpec(value)
+
+            except error.PyAsn1Error:
+                exType, exValue, exTb = sys.exc_info()
+                raise exType('%s at %s' % (exValue, self.__class__.__name__))
+
         self.__hashedValue = None
         self._value = value
         self._len = None
