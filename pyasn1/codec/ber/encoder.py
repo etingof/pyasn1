@@ -18,19 +18,19 @@ class AbstractItemEncoder(object):
 
     # noinspection PyMethodMayBeStatic
     def encodeTag(self, singleTag, isConstructed):
-        tagClass, tagFormat, tagId = singleTag.asTuple()
-        v = tagClass | tagFormat
+        tagClass, tagFormat, tagId = singleTag
+        encodedTag = tagClass | tagFormat
         if isConstructed:
-            v |= tag.tagFormatConstructed
+            encodedTag |= tag.tagFormatConstructed
         if tagId < 31:
-            return (v | tagId,)
+            return (encodedTag | tagId,)
         else:
             substrate = (tagId & 0x7f,)
             tagId >>= 7
             while tagId:
                 substrate = (0x80 | (tagId & 0x7f),) + substrate
                 tagId >>= 7
-            return (v | 0x1F,) + substrate
+            return (encodedTag | 0x1F,) + substrate
 
     def encodeLength(self, length, defMode):
         if not defMode and self.supportIndefLenMode:
