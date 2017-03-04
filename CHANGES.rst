@@ -14,6 +14,8 @@ Revision 0.2.4, released XX-03-2017
 - Reduced the frequency of expensive isinstance() calls
 - Tag-related classes optimized, refactored into properties and
   documented.
+- NamedType family of classes overhauled, optimized and
+  documented.
 
 Revision 0.2.3, released 25-02-2017
 -----------------------------------
