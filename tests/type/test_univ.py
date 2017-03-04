@@ -817,7 +817,7 @@ class SequenceOf(unittest.TestCase):
             assert 0, 'size spec fails'
 
     def testGetComponentTagMap(self):
-        assert self.s1.getComponentTagMap().getPosMap() == {
+        assert self.s1.getComponentTagMap().presentTypes == {
             univ.OctetString.tagSet: univ.OctetString('')
         }
 
@@ -921,7 +921,7 @@ class Sequence(unittest.TestCase):
         assert '<missing>' not in self.s1
 
     def testGetNearPosition(self):
-        assert self.s1.getComponentTagMapNearPosition(1).getPosMap() == {
+        assert self.s1.getComponentTagMapNearPosition(1).presentTypes == {
             univ.OctetString.tagSet: univ.OctetString(''),
             univ.Integer.tagSet: univ.Integer(34)
         }
@@ -1073,12 +1073,12 @@ class Set(unittest.TestCase):
         ) == str2octs('abc'), 'set by name fails'
 
     def testGetTagMap(self):
-        assert self.s1.getTagMap().getPosMap() == {
+        assert self.s1.getTagMap().presentTypes == {
             univ.Set.tagSet: univ.Set()
         }
 
     def testGetComponentTagMap(self):
-        assert self.s1.getComponentTagMap().getPosMap() == {
+        assert self.s1.getComponentTagMap().presentTypes == {
             univ.OctetString.tagSet: univ.OctetString(''),
             univ.Null.tagSet: univ.Null(''),
             univ.Integer.tagSet: univ.Integer(34)

@@ -12,6 +12,8 @@ Revision 0.2.4, released XX-03-2017
 - BER/CER/DER value encoders refactored to produce either tuple of
   bytes or octetstream depending on what is more optimal
 - Reduced the frequency of expensive isinstance() calls
+- Tag-related classes optimized, refactored into properties and
+  documented.
 
 Revision 0.2.3, released 25-02-2017
 -----------------------------------

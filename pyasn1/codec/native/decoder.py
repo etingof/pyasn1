@@ -28,7 +28,7 @@ class SequenceOrSetDecoder(object):
 
         for field in asn1Value:
             if field in pyObject:
-                asn1Value[field] = decoderFunc(pyObject[field], componentsTypes[field].getType())
+                asn1Value[field] = decoderFunc(pyObject[field], componentsTypes[field].asn1Object)
 
         return asn1Value
 
@@ -51,40 +51,40 @@ class ChoiceDecoder(object):
 
         for field in pyObject:
             if field in componentsTypes:
-                asn1Value[field] = decoderFunc(pyObject[field], componentsTypes[field].getType())
+                asn1Value[field] = decoderFunc(pyObject[field], componentsTypes[field].asn1Object)
                 break
 
         return asn1Value
 
 
 tagMap = {
-    univ.Integer.tagSet.getBaseTag(): AbstractScalarDecoder(),
-    univ.Boolean.tagSet.getBaseTag(): AbstractScalarDecoder(),
-    univ.BitString.tagSet.getBaseTag(): BitStringDecoder(),
-    univ.OctetString.tagSet.getBaseTag(): AbstractScalarDecoder(),
-    univ.Null.tagSet.getBaseTag(): AbstractScalarDecoder(),
-    univ.ObjectIdentifier.tagSet.getBaseTag(): AbstractScalarDecoder(),
-    univ.Enumerated.tagSet.getBaseTag(): AbstractScalarDecoder(),
-    univ.Real.tagSet.getBaseTag(): AbstractScalarDecoder(),
-    univ.Sequence.tagSet.getBaseTag(): SequenceOrSetDecoder(),  # conflicts with SequenceOf
-    univ.Set.tagSet.getBaseTag(): SequenceOrSetDecoder(),  # conflicts with SetOf
-    univ.Choice.tagSet.getBaseTag(): ChoiceDecoder(),  # conflicts with Any
+    univ.Integer.tagSet.baseTag: AbstractScalarDecoder(),
+    univ.Boolean.tagSet.baseTag: AbstractScalarDecoder(),
+    univ.BitString.tagSet.baseTag: BitStringDecoder(),
+    univ.OctetString.tagSet.baseTag: AbstractScalarDecoder(),
+    univ.Null.tagSet.baseTag: AbstractScalarDecoder(),
+    univ.ObjectIdentifier.tagSet.baseTag: AbstractScalarDecoder(),
+    univ.Enumerated.tagSet.baseTag: AbstractScalarDecoder(),
+    univ.Real.tagSet.baseTag: AbstractScalarDecoder(),
+    univ.Sequence.tagSet.baseTag: SequenceOrSetDecoder(),  # conflicts with SequenceOf
+    univ.Set.tagSet.baseTag: SequenceOrSetDecoder(),  # conflicts with SetOf
+    univ.Choice.tagSet.baseTag: ChoiceDecoder(),  # conflicts with Any
     # character string types
-    char.UTF8String.tagSet.getBaseTag(): AbstractScalarDecoder(),
-    char.NumericString.tagSet.getBaseTag(): AbstractScalarDecoder(),
-    char.PrintableString.tagSet.getBaseTag(): AbstractScalarDecoder(),
-    char.TeletexString.tagSet.getBaseTag(): AbstractScalarDecoder(),
-    char.VideotexString.tagSet.getBaseTag(): AbstractScalarDecoder(),
-    char.IA5String.tagSet.getBaseTag(): AbstractScalarDecoder(),
-    char.GraphicString.tagSet.getBaseTag(): AbstractScalarDecoder(),
-    char.VisibleString.tagSet.getBaseTag(): AbstractScalarDecoder(),
-    char.GeneralString.tagSet.getBaseTag(): AbstractScalarDecoder(),
-    char.UniversalString.tagSet.getBaseTag(): AbstractScalarDecoder(),
-    char.BMPString.tagSet.getBaseTag(): AbstractScalarDecoder(),
+    char.UTF8String.tagSet.baseTag: AbstractScalarDecoder(),
+    char.NumericString.tagSet.baseTag: AbstractScalarDecoder(),
+    char.PrintableString.tagSet.baseTag: AbstractScalarDecoder(),
+    char.TeletexString.tagSet.baseTag: AbstractScalarDecoder(),
+    char.VideotexString.tagSet.baseTag: AbstractScalarDecoder(),
+    char.IA5String.tagSet.baseTag: AbstractScalarDecoder(),
+    char.GraphicString.tagSet.baseTag: AbstractScalarDecoder(),
+    char.VisibleString.tagSet.baseTag: AbstractScalarDecoder(),
+    char.GeneralString.tagSet.baseTag: AbstractScalarDecoder(),
+    char.UniversalString.tagSet.baseTag: AbstractScalarDecoder(),
+    char.BMPString.tagSet.baseTag: AbstractScalarDecoder(),
     # useful types
-    useful.ObjectDescriptor.tagSet.getBaseTag(): AbstractScalarDecoder(),
-    useful.GeneralizedTime.tagSet.getBaseTag(): AbstractScalarDecoder(),
-    useful.UTCTime.tagSet.getBaseTag(): AbstractScalarDecoder()
+    useful.ObjectDescriptor.tagSet.baseTag: AbstractScalarDecoder(),
+    useful.GeneralizedTime.tagSet.baseTag: AbstractScalarDecoder(),
+    useful.UTCTime.tagSet.baseTag: AbstractScalarDecoder()
 }
 
 # Type-to-codec map for ambiguous ASN.1 types
@@ -115,8 +115,8 @@ class Decoder(object):
 
         if asn1Spec.typeId is not None and asn1Spec.typeId in self.__typeMap:
             valueDecoder = self.__typeMap[asn1Spec.typeId]
-        elif asn1Spec.tagSet.getBaseTag() in self.__tagMap:
-            valueDecoder = self.__tagMap[asn1Spec.tagSet.getBaseTag()]
+        elif asn1Spec.tagSet.baseTag in self.__tagMap:
+            valueDecoder = self.__tagMap[asn1Spec.tagSet.baseTag]
         else:
             raise error.PyAsn1Error('Unknown ASN.1 tag %s' % asn1Spec.tagSet)
 

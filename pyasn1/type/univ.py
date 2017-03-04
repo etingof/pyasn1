@@ -1969,7 +1969,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
     Parameters
     ----------
-    componentType : :py:class:`~pyasn1.type.namedtype.NamedType`
+    componentType: :py:class:`~pyasn1.type.namedtype.NamedType`
         Object holding named ASN.1 types allowed within this collection
 
     tagSet: :py:class:`~pyasn1.type.tag.TagSet`
@@ -2074,7 +2074,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
         Parameters
         ----------
-        name : :class:`str`
+        name: :class:`str`
             |ASN.1| type component name
 
         value : :class:`object` or :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
@@ -2205,7 +2205,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
     def getDefaultComponentByPosition(self, idx):
         if self._componentTypeLen and self._componentType[idx].isDefaulted:
-            return self._componentType[idx].getType()
+            return self._componentType[idx].asn1Object
 
     def getComponentType(self):
         if self._componentTypeLen:
@@ -2219,7 +2219,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         self
         """
         if self._componentTypeLen == self._componentValuesSet:
-            return
+            return self
         idx = self._componentTypeLen
         while idx:
             idx -= 1
@@ -2590,7 +2590,7 @@ class Choice(Set):
         if self._tagSet:
             return self._tagSet
         else:
-            return self._componentType.genMinTagSet()
+            return self._componentType.minTagSet
 
     def getEffectiveTagSet(self):
         if self._tagSet:
