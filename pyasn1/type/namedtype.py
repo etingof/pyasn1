@@ -196,7 +196,7 @@ class NamedTypes(object):
 
     @property
     def __nameToPosMap(self):
-        if self.__tagToPosMapImpl is None:
+        if self.__nameToPosMapImpl is None:
             self.__nameToPosMapImpl = {}
             for idx, namedType in enumerate(self.__namedTypes):
                 if namedType.name in self.__nameToPosMapImpl:
