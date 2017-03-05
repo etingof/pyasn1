@@ -29,7 +29,7 @@ class AbstractSimpleDecoder(AbstractDecoder):
     tagFormats = (tag.tagFormatSimple,)
 
     def _createComponent(self, asn1Spec, tagSet, value=None):
-        if tagSet[0][1] not in self.tagFormats:
+        if tagSet[0].tagFormat not in self.tagFormats:
             raise error.PyAsn1Error('Invalid tag format %s for %s' % (tagSet[0], self.protoComponent.prettyPrintType()))
         if asn1Spec is None:
             return self.protoComponent.clone(value, tagSet)
@@ -44,7 +44,7 @@ class AbstractConstructedDecoder(AbstractDecoder):
 
     # noinspection PyUnusedLocal
     def _createComponent(self, asn1Spec, tagSet, value=None):
-        if tagSet[0][1] not in self.tagFormats:
+        if tagSet[0].tagFormat not in self.tagFormats:
             raise error.PyAsn1Error('Invalid tag format %s for %s' % (tagSet[0], self.protoComponent.prettyPrintType()))
         if asn1Spec is None:
             return self.protoComponent.clone(tagSet)
@@ -115,7 +115,7 @@ class BitStringDecoder(AbstractSimpleDecoder):
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet, length,
                      state, decodeFun, substrateFun):
         head, tail = substrate[:length], substrate[length:]
-        if tagSet[0][1] == tag.tagFormatSimple:  # XXX what tag to check?
+        if tagSet[0].tagFormat == tag.tagFormatSimple:  # XXX what tag to check?
             if not head:
                 raise error.PyAsn1Error('Empty substrate')
             trailingBits = oct2int(head[0])
@@ -169,7 +169,7 @@ class OctetStringDecoder(AbstractSimpleDecoder):
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet, length,
                      state, decodeFun, substrateFun):
         head, tail = substrate[:length], substrate[length:]
-        if tagSet[0][1] == tag.tagFormatSimple:  # XXX what tag to check?
+        if tagSet[0].tagFormat == tag.tagFormatSimple:  # XXX what tag to check?
             return self._createComponent(asn1Spec, tagSet, head), tail
         if not self.supportConstructedForm:
             raise error.PyAsn1Error('Constructed encoding form prohibited at %s' % self.__class__.__name__)
@@ -930,7 +930,7 @@ class Decoder(object):
                     debug.logger('codec %s chosen by ASN.1 spec, decoding %s' % (state == stDecodeValue and concreteDecoder.__class__.__name__ or "<none>", state == stDecodeValue and 'value' or 'as explicit tag'))
                     debug.scope.push(chosenSpec is None and '?' or chosenSpec.__class__.__name__)
             if state == stTryAsExplicitTag:
-                if tagSet and tagSet[0][1] == tag.tagFormatConstructed and tagSet[0][0] != tag.tagClassUniversal:
+                if tagSet and tagSet[0].tagFormat == tag.tagFormatConstructed and tagSet[0].tagClass != tag.tagClassUniversal:
                     # Assume explicit tagging
                     concreteDecoder = explicitTagDecoder
                     state = stDecodeValue
