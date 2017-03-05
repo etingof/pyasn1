@@ -16,6 +16,8 @@ Revision 0.2.4, released XX-03-2017
   documented.
 - NamedType family of classes overhauled, optimized and
   documented.
+- Sequence/Set DER/CER/DER decoder optimized to skip the case of
+  reordered components handling when not necessary.
 
 Revision 0.2.3, released 25-02-2017
 -----------------------------------
