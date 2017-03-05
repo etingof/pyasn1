@@ -533,10 +533,7 @@ class ChoiceDecoder(AbstractConstructedDecoder):
             component, head = decodeFun(
                 head, asn1Object.getComponentTagMap(), tagSet, length, state
             )
-        if isinstance(component, univ.Choice):
-            effectiveTagSet = component.getEffectiveTagSet()
-        else:
-            effectiveTagSet = component.getTagSet()
+        effectiveTagSet = component.getEffectiveTagSet()
         asn1Object.setComponentByType(
             effectiveTagSet, component,
             verifyConstraints=False,
@@ -560,10 +557,7 @@ class ChoiceDecoder(AbstractConstructedDecoder):
             component, substrate = decodeFun(
                 substrate, asn1Object.getComponentTagMap(), tagSet, length, state
             )
-        if isinstance(component, univ.Choice):
-            effectiveTagSet = component.getEffectiveTagSet()
-        else:
-            effectiveTagSet = component.getTagSet()
+        effectiveTagSet = component.getEffectiveTagSet()
         asn1Object.setComponentByType(
             effectiveTagSet, component,
             verifyConstraints=False,

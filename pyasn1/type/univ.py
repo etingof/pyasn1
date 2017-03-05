@@ -2596,11 +2596,8 @@ class Choice(Set):
         if self._tagSet:
             return self._tagSet
         else:
-            c = self.getComponent()
-            if isinstance(c, Choice):
-                return c.getEffectiveTagSet()
-            else:
-                return c.getTagSet()
+            component = self.getComponent()
+            return component.getEffectiveTagSet()
 
     def getTagMap(self):
         if self._tagSet:
