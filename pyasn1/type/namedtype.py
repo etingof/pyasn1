@@ -6,7 +6,6 @@
 #
 import sys
 from pyasn1.type import tagmap
-from pyasn1.compat import octets
 from pyasn1 import error
 
 __all__ = ['NamedType', 'OptionalNamedType', 'DefaultedNamedType', 'NamedTypes']
@@ -115,6 +114,7 @@ class NamedTypes(object):
         self.__nameToPosMapImpl = None
         self.__ambigiousTypesImpl = None
         self.__tagMap = {}
+        self.__hasOptionalOrDefault = None
 
     def __repr__(self):
         return '%s(%s)' % (
@@ -454,3 +454,9 @@ class NamedTypes(object):
             self.__tagMap[unique] = tagmap.TagMap(presentTypes, skipTypes, defaultType)
 
         return self.__tagMap[unique]
+
+    @property
+    def hasOptionalOrDefault(self):
+        if self.__hasOptionalOrDefault is None:
+            self.__hasOptionalOrDefault = bool([True for namedType in self.__namedTypes if namedType.isDefaulted or namedType.isOptional])
+        return self.__hasOptionalOrDefault
