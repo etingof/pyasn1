@@ -184,7 +184,7 @@ class NamedTypes(object):
         if self.__tagToPosMapImpl is None:
             self.__tagToPosMapImpl = {}
             for idx, namedType in enumerate(self.__namedTypes):
-                tagMap = namedType.asn1Object.getTagMap()
+                tagMap = namedType.asn1Object.tagMap
                 if not tagMap:
                     continue
                 for _tagSet in tagMap.presentTypes:
@@ -396,7 +396,7 @@ class NamedTypes(object):
                     tagSet = asn1Object.getMinTagSet()
 
                 except AttributeError:
-                    tagSet = asn1Object.getTagSet()
+                    tagSet = asn1Object.tagSet
                 if self.__minTagSet is None or tagSet < self.__minTagSet:
                     self.__minTagSet = tagSet
         return self.__minTagSet
@@ -439,7 +439,7 @@ class NamedTypes(object):
             skipTypes = {}
             defaultType = None
             for namedType in self.__namedTypes:
-                tagMap = namedType.asn1Object.getTagMap()
+                tagMap = namedType.asn1Object.tagMap
                 for tagSet in tagMap:
                     if unique and tagSet in presentTypes:
                         raise error.PyAsn1Error('Non-unique tagSet %s' % (tagSet,))

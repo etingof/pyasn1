@@ -24,10 +24,10 @@ class AbstractItemEncoder(object):
 class ExplicitlyTaggedItemEncoder(AbstractItemEncoder):
     def encode(self, encodeFun, value):
         if isinstance(value, base.AbstractConstructedAsn1Item):
-            value = value.clone(tagSet=value.getTagSet()[:-1],
+            value = value.clone(tagSet=value.tagSet[:-1],
                                 cloneValueFlag=1)
         else:
-            value = value.clone(tagSet=value.getTagSet()[:-1])
+            value = value.clone(tagSet=value.tagSet[:-1])
         return encodeFun(value)
 
 explicitlyTaggedItemEncoder = ExplicitlyTaggedItemEncoder()
@@ -162,7 +162,7 @@ class Encoder(object):
             debug.scope.push(type(asn1Value).__name__)
             debug.logger('encoder called for type %s <%s>' % (type(asn1Value).__name__, asn1Value.prettyPrint()))
 
-        tagSet = asn1Value.getTagSet()
+        tagSet = asn1Value.tagSet
         if len(tagSet) > 1:
             concreteEncoder = explicitlyTaggedItemEncoder
         else:

@@ -103,7 +103,7 @@ class SetOfEncoder(encoder.SequenceOfEncoder):
                 if client.getDefaultComponentByPosition(idx) == client[idx]:
                     continue
                 comps.append(client[idx])
-            comps.sort(key=lambda x: isinstance(x, univ.Choice) and x.getMinTagSet() or x.getTagSet())
+            comps.sort(key=lambda x: isinstance(x, univ.Choice) and x.getMinTagSet() or x.tagSet)
             for c in comps:
                 substrate += encodeFun(c, defMode, maxChunkSize)
         else:

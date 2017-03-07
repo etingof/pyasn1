@@ -266,7 +266,7 @@ class IntegerTestCase(unittest.TestCase):
         assert univ.Integer('3') == 3, 'prettyIn() fails'
 
     def testTag(self):
-        assert univ.Integer().getTagSet() == tag.TagSet(
+        assert univ.Integer().tagSet == tag.TagSet(
             (),
             tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x02)
         )
@@ -293,7 +293,7 @@ class BooleanTestCase(unittest.TestCase):
         assert eval(repr(univ.Boolean(1)), {'Boolean': univ.Boolean}) == univ.Boolean(1), 'repr() fails'
 
     def testTag(self):
-        assert univ.Boolean().getTagSet() == tag.TagSet(
+        assert univ.Boolean().tagSet == tag.TagSet(
             (),
             tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x01)
         )
@@ -356,7 +356,7 @@ class BitStringTestCase(unittest.TestCase):
             'Urgent,Active'), 'repr() fails'
 
     def testTag(self):
-        assert univ.BitString().getTagSet() == tag.TagSet(
+        assert univ.BitString().tagSet == tag.TagSet(
             (),
             tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x03)
         )
@@ -512,7 +512,7 @@ class OctetStringTestCase(unittest.TestCase):
             assert 0, 'empty OctetString() not reported'
 
     def testTag(self):
-        assert univ.OctetString().getTagSet() == tag.TagSet(
+        assert univ.OctetString().tagSet == tag.TagSet(
             (),
             tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x04)
         )
@@ -526,7 +526,7 @@ class Null(unittest.TestCase):
         assert eval(repr(univ.Null()), {'Null': univ.Null}) == univ.Null(), 'repr() fails'
 
     def testTag(self):
-        assert univ.Null().getTagSet() == tag.TagSet(
+        assert univ.Null().tagSet == tag.TagSet(
             (),
             tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x05)
         )
@@ -660,7 +660,7 @@ class RealTestCase(unittest.TestCase):
             assert math.trunc(univ.Real(1.1)) == 1.0, '__trunc__() fails'
 
     def testTag(self):
-        assert univ.Real().getTagSet() == tag.TagSet(
+        assert univ.Real().tagSet == tag.TagSet(
             (),
             tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x09)
         )
@@ -708,7 +708,7 @@ class ObjectIdentifier(unittest.TestCase):
         assert univ.ObjectIdentifier(s) == (1, 3, 6), 'unicode init fails'
 
     def testTag(self):
-        assert univ.ObjectIdentifier().getTagSet() == tag.TagSet(
+        assert univ.ObjectIdentifier().tagSet == tag.TagSet(
             (),
             tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x06)
         )
@@ -732,7 +732,7 @@ class SequenceOf(unittest.TestCase):
             'a', 'b'), 'repr() fails'
 
     def testTag(self):
-        assert self.s1.getTagSet() == tag.TagSet(
+        assert self.s1.tagSet == tag.TagSet(
             (),
             tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x10)
         ), 'wrong tagSet'
@@ -903,7 +903,7 @@ class Sequence(unittest.TestCase):
                      'DefaultedNamedType': namedtype.DefaultedNamedType}) == self.s1.clone().setComponents('a', 'b'), 'repr() fails'
 
     def testTag(self):
-        assert self.s1.getTagSet() == tag.TagSet(
+        assert self.s1.tagSet == tag.TagSet(
             (),
             tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x10)
         ), 'wrong tagSet'
@@ -1033,7 +1033,7 @@ class SetOf(unittest.TestCase):
         self.s1 = univ.SetOf(componentType=univ.OctetString(''))
 
     def testTag(self):
-        assert self.s1.getTagSet() == tag.TagSet(
+        assert self.s1.tagSet == tag.TagSet(
             (),
             tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x11)
         ), 'wrong tagSet'
@@ -1055,7 +1055,7 @@ class Set(unittest.TestCase):
         self.s2 = self.s1.clone()
 
     def testTag(self):
-        assert self.s1.getTagSet() == tag.TagSet(
+        assert self.s1.tagSet == tag.TagSet(
             (),
             tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x11)
         ), 'wrong tagSet'
@@ -1073,7 +1073,7 @@ class Set(unittest.TestCase):
         ) == str2octs('abc'), 'set by name fails'
 
     def testGetTagMap(self):
-        assert self.s1.getTagMap().presentTypes == {
+        assert self.s1.tagMap.presentTypes == {
             univ.Set.tagSet: univ.Set()
         }
 
@@ -1085,7 +1085,7 @@ class Set(unittest.TestCase):
         }
 
     def testGetPositionByType(self):
-        assert self.s1.getComponentPositionByType(univ.Null().getTagSet()) == 1
+        assert self.s1.getComponentPositionByType(univ.Null().tagSet) == 1
 
     def testSetToDefault(self):
         self.s1.setComponentByName('name', univ.noValue)
@@ -1107,7 +1107,7 @@ class Choice(unittest.TestCase):
         ))
 
     def testTag(self):
-        assert self.s1.getTagSet() == tag.TagSet(), 'wrong tagSet'
+        assert self.s1.tagSet == tag.TagSet(), 'wrong tagSet'
 
     def testRepr(self):
         assert eval(repr(self.s1.clone().setComponents('a')),

@@ -211,7 +211,9 @@ class AbstractCharacterString(univ.OctetString):
 class NumericString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
 
-    #: Default :py:class:`~pyasn1.type.tag.TagSet` object for |ASN.1| objects
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
+    #: associated with |ASN.1| type.
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 18)
     )
@@ -221,7 +223,9 @@ class NumericString(AbstractCharacterString):
 class PrintableString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
 
-    #: Default :py:class:`~pyasn1.type.tag.TagSet` object for |ASN.1| objects
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
+    #: associated with |ASN.1| type.
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 19)
     )
@@ -231,7 +235,9 @@ class PrintableString(AbstractCharacterString):
 class TeletexString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
 
-    #: Default :py:class:`~pyasn1.type.tag.TagSet` object for |ASN.1| objects
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
+    #: associated with |ASN.1| type.
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 20)
     )
@@ -245,7 +251,9 @@ class T61String(TeletexString):
 class VideotexString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
 
-    #: Default :py:class:`~pyasn1.type.tag.TagSet` object for |ASN.1| objects
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
+    #: associated with |ASN.1| type.
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 21)
     )
@@ -255,7 +263,9 @@ class VideotexString(AbstractCharacterString):
 class IA5String(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
 
-    #: Default :py:class:`~pyasn1.type.tag.TagSet` object for |ASN.1| objects
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
+    #: associated with |ASN.1| type.
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 22)
     )
@@ -265,7 +275,9 @@ class IA5String(AbstractCharacterString):
 class GraphicString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
 
-    #: Default :py:class:`~pyasn1.type.tag.TagSet` object for |ASN.1| objects
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
+    #: associated with |ASN.1| type.
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 25)
     )
@@ -275,7 +287,9 @@ class GraphicString(AbstractCharacterString):
 class VisibleString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
 
-    #: Default :py:class:`~pyasn1.type.tag.TagSet` object for |ASN.1| objects
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
+    #: associated with |ASN.1| type.
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 26)
     )
@@ -289,7 +303,9 @@ class ISO646String(VisibleString):
 class GeneralString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
 
-    #: Default :py:class:`~pyasn1.type.tag.TagSet` object for |ASN.1| objects
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
+    #: associated with |ASN.1| type.
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 27)
     )
@@ -299,7 +315,9 @@ class GeneralString(AbstractCharacterString):
 class UniversalString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
 
-    #: Default :py:class:`~pyasn1.type.tag.TagSet` object for |ASN.1| objects
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
+    #: associated with |ASN.1| type.
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 28)
     )
@@ -309,7 +327,9 @@ class UniversalString(AbstractCharacterString):
 class BMPString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
 
-    #: Default :py:class:`~pyasn1.type.tag.TagSet` object for |ASN.1| objects
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
+    #: associated with |ASN.1| type.
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 30)
     )
@@ -319,7 +339,9 @@ class BMPString(AbstractCharacterString):
 class UTF8String(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
 
-    #: Default :py:class:`~pyasn1.type.tag.TagSet` object for |ASN.1| objects
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
+    #: associated with |ASN.1| type.
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 12)
     )
