@@ -33,12 +33,9 @@ class Asn1ItemBase(Asn1Item):
         else:
             self._tagSet = tagSet
         if subtypeSpec is None:
-            self._subtypeSpec = self.subtypeSpec
+            self._subtypeSpec = self.__class__.subtypeSpec
         else:
             self._subtypeSpec = subtypeSpec
-
-    def getSubtypeSpec(self):
-        return self._subtypeSpec
 
     @property
     def effectiveTagSet(self):
@@ -76,7 +73,7 @@ class Asn1ItemBase(Asn1Item):
             (not matchTags or
              self._tagSet == other.tagSet) and \
             (not matchConstraints or
-             self._subtypeSpec == other.getSubtypeSpec())
+             self._subtypeSpec == other.subtypeSpec)
 
     def isSuperTypeOf(self, other, matchTags=True, matchConstraints=True):
         """Examine |ASN.1| type for subtype relationship with other ASN.1 type.
@@ -102,7 +99,7 @@ class Asn1ItemBase(Asn1Item):
         return (not matchTags or
                 self._tagSet.isSuperTagSetOf(other.tagSet)) and \
                (not matchConstraints or
-                (self._subtypeSpec.isSuperTypeOf(other.getSubtypeSpec())))
+                (self._subtypeSpec.isSuperTypeOf(other.subtypeSpec)))
 
     @staticmethod
     def isNoValue(*values):
@@ -121,6 +118,9 @@ class Asn1ItemBase(Asn1Item):
 
     def getTagMap(self):
         return self.tagMap
+
+    def getSubtypeSpec(self):
+        return self.subtypeSpec
 
 
 class NoValue(object):
@@ -233,8 +233,9 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
             self.__hashedValue = hash(self._value)
         return self.__hashedValue
 
-    def hasValue(self):
-        """Indicate if |ASN.1| object represents ASN.1 value or ASN.1 type.
+    @property
+    def isValue(self):
+        """Indicate if |ASN.1| object represents ASN.1 type or ASN.1 value.
 
         The PyASN1 type objects can only participate in types comparison
         and serve as a blueprint for serialization codecs to resolve
@@ -246,8 +247,8 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         Returns
         -------
         : :class:`bool`
-            :class:`True` if object is ASN.1 value,
-            :class:`False` otherwise.
+            :class:`True` if object represents ASN.1 value and type,
+            :class:`False` if object represents just ASN.1 type.
 
         """
         return self._value is not noValue
@@ -366,7 +367,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         : :class:`str`
             human-friendly type and/or value representation.
         """
-        if self.hasValue():
+        if self.isValue:
             return self.prettyOut(self._value)
         else:
             return '<no value>'
@@ -378,6 +379,11 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
     # noinspection PyUnusedLocal
     def prettyPrintType(self, scope=0):
         return '%s -> %s' % (self.tagSet, self.__class__.__name__)
+
+    # backward compatibility
+
+    def hasValue(self):
+        return self.isValue
 
 
 #
@@ -509,10 +515,10 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
             subtypeSpec = self._subtypeSpec
         if sizeSpec is None:
             sizeSpec = self._sizeSpec
-        r = self.__class__(self._componentType, tagSet, subtypeSpec, sizeSpec)
+        clone = self.__class__(self._componentType, tagSet, subtypeSpec, sizeSpec)
         if cloneValueFlag:
-            self._cloneComponentValues(r, cloneValueFlag)
-        return r
+            self._cloneComponentValues(clone, cloneValueFlag)
+        return clone
 
     def subtype(self, implicitTag=None, explicitTag=None, subtypeSpec=None,
                 sizeSpec=None, cloneValueFlag=None):
@@ -551,14 +557,11 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         if sizeSpec is None or sizeSpec is noValue:
             sizeSpec = self._sizeSpec
         else:
-            sizeSpec = sizeSpec + self._sizeSpec
-        r = self.__class__(self._componentType, tagSet, subtypeSpec, sizeSpec)
+            sizeSpec += self._sizeSpec
+        clone = self.__class__(self._componentType, tagSet, subtypeSpec, sizeSpec)
         if cloneValueFlag:
-            self._cloneComponentValues(r, cloneValueFlag)
-        return r
-
-    def _verifyComponent(self, idx, value):
-        pass
+            self._cloneComponentValues(clone, cloneValueFlag)
+        return clone
 
     def verifySizeSpec(self):
         self._sizeSpec(self)

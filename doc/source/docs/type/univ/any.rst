@@ -7,7 +7,7 @@
 ------------
 
 .. autoclass:: pyasn1.type.univ.Any(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), encoding='iso-8859-1', binValue=NoValue(),hexValue=NoValue())
-   :members: hasValue, isSameTypeWith, isSuperTypeOf, tagSet, effectiveTagSet, tagMap, subtypeSpec
+   :members: isValue, isSameTypeWith, isSuperTypeOf, tagSet, effectiveTagSet, tagMap, subtypeSpec
 
    .. note::
 

@@ -5,7 +5,7 @@
 ------------
 
 .. autoclass:: pyasn1.type.univ.Enumerated(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), namedValues=NamedValues())
-   :members: hasValue, isSameTypeWith, isSuperTypeOf, tagSet, effectiveTagSet, tagMap, subtypeSpec, namedValues
+   :members: isValue, isSameTypeWith, isSuperTypeOf, tagSet, effectiveTagSet, tagMap, subtypeSpec, namedValues
 
    .. note::
 

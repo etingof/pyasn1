@@ -5,7 +5,7 @@
 ------------
 
 .. autoclass:: pyasn1.type.univ.Real(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection())
-   :members: hasValue, isSameTypeWith, isSuperTypeOf, tagSet, effectiveTagSet, tagMap, subtypeSpec
+   :members: isValue, isSameTypeWith, isSuperTypeOf, tagSet, effectiveTagSet, tagMap, subtypeSpec
 
    .. note::
 
