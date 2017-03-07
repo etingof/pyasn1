@@ -11,22 +11,22 @@ __all__ = ['tagClassUniversal', 'tagClassApplication', 'tagClassContext',
            'tagCategoryImplicit', 'tagCategoryExplicit', 'tagCategoryUntagged',
            'Tag', 'TagSet']
 
-#: Class of ASN.1 type: UNIVERSAL
+#: Identifier for ASN.1 class UNIVERSAL
 tagClassUniversal = 0x00
 
-#: Class of ASN.1 type: APPLICATION
+#: Identifier for ASN.1 class APPLICATION
 tagClassApplication = 0x40
 
-#: Class of ASN.1 type: context-specific
+#: Identifier for ASN.1 class context-specific
 tagClassContext = 0x80
 
-#: Class of ASN.1 type: private
+#: Identifier for ASN.1 class private
 tagClassPrivate = 0xC0
 
-#: Structure of ASN.1 type: simple (e.g. scalar)
+#: Identifier for "simple" ASN.1 structure (e.g. scalar)
 tagFormatSimple = 0x00
 
-#: Structure of ASN.1 type: constructed (e.g. may have inner components)
+#: Identifier for "constructed" ASN.1 structure (e.g. may have inner components)
 tagFormatConstructed = 0x20
 
 tagCategoryImplicit = 0x01
@@ -125,7 +125,7 @@ class Tag(object):
 
         Returns
         -------
-        :py:class:`int`:
+        : :py:class:`int`
             Tag class
         """
         return self.__tagClass
@@ -136,7 +136,7 @@ class Tag(object):
 
         Returns
         -------
-        :py:class:`int`:
+        : :py:class:`int`
             Tag format
         """
         return self.__tagFormat
@@ -147,7 +147,7 @@ class Tag(object):
 
         Returns
         -------
-        :py:class:`int`:
+        : :py:class:`int`
             Tag ID
         """
         return self.__tagId
@@ -226,13 +226,28 @@ class TagSet(object):
     def __len__(self):
         return self.__lenOfSuperTags
 
+    # descriptor protocol
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self
+
+        try:
+            return instance._tagSet
+
+        except AttributeError:
+            return self
+
+    def __set__(self, instance, value):
+        raise AttributeError('attribute is read-only')
+
     @property
     def baseTag(self):
         """Return base ASN.1 tag
 
         Returns
         -------
-        :class:`~pyasn1.type.tag.Tag`:
+        : :class:`~pyasn1.type.tag.Tag`
             Base tag of this *TagSet*
         """
         return self.__baseTag
@@ -243,7 +258,7 @@ class TagSet(object):
 
         Returns
         -------
-        :py:class:`tuple`:
+        : :py:class:`tuple`
             Tuple of :class:`~pyasn1.type.tag.Tag` objects that this *TagSet* contains
         """
         return self.__superTags
@@ -262,7 +277,7 @@ class TagSet(object):
 
         Returns
         -------
-        :class:`~pyasn1.type.tag.TagSet`:
+        : :class:`~pyasn1.type.tag.TagSet`
             New *TagSet* object
         """
         if superTag.tagClass == tagClassUniversal:
@@ -285,7 +300,7 @@ class TagSet(object):
 
         Returns
         -------
-        :class:`~pyasn1.type.tag.TagSet`:
+        : :class:`~pyasn1.type.tag.TagSet`
             New *TagSet* object
         """
         if self.__superTags:
@@ -306,7 +321,7 @@ class TagSet(object):
 
         Returns
         -------
-        :py::class:`bool`:
+        : :py:class:`bool`
             `True` if callee is a supertype of *tagSet*
         """
         if len(tagSet) < self.__lenOfSuperTags:

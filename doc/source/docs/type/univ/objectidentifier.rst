@@ -5,7 +5,7 @@
 ------------
 
 .. autoclass:: pyasn1.type.univ.ObjectIdentifier(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection())
-   :members: hasValue, isSameTypeWith, isSuperTypeOf, tagSet, subtypeSpec, isPrefixOf
+   :members: hasValue, isSameTypeWith, isSuperTypeOf, tagSet, effectiveTagSet, tagMap, subtypeSpec, isPrefixOf
 
    .. note::
 

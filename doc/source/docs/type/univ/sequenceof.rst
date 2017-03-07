@@ -5,7 +5,7 @@
 ------------
 
 .. autoclass:: pyasn1.type.univ.SequenceOf(componentType=None, tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), sizeSpec=ConstraintsIntersection())
-   :members: isSameTypeWith, isSuperTypeOf, tagSet, componentType, subtypeSpec, sizeSpec,
+   :members: isSameTypeWith, isSuperTypeOf, tagSet, effectiveTagSet, tagMap, componentType, subtypeSpec, sizeSpec,
              getComponentByPosition, setComponentByPosition
 
    .. note::

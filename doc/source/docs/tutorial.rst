@@ -792,7 +792,7 @@ could be expressed in pyasn1 like this:
    >>> class MyIntegerType(univ.Integer):
    ...   tagSet = univ.Integer.tagSet.tagExplicitly(tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 12))
    >>> myInteger = MyIntegerType(12345)
-   >>> myInteger.getTagSet()
+   >>> myInteger.tagSet
    TagSet((), Tag(tagClass=0, tagFormat=0, tagId=2), 
    Tag(tagClass=128, tagFormat=32, tagId=12))
    >>>
@@ -941,9 +941,9 @@ types).
    ...     namedtype.NamedType('id', univ.ObjectIdentifier())
    ...   )
    >>> gamer = Gamer()
-   >>> gamer.setComponentByType(univ.Integer().getTagSet(), 121343)
-   >>> gamer.setComponentByType(univ.OctetString().getTagSet(), 'Pascal')
-   >>> gamer.setComponentByType(univ.ObjectIdentifier().getTagSet(), (1,3,7,2))
+   >>> gamer.setComponentByType(univ.Integer().tagSet, 121343)
+   >>> gamer.setComponentByType(univ.OctetString().tagSet, 'Pascal')
+   >>> gamer.setComponentByType(univ.ObjectIdentifier().tagSet, (1,3,7,2))
    >>> print(gamer.prettyPrint())
    Gamer:
     score=121343

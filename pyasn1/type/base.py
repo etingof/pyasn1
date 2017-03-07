@@ -16,8 +16,8 @@ class Asn1Item(object):
 
 
 class Asn1ItemBase(Asn1Item):
-    #: Default :py:class:`~pyasn1.type.tag.TagSet` object representing
-    #: ASN.1 tag(s) associated with this ASN.1 type.
+    #: Set or return a :py:class:`~pyasn1.type.tag.TagSet` object representing
+    #: ASN.1 tag(s) associated with |ASN.1| type.
     tagSet = tag.TagSet()
 
     #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
@@ -29,7 +29,7 @@ class Asn1ItemBase(Asn1Item):
 
     def __init__(self, tagSet=None, subtypeSpec=None):
         if tagSet is None:
-            self._tagSet = self.tagSet
+            self._tagSet = self.__class__.tagSet
         else:
             self._tagSet = tagSet
         if subtypeSpec is None:
@@ -40,13 +40,16 @@ class Asn1ItemBase(Asn1Item):
     def getSubtypeSpec(self):
         return self._subtypeSpec
 
-    def getTagSet(self):
-        return self._tagSet
-
-    def getEffectiveTagSet(self):
+    @property
+    def effectiveTagSet(self):
+        """For |ASN.1| type is equivalent to *tagSet*
+        """
         return self._tagSet  # used by untagged types
 
-    def getTagMap(self):
+    @property
+    def tagMap(self):
+        """Return a :class:`~pyasn1.type.tagmap.TagMap` object mapping ASN.1 tags to ASN.1 objects within callee object.
+        """
         return tagmap.TagMap({self._tagSet: self})
 
     def isSameTypeWith(self, other, matchTags=True, matchConstraints=True):
@@ -71,7 +74,7 @@ class Asn1ItemBase(Asn1Item):
         """
         return self is other or \
             (not matchTags or
-             self._tagSet == other.getTagSet()) and \
+             self._tagSet == other.tagSet) and \
             (not matchConstraints or
              self._subtypeSpec == other.getSubtypeSpec())
 
@@ -97,7 +100,7 @@ class Asn1ItemBase(Asn1Item):
                 :class:`False` otherwise.
         """
         return (not matchTags or
-                self._tagSet.isSuperTagSetOf(other.getTagSet())) and \
+                self._tagSet.isSuperTagSetOf(other.tagSet)) and \
                (not matchConstraints or
                 (self._subtypeSpec.isSuperTypeOf(other.getSubtypeSpec())))
 
@@ -107,6 +110,17 @@ class Asn1ItemBase(Asn1Item):
             if value is not None and value is not noValue:
                 return False
         return True
+
+    # backward compatibility
+
+    def getTagSet(self):
+        return self.tagSet
+
+    def getEffectiveTagSet(self):
+        return self.effectiveTagSet
+
+    def getTagMap(self):
+        return self.tagMap
 
 
 class NoValue(object):
@@ -180,7 +194,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         representation = []
         if self._value is not self.defaultValue:
             representation.append(self.prettyOut(self._value))
-        if self._tagSet is not self.tagSet:
+        if self._tagSet is not self.__class__.tagSet:
             representation.append('tagSet=%r' % (self._tagSet,))
         if self._subtypeSpec is not self.subtypeSpec:
             representation.append('subtypeSpec=%r' % (self._subtypeSpec,))
@@ -226,7 +240,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         and serve as a blueprint for serialization codecs to resolve
         ambiguous types.
 
-        The PyASN1 value objects can additionally participate to most
+        The PyASN1 value objects can additionally participate in most
         of built-in Python operations.
 
         Returns
@@ -363,7 +377,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
 
     # noinspection PyUnusedLocal
     def prettyPrintType(self, scope=0):
-        return '%s -> %s' % (self.getTagSet(), self.__class__.__name__)
+        return '%s -> %s' % (self.tagSet, self.__class__.__name__)
 
 
 #
@@ -426,7 +440,7 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         representation = []
         if self._componentType is not self.componentType:
             representation.append('componentType=%r' % (self._componentType,))
-        if self._tagSet is not self.tagSet:
+        if self._tagSet is not self.__class__.tagSet:
             representation.append('tagSet=%r' % (self._tagSet,))
         if self._subtypeSpec is not self.subtypeSpec:
             representation.append('subtypeSpec=%r' % (self._subtypeSpec,))
@@ -462,9 +476,6 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
     else:
         def __bool__(self):
             return self._componentValues and True or False
-
-    def getComponentTagMap(self):
-        raise error.PyAsn1Error('Method not implemented')
 
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         pass
@@ -571,6 +582,10 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
     def setDefaultComponents(self):
         pass
 
+    @property
+    def componentTagMap(self):
+        raise error.PyAsn1Error('Method not implemented')
+
     def __getitem__(self, idx):
         return self.getComponentByPosition(idx)
 
@@ -583,3 +598,7 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
     def clear(self):
         self._componentValues = []
         self._componentValuesSet = 0
+
+    # backward compatibility
+    def getComponentTagMap(self):
+        return self.componentTagMap

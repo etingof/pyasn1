@@ -7,7 +7,7 @@
 ------------
 
 .. autoclass:: pyasn1.type.char.GraphicString(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
-   :members: hasValue, isSameTypeWith, isSuperTypeOf, tagSet
+   :members: hasValue, isSameTypeWith, isSuperTypeOf, tagSet, effectiveTagSet, tagMap
 
    .. note::
 

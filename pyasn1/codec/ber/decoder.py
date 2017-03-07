@@ -357,7 +357,7 @@ class SequenceAndSetDecoderBase(AbstractConstructedDecoder):
                 asn1Spec = self._getComponentTagMap(asn1Object, idx)
                 component, head = decodeFun(head, asn1Spec)
                 idx = self._getComponentPositionByType(
-                    asn1Object, component.getEffectiveTagSet(), idx
+                    asn1Object, component.effectiveTagSet, idx
                 )
 
                 asn1Object.setComponentByPosition(
@@ -398,7 +398,7 @@ class SequenceAndSetDecoderBase(AbstractConstructedDecoder):
                 if eoo.endOfOctets.isSameTypeWith(component) and component == eoo.endOfOctets:
                     break
                 idx = self._getComponentPositionByType(
-                    asn1Object, component.getEffectiveTagSet(), idx
+                    asn1Object, component.effectiveTagSet, idx
                 )
 
                 asn1Object.setComponentByPosition(
@@ -501,7 +501,7 @@ class SetDecoder(SequenceAndSetDecoderBase):
     orderedComponents = False
 
     def _getComponentTagMap(self, asn1Object, idx):
-        return asn1Object.getComponentTagMap()
+        return asn1Object.componentTagMap
 
     def _getComponentPositionByType(self, asn1Object, tagSet, idx):
         nextIdx = asn1Object.getComponentPositionByType(tagSet)
@@ -525,15 +525,15 @@ class ChoiceDecoder(AbstractConstructedDecoder):
         asn1Object = self._createComponent(asn1Spec, tagSet)
         if substrateFun:
             return substrateFun(asn1Object, substrate, length)
-        if asn1Object.getTagSet() == tagSet:  # explicitly tagged Choice
+        if asn1Object.tagSet == tagSet:  # explicitly tagged Choice
             component, head = decodeFun(
-                head, asn1Object.getComponentTagMap()
+                head, asn1Object.componentTagMap
             )
         else:
             component, head = decodeFun(
-                head, asn1Object.getComponentTagMap(), tagSet, length, state
+                head, asn1Object.componentTagMap, tagSet, length, state
             )
-        effectiveTagSet = component.getEffectiveTagSet()
+        effectiveTagSet = component.effectiveTagSet
         asn1Object.setComponentByType(
             effectiveTagSet, component,
             verifyConstraints=False,
@@ -547,17 +547,17 @@ class ChoiceDecoder(AbstractConstructedDecoder):
         asn1Object = self._createComponent(asn1Spec, tagSet)
         if substrateFun:
             return substrateFun(asn1Object, substrate, length)
-        if asn1Object.getTagSet() == tagSet:  # explicitly tagged Choice
-            component, substrate = decodeFun(substrate, asn1Object.getComponentTagMap())
+        if asn1Object.tagSet == tagSet:  # explicitly tagged Choice
+            component, substrate = decodeFun(substrate, asn1Object.componentTagMap)
             # eat up EOO marker
             eooMarker, substrate = decodeFun(substrate, allowEoo=True)
             if not eoo.endOfOctets.isSameTypeWith(eooMarker) or eooMarker != eoo.endOfOctets:
                 raise error.PyAsn1Error('No EOO seen before substrate ends')
         else:
             component, substrate = decodeFun(
-                substrate, asn1Object.getComponentTagMap(), tagSet, length, state
+                substrate, asn1Object.componentTagMap, tagSet, length, state
             )
-        effectiveTagSet = component.getEffectiveTagSet()
+        effectiveTagSet = component.effectiveTagSet
         asn1Object.setComponentByType(
             effectiveTagSet, component,
             verifyConstraints=False,
@@ -573,7 +573,7 @@ class AnyDecoder(AbstractSimpleDecoder):
 
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                      length, state, decodeFun, substrateFun):
-        if asn1Spec is None or asn1Spec is not None and tagSet != asn1Spec.getTagSet():
+        if asn1Spec is None or asn1Spec is not None and tagSet != asn1Spec.tagSet:
             # untagged Any container, recover inner header substrate
             length = length + len(fullSubstrate) - len(substrate)
             substrate = fullSubstrate
@@ -585,7 +585,7 @@ class AnyDecoder(AbstractSimpleDecoder):
 
     def indefLenValueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                              length, state, decodeFun, substrateFun):
-        if asn1Spec is not None and tagSet == asn1Spec.getTagSet():
+        if asn1Spec is not None and tagSet == asn1Spec.tagSet:
             # tagged Any type -- consume header substrate
             header = ''
         else:
@@ -902,15 +902,15 @@ class Decoder(object):
                     chosenSpec = asn1Spec
                     debug.logger and debug.logger & debug.flagDecoder and debug.logger(
                         'candidate ASN.1 spec is %s' % asn1Spec.__class__.__name__)
-                if chosenSpec is not None and (tagSet == chosenSpec.getTagSet() or tagSet in chosenSpec.getTagMap()):
+                if chosenSpec is not None and (tagSet == chosenSpec.tagSet or tagSet in chosenSpec.tagMap):
                     # use base type for codec lookup to recover untagged types
-                    baseTagSet = chosenSpec.baseTagSet
                     try:
                         # ambiguous type
                         concreteDecoder = self.__typeMap[chosenSpec.typeId]
                         debug.logger and debug.logger & debug.flagDecoder and debug.logger(
                             'value decoder chosen for an ambiguous type by type ID %s' % (chosenSpec.typeId,))
                     except KeyError:
+                        baseTagSet = tag.TagSet(chosenSpec.tagSet.baseTag,  chosenSpec.tagSet.baseTag)
                         try:
                             # base type or tagged subtype
                             concreteDecoder = self.__tagMap[baseTagSet]

@@ -14,8 +14,8 @@ __all__ = ['encode']
 class SetOfEncoder(encoder.SetOfEncoder):
     @staticmethod
     def _cmpSetComponents(c1, c2):
-        tagSet1 = isinstance(c1, univ.Choice) and c1.getEffectiveTagSet() or c1.getTagSet()
-        tagSet2 = isinstance(c2, univ.Choice) and c2.getEffectiveTagSet() or c2.getTagSet()
+        tagSet1 = isinstance(c1, univ.Choice) and c1.effectiveTagSet or c1.tagSet
+        tagSet2 = isinstance(c2, univ.Choice) and c2.effectiveTagSet or c2.tagSet
         return cmp(tagSet1, tagSet2)
 
 

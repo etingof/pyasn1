@@ -60,7 +60,7 @@ class AbstractItemEncoder(object):
         substrate, isConstructed, isOctets = self.encodeValue(
             encodeFun, value, defMode, maxChunkSize
         )
-        tagSet = value.getTagSet()
+        tagSet = value.tagSet
         # tagged value?
         if tagSet:
             if not isConstructed:  # primitive form implies definite mode
@@ -88,9 +88,9 @@ class EndOfOctetsEncoder(AbstractItemEncoder):
 class ExplicitlyTaggedItemEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         if isinstance(value, base.AbstractConstructedAsn1Item):
-            value = value.clone(tagSet=value.getTagSet()[:-1], cloneValueFlag=1)
+            value = value.clone(tagSet=value.tagSet[:-1], cloneValueFlag=1)
         else:
-            value = value.clone(tagSet=value.getTagSet()[:-1])
+            value = value.clone(tagSet=value.tagSet[:-1])
         return encodeFun(value, defMode, maxChunkSize), True, True
 
 
@@ -431,7 +431,7 @@ class Encoder(object):
         debug.logger & debug.flagEncoder and debug.logger(
             'encoder called in %sdef mode, chunk size %s for type %s, value:\n%s' % (
                 not defMode and 'in' or '', maxChunkSize, value.prettyPrintType(), value.prettyPrint()))
-        tagSet = value.getTagSet()
+        tagSet = value.tagSet
         if len(tagSet) > 1:
             concreteEncoder = explicitlyTaggedItemEncoder
         else:

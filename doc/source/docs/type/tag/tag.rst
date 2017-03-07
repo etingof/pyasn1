@@ -2,5 +2,7 @@
 Solitary tag
 ------------
 
-.. autoclass:: pyasn1.type.tag.Tag
-   :members:
+.. automodule:: pyasn1.type.tag
+   :members: Tag, tagClassUniversal, tagClassApplication, tagClassContext,
+             tagClassPrivate, tagFormatSimple, tagFormatConstructed
+
