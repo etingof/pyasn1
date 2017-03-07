@@ -7,7 +7,7 @@
 ------------
 
 .. autoclass:: pyasn1.type.useful.ObjectDescriptor(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), encoding='us-ascii')
-   :members: hasValue, isSameTypeWith, isSuperTypeOf, tagSet
+   :members: isValue, isSameTypeWith, isSuperTypeOf, tagSet
 
    .. note::
 

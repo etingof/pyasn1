@@ -52,8 +52,9 @@ class Integer(base.AbstractSimpleAsn1Item):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x02)
     )
 
-    #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-    #: object imposing constraints on initialization values.
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection` object
+    #: imposing constraints on |ASN.1| type initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
 
     #: Default :py:class:`~pyasn1.type.namedval.NamedValues` object
@@ -370,8 +371,9 @@ class Boolean(Integer):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x01),
     )
 
-    #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-    #: object imposing constraints on initialization values.
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection` object
+    #: imposing constraints on |ASN.1| type initialization values.
     subtypeSpec = Integer.subtypeSpec + constraint.SingleValueConstraint(0, 1)
 
     #: Default :py:class:`~pyasn1.type.namedval.NamedValues` object
@@ -420,8 +422,9 @@ class BitString(base.AbstractSimpleAsn1Item):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x03)
     )
 
-    #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-    #: object imposing constraints on initialization values.
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection` object
+    #: imposing constraints on |ASN.1| type initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
 
     #: Default :py:class:`~pyasn1.type.namedval.NamedValues` object
@@ -849,8 +852,9 @@ class OctetString(base.AbstractSimpleAsn1Item):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x04)
     )
 
-    #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-    #: object imposing constraints on initialization values.
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection` object
+    #: imposing constraints on |ASN.1| type initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
 
     defaultBinValue = defaultHexValue = noValue
@@ -1314,8 +1318,9 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x06)
     )
 
-    #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-    #: object imposing constraints on initialization values.
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection` object
+    #: imposing constraints on |ASN.1| type initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
 
     def __add__(self, other):
@@ -1450,8 +1455,9 @@ class Real(base.AbstractSimpleAsn1Item):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x09)
     )
 
-    #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-    #: object imposing constraints on initialization values.
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection` object
+    #: imposing constraints on |ASN.1| type initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
 
     def clone(self, value=noValue, tagSet=None, subtypeSpec=None):
@@ -1733,8 +1739,9 @@ class Enumerated(Integer):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x0A)
     )
 
-    #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-    #: object imposing constraints on initialization values.
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection` object
+    #: imposing constraints on |ASN.1| type initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
 
     #: Default :py:class:`~pyasn1.type.namedval.NamedValues` object
@@ -1935,8 +1942,9 @@ class SequenceOf(SequenceOfAndSetOfBase):
     #: object representing ASN.1 type allowed within |ASN.1| type
     componentType = None
 
-    #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-    #: object imposing constraints on |ASN.1| objects
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection` object
+    #: imposing constraints on |ASN.1| type initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
 
     #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
@@ -1960,8 +1968,9 @@ class SetOf(SequenceOfAndSetOfBase):
     #: object representing ASN.1 type allowed within |ASN.1| type
     componentType = None
 
-    #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-    #: object imposing constraints on |ASN.1| objects
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection` object
+    #: imposing constraints on |ASN.1| type initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
 
     #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
@@ -2287,8 +2296,9 @@ class Sequence(SequenceAndSetBase):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatConstructed, 0x10)
     )
 
-    #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-    #: object imposing constraints on |ASN.1| objects
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection` object
+    #: imposing constraints on |ASN.1| type initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
 
     #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
@@ -2326,8 +2336,9 @@ class Set(SequenceAndSetBase):
     #: object representing ASN.1 type allowed within |ASN.1| type
     componentType = namedtype.NamedTypes()
 
-    #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-    #: object imposing constraints on |ASN.1| objects
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection` object
+    #: imposing constraints on |ASN.1| type initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
 
     #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
@@ -2434,8 +2445,9 @@ class Choice(Set):
     #: object representing ASN.1 type allowed within |ASN.1| type
     componentType = namedtype.NamedTypes()
 
-    #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-    #: object imposing size constraint on |ASN.1| objects
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection` object
+    #: imposing constraints on |ASN.1| type initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
 
     #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
@@ -2670,8 +2682,9 @@ class Any(OctetString):
     tagSet = tag.TagSet()  # untagged
     typeId = 6
 
-    #: Default :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-    #: object imposing constraints on initialization values.
+    #: Set (class attribute) or return (class or instance attribute) a
+    #: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection` object
+    #: imposing constraints on |ASN.1| type initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
 
     @property

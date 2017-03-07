@@ -232,6 +232,11 @@ class TagSet(object):
         if instance is None:
             return self
 
+        # This is a bit of hack: look up instance attribute first,
+        # then try class attribute if instance attribute with that
+        # name is not available.
+        # The rationale is to have `.tagSet` readable-writeable
+        # as a class attribute and read-only as instance attribute.
         try:
             return instance._tagSet
 
