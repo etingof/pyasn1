@@ -219,6 +219,9 @@ class NumericString(AbstractCharacterString):
     )
     encoding = 'us-ascii'
 
+    # Optimization for faster codec lookup
+    typeId = AbstractCharacterString.getTypeId()
+
 
 class PrintableString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
@@ -230,6 +233,9 @@ class PrintableString(AbstractCharacterString):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 19)
     )
     encoding = 'us-ascii'
+
+    # Optimization for faster codec lookup
+    typeId = AbstractCharacterString.getTypeId()
 
 
 class TeletexString(AbstractCharacterString):
@@ -259,6 +265,9 @@ class VideotexString(AbstractCharacterString):
     )
     encoding = 'iso-8859-1'
 
+    # Optimization for faster codec lookup
+    typeId = AbstractCharacterString.getTypeId()
+
 
 class IA5String(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
@@ -270,6 +279,9 @@ class IA5String(AbstractCharacterString):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 22)
     )
     encoding = 'us-ascii'
+
+    # Optimization for faster codec lookup
+    typeId = AbstractCharacterString.getTypeId()
 
 
 class GraphicString(AbstractCharacterString):
@@ -283,6 +295,9 @@ class GraphicString(AbstractCharacterString):
     )
     encoding = 'iso-8859-1'
 
+    # Optimization for faster codec lookup
+    typeId = AbstractCharacterString.getTypeId()
+
 
 class VisibleString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
@@ -294,6 +309,9 @@ class VisibleString(AbstractCharacterString):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 26)
     )
     encoding = 'us-ascii'
+
+    # Optimization for faster codec lookup
+    typeId = AbstractCharacterString.getTypeId()
 
 
 class ISO646String(VisibleString):
@@ -311,6 +329,9 @@ class GeneralString(AbstractCharacterString):
     )
     encoding = 'iso-8859-1'
 
+    # Optimization for faster codec lookup
+    typeId = AbstractCharacterString.getTypeId()
+
 
 class UniversalString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
@@ -322,6 +343,9 @@ class UniversalString(AbstractCharacterString):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 28)
     )
     encoding = "utf-32-be"
+
+    # Optimization for faster codec lookup
+    typeId = AbstractCharacterString.getTypeId()
 
 
 class BMPString(AbstractCharacterString):
@@ -335,6 +359,9 @@ class BMPString(AbstractCharacterString):
     )
     encoding = "utf-16-be"
 
+    # Optimization for faster codec lookup
+    typeId = AbstractCharacterString.getTypeId()
+
 
 class UTF8String(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
@@ -346,3 +373,6 @@ class UTF8String(AbstractCharacterString):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 12)
     )
     encoding = "utf-8"
+
+    # Optimization for faster codec lookup
+    typeId = AbstractCharacterString.getTypeId()

@@ -20,6 +20,8 @@ Revision 0.2.4, released XX-03-2017
   reordered components handling when not necessary.
 - Tags and constraints-related getter methods refactored into descriptors/properties.
 - The .hasValue() method refactored into .isValue property
+- Codecs lookup made more efficient at BER/CER/DER decoder main loop by
+  assigning `typeId` to every ASN.1 type, not just ambiguous ones.
 
 Revision 0.2.3, released 25-02-2017
 -----------------------------------
