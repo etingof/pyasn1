@@ -899,10 +899,14 @@ class Decoder(object):
                                 debug.logger('  %s -> %s' % (firstOctet, v.__class__.__name__))
                         debug.logger('new candidate ASN.1 spec is %s, chosen by %s' % (chosenSpec is None and '<none>' or chosenSpec.prettyPrintType(), tagSet))
                 else:
-                    chosenSpec = asn1Spec
-                    debug.logger and debug.logger & debug.flagDecoder and debug.logger(
-                        'candidate ASN.1 spec is %s' % asn1Spec.__class__.__name__)
-                if chosenSpec is not None and (tagSet == chosenSpec.tagSet or tagSet in chosenSpec.tagMap):
+                    if tagSet == asn1Spec.tagSet or tagSet in asn1Spec.tagMap:
+                        chosenSpec = asn1Spec
+                        debug.logger and debug.logger & debug.flagDecoder and debug.logger(
+                            'candidate ASN.1 spec is %s' % asn1Spec.__class__.__name__)
+                    else:
+                        chosenSpec = None
+
+                if chosenSpec is not None:
                     # use base type for codec lookup to recover untagged types
                     try:
                         # ambiguous type
