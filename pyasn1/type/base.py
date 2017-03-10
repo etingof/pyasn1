@@ -12,7 +12,13 @@ __all__ = ['Asn1Item', 'Asn1ItemBase', 'AbstractSimpleAsn1Item', 'AbstractConstr
 
 
 class Asn1Item(object):
-    pass
+    @classmethod
+    def getTypeId(cls, increment=1):
+        try:
+            Asn1Item._typeCounter += increment
+        except AttributeError:
+            Asn1Item._typeCounter = increment
+        return Asn1Item._typeCounter
 
 
 class Asn1ItemBase(Asn1Item):
@@ -24,7 +30,7 @@ class Asn1ItemBase(Asn1Item):
     #: object imposing constraints on initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
 
-    # Used for ambiguous ASN.1 types identification
+    # Disambiguation ASN.1 types identification
     typeId = None
 
     def __init__(self, tagSet=None, subtypeSpec=None):

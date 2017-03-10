@@ -709,6 +709,13 @@ typeMap = {
     univ.Any.typeId: AnyDecoder()
 }
 
+# Put in non-ambiguous types for faster codec lookup
+for typeDecoder in tagMap.values():
+    typeId = typeDecoder.protoComponent.__class__.typeId
+    if typeId is not None and typeId not in typeMap:
+        typeMap[typeId] = typeDecoder
+
+
 (stDecodeTag, stDecodeLength, stGetValueDecoder, stGetValueDecoderByAsn1Spec,
  stGetValueDecoderByTag, stTryAsExplicitTag, stDecodeValue,
  stDumpRawValue, stErrorCondition, stStop) = [x for x in range(10)]
@@ -729,7 +736,7 @@ class Decoder(object):
         self.__tagSetCache = {}
 
     def __call__(self, substrate, asn1Spec=None, tagSet=None,
-                 length=None, state=stDecodeTag, recursiveFlag=1,
+                 length=None, state=stDecodeTag, recursiveFlag=True,
                  substrateFun=None, allowEoo=False):
         if debug.logger & debug.flagDecoder:
             debug.logger('decoder called at scope %s with state %d, working with up to %d octets of substrate: %s' % (debug.scope, state, len(substrate), debug.hexdump(substrate)))
@@ -907,13 +914,13 @@ class Decoder(object):
                         chosenSpec = None
 
                 if chosenSpec is not None:
-                    # use base type for codec lookup to recover untagged types
                     try:
-                        # ambiguous type
+                        # ambiguous type or just faster codec lookup
                         concreteDecoder = self.__typeMap[chosenSpec.typeId]
                         debug.logger and debug.logger & debug.flagDecoder and debug.logger(
                             'value decoder chosen for an ambiguous type by type ID %s' % (chosenSpec.typeId,))
                     except KeyError:
+                        # use base type for codec lookup to recover untagged types
                         baseTagSet = tag.TagSet(chosenSpec.tagSet.baseTag,  chosenSpec.tagSet.baseTag)
                         try:
                             # base type or tagged subtype

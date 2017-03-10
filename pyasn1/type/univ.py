@@ -61,6 +61,9 @@ class Integer(base.AbstractSimpleAsn1Item):
     #: representing symbolic aliases for numbers
     namedValues = namedval.NamedValues()
 
+    # Optimization for faster codec lookup
+    typeId = base.AbstractSimpleAsn1Item.getTypeId()
+
     def __init__(self, value=noValue, tagSet=None, subtypeSpec=None,
                  namedValues=None):
         if namedValues is None:
@@ -380,6 +383,9 @@ class Boolean(Integer):
     #: representing symbolic aliases for numbers
     namedValues = Integer.namedValues.clone(('False', 0), ('True', 1))
 
+    # Optimization for faster codec lookup
+    typeId = Integer.getTypeId()
+
 
 class BitString(base.AbstractSimpleAsn1Item):
     """Create |ASN.1| type or object.
@@ -430,6 +436,9 @@ class BitString(base.AbstractSimpleAsn1Item):
     #: Default :py:class:`~pyasn1.type.namedval.NamedValues` object
     #: representing symbolic aliases for numbers
     namedValues = namedval.NamedValues()
+
+    # Optimization for faster codec lookup
+    typeId = base.AbstractSimpleAsn1Item.getTypeId()
 
     defaultBinValue = defaultHexValue = noValue
 
@@ -857,6 +866,9 @@ class OctetString(base.AbstractSimpleAsn1Item):
     #: imposing constraints on |ASN.1| type initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
 
+    # Optimization for faster codec lookup
+    typeId = base.AbstractSimpleAsn1Item.getTypeId()
+
     defaultBinValue = defaultHexValue = noValue
     encoding = 'iso-8859-1'
 
@@ -1230,6 +1242,9 @@ class Null(OctetString):
     )
     subtypeSpec = OctetString.subtypeSpec + constraint.SingleValueConstraint(octets.str2octs(''))
 
+    # Optimization for faster codec lookup
+    typeId = OctetString.getTypeId()
+
     def clone(self, value=noValue, tagSet=None):
         """Create a copy of a |ASN.1| type or object.
 
@@ -1322,6 +1337,9 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
     #: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection` object
     #: imposing constraints on |ASN.1| type initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
+
+    # Optimization for faster codec lookup
+    typeId = base.AbstractSimpleAsn1Item.getTypeId()
 
     def __add__(self, other):
         return self.clone(self._value + other)
@@ -1459,6 +1477,9 @@ class Real(base.AbstractSimpleAsn1Item):
     #: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection` object
     #: imposing constraints on |ASN.1| type initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
+
+    # Optimization for faster codec lookup
+    typeId = base.AbstractSimpleAsn1Item.getTypeId()
 
     def clone(self, value=noValue, tagSet=None, subtypeSpec=None):
         """Create a copy of a |ASN.1| type or object.
@@ -1744,9 +1765,13 @@ class Enumerated(Integer):
     #: imposing constraints on |ASN.1| type initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
 
+    # Optimization for faster codec lookup
+    typeId = Integer.getTypeId()
+
     #: Default :py:class:`~pyasn1.type.namedval.NamedValues` object
     #: representing symbolic aliases for numbers
     namedValues = namedval.NamedValues()
+
 
 # "Structured" ASN.1 types
 
@@ -1951,7 +1976,8 @@ class SequenceOf(SequenceOfAndSetOfBase):
     #: object imposing size constraint on |ASN.1| objects
     sizeSpec = constraint.ConstraintsIntersection()
 
-    typeId = 1
+    # Disambiguation ASN.1 types identification
+    typeId = SequenceOfAndSetOfBase.getTypeId()
 
 
 class SetOf(SequenceOfAndSetOfBase):
@@ -1977,7 +2003,8 @@ class SetOf(SequenceOfAndSetOfBase):
     #: object imposing size constraint on |ASN.1| objects
     sizeSpec = constraint.ConstraintsIntersection()
 
-    typeId = 2
+    # Disambiguation ASN.1 types identification
+    typeId = SequenceOfAndSetOfBase.getTypeId()
 
 
 class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
@@ -2309,7 +2336,8 @@ class Sequence(SequenceAndSetBase):
     #: object imposing size constraint on |ASN.1| objects
     componentType = namedtype.NamedTypes()
 
-    typeId = 3
+    # Disambiguation ASN.1 types identification
+    typeId = SequenceAndSetBase.getTypeId()
 
     def getComponentTagMapNearPosition(self, idx):
         if self._componentType:
@@ -2345,7 +2373,8 @@ class Set(SequenceAndSetBase):
     #: object imposing constraints on |ASN.1| objects
     sizeSpec = constraint.ConstraintsIntersection()
 
-    typeId = 4
+    # Disambiguation ASN.1 types identification
+    typeId = SequenceAndSetBase.getTypeId()
 
     def getComponent(self, innerFlag=False):
         return self
@@ -2456,7 +2485,8 @@ class Choice(Set):
         constraint.ValueSizeConstraint(1, 1)
     )
 
-    typeId = 5
+    # Disambiguation ASN.1 types identification
+    typeId = Set.getTypeId()
 
     _currentIdx = None
 
@@ -2680,12 +2710,14 @@ class Any(OctetString):
     #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
     #: associated with |ASN.1| type.
     tagSet = tag.TagSet()  # untagged
-    typeId = 6
 
     #: Set (class attribute) or return (class or instance attribute) a
     #: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection` object
     #: imposing constraints on |ASN.1| type initialization values.
     subtypeSpec = constraint.ConstraintsIntersection()
+
+    # Disambiguation ASN.1 types identification
+    typeId = OctetString.getTypeId()
 
     @property
     def tagMap(self):
