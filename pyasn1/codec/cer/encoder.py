@@ -86,8 +86,6 @@ class UTCTimeEncoder(encoder.OctetStringEncoder):
 
 class SetOfEncoder(encoder.SequenceOfEncoder):
     def encodeValue(self, encodeFun, client, defMode, maxChunkSize):
-        if isinstance(client, univ.SequenceAndSetBase):
-            client.setDefaultComponents()
         client.verifySizeSpec()
         substrate = null
         idx = len(client)
@@ -95,12 +93,13 @@ class SetOfEncoder(encoder.SequenceOfEncoder):
         # from Set if they have the same tags&constraints?
         if isinstance(client, univ.SequenceAndSetBase):
             # Set
+            namedTypes = client.getComponentType()
             comps = []
             while idx > 0:
                 idx -= 1
-                if client[idx] is None:  # Optional component
+                if namedTypes[idx].isOptional and not client[idx].isValue:
                     continue
-                if client.getDefaultComponentByPosition(idx) == client[idx]:
+                if namedTypes[idx].isDefaulted and client[idx] == namedTypes[idx].asn1Object:
                     continue
                 comps.append(client[idx])
             comps.sort(key=lambda x: isinstance(x, univ.Choice) and x.getMinTagSet() or x.tagSet)

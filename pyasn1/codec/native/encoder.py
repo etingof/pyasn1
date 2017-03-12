@@ -76,11 +76,11 @@ class RealEncoder(AbstractItemEncoder):
 class SetEncoder(AbstractItemEncoder):
     protoDict = dict
     def encode(self, encodeFun, value):
-        value.setDefaultComponents()
         value.verifySizeSpec()
+        namedTypes = value.getComponentType()
         substrate = self.protoDict()
-        for key, subValue in value.items():
-            if subValue is None:  # Optional component
+        for idx, (key, subValue) in enumerate(value.items()):
+            if namedTypes[idx].isOptional and not value[idx].isValue:
                 continue
             substrate[key] = encodeFun(subValue)
         return substrate

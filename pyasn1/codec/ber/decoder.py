@@ -352,6 +352,7 @@ class SequenceAndSetDecoderBase(AbstractConstructedDecoder):
         namedTypes = asn1Object.getComponentType()
 
         if not self.orderedComponents or not namedTypes or namedTypes.hasOptionalOrDefault:
+            seenIndices = set()
             idx = 0
             while head:
                 asn1Spec = self._getComponentTagMap(asn1Object, idx)
@@ -365,9 +366,11 @@ class SequenceAndSetDecoderBase(AbstractConstructedDecoder):
                     verifyConstraints=False,
                     matchTags=False, matchConstraints=False
                 )
+                seenIndices.add(idx)
                 idx += 1
 
-            asn1Object.setDefaultComponents()
+            if namedTypes and not namedTypes.requiredComponents.issubset(seenIndices):
+                raise error.PyAsn1Error('ASN.1 object %s has uninitialized components' % asn1Object.__class__.__name__)
         else:
             for idx, asn1Spec in enumerate(namedTypes.values()):
                 component, head = decodeFun(head, asn1Spec)
@@ -391,6 +394,7 @@ class SequenceAndSetDecoderBase(AbstractConstructedDecoder):
         namedTypes = asn1Object.getComponentType()
 
         if not namedTypes or namedTypes.hasOptionalOrDefault:
+            seenIndices = set()
             idx = 0
             while substrate:
                 asn1Spec = self._getComponentTagMap(asn1Object, idx)
@@ -406,6 +410,7 @@ class SequenceAndSetDecoderBase(AbstractConstructedDecoder):
                     verifyConstraints=False,
                     matchTags=False, matchConstraints=False
                 )
+                seenIndices.add(idx)
                 idx += 1
 
             else:
@@ -413,7 +418,8 @@ class SequenceAndSetDecoderBase(AbstractConstructedDecoder):
                     'No EOO seen before substrate ends'
                 )
 
-            asn1Object.setDefaultComponents()
+            if namedTypes and not namedTypes.requiredComponents.issubset(seenIndices):
+                raise error.PyAsn1Error('ASN.1 object %s has uninitialized components' % asn1Object.__class__.__name__)
         else:
             for idx, asn1Spec in enumerate(namedTypes.values()):
                 component, substrate = decodeFun(substrate, asn1Spec)
@@ -898,11 +904,11 @@ class Decoder(object):
                         chosenSpec = None
                     if debug.logger and debug.logger & debug.flagDecoder:
                         debug.logger('candidate ASN.1 spec is a map of:')
-                        for firstOctet, v in asn1Spec.posMap.items():
+                        for firstOctet, v in asn1Spec.presentTypes.items():
                             debug.logger('  %s -> %s' % (firstOctet, v.__class__.__name__))
-                        if asn1Spec.negMap:
+                        if asn1Spec.skipTypes:
                             debug.logger('but neither of: ')
-                            for firstOctet, v in asn1Spec.negMap.items():
+                            for firstOctet, v in asn1Spec.skipTypes.items():
                                 debug.logger('  %s -> %s' % (firstOctet, v.__class__.__name__))
                         debug.logger('new candidate ASN.1 spec is %s, chosen by %s' % (chosenSpec is None and '<none>' or chosenSpec.prettyPrintType(), tagSet))
                 else:

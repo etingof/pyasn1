@@ -115,6 +115,7 @@ class NamedTypes(object):
         self.__ambigiousTypesImpl = None
         self.__tagMap = {}
         self.__hasOptionalOrDefault = None
+        self.__requiredComponents = None
 
     def __repr__(self):
         return '%s(%s)' % (
@@ -460,3 +461,15 @@ class NamedTypes(object):
         if self.__hasOptionalOrDefault is None:
             self.__hasOptionalOrDefault = bool([True for namedType in self.__namedTypes if namedType.isDefaulted or namedType.isOptional])
         return self.__hasOptionalOrDefault
+
+    @property
+    def namedTypes(self):
+        return iter(self.__namedTypes)
+
+    @property
+    def requiredComponents(self):
+        if self.__requiredComponents is None:
+            self.__requiredComponents = frozenset(
+                [idx for idx, nt in enumerate(self.__namedTypes) if not nt.isOptional and not nt.isDefaulted]
+            )
+        return self.__requiredComponents

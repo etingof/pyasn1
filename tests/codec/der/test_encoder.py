@@ -49,16 +49,16 @@ class BitStringEncoderTestCase(unittest.TestCase):
 class SetWithChoiceEncoderTestCase(unittest.TestCase):
     def setUp(self):
         c = univ.Choice(componentType=namedtype.NamedTypes(
-            namedtype.NamedType('name', univ.OctetString('')),
+            namedtype.NamedType('name', univ.OctetString()),
             namedtype.NamedType('amount', univ.Integer(0)))
         )
         self.s = univ.Set(componentType=namedtype.NamedTypes(
-            namedtype.NamedType('place-holder', univ.Null('')),
+            namedtype.NamedType('place-holder', univ.Null()),
             namedtype.NamedType('status', c))
         )
 
     def testDefMode(self):
-        self.s.setComponentByPosition(0)
+        self.s.setComponentByPosition(0, '')
         self.s.setComponentByName('status')
         self.s.getComponentByName('status').setComponentByPosition(0, 'ann')
         assert encoder.encode(self.s) == ints2octs((49, 7, 4, 3, 97, 110, 110, 5, 0))

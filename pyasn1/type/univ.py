@@ -1799,7 +1799,6 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
 
     def clear(self):
         self._componentValues = []
-        self._componentValuesSet = 0
 
     def append(self, value):
         self[len(self)] = value
@@ -1843,14 +1842,21 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         Parameters
         ----------
         idx : :class:`int`
-            component index (zero-based)
+            Component index (zero-based). Must either refer to an existing
+            component or to N+1 component (of *componentType is set). In the latter
+            case a new component type gets instantiated and appended to the |ASN.1|
+            sequence.
 
         Returns
         -------
         : :py:class:`~pyasn1.type.base.PyAsn1Item`
             a pyasn1 object
         """
-        return self._componentValues[idx]
+        try:
+            return self._componentValues[idx]
+        except IndexError:
+            self.setComponentByPosition(idx)
+            return self._componentValues[idx]
 
     def setComponentByPosition(self, idx, value=noValue,
                                verifyConstraints=True,
@@ -1858,18 +1864,22 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
                                matchConstraints=True):
         """Assign |ASN.1| type component by position.
 
-        Equivalent to Python sequence item assignment operation (e.g. `[]`).
+        Equivalent to Python sequence item assignment operation (e.g. `[]`)
+        or list.append() (when idx == len(self)).
 
         Parameters
         ----------
-        idx : :class:`int`
-            component index (zero-based)
+        idx: :class:`int`
+            Component index (zero-based). Must either refer to existing
+            component or to N+1 component. In the latter case a new component
+            type gets instantiated (if *componentType* is set, or given ASN.1
+            object is taken otherwise) and appended to the |ASN.1| sequence.
 
-        value : :class:`object` or :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
-            A Python or pyasn1 object to assign or :py:class:`~pyasn1.type.univ.noValue`
-            object to instantiate component type.
+        value: :class:`object` or :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
+            A Python value to initialize |ASN.1| component with (if *componentType* is set)
+            or ASN.1 value object to assign to |ASN.1| component.
 
-        verifyConstraints : :class:`bool`
+        verifyConstraints: :class:`bool`
              If `False`, skip constraints validation
 
         matchTags: :class:`bool`
@@ -1881,30 +1891,34 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         Returns
         -------
         self
+
+        Raises
+        ------
+        IndexError:
+            When idx > len(self)
         """
         componentType = self._componentType
 
-        componentValuesLength = len(self._componentValues)
+        try:
+            currentValue = self._componentValues[idx]
+        except IndexError:
+            currentValue = None
 
-        if idx == componentValuesLength:
-            self._componentValues.append(None)
-        elif idx >= componentValuesLength:
-            self._componentValues.extend([None for x in range((idx - componentValuesLength + 1))])
+            if len(self._componentValues) < idx:
+                raise error.PyAsn1Error('Component index out of range')
 
         if value is None or value is noValue:
-            if self._componentValues[idx] is None:
-                if componentType is None:
-                    raise error.PyAsn1Error('Component type not defined')
-                self._componentValues[idx] = componentType.clone()
-                self._componentValuesSet += 1
-            return self
-        elif not isinstance(value, base.Asn1Item):
-            if componentType is None:
+            if componentType is not None:
+                value = componentType.clone()
+            elif currentValue is None:
                 raise error.PyAsn1Error('Component type not defined')
-            if isinstance(componentType, base.AbstractSimpleAsn1Item):
+        elif not isinstance(value, base.Asn1Item):
+            if componentType is not None and isinstance(componentType, base.AbstractSimpleAsn1Item):
                 value = componentType.clone(value=value)
+            elif currentValue is not None and isinstance(currentValue, base.AbstractSimpleAsn1Item):
+                value = currentValue.clone(value=value)
             else:
-                raise error.PyAsn1Error('%s instance value required' % componentType.__class__.__name__)
+                raise error.PyAsn1Error('%s undefined component type' % componentType.__class__.__name__)
         elif componentType is not None:
             if self.strictConstraints:
                 if not componentType.isSameTypeWith(value, matchTags, matchConstraints):
@@ -1913,7 +1927,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
                 if not componentType.isSuperTypeOf(value, matchTags, matchConstraints):
                     raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
 
-        if verifyConstraints:
+        if verifyConstraints and value.isValue:
             try:
                 self._subtypeSpec(value, idx)
 
@@ -1921,10 +1935,10 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
                 exType, exValue, exTb = sys.exc_info()
                 raise exType('%s at %s' % (exValue, self.__class__.__name__))
 
-        if self._componentValues[idx] is None:
-            self._componentValuesSet += 1
-
-        self._componentValues[idx] = value
+        if currentValue is None:
+            self._componentValues.append(value)
+        else:
+            self._componentValues[idx] = value
 
         return self
 
@@ -1935,22 +1949,49 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
 
     def prettyPrint(self, scope=0):
         scope += 1
-        r = self.__class__.__name__ + ':\n'
+        representation = self.__class__.__name__ + ':\n'
         for idx in range(len(self._componentValues)):
-            r += ' ' * scope
+            representation += ' ' * scope
             if self._componentValues[idx] is None:
-                r += '<empty>'
+                representation += '<empty>'
             else:
-                r = r + self._componentValues[idx].prettyPrint(scope)
-        return r
+                representation += self._componentValues[idx].prettyPrint(scope)
+        return representation
 
     def prettyPrintType(self, scope=0):
         scope += 1
-        r = '%s -> %s {\n' % (self.tagSet, self.__class__.__name__)
+        representation = '%s -> %s {\n' % (self.tagSet, self.__class__.__name__)
         if self._componentType is not None:
-            r += ' ' * scope
-            r = r + self._componentType.prettyPrintType(scope)
-        return r + '\n' + ' ' * (scope - 1) + '}'
+            representation += ' ' * scope
+            representation += self._componentType.prettyPrintType(scope)
+        return representation + '\n' + ' ' * (scope - 1) + '}'
+
+
+    @property
+    def isValue(self):
+        """Indicate if |ASN.1| object components represent ASN.1 type or ASN.1 value.
+
+        The PyASN1 type objects can only participate in types comparison
+        and serve as a blueprint for serialization codecs to resolve
+        ambiguous types.
+
+        The PyASN1 value objects can additionally participate in most
+        of built-in Python operations.
+
+        Returns
+        -------
+        : :class:`bool`
+            :class:`True` if all |ASN.1| components represent value and type,
+            :class:`False` if at least one |ASN.1| component represents just ASN.1 type.
+        """
+        if not self._componentValues:
+            return False
+
+        for componentValue in self._componentValues:
+            if not componentValue.isValue:
+                return False
+
+        return True
 
 
 class SequenceOf(SequenceOfAndSetOfBase):
@@ -2078,7 +2119,6 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
     def clear(self):
         self._componentValues = []
-        self._componentValuesSet = 0
 
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         for idx, componentValue in enumerate(self._componentValues):
@@ -2103,7 +2143,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         Returns
         -------
         : :py:class:`~pyasn1.type.base.PyAsn1Item`
-            a pyasn1 object
+            Instantiate |ASN.1| component type or return existing component value
         """
         return self.getComponentByPosition(
             self._componentType.getPositionByName(name)
@@ -2123,7 +2163,8 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             |ASN.1| type component name
 
         value : :class:`object` or :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
-            A Python or pyasn1 object to assign
+            A Python value to initialize |ASN.1| component with (if *componentType* is set)
+            or ASN.1 value object to assign to |ASN.1| component.
 
         verifyConstraints: :class:`bool`
              If `False`, skip constraints validation
@@ -2150,7 +2191,9 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         Parameters
         ----------
         idx : :class:`int`
-            component index (zero-based)
+            Component index (zero-based). Must either refer to an existing
+            component or (if *componentType* is set) new ASN.1 type object gets
+            instantiated.
 
         Returns
         -------
@@ -2158,11 +2201,14 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             a PyASN1 object
         """
         try:
-            return self._componentValues[idx]
+            componentValue = self._componentValues[idx]
         except IndexError:
-            if idx < self._componentTypeLen:
-                return
-            raise
+            componentValue = None
+
+        if componentValue is None:
+            self.setComponentByPosition(idx)
+
+        return self._componentValues[idx]
 
     def setComponentByPosition(self, idx, value=noValue,
                                verifyConstraints=True,
@@ -2175,10 +2221,14 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         Parameters
         ----------
         idx : :class:`int`
-            |ASN.1| type component index (zero-based)
+            Component index (zero-based). Must either refer to existing
+            component (if *componentType* is set) or to N+1 component
+            otherwise. In the latter case a new component of given ASN.1
+            type gets instantiated and appended to |ASN.1| sequence.
 
         value : :class:`object` or :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
-            A Python or pyasn1 object to assign
+            A Python value to initialize |ASN.1| component with (if *componentType* is set)
+            or ASN.1 value object to assign to |ASN.1| component.
 
         verifyConstraints : :class:`bool`
              If `False`, skip constraints validation
@@ -2193,43 +2243,44 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         -------
         self
         """
-        componentValuesLength = len(self._componentValues)
+        componentType = self._componentType
 
-        if idx >= componentValuesLength:
-            if componentValuesLength or not self._componentTypeLen:
-                self._componentValues.extend([None] * (idx - componentValuesLength + 1))
-            else:
-                self._componentValues = [None] * self._componentTypeLen
+        try:
+            currentValue = self._componentValues[idx]
+        except IndexError:
+            currentValue = None
+            if componentType:
+                if len(componentType) < idx:
+                    raise IndexError('component index out of range')
+                self._componentValues = [None] * len(componentType)
 
         if value is None or value is noValue:
-            if self._componentValues[idx] is None:
-                if self._componentType:
-                    componentType = self._componentType.getTypeByPosition(idx)
-                if componentType is None:
-                    raise error.PyAsn1Error('%s instance value required' % componentType.__class__.__name__)
-                self._componentValues[idx] = componentType.clone()
-                self._componentValuesSet += 1
-            return self
-        elif not isinstance(value, base.Asn1Item):
-            if self._componentType:
-                componentType = self._componentType.getTypeByPosition(idx)
-            if componentType is None:
+            if componentType:
+                value = componentType.getTypeByPosition(idx).clone()
+            elif currentValue is None:
                 raise error.PyAsn1Error('Component type not defined')
-            if isinstance(componentType, base.AbstractSimpleAsn1Item):
-                value = componentType.clone(value=value)
+        elif not isinstance(value, base.Asn1Item):
+            if componentType:
+                subComponentType = componentType.getTypeByPosition(idx)
+                if isinstance(subComponentType, base.AbstractSimpleAsn1Item):
+                    value = subComponentType.clone(value=value)
+                else:
+                    raise error.PyAsn1Error('%s can cast only scalar values' % componentType.__class__.__name__)
+            elif currentValue is not None and isinstance(currentValue, base.AbstractSimpleAsn1Item):
+                value = currentValue.clone(value=value)
             else:
-                raise error.PyAsn1Error('%s instance value required' % componentType.__class__.__name__)
-        elif (matchTags or matchConstraints) and self._componentType:
-            componentType = self._componentType.getTypeByPosition(idx)
-            if componentType is not None:
+                raise error.PyAsn1Error('%s undefined component type' % componentType.__class__.__name__)
+        elif (matchTags or matchConstraints) and componentType:
+            subComponentType = componentType.getTypeByPosition(idx)
+            if subComponentType is not None:
                 if self.strictConstraints:
-                    if not componentType.isSameTypeWith(value, matchTags, matchConstraints):
+                    if not subComponentType.isSameTypeWith(value, matchTags, matchConstraints):
                         raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
                 else:
-                    if not componentType.isSuperTypeOf(value, matchTags, matchConstraints):
+                    if not subComponentType.isSuperTypeOf(value, matchTags, matchConstraints):
                         raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
 
-        if verifyConstraints:
+        if verifyConstraints and value.isValue:
             try:
                 self._subtypeSpec(value, idx)
 
@@ -2237,10 +2288,12 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                 exType, exValue, exTb = sys.exc_info()
                 raise exType('%s at %s' % (exValue, self.__class__.__name__))
 
-        if self._componentValues[idx] is None:
-            self._componentValuesSet += 1
-
-        self._componentValues[idx] = value
+        if componentType:
+            self._componentValues[idx] = value
+        elif len(self._componentValues) == idx:
+            self._componentValues.append(value)
+        else:
+            raise error.PyAsn1Error('Component index out of range')
 
         return self
 
@@ -2248,35 +2301,42 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         if self._componentTypeLen:
             return self._componentType.getNameByPosition(idx)
 
-    def getDefaultComponentByPosition(self, idx):
-        if self._componentTypeLen and self._componentType[idx].isDefaulted:
-            return self._componentType[idx].asn1Object
-
     def getComponentType(self):
         if self._componentTypeLen:
             return self._componentType
 
-    def setDefaultComponents(self):
-        """Assign default values to all defaulted |ASN.1| type components.
+    @property
+    def isValue(self):
+        """Indicate if |ASN.1| object components represent ASN.1 type or ASN.1 value.
+
+        The PyASN1 type objects can only participate in types comparison
+        and serve as a blueprint for serialization codecs to resolve
+        ambiguous types.
+
+        The PyASN1 value objects can additionally participate in most
+        of built-in Python operations.
 
         Returns
         -------
-        self
+        : :class:`bool`
+            :class:`True` if all |ASN.1| components represent value and type,
+            :class:`False` if at least one |ASN.1| component represents just ASN.1 type.
         """
-        if self._componentTypeLen == self._componentValuesSet:
-            return self
-        idx = self._componentTypeLen
-        while idx:
-            idx -= 1
-            if self._componentType[idx].isDefaulted:
-                if self.getComponentByPosition(idx) is None:
-                    self.setComponentByPosition(idx)
-            elif not self._componentType[idx].isOptional:
-                if self.getComponentByPosition(idx) is None:
-                    raise error.PyAsn1Error(
-                        'Uninitialized component #%s at %r' % (idx, self)
-                    )
-        return self
+        componentType = self._componentType
+
+        if componentType:
+            for idx, subComponentType in enumerate(componentType.namedTypes):
+                if subComponentType.isDefaulted or subComponentType.isOptional:
+                    continue
+                if not self._componentValues or self._componentValues[idx] is None or not self._componentValues[idx].isValue:
+                    return False
+
+        else:
+            for componentValue in self._componentValues:
+                if not componentValue.isValue:
+                    return False
+
+        return True
 
     def prettyPrint(self, scope=0):
         """Return an object representation string.
@@ -2287,30 +2347,34 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             Human-friendly object representation.
         """
         scope += 1
-        r = self.__class__.__name__ + ':\n'
+        representation = self.__class__.__name__ + ':\n'
         for idx in range(len(self._componentValues)):
             if self._componentValues[idx] is not None:
-                r += ' ' * scope
+                representation += ' ' * scope
                 componentType = self.getComponentType()
                 if componentType is None:
-                    r += '<no-name>'
+                    representation += '<no-name>'
                 else:
-                    r = r + componentType.getNameByPosition(idx)
-                r = '%s=%s\n' % (
-                    r, self._componentValues[idx].prettyPrint(scope)
+                    representation += componentType.getNameByPosition(idx)
+                representation = '%s=%s\n' % (
+                    representation, self._componentValues[idx].prettyPrint(scope)
                 )
-        return r
+        return representation
 
     def prettyPrintType(self, scope=0):
         scope += 1
-        r = '%s -> %s {\n' % (self.tagSet, self.__class__.__name__)
+        representation = '%s -> %s {\n' % (self.tagSet, self.__class__.__name__)
         for idx in range(len(self.componentType)):
-            r += ' ' * scope
-            r += '"%s"' % self.componentType.getNameByPosition(idx)
-            r = '%s = %s\n' % (
-                r, self._componentType.getTypeByPosition(idx).prettyPrintType(scope)
+            representation += ' ' * scope
+            representation += '"%s"' % self.componentType.getNameByPosition(idx)
+            representation = '%s = %s\n' % (
+                representation, self._componentType.getTypeByPosition(idx).prettyPrintType(scope)
             )
-        return r + '\n' + ' ' * (scope - 1) + '}'
+        return representation + '\n' + ' ' * (scope - 1) + '}'
+
+    # backward compatibility -- no-op
+    def setDefaultComponents(self):
+        return self
 
 
 class Sequence(SequenceAndSetBase):
@@ -2385,7 +2449,8 @@ class Set(SequenceAndSetBase):
         Parameters
         ----------
         tagSet : :py:class:`~pyasn1.type.tag.TagSet`
-            Object representing ASN.1 tags
+            Object representing ASN.1 tags to identify one of
+            |ASN.1| object component
 
         Returns
         -------
@@ -2412,10 +2477,12 @@ class Set(SequenceAndSetBase):
         Parameters
         ----------
         tagSet : :py:class:`~pyasn1.type.tag.TagSet`
-           Object representing ASN.1 tags
+            Object representing ASN.1 tags to identify one of
+            |ASN.1| object component
 
         value : :class:`object` or :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
-            A Python or pyasn1 object to assign
+            A Python value to initialize |ASN.1| component with (if *componentType* is set)
+            or ASN.1 value object to assign to |ASN.1| component.
 
         verifyConstraints : :class:`bool`
             If `False`, skip constraints validation
@@ -2540,6 +2607,20 @@ class Choice(Set):
             raise StopIteration
         yield self._componentType[self._currentIdx].getName()
 
+    # Python dict protocol
+
+    def values(self):
+        if self._currentIdx is not None:
+            yield self._componentValues[self._currentIdx]
+
+    def keys(self):
+        if self._currentIdx is not None:
+            yield self._componentType[self._currentIdx].getName()
+
+    def items(self):
+        if self._currentIdx is not None:
+            yield self._componentType[self._currentIdx].getName(), self[self._currentIdx]
+
     def verifySizeSpec(self):
         if self._currentIdx is None:
             raise error.PyAsn1Error('Component not chosen')
@@ -2561,6 +2642,14 @@ class Choice(Set):
             else:
                 myClone.setComponentByType(tagSet, component.clone())
 
+    def getComponentByPosition(self, idx):
+        __doc__ = Set.__doc__
+
+        if self._currentIdx is None or self._currentIdx != idx:
+            Set.setComponentByPosition(idx)
+
+        return self._componentValues[idx]
+
     def setComponentByPosition(self, idx, value=noValue,
                                verifyConstraints=True,
                                matchTags=True,
@@ -2571,11 +2660,16 @@ class Choice(Set):
 
         Parameters
         ----------
-        idx : :class:`int`
-            component index (zero-based)
+        idx: :class:`int`
+            Component index (zero-based). Must either refer to existing
+            component or to N+1 component. In the latter case a new component
+            type gets instantiated (if *componentType* is set, or given ASN.1
+            object is taken otherwise) and appended to the |ASN.1| sequence.
 
-        value : :class:`object` or :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
-            A Python or pyasn1 object to assign
+        value: :class:`object` or :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
+            A Python value to initialize |ASN.1| component with (if *componentType* is set)
+            or ASN.1 value object to assign to |ASN.1| component. Once a new value is
+            set to *idx* component, previous value is dropped.
 
         verifyConstraints : :class:`bool`
             If `False`, skip constraints validation
@@ -2590,54 +2684,11 @@ class Choice(Set):
         -------
         self
         """
-        componentValuesLength = len(self._componentValues)
-
-        if idx >= componentValuesLength:
-            if componentValuesLength or not self._componentTypeLen:
-                self._componentValues.extend([None] * (idx - componentValuesLength + 1))
-            else:
-                self._componentValues = [None] * self._componentTypeLen
-
-        if self._currentIdx is not None:
-            self._componentValues[self._currentIdx] = None
-
-        if value is None or value is noValue:
-            if self._componentValues[idx] is None:
-                self._componentValues[idx] = self._componentType.getTypeByPosition(idx).clone()
-                self._componentValuesSet = 1
-                self._currentIdx = idx
-            return self
-        elif not isinstance(value, base.Asn1Item):
-            if self._componentType:
-                componentType = self._componentType.getTypeByPosition(idx)
-            if componentType is None:
-                raise error.PyAsn1Error('Component type not defined')
-            if isinstance(componentType, base.AbstractSimpleAsn1Item):
-                value = componentType.clone(value)
-            else:
-                raise error.PyAsn1Error('%s instance value required' % componentType.__class__.__name__)
-        elif (matchTags or matchConstraints) and self._componentType:
-            componentType = self._componentType.getTypeByPosition(idx)
-            if componentType is not None:
-                if self.strictConstraints:
-                    if not componentType.isSameTypeWith(value, matchTags, matchConstraints):
-                        raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
-                else:
-                    if not componentType.isSuperTypeOf(value, matchTags, matchConstraints):
-                        raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
-
-        if verifyConstraints:
-            try:
-                self._subtypeSpec(value, idx)
-
-            except error.PyAsn1Error:
-                exType, exValue, exTb = sys.exc_info()
-                raise exType('%s at %s' % (exValue, self.__class__.__name__))
-
-        self._componentValues[idx] = value
+        oldIdx = self._currentIdx
+        Set.setComponentByPosition(self, idx, value, verifyConstraints, matchTags, matchConstraints)
         self._currentIdx = idx
-        self._componentValuesSet = 1
-
+        if oldIdx is not None and oldIdx != idx:
+            self._componentValues[oldIdx] = None
         return self
 
     def getMinTagSet(self):
@@ -2699,8 +2750,27 @@ class Choice(Set):
                     return c.getName(innerFlag)
             return self._componentType.getNameByPosition(self._currentIdx)
 
-    def setDefaultComponents(self):
-        pass
+    @property
+    def isValue(self):
+        """Indicate if |ASN.1| component is set and represents ASN.1 type or ASN.1 value.
+
+        The PyASN1 type objects can only participate in types comparison
+        and serve as a blueprint for serialization codecs to resolve
+        ambiguous types.
+
+        The PyASN1 value objects can additionally participate in most
+        of built-in Python operations.
+
+        Returns
+        -------
+        : :class:`bool`
+            :class:`True` if |ASN.1| component is set and represent value and type,
+            :class:`False` if |ASN.1| component is not set or it represents just ASN.1 type.
+        """
+        if self._currentIdx is None:
+            return False
+
+        return self._componentValues[self._currentIdx].isValue
 
 
 class Any(OctetString):

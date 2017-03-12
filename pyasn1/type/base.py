@@ -446,7 +446,6 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         else:
             self._sizeSpec = sizeSpec
         self._componentValues = []
-        self._componentValuesSet = 0
 
     def __repr__(self):
         representation = []
@@ -588,6 +587,7 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
     def getComponentType(self):
         return self._componentType
 
+    # backward compatibility -- no-op
     def setDefaultComponents(self):
         pass
 
@@ -606,7 +606,6 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
 
     def clear(self):
         self._componentValues = []
-        self._componentValuesSet = 0
 
     # backward compatibility
     def getComponentTagMap(self):
