@@ -50,7 +50,7 @@ class SetEncoderTestCase(unittest.TestCase):
     def setUp(self):
         self.s = univ.Set(componentType=namedtype.NamedTypes(
             namedtype.NamedType('place-holder', univ.Null('')),
-            namedtype.OptionalNamedType('first-name', univ.OctetString('')),
+            namedtype.OptionalNamedType('first-name', univ.OctetString()),
             namedtype.DefaultedNamedType('age', univ.Integer(33))
         ))
 

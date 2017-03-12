@@ -338,16 +338,15 @@ class RealEncoder(AbstractItemEncoder):
 
 class SequenceEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
-        value.setDefaultComponents()
         value.verifySizeSpec()
+        namedTypes = value.getComponentType()
         substrate = null
         idx = len(value)
         while idx > 0:
             idx -= 1
-            if value.getComponentByPosition(idx) is None:  # Optional component
+            if namedTypes[idx].isOptional and not value[idx].isValue:
                 continue
-            component = value.getDefaultComponentByPosition(idx)
-            if component is not None and component == value[idx]:
+            if namedTypes[idx].isDefaulted and value[idx] == namedTypes[idx].asn1Object:
                 continue
             substrate = encodeFun(value[idx], defMode, maxChunkSize) + substrate
         return substrate, True, True

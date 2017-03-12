@@ -343,8 +343,8 @@ class UTF8StringEncoderTestCase(unittest.TestCase):
 class SequenceEncoderTestCase(unittest.TestCase):
     def setUp(self):
         self.s = univ.Sequence(componentType=namedtype.NamedTypes(
-            namedtype.NamedType('place-holder', univ.Null('')),
-            namedtype.OptionalNamedType('first-name', univ.OctetString('')),
+            namedtype.NamedType('place-holder', univ.Null()),
+            namedtype.OptionalNamedType('first-name', univ.OctetString()),
             namedtype.DefaultedNamedType('age', univ.Integer(33)),
         ))
 
@@ -359,7 +359,7 @@ class SequenceEncoderTestCase(unittest.TestCase):
 
     def __initWithDefaulted(self):
         self.s.clear()
-        self.s.setComponentByPosition(0)
+        self.s.setComponentByPosition(0, '')
         self.s.setComponentByPosition(2, 1)
 
     def __initWithOptionalAndDefaulted(self):

@@ -480,7 +480,6 @@ class SequenceDecoderTestCase(unittest.TestCase):
         self.s.setComponentByPosition(0, univ.Null(null))
         self.s.setComponentByPosition(1, univ.OctetString('quick brown'))
         self.s.setComponentByPosition(2, univ.Integer(1))
-        self.s.setDefaultComponents()
 
     def testWithOptionalAndDefaultedDefMode(self):
         assert decoder.decode(
@@ -541,26 +540,22 @@ class GuidedSequenceDecoderTestCase(unittest.TestCase):
     def __init(self):
         self.s.clear()
         self.s.setComponentByPosition(0, univ.Null(null))
-        self.s.setDefaultComponents()
 
     def __initWithOptional(self):
         self.s.clear()
         self.s.setComponentByPosition(0, univ.Null(null))
         self.s.setComponentByPosition(1, univ.OctetString('quick brown'))
-        self.s.setDefaultComponents()
 
     def __initWithDefaulted(self):
         self.s.clear()
         self.s.setComponentByPosition(0, univ.Null(null))
         self.s.setComponentByPosition(2, univ.Integer(1))
-        self.s.setDefaultComponents()
 
     def __initWithOptionalAndDefaulted(self):
         self.s.clear()
         self.s.setComponentByPosition(0, univ.Null(null))
         self.s.setComponentByPosition(1, univ.OctetString('quick brown'))
         self.s.setComponentByPosition(2, univ.Integer(1))
-        self.s.setDefaultComponents()
 
     def testDefMode(self):
         self.__init()

@@ -22,6 +22,17 @@ Revision 0.2.4, released XX-03-2017
 - The .hasValue() method refactored into .isValue property
 - Codecs lookup made more efficient at BER/CER/DER decoder main loop by
   assigning `typeId` to every ASN.1 type, not just ambiguous ones.
+- The .getComponent*() methods of constructed ASN.1 types changed
+  to lazily instantiate underlying type rather than return `None`.
+  This should simplify its API as initialization like `X[0][1] = 2` becomes
+  possible. Beware that this change introduces a deviation from
+  original API.
+- The .setComponent*() methods of SetOf/SequenceOf types changed not
+  to allow uninitialized "holes" inside the sequences of their components.
+  They now behave sililarily to Python lists. Beware that this change
+  introduces a deviation from original API.
+- Default and optional components en/decoding of Constructed type
+  refactored towards better efficiency and more control.
 
 Revision 0.2.3, released 25-02-2017
 -----------------------------------

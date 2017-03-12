@@ -929,17 +929,10 @@ class Sequence(unittest.TestCase):
             univ.OctetString.tagSet, 1
         ) == 1
 
-    def testGetDefaultComponentByPosition(self):
-        self.s1.clear()
-        assert self.s1.getDefaultComponentByPosition(0) is None
-        assert self.s1.getDefaultComponentByPosition(2) == univ.Integer(34)
-
     def testSetDefaultComponents(self):
         self.s1.clear()
-        assert self.s1.getComponentByPosition(2) is None
         self.s1.setComponentByPosition(0, univ.OctetString('Ping'))
         self.s1.setComponentByPosition(1, univ.OctetString('Pong'))
-        self.s1.setDefaultComponents()
         assert self.s1.getComponentByPosition(2) == 34
 
     def testClone(self):
@@ -1019,7 +1012,7 @@ class Sequence(unittest.TestCase):
 
     def testUpdate(self):
         self.s1.clear()
-        assert list(self.s1.values()) == [None, None, None]
+        assert list(self.s1.values()) == [str2octs(''), str2octs(''), 34]
         self.s1.update(**{'name': 'abc', 'nick': 'def', 'age': 123})
         assert list(self.s1.items()) == [(x[0], str2octs(x[1])) for x in [('name', 'abc'), ('nick', 'def')]] + [('age', 123)]
         self.s1.update(('name', 'ABC'))
