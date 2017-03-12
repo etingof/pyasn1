@@ -2244,23 +2244,24 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         self
         """
         componentType = self._componentType
+        componentTypeLen = self._componentTypeLen
 
         try:
             currentValue = self._componentValues[idx]
         except IndexError:
             currentValue = None
-            if componentType:
-                if len(componentType) < idx:
+            if componentTypeLen:
+                if componentTypeLen < idx:
                     raise IndexError('component index out of range')
-                self._componentValues = [None] * len(componentType)
+                self._componentValues = [None] * componentTypeLen
 
         if value is None or value is noValue:
-            if componentType:
+            if componentTypeLen:
                 value = componentType.getTypeByPosition(idx).clone()
             elif currentValue is None:
                 raise error.PyAsn1Error('Component type not defined')
         elif not isinstance(value, base.Asn1Item):
-            if componentType:
+            if componentTypeLen:
                 subComponentType = componentType.getTypeByPosition(idx)
                 if isinstance(subComponentType, base.AbstractSimpleAsn1Item):
                     value = subComponentType.clone(value=value)
@@ -2270,7 +2271,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                 value = currentValue.clone(value=value)
             else:
                 raise error.PyAsn1Error('%s undefined component type' % componentType.__class__.__name__)
-        elif (matchTags or matchConstraints) and componentType:
+        elif (matchTags or matchConstraints) and componentTypeLen:
             subComponentType = componentType.getTypeByPosition(idx)
             if subComponentType is not None:
                 if self.strictConstraints:
@@ -2288,7 +2289,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                 exType, exValue, exTb = sys.exc_info()
                 raise exType('%s at %s' % (exValue, self.__class__.__name__))
 
-        if componentType:
+        if componentTypeLen:
             self._componentValues[idx] = value
         elif len(self._componentValues) == idx:
             self._componentValues.append(value)
@@ -2502,15 +2503,15 @@ class Set(SequenceAndSetBase):
         """
         idx = self._componentType.getPositionByType(tagSet)
 
-        componentType = self._componentType.getTypeByPosition(idx)
-
         if innerFlag:  # set inner component by inner tagSet
+            componentType = self._componentType.getTypeByPosition(idx)
+
             if componentType.tagSet:
                 return self.setComponentByPosition(
                     idx, value, verifyConstraints, matchTags, matchConstraints
                 )
             else:
-                componentType = self.setComponentByPosition(idx).getComponentByPosition(idx)
+                componentType = self.getComponentByPosition(idx)
                 return componentType.setComponentByType(
                     tagSet, value, verifyConstraints, matchTags, matchConstraints, innerFlag=innerFlag
                 )

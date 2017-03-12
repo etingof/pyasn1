@@ -875,7 +875,7 @@ class Decoder(object):
             # in an incremental, tag-by-tag fashion (this is the case of
             # EXPLICIT tag which is most basic). Outermost tag comes first
             # from the wire.
-            #            
+            #
             if state == stGetValueDecoderByTag:
                 try:
                     concreteDecoder = self.__tagMap[tagSet]
