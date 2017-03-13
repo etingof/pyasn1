@@ -2647,7 +2647,7 @@ class Choice(Set):
         __doc__ = Set.__doc__
 
         if self._currentIdx is None or self._currentIdx != idx:
-            Set.setComponentByPosition(idx)
+            return Set.getComponentByPosition(self, idx)
 
         return self._componentValues[idx]
 
