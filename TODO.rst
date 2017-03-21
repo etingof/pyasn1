@@ -73,6 +73,7 @@ Minor, housekeeping things
 
     * Asn1Item.clone() / shallowcopy issue
     * large length encoder?
+    * lookup type by tag first to allow custom codecs for non-base types
 
 * type.useful:
 
@@ -87,3 +88,5 @@ Minor, housekeeping things
     * type vs tagset name convention
 
 * how untagged TagSet should be initialized?
+
+* type and codecs for Real needs refactoring

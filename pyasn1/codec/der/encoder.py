@@ -28,7 +28,7 @@ tagMap.update({
     univ.SetOf().tagSet: SetOfEncoder()
 })
 
-typeMap = encoder.typeMap
+typeMap = encoder.typeMap.copy()
 
 
 class Encoder(encoder.Encoder):

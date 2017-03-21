@@ -267,7 +267,7 @@ class RealEncoderTestCase(unittest.TestCase):
 
     def testBin1(self):
         assert encoder.encode(  # default binEncBase = 2
-            univ.Real((0.5, 2, 0))  # check encbase = 2 and exponenta = -1
+            univ.Real((0.5, 2, 0))  # check encbase = 2 and exponent = -1
         ) == ints2octs((9, 3, 128, 255, 1))
 
     def testBin2(self):
@@ -278,38 +278,40 @@ class RealEncoderTestCase(unittest.TestCase):
         ) == ints2octs((9, 3, 148, 255, 13))
 
     def testBin3(self):
-        # change binEncBase in the RealEncoder instance => for all further Reals
-        encoder.tagMap[univ.Real.tagSet].binEncBase = 16
+        # change binEncBase in the RealEncoder instance => for all further Real
+        binEncBase, encoder.typeMap[univ.Real.typeId].binEncBase = encoder.typeMap[univ.Real.typeId].binEncBase, 16
         assert encoder.encode(
             univ.Real((0.00390625, 2, 0))  # check encbase = 16
         ) == ints2octs((9, 3, 160, 254, 1))
+        encoder.typeMap[univ.Real.typeId].binEncBase = binEncBase
 
     def testBin4(self):
-        # choose binEncBase automatically for all further Reals (testBin[4-7])
-        encoder.tagMap[univ.Real.tagSet].binEncBase = None
+        # choose binEncBase automatically for all further Real (testBin[4-7])
+        binEncBase, encoder.typeMap[univ.Real.typeId].binEncBase = encoder.typeMap[univ.Real.typeId].binEncBase, None
         assert encoder.encode(
             univ.Real((1, 2, 0))  # check exponenta = 0
         ) == ints2octs((9, 3, 128, 0, 1))
+        encoder.typeMap[univ.Real.typeId].binEncBase = binEncBase
 
     def testBin5(self):
         assert encoder.encode(
-            univ.Real((3, 2, -1020))  # case of 2 octs for exponenta and
-            # negative exponenta and abs(exponenta) is
+            univ.Real((3, 2, -1020))  # case of 2 octs for exponent and
+            # negative exponenta and abs(exponent) is
             # all 1's and fills the whole octet(s)
-        ) == ints2octs((9, 4, 161, 255, 1, 3))
+        ) == ints2octs((9, 4, 129, 252, 4, 3))
 
     def testBin6(self):
         assert encoder.encode(
-            univ.Real((1, 2, 262140))  # case of 3 octs for exponenta and
-            # check that first 9 bits for exponenta
+            univ.Real((1, 2, 262140))  # case of 3 octs for exponent and
+            # check that first 9 bits for exponent
             # are not all 1's
-        ) == ints2octs((9, 5, 162, 0, 255, 255, 1))
+        ) == ints2octs((9, 5, 130, 3, 255, 252, 1))
 
     def testBin7(self):
         assert encoder.encode(
-            univ.Real((-1, 2, 76354972))  # case of >3 octs for exponenta and
+            univ.Real((-1, 2, 76354972))  # case of >3 octs for exponent and
             # mantissa < 0
-        ) == ints2octs((9, 7, 227, 4, 1, 35, 69, 103, 1))
+        ) == ints2octs((9, 7, 195, 4, 4, 141, 21, 156, 1))
 
     def testPlusInf(self):
         assert encoder.encode(univ.Real('inf')) == ints2octs((9, 1, 64))

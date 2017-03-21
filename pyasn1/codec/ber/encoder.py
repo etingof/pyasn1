@@ -405,14 +405,39 @@ tagMap = {
     useful.UTCTime.tagSet: OctetStringEncoder()
 }
 
-# Type-to-codec map for ambiguous ASN.1 types
+# Put in ambiguous & non-ambiguous types for faster codec lookup
 typeMap = {
+    univ.Boolean.typeId: BooleanEncoder(),
+    univ.Integer.typeId: IntegerEncoder(),
+    univ.BitString.typeId: BitStringEncoder(),
+    univ.OctetString.typeId: OctetStringEncoder(),
+    univ.Null.typeId: NullEncoder(),
+    univ.ObjectIdentifier.typeId: ObjectIdentifierEncoder(),
+    univ.Enumerated.typeId: IntegerEncoder(),
+    univ.Real.typeId: RealEncoder(),
+    # Sequence & Set have same tags as SequenceOf & SetOf
     univ.Set.typeId: SequenceEncoder(),
     univ.SetOf.typeId: SequenceOfEncoder(),
     univ.Sequence.typeId: SequenceEncoder(),
     univ.SequenceOf.typeId: SequenceOfEncoder(),
     univ.Choice.typeId: ChoiceEncoder(),
-    univ.Any.typeId: AnyEncoder()
+    univ.Any.typeId: AnyEncoder(),
+    # character string types
+    char.UTF8String.typeId: OctetStringEncoder(),
+    char.NumericString.typeId: OctetStringEncoder(),
+    char.PrintableString.typeId: OctetStringEncoder(),
+    char.TeletexString.typeId: OctetStringEncoder(),
+    char.VideotexString.typeId: OctetStringEncoder(),
+    char.IA5String.typeId: OctetStringEncoder(),
+    char.GraphicString.typeId: OctetStringEncoder(),
+    char.VisibleString.typeId: OctetStringEncoder(),
+    char.GeneralString.typeId: OctetStringEncoder(),
+    char.UniversalString.typeId: OctetStringEncoder(),
+    char.BMPString.typeId: OctetStringEncoder(),
+    # useful types
+    useful.ObjectDescriptor.typeId: OctetStringEncoder(),
+    useful.GeneralizedTime.typeId: OctetStringEncoder(),
+    useful.UTCTime.typeId: OctetStringEncoder()
 }
 
 
@@ -434,16 +459,13 @@ class Encoder(object):
         if len(tagSet) > 1:
             concreteEncoder = explicitlyTaggedItemEncoder
         else:
-            if value.typeId is None:
-                concreteEncoder = None
-            else:
-                concreteEncoder = self.__typeMap.get(value.typeId, None)
-            if concreteEncoder is None:
-                concreteEncoder = self.__tagMap.get(tagSet, None)
-            if concreteEncoder is None:
-                tagSet = value.baseTagSet
+            try:
+                concreteEncoder = self.__typeMap[value.typeId]
+            except KeyError:
+                # use base type for codec lookup to recover untagged types
+                baseTagSet = tag.TagSet(value.tagSet.baseTag, value.tagSet.baseTag)
                 try:
-                    concreteEncoder = self.__tagMap[tagSet]
+                    concreteEncoder = self.__tagMap[baseTagSet]
                 except KeyError:
                     raise error.PyAsn1Error('No encoder for %s' % (value,))
         debug.logger & debug.flagEncoder and debug.logger(

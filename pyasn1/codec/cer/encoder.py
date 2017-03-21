@@ -133,6 +133,12 @@ tagMap.update({
 
 typeMap = encoder.typeMap.copy()
 typeMap.update({
+    univ.Boolean.typeId: BooleanEncoder(),
+    univ.BitString.typeId: BitStringEncoder(),
+    univ.OctetString.typeId: OctetStringEncoder(),
+    univ.Real.typeId: RealEncoder(),
+    useful.GeneralizedTime.typeId: GeneralizedTimeEncoder(),
+    useful.UTCTime.typeId: UTCTimeEncoder(),
     univ.Set.typeId: SetOfEncoder(),
     univ.SetOf.typeId: SetOfEncoder()
 })
