@@ -29,7 +29,7 @@ Revision 0.2.4, released XX-03-2017
   original API.
 - The .setComponent*() methods of SetOf/SequenceOf types changed not
   to allow uninitialized "holes" inside the sequences of their components.
-  They now behave sililarily to Python lists. Beware that this change
+  They now behave similarly to Python lists. Beware that this change
   introduces a deviation from original API.
 - Default and optional components en/decoding of Constructed type
   refactored towards better efficiency and more control.
