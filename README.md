@@ -179,6 +179,6 @@ post your question [on Stack Overflow](http://stackoverflow.com/questions/ask)
 or try browsing pyasn1 
 [mailing list archives](https://sourceforge.net/p/pyasn1/mailman/pyasn1-users/).
 
-Copyright (c) 2005-2017, [Ilya Etingof](http://etingof@gmail.com).
+Copyright (c) 2005-2017, [Ilya Etingof](mailto://etingof@gmail.com).
 All rights reserved.
 
