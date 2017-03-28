@@ -762,22 +762,17 @@ class BitString(base.AbstractSimpleAsn1Item):
                     )
 
             elif self.__namedValues and not value.isdigit():  # named bits like 'Urgent, Active'
-                highestBitPosition = 0
-                bitPositions = []
-                for namedBit in value.split(','):
-                    bitPosition = self.__namedValues.getValue(namedBit)
-                    if bitPosition is None:
-                        raise error.PyAsn1Error(
-                            'Unknown bit identifier \'%s\'' % (namedBit,)
-                        )
-                    bitPositions.append(bitPosition)
-                    highestBitPosition = max(highestBitPosition, bitPosition)
+                bitPositions = self.__namedValues.getValues(*[x.strip() for x in value.split(',')])
+
+                bitPositions.sort()
+
+                rightmostPosition = bitPositions[-1]
 
                 number = 0
                 for bitPosition in bitPositions:
-                    number |= 1 << (highestBitPosition - bitPosition)
+                    number |= 1 << (rightmostPosition - bitPosition)
 
-                return self.SizedInteger(number).setBitLength(highestBitPosition + 1)
+                return self.SizedInteger(number).setBitLength(rightmostPosition + 1)
 
             elif value.startswith('0x'):
                 return self.fromHexString(value[2:])

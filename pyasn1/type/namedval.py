@@ -67,6 +67,15 @@ class NamedValues(object):
         if name in self.nameToValIdx:
             return self.nameToValIdx[name]
 
+    def getValues(self, *names):
+        try:
+            return [self.nameToValIdx[name] for name in names]
+
+        except KeyError:
+            raise error.PyAsn1Error(
+                'Unknown bit identifier(s): %s' % (set(names).difference(self.nameToValIdx),)
+            )
+
     def __getitem__(self, i):
         return self.namedValues[i]
 
