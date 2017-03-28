@@ -762,18 +762,20 @@ class BitString(base.AbstractSimpleAsn1Item):
                     )
 
             elif self.__namedValues and not value.isdigit():  # named bits like 'Urgent, Active'
-                number = 0
                 highestBitPosition = 0
+                bitPositions = []
                 for namedBit in value.split(','):
                     bitPosition = self.__namedValues.getValue(namedBit)
                     if bitPosition is None:
                         raise error.PyAsn1Error(
                             'Unknown bit identifier \'%s\'' % (namedBit,)
                         )
-
-                    number |= (1 << bitPosition)
-
+                    bitPositions.append(bitPosition)
                     highestBitPosition = max(highestBitPosition, bitPosition)
+
+                number = 0
+                for bitPosition in bitPositions:
+                    number |= 1 << (highestBitPosition - bitPosition)
 
                 return self.SizedInteger(number).setBitLength(highestBitPosition + 1)
 
