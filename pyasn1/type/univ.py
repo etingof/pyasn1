@@ -764,9 +764,7 @@ class BitString(base.AbstractSimpleAsn1Item):
             elif self.__namedValues and not value.isdigit():  # named bits like 'Urgent, Active'
                 bitPositions = self.__namedValues.getValues(*[x.strip() for x in value.split(',')])
 
-                bitPositions.sort()
-
-                rightmostPosition = bitPositions[-1]
+                rightmostPosition = max(bitPositions)
 
                 number = 0
                 for bitPosition in bitPositions:
