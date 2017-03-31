@@ -768,7 +768,7 @@ class EndOfOctetsTestCase(unittest.TestCase):
 
     def testExpectedEoo(self):
         result, remainder = decoder.decode(ints2octs((0, 0)), allowEoo=True)
-        assert eoo.endOfOctets.isSameTypeWith(result) and result == eoo.endOfOctets
+        assert eoo.endOfOctets.isSameTypeWith(result) and result == eoo.endOfOctets and result is eoo.endOfOctets
         assert remainder == null
 
     def testDefiniteNoEoo(self):

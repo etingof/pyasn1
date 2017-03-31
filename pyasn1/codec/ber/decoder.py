@@ -76,7 +76,7 @@ class ExplicitTagDecoder(AbstractSimpleDecoder):
             )
         value, substrate = decodeFun(substrate, asn1Spec, tagSet, length)
         terminator, substrate = decodeFun(substrate, allowEoo=True)
-        if eoo.endOfOctets.isSameTypeWith(terminator) and terminator == eoo.endOfOctets:
+        if terminator is eoo.endOfOctets:
             return value, substrate
         else:
             raise error.PyAsn1Error('Missing end-of-octets terminator')
@@ -150,7 +150,7 @@ class BitStringDecoder(AbstractSimpleDecoder):
 
         while substrate:
             component, substrate = decodeFun(substrate, self.protoComponent, allowEoo=True)
-            if eoo.endOfOctets.isSameTypeWith(component) and component == eoo.endOfOctets:
+            if component is eoo.endOfOctets:
                 break
 
             bitString += component
@@ -189,7 +189,7 @@ class OctetStringDecoder(AbstractSimpleDecoder):
         while substrate:
             component, substrate = decodeFun(substrate, self.protoComponent,
                                              allowEoo=True)
-            if eoo.endOfOctets.isSameTypeWith(component) and component == eoo.endOfOctets:
+            if component is eoo.endOfOctets:
                 break
             asn1Object += component
         else:
@@ -399,7 +399,7 @@ class SequenceAndSetDecoderBase(AbstractConstructedDecoder):
             while substrate:
                 asn1Spec = self._getComponentTagMap(asn1Object, idx)
                 component, substrate = decodeFun(substrate, asn1Spec, allowEoo=True)
-                if eoo.endOfOctets.isSameTypeWith(component) and component == eoo.endOfOctets:
+                if component is eoo.endOfOctets:
                     break
                 idx = self._getComponentPositionByType(
                     asn1Object, component.effectiveTagSet, idx
@@ -431,7 +431,7 @@ class SequenceAndSetDecoderBase(AbstractConstructedDecoder):
                 )
 
             component, substrate = decodeFun(substrate, eoo.endOfOctets, allowEoo=True)
-            if not eoo.endOfOctets.isSameTypeWith(component) or component != eoo.endOfOctets:
+            if component is not eoo.endOfOctets:
                 raise error.SubstrateUnderrunError(
                     'No EOO seen before substrate ends'
                 )
@@ -486,7 +486,7 @@ class SequenceOfDecoder(AbstractConstructedDecoder):
         idx = 0
         while substrate:
             component, substrate = decodeFun(substrate, asn1Spec, allowEoo=True)
-            if eoo.endOfOctets.isSameTypeWith(component) and component == eoo.endOfOctets:
+            if component is eoo.endOfOctets:
                 break
             asn1Object.setComponentByPosition(
                 idx, component,
@@ -557,7 +557,7 @@ class ChoiceDecoder(AbstractConstructedDecoder):
             component, substrate = decodeFun(substrate, asn1Object.componentTagMap)
             # eat up EOO marker
             eooMarker, substrate = decodeFun(substrate, allowEoo=True)
-            if not eoo.endOfOctets.isSameTypeWith(eooMarker) or eooMarker != eoo.endOfOctets:
+            if eooMarker is not eoo.endOfOctets:
                 raise error.PyAsn1Error('No EOO seen before substrate ends')
         else:
             component, substrate = decodeFun(
@@ -581,7 +581,7 @@ class AnyDecoder(AbstractSimpleDecoder):
                      length, state, decodeFun, substrateFun):
         if asn1Spec is None or asn1Spec is not None and tagSet != asn1Spec.tagSet:
             # untagged Any container, recover inner header substrate
-            length = length + len(fullSubstrate) - len(substrate)
+            length += len(fullSubstrate) - len(substrate)
             substrate = fullSubstrate
         if substrateFun:
             return substrateFun(self._createComponent(asn1Spec, tagSet),
@@ -607,9 +607,9 @@ class AnyDecoder(AbstractSimpleDecoder):
             return substrateFun(asn1Object, substrate, length)
         while substrate:
             component, substrate = decodeFun(substrate, asn1Spec, allowEoo=True)
-            if eoo.endOfOctets.isSameTypeWith(component) and component == eoo.endOfOctets:
+            if component is eoo.endOfOctets:
                 break
-            asn1Object = asn1Object + component
+            asn1Object += component
         else:
             raise error.SubstrateUnderrunError(
                 'No EOO seen before substrate ends'
