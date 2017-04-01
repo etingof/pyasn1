@@ -36,6 +36,7 @@ Revision 0.2.4, released XX-03-2017
 - Default and optional components en/decoding of Constructed type
   refactored towards better efficiency and more control.
 - Fixed BitString named bits initialization bug.
+- Fixed non-functional tag cache (when running Python 2) at DEB decoder.
 
 Revision 0.2.3, released 25-02-2017
 -----------------------------------
