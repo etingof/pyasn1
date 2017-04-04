@@ -344,10 +344,11 @@ class SequenceEncoder(AbstractItemEncoder):
         idx = len(value)
         while idx > 0:
             idx -= 1
-            if namedTypes[idx].isOptional and not value[idx].isValue:
-                continue
-            if namedTypes[idx].isDefaulted and value[idx] == namedTypes[idx].asn1Object:
-                continue
+            if namedTypes:
+                if namedTypes[idx].isOptional and not value[idx].isValue:
+                    continue
+                if namedTypes[idx].isDefaulted and value[idx] == namedTypes[idx].asn1Object:
+                    continue
             substrate = encodeFun(value[idx], defMode, maxChunkSize) + substrate
         return substrate, True, True
 
