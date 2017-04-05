@@ -15,9 +15,9 @@ class EndOfOctets(base.AbstractSimpleAsn1Item):
 
     _instance = None
 
-    def __new__(cls):
+    def __new__(cls, *args):
         if cls._instance is None:
-            cls._instance = object.__new__(cls)
+            cls._instance = object.__new__(cls, *args)
 
         return cls._instance
 
