@@ -6,7 +6,7 @@
 #
 from pyasn1.type import base, tag, univ, char, useful, tagmap
 from pyasn1.codec.ber import eoo
-from pyasn1.compat.octets import oct2int, octs2ints, isOctetsType, ensureString
+from pyasn1.compat.octets import oct2int, octs2ints, ints2octs, ensureString
 from pyasn1.compat.integer import from_bytes
 from pyasn1 import debug, error
 
@@ -740,6 +740,7 @@ class Decoder(object):
         # Tag & TagSet objects caches
         self.__tagCache = {}
         self.__tagSetCache = {}
+        self.__eooSentinel = ints2octs((0, 0))
 
     def __call__(self, substrate, asn1Spec=None, tagSet=None,
                  length=None, state=stDecodeTag, recursiveFlag=True,
@@ -748,6 +749,13 @@ class Decoder(object):
             debug.logger('decoder called at scope %s with state %d, working with up to %d octets of substrate: %s' % (debug.scope, state, len(substrate), debug.hexdump(substrate)))
 
         substrate = ensureString(substrate)
+
+        # Look for end-of-octets sentinel
+        if allowEoo and self.supportIndefLength:
+            if substrate.startswith(self.__eooSentinel):
+                debug.logger and debug.logger & debug.flagDecoder and debug.logger('end-of-octets sentinel found')
+                return eoo.endOfOctets, substrate[2:]
+
         value = base.noValue
 
         fullSubstrate = substrate
@@ -765,19 +773,6 @@ class Decoder(object):
                     lastTag = self.__tagCache[firstOctet]
                 except KeyError:
                     integerTag = oct2int(firstOctet)
-                    # Look for end-of-octets sentinel
-                    if integerTag == 0:
-                        if substrate and oct2int(substrate[0]) == 0:
-                            if allowEoo and self.supportIndefLength:
-                                debug.logger and debug.logger & debug.flagDecoder and debug.logger(
-                                    'end-of-octets sentinel found')
-                                value, substrate = eoo.endOfOctets, substrate[1:]
-                                state = stStop
-                                continue
-                            else:
-                                raise error.PyAsn1Error('Unexpected end-of-contents sentinel')
-                        else:
-                            raise error.PyAsn1Error('Zero tag encountered')
                     tagClass = integerTag & 0xC0
                     tagFormat = integerTag & 0x20
                     tagId = integerTag & 0x1F
