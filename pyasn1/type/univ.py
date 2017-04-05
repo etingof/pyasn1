@@ -2790,11 +2790,17 @@ class Any(OctetString):
         """"Return a :class:`~pyasn1.type.tagmap.TagMap` object mapping
             ASN.1 tags to ASN.1 objects contained within callee.
         """
-        return tagmap.TagMap(
-            {self.tagSet: self},
-            {eoo.endOfOctets.tagSet: eoo.endOfOctets},
-            self
-        )
+        try:
+            return self.__tagMap
+
+        except AttributeError:
+            self.__tagMap = tagmap.TagMap(
+                {self.tagSet: self},
+                {eoo.endOfOctets.tagSet: eoo.endOfOctets},
+                self
+            )
+
+            return self.__tagMap
 
 # XXX
 # coercion rules?

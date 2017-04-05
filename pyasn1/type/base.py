@@ -53,7 +53,12 @@ class Asn1ItemBase(Asn1Item):
     def tagMap(self):
         """Return a :class:`~pyasn1.type.tagmap.TagMap` object mapping ASN.1 tags to ASN.1 objects within callee object.
         """
-        return tagmap.TagMap({self._tagSet: self})
+        try:
+            return self._tagMap
+
+        except AttributeError:
+            self._tagMap = tagmap.TagMap({self._tagSet: self})
+            return self._tagMap
 
     def isSameTypeWith(self, other, matchTags=True, matchConstraints=True):
         """Examine |ASN.1| type for equality with other ASN.1 type.
