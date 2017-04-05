@@ -35,6 +35,9 @@ Revision 0.2.4, released XX-03-2017
   introduces a deviation from original API.
 - Default and optional components en/decoding of Constructed type
   refactored towards better efficiency and more control.
+- OctetsString and Any decoder optimized to avoid creating ASN.1
+  objects for chunks of substrate. Instead they now join substrate
+  chunks together and create ASN.1 object from it just once.
 - Fixed BitString named bits initialization bug.
 - Fixed non-functional tag cache (when running Python 2) at DEB decoder.
 

@@ -6,7 +6,7 @@
 #
 from pyasn1.type import base, tag, univ, char, useful, tagmap
 from pyasn1.codec.ber import eoo
-from pyasn1.compat.octets import oct2int, octs2ints, ints2octs, ensureString
+from pyasn1.compat.octets import oct2int, octs2ints, ints2octs, ensureString, null
 from pyasn1.compat.integer import from_bytes
 from pyasn1 import debug, error
 
@@ -27,6 +27,10 @@ class AbstractDecoder(object):
 
 class AbstractSimpleDecoder(AbstractDecoder):
     tagFormats = (tag.tagFormatSimple,)
+
+    @staticmethod
+    def substrateCollector(asn1Object, substrate, length):
+            return substrate[:length], substrate[length:]
 
     def _createComponent(self, asn1Spec, tagSet, value=None):
         if tagSet[0].tagFormat not in self.tagFormats:
@@ -169,34 +173,53 @@ class OctetStringDecoder(AbstractSimpleDecoder):
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet, length,
                      state, decodeFun, substrateFun):
         head, tail = substrate[:length], substrate[length:]
+
+        if substrateFun:
+            return substrateFun(self._createComponent(asn1Spec, tagSet),
+                                substrate, length)
+
         if tagSet[0].tagFormat == tag.tagFormatSimple:  # XXX what tag to check?
             return self._createComponent(asn1Spec, tagSet, head), tail
+
         if not self.supportConstructedForm:
             raise error.PyAsn1Error('Constructed encoding form prohibited at %s' % self.__class__.__name__)
-        asn1Object = self._createComponent(asn1Spec, tagSet, '')
-        if substrateFun:
-            return substrateFun(asn1Object, substrate, length)
+
+        # All inner fragments are of the same type, treat them as octet string
+        substrateFun = self.substrateCollector
+
+        header = null
+
         while head:
-            component, head = decodeFun(head, self.protoComponent)
-            asn1Object += component
-        return asn1Object, tail
+            component, head = decodeFun(head, self.protoComponent,
+                                        substrateFun=substrateFun)
+            header += component
+
+        return self._createComponent(asn1Spec, tagSet, header), tail
 
     def indefLenValueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                              length, state, decodeFun, substrateFun):
-        asn1Object = self._createComponent(asn1Spec, tagSet, '')
-        if substrateFun:
+        if substrateFun and substrateFun is not self.substrateCollector:
+            asn1Object = self._createComponent(asn1Spec, tagSet)
             return substrateFun(asn1Object, substrate, length)
+
+        # All inner fragments are of the same type, treat them as octet string
+        substrateFun = self.substrateCollector
+
+        header = null
+
         while substrate:
-            component, substrate = decodeFun(substrate, self.protoComponent,
+            component, substrate = decodeFun(substrate,
+                                             self.protoComponent,
+                                             substrateFun=substrateFun,
                                              allowEoo=True)
             if component is eoo.endOfOctets:
                 break
-            asn1Object += component
+            header += component
         else:
             raise error.SubstrateUnderrunError(
                 'No EOO seen before substrate ends'
             )
-        return asn1Object, substrate
+        return self._createComponent(asn1Spec, tagSet, header), substrate
 
 
 class NullDecoder(AbstractSimpleDecoder):
@@ -205,10 +228,10 @@ class NullDecoder(AbstractSimpleDecoder):
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                      length, state, decodeFun, substrateFun):
         head, tail = substrate[:length], substrate[length:]
-        r = self._createComponent(asn1Spec, tagSet)
+        component = self._createComponent(asn1Spec, tagSet)
         if head:
             raise error.PyAsn1Error('Unexpected %d-octet substrate for Null' % length)
-        return r, tail
+        return component, tail
 
 
 class ObjectIdentifierDecoder(AbstractSimpleDecoder):
@@ -593,28 +616,36 @@ class AnyDecoder(AbstractSimpleDecoder):
                              length, state, decodeFun, substrateFun):
         if asn1Spec is not None and tagSet == asn1Spec.tagSet:
             # tagged Any type -- consume header substrate
-            header = ''
+            header = null
         else:
             # untagged Any, recover header substrate
             header = fullSubstrate[:-len(substrate)]
 
-        asn1Object = self._createComponent(asn1Spec, tagSet, header)
-
         # Any components do not inherit initial tag
         asn1Spec = self.protoComponent
 
-        if substrateFun:
-            return substrateFun(asn1Object, substrate, length)
+        if substrateFun and substrateFun is not self.substrateCollector:
+            asn1Object = self._createComponent(asn1Spec, tagSet)
+            return substrateFun(asn1Object, header + substrate, length + len(header))
+
+        # All inner fragments are of the same type, treat them as octet string
+        substrateFun = self.substrateCollector
+
         while substrate:
-            component, substrate = decodeFun(substrate, asn1Spec, allowEoo=True)
+            component, substrate = decodeFun(substrate, asn1Spec,
+                                             substrateFun=substrateFun,
+                                             allowEoo=True)
             if component is eoo.endOfOctets:
                 break
-            asn1Object += component
+            header += component
         else:
             raise error.SubstrateUnderrunError(
                 'No EOO seen before substrate ends'
             )
-        return asn1Object, substrate
+        if substrateFun:
+            return header, substrate
+        else:
+            return self._createComponent(asn1Spec, tagSet, header), substrate
 
 
 # character string types
@@ -745,7 +776,7 @@ class Decoder(object):
     def __call__(self, substrate, asn1Spec=None, tagSet=None,
                  length=None, state=stDecodeTag, recursiveFlag=True,
                  substrateFun=None, allowEoo=False):
-        if debug.logger & debug.flagDecoder:
+        if debug.logger and debug.logger & debug.flagDecoder:
             debug.logger('decoder called at scope %s with state %d, working with up to %d octets of substrate: %s' % (debug.scope, state, len(substrate), debug.hexdump(substrate)))
 
         substrate = ensureString(substrate)
