@@ -758,14 +758,15 @@ class Decoder(object):
                         'Short octet stream on tag decoding'
                     )
                 # Decode tag
+                isShortTag = True
                 firstOctet = substrate[0]
                 substrate = substrate[1:]
                 try:
                     lastTag = self.__tagCache[firstOctet]
                 except KeyError:
-                    firstOctet = oct2int(firstOctet)
+                    integerTag = oct2int(firstOctet)
                     # Look for end-of-octets sentinel
-                    if firstOctet == 0:
+                    if integerTag == 0:
                         if substrate and oct2int(substrate[0]) == 0:
                             if allowEoo and self.supportIndefLength:
                                 debug.logger and debug.logger & debug.flagDecoder and debug.logger(
@@ -777,20 +778,20 @@ class Decoder(object):
                                 raise error.PyAsn1Error('Unexpected end-of-contents sentinel')
                         else:
                             raise error.PyAsn1Error('Zero tag encountered')
-                    tagClass = firstOctet & 0xC0
-                    tagFormat = firstOctet & 0x20
-                    tagId = firstOctet & 0x1F
-                    isShortTag = True
+                    tagClass = integerTag & 0xC0
+                    tagFormat = integerTag & 0x20
+                    tagId = integerTag & 0x1F
                     if tagId == 0x1F:
                         isShortTag = False
                         lengthOctetIdx = 0
                         tagId = 0
                         try:
                             while True:
-                                firstOctet = oct2int(substrate[lengthOctetIdx])
+                                integerTag = oct2int(substrate[lengthOctetIdx])
                                 lengthOctetIdx += 1
-                                tagId <<= 7 | (firstOctet & 0x7F)
-                                if not firstOctet & 0x80:
+                                tagId <<= 7
+                                tagId |= (integerTag & 0x7F)
+                                if not integerTag & 0x80:
                                     break
                             substrate = substrate[lengthOctetIdx:]
                         except IndexError:
@@ -804,13 +805,15 @@ class Decoder(object):
                         # cache short tags
                         self.__tagCache[firstOctet] = lastTag
                 if tagSet is None:
-                    try:
-                        tagSet = self.__tagSetCache[firstOctet]
-                    except KeyError:
-                        # base tag not recovered
-                        tagSet = tag.TagSet((), lastTag)
-                        if firstOctet in self.__tagCache:
+                    if isShortTag:
+                        try:
+                            tagSet = self.__tagSetCache[firstOctet]
+                        except KeyError:
+                            # base tag not recovered
+                            tagSet = tag.TagSet((), lastTag)
                             self.__tagSetCache[firstOctet] = tagSet
+                    else:
+                        tagSet = tag.TagSet((), lastTag)
                 else:
                     tagSet = lastTag + tagSet
                 state = stDecodeLength
