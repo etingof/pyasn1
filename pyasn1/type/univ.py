@@ -2791,16 +2791,16 @@ class Any(OctetString):
             ASN.1 tags to ASN.1 objects contained within callee.
         """
         try:
-            return self.__tagMap
+            return self._tagMap
 
         except AttributeError:
-            self.__tagMap = tagmap.TagMap(
+            self._tagMap = tagmap.TagMap(
                 {self.tagSet: self},
                 {eoo.endOfOctets.tagSet: eoo.endOfOctets},
                 self
             )
 
-            return self.__tagMap
+            return self._tagMap
 
 # XXX
 # coercion rules?
