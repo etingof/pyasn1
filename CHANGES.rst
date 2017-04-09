@@ -19,7 +19,8 @@ Revision 0.2.4, released XX-03-2017
 - Sequence/Set DER/CER/DER decoder optimized to skip the case of
   reordered components handling when not necessary.
 - Tags and constraints-related getter methods refactored into descriptors/properties.
-- The .hasValue() method refactored into .isValue property
+- The .hasValue() method refactored into .isValue property. All ASN.1
+  objects now support them, not just scalars.
 - The end-of-octets type refactored to ensure it is a singleton. Codecs
   changed to rely on that for better performance.
 - Codecs lookup made more efficient at BER/CER/DER decoder main loop by

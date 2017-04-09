@@ -133,6 +133,9 @@ class Asn1ItemBase(Asn1Item):
     def getSubtypeSpec(self):
         return self.subtypeSpec
 
+    def hasValue(self):
+        return self.isValue
+
 
 class NoValue(object):
     """Create a singleton instance of NoValue class.
@@ -390,12 +393,6 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
     # noinspection PyUnusedLocal
     def prettyPrintType(self, scope=0):
         return '%s -> %s' % (self.tagSet, self.__class__.__name__)
-
-    # backward compatibility
-
-    def hasValue(self):
-        return self.isValue
-
 
 #
 # Constructed types:
