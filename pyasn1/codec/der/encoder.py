@@ -35,7 +35,7 @@ class Encoder(encoder.Encoder):
     supportIndefLength = False
 
     def __call__(self, client, defMode=True, maxChunkSize=0):
-        if not defMode or maxChunkSize:
+        if not defMode:
             raise error.PyAsn1Error('DER forbids indefinite length mode')
         return encoder.Encoder.__call__(self, client, defMode, maxChunkSize)
 

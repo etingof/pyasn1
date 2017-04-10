@@ -31,12 +31,9 @@ class OctetStringEncoderTestCase(unittest.TestCase):
             assert 0, 'Indefinite length encoding tolerated'
 
     def testChunkedMode(self):
-        try:
-            x = encoder.encode(univ.OctetString('Quick brown'), maxChunkSize=2)
-        except PyAsn1Error:
-            pass
-        else:
-            assert 0, 'Chunked encoding tolerated'
+        assert encoder.encode(
+            univ.OctetString('Quick brown'), maxChunkSize=2
+        ) == ints2octs((4, 11, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110))
 
 
 class BitStringEncoderTestCase(unittest.TestCase):
