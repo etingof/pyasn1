@@ -76,6 +76,7 @@ class NamedValues(object):
                 'Unknown bit identifier(s): %s' % (set(names).difference(self.nameToValIdx),)
             )
 
+    # TODO support by-name subscription
     def __getitem__(self, i):
         return self.namedValues[i]
 

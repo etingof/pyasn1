@@ -110,6 +110,7 @@ class AbstractConstraint(object):
         return self._valueMap
 
     def isSuperTypeOf(self, otherConstraint):
+        # TODO: fix possible comparison of set vs scalars here
         return (otherConstraint is self or
                 not self._values or
                 otherConstraint == self or

@@ -1105,9 +1105,16 @@ class OctetString(base.AbstractSimpleAsn1Item):
             numbers = tuple(value)
         for x in numbers:
             if x < 32 or x > 126:
-                return '0x' + ''.join(('%.2x' % x for x in numbers))
+                return octets.octs2str('0x') + ''.join(('%.2x' % x for x in numbers))
         else:
-            return octets.octs2str(value)
+            try:
+                return value.decode(self._encoding)
+
+            except UnicodeDecodeError:
+                raise error.PyAsn1Error(
+                    'Can\'t decode string \'%s\' with \'%s\' codec at \'%s\'' % (
+                    value, self._encoding, self.__class__.__name__)
+                )
 
     @staticmethod
     def fromBinaryString(value):

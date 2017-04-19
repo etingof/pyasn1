@@ -43,4 +43,3 @@ else:
     isStringType = lambda s: isinstance(s, str)
     # noinspection PyPep8
     ensureString = bytes
-
