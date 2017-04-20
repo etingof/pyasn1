@@ -2,6 +2,7 @@
 Revision 0.2.4, released XX-03-2017
 -----------------------------------
 
+- ANY DEFINED BY clause support implemented
 - ASN.1 types initialization refactored to minimize the use of
   relatively expensive isNoValue() call
 - Lazily pre-populate list of values of Sequence/Set/Choice types

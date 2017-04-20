@@ -34,6 +34,8 @@ class NamedType(object):
         self.__name = name
         self.__type = asn1Object
         self.__nameAndType = name, asn1Object
+        self.__governingName = None
+        self.__typesMap = None
 
     def __repr__(self):
         return '%s(%r, %r)' % (self.__class__.__name__, self.__name, self.__type)
@@ -72,6 +74,19 @@ class NamedType(object):
     @property
     def asn1Object(self):
         return self.__type
+
+    def definedBy(self, governingName, typesMap):
+        self.__governingName = governingName
+        self.__typesMap = typesMap
+        return self
+
+    @property
+    def governingName(self):
+        return self.__governingName
+
+    @property
+    def typesMap(self):
+        return self.__typesMap
 
     # Backward compatibility
 
@@ -116,6 +131,7 @@ class NamedTypes(object):
         self.__tagMap = {}
         self.__hasOptionalOrDefault = None
         self.__requiredComponents = None
+        self.__holes = None
 
     def __repr__(self):
         return '%s(%s)' % (
@@ -473,3 +489,15 @@ class NamedTypes(object):
                 [idx for idx, nt in enumerate(self.__namedTypes) if not nt.isOptional and not nt.isDefaulted]
             )
         return self.__requiredComponents
+
+    @property
+    def holes(self):
+        if self.__holes is None:
+            holes = []
+            for namedType in self.__namedTypes:
+                if namedType.governingName:
+                    holes.append((namedType.name, namedType.governingName, namedType.typesMap))
+
+            self.__holes = holes
+
+        return self.__holes

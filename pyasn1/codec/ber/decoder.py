@@ -403,6 +403,17 @@ class SequenceAndSetDecoderBase(AbstractConstructedDecoder):
                     matchTags=False, matchConstraints=False
                 )
 
+        for holeName, governingName, typesMap in namedTypes.holes:
+            holeComponent = asn1Object[holeName]
+            if holeComponent.isValue:
+                governingComponent = asn1Object[governingName]
+                if governingComponent in typesMap:
+                    component, rest = decodeFun(
+                        holeComponent.asOctets(),
+                        asn1Spec=typesMap[governingComponent]
+                    )
+                    asn1Object.setComponentByName(holeName, component, matchTags=False, matchConstraints=False)
+
         if not namedTypes:
             asn1Object.verifySizeSpec()
 
@@ -1008,7 +1019,7 @@ class Decoder(object):
                     'codec %s yields type %s, value:\n%s\n...remaining substrate is: %s' % (concreteDecoder.__class__.__name__, value.__class__.__name__, value.prettyPrint(), substrate and debug.hexdump(substrate) or '<none>'))
             if state == stErrorCondition:
                 raise error.PyAsn1Error(
-                    '%s not in asn1Spec: %s' % (tagSet, asn1Spec)
+                    '%s not in asn1Spec: %r' % (tagSet, asn1Spec)
                 )
         if debug.logger and debug.logger & debug.flagDecoder:
             debug.scope.pop()
