@@ -138,7 +138,7 @@ class NamedTypes(object):
         self.__keys = frozenset([namedType.name for namedType in self.__namedTypes])
         self.__values = tuple([namedType.asn1Object for namedType in self.__namedTypes])
         self.__items = tuple([(namedType.name, namedType.asn1Object) for namedType in self.__namedTypes])
-        self.__holes = None
+        self.__holes = self.__computeTypeHoles()
 
     def __repr__(self):
         return '%s(%s)' % (
@@ -528,12 +528,12 @@ class NamedTypes(object):
 
     @property
     def holes(self):
-        if self.__holes is None:
-            holes = []
-            for namedType in self.__namedTypes:
-                if namedType.governingName:
-                    holes.append((namedType.name, namedType.governingName, namedType.typesMap))
-
-            self.__holes = holes
-
         return self.__holes
+
+    def __computeTypeHoles(self):
+        holes = []
+        for namedType in self.__namedTypes:
+            if namedType.governingName:
+                holes.append((namedType.name, namedType.governingName, namedType.typesMap))
+
+        return holes
