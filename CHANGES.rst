@@ -1,4 +1,9 @@
 
+Revision 0.4.1, released XX-09-2017
+-----------------------------------
+
+- ANY DEFINED BY clause support implemented
+
 Revision 0.3.4, released 07-09-2017
 -----------------------------------
 
