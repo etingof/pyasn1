@@ -1105,7 +1105,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
             numbers = tuple(value)
         for x in numbers:
             if x < 32 or x > 126:
-                return octets.octs2str('0x') + ''.join(('%.2x' % x for x in numbers))
+                return octets.str2octs('0x' + ''.join(('%.2x' % x for x in numbers)))
         else:
             try:
                 return value.decode(self._encoding)
