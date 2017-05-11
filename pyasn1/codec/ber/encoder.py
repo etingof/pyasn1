@@ -453,9 +453,12 @@ class Encoder(object):
     def __call__(self, value, defMode=True, maxChunkSize=0):
         if not defMode and not self.supportIndefLength:
             raise error.PyAsn1Error('Indefinite length encoding not supported by this codec')
-        debug.logger & debug.flagEncoder and debug.logger(
-            'encoder called in %sdef mode, chunk size %s for type %s, value:\n%s' % (
-                not defMode and 'in' or '', maxChunkSize, value.prettyPrintType(), value.prettyPrint()))
+        if debug.logger & debug.flagEncoder:
+            logger = debug.logger
+        else:
+            logger = None
+        if logger:
+            logger('encoder called in %sdef mode, chunk size %s for type %s, value:\n%s' % (not defMode and 'in' or '', maxChunkSize, value.prettyPrintType(), value.prettyPrint()))
         tagSet = value.tagSet
         if len(tagSet) > 1:
             concreteEncoder = explicitlyTaggedItemEncoder
@@ -469,13 +472,13 @@ class Encoder(object):
                     concreteEncoder = self.__tagMap[baseTagSet]
                 except KeyError:
                     raise error.PyAsn1Error('No encoder for %s' % (value,))
-        debug.logger & debug.flagEncoder and debug.logger(
-            'using value codec %s chosen by %s' % (concreteEncoder.__class__.__name__, tagSet))
+            if logger:
+                logger('using value codec %s chosen by %s' % (concreteEncoder.__class__.__name__, tagSet))
         substrate = concreteEncoder.encode(
             self, value, defMode, maxChunkSize
         )
-        debug.logger & debug.flagEncoder and debug.logger(
-            'built %s octets of substrate: %s\nencoder completed' % (len(substrate), debug.hexdump(substrate)))
+        if logger:
+            logger('built %s octets of substrate: %s\nencoder completed' % (len(substrate), debug.hexdump(substrate)))
         return substrate
 
 #: Turns ASN.1 object into BER octet stream.
