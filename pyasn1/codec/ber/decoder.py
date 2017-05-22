@@ -776,22 +776,28 @@ class Decoder(object):
     def __call__(self, substrate, asn1Spec=None, tagSet=None,
                  length=None, state=stDecodeTag, recursiveFlag=True,
                  substrateFun=None, allowEoo=False):
-        if debug.logger and debug.logger & debug.flagDecoder:
-            debug.logger('decoder called at scope %s with state %d, working with up to %d octets of substrate: %s' % (debug.scope, state, len(substrate), debug.hexdump(substrate)))
+        if debug.logger & debug.flagDecoder:
+            logger = debug.logger
+        else:
+            logger = None
+
+        if logger:
+            logger('decoder called at scope %s with state %d, working with up to %d octets of substrate: %s' % (debug.scope, state, len(substrate), debug.hexdump(substrate)))
 
         substrate = ensureString(substrate)
 
         # Look for end-of-octets sentinel
         if allowEoo and self.supportIndefLength:
             if substrate.startswith(self.__eooSentinel):
-                debug.logger and debug.logger & debug.flagDecoder and debug.logger('end-of-octets sentinel found')
+                if logger:
+                    logger('end-of-octets sentinel found')
                 return eoo.endOfOctets, substrate[2:]
 
         value = base.noValue
 
         fullSubstrate = substrate
-        while state != stStop:
-            if state == stDecodeTag:
+        while not state is stStop:
+            if state is stDecodeTag:
                 if not substrate:
                     raise error.SubstrateUnderrunError(
                         'Short octet stream on tag decoding'
@@ -843,9 +849,9 @@ class Decoder(object):
                 else:
                     tagSet = lastTag + tagSet
                 state = stDecodeLength
-                debug.logger and debug.logger & debug.flagDecoder and debug.logger(
-                    'tag decoded into %s, decoding length' % tagSet)
-            if state == stDecodeLength:
+                if logger:
+                    logger('tag decoded into %s, decoding length' % tagSet)
+            if state is stDecodeLength:
                 # Decode length
                 if not substrate:
                     raise error.SubstrateUnderrunError(
@@ -881,10 +887,9 @@ class Decoder(object):
                     if len(substrate) < length:
                         raise error.SubstrateUnderrunError('%d-octet short' % (length - len(substrate)))
                 state = stGetValueDecoder
-                debug.logger and debug.logger & debug.flagDecoder and debug.logger(
-                    'value length decoded into %d, payload substrate is: %s' % (length, debug.hexdump(length == -1 and substrate or substrate[:length]))
-                )
-            if state == stGetValueDecoder:
+                if logger:
+                    logger('value length decoded into %d, payload substrate is: %s' % (length, debug.hexdump(length == -1 and substrate or substrate[:length])))
+            if state is stGetValueDecoder:
                 if asn1Spec is None:
                     state = stGetValueDecoderByTag
                 else:
@@ -905,7 +910,7 @@ class Decoder(object):
             # EXPLICIT tag which is most basic). Outermost tag comes first
             # from the wire.
             #
-            if state == stGetValueDecoderByTag:
+            if state is stGetValueDecoderByTag:
                 try:
                     concreteDecoder = self.__tagMap[tagSet]
                 except KeyError:
@@ -921,30 +926,29 @@ class Decoder(object):
                         state = stDecodeValue
                     else:
                         state = stTryAsExplicitTag
-                if debug.logger and debug.logger & debug.flagDecoder:
-                    debug.logger('codec %s chosen by a built-in type, decoding %s' % (concreteDecoder and concreteDecoder.__class__.__name__ or "<none>", state == stDecodeValue and 'value' or 'as explicit tag'))
-                    debug.scope.push(
-                        concreteDecoder is None and '?' or concreteDecoder.protoComponent.__class__.__name__)
-            if state == stGetValueDecoderByAsn1Spec:
+                if logger:
+                    logger('codec %s chosen by a built-in type, decoding %s' % (concreteDecoder and concreteDecoder.__class__.__name__ or "<none>", state is stDecodeValue and 'value' or 'as explicit tag'))
+                    debug.scope.push(concreteDecoder is None and '?' or concreteDecoder.protoComponent.__class__.__name__)
+            if state is stGetValueDecoderByAsn1Spec:
                 if asn1Spec.__class__ is dict or asn1Spec.__class__ is tagmap.TagMap:
                     try:
                         chosenSpec = asn1Spec[tagSet]
                     except KeyError:
                         chosenSpec = None
-                    if debug.logger and debug.logger & debug.flagDecoder:
-                        debug.logger('candidate ASN.1 spec is a map of:')
+                    if logger:
+                        logger('candidate ASN.1 spec is a map of:')
                         for firstOctet, v in asn1Spec.presentTypes.items():
-                            debug.logger('  %s -> %s' % (firstOctet, v.__class__.__name__))
+                            logger('  %s -> %s' % (firstOctet, v.__class__.__name__))
                         if asn1Spec.skipTypes:
-                            debug.logger('but neither of: ')
+                            logger('but neither of: ')
                             for firstOctet, v in asn1Spec.skipTypes.items():
-                                debug.logger('  %s -> %s' % (firstOctet, v.__class__.__name__))
-                        debug.logger('new candidate ASN.1 spec is %s, chosen by %s' % (chosenSpec is None and '<none>' or chosenSpec.prettyPrintType(), tagSet))
+                                logger('  %s -> %s' % (firstOctet, v.__class__.__name__))
+                        logger('new candidate ASN.1 spec is %s, chosen by %s' % (chosenSpec is None and '<none>' or chosenSpec.prettyPrintType(), tagSet))
                 else:
                     if tagSet == asn1Spec.tagSet or tagSet in asn1Spec.tagMap:
                         chosenSpec = asn1Spec
-                        debug.logger and debug.logger & debug.flagDecoder and debug.logger(
-                            'candidate ASN.1 spec is %s' % asn1Spec.__class__.__name__)
+                        if logger:
+                            logger('candidate ASN.1 spec is %s' % asn1Spec.__class__.__name__)
                     else:
                         chosenSpec = None
 
@@ -952,16 +956,16 @@ class Decoder(object):
                     try:
                         # ambiguous type or just faster codec lookup
                         concreteDecoder = self.__typeMap[chosenSpec.typeId]
-                        debug.logger and debug.logger & debug.flagDecoder and debug.logger(
-                            'value decoder chosen for an ambiguous type by type ID %s' % (chosenSpec.typeId,))
+                        if logger:
+                            logger('value decoder chosen for an ambiguous type by type ID %s' % (chosenSpec.typeId,))
                     except KeyError:
                         # use base type for codec lookup to recover untagged types
                         baseTagSet = tag.TagSet(chosenSpec.tagSet.baseTag,  chosenSpec.tagSet.baseTag)
                         try:
                             # base type or tagged subtype
                             concreteDecoder = self.__tagMap[baseTagSet]
-                            debug.logger and debug.logger & debug.flagDecoder and debug.logger(
-                                'value decoder chosen by base %s' % (baseTagSet,))
+                            if logger:
+                                logger('value decoder chosen by base %s' % (baseTagSet,))
                         except KeyError:
                             concreteDecoder = None
                     if concreteDecoder:
@@ -972,10 +976,10 @@ class Decoder(object):
                 else:
                     concreteDecoder = None
                     state = stTryAsExplicitTag
-                if debug.logger and debug.logger & debug.flagDecoder:
-                    debug.logger('codec %s chosen by ASN.1 spec, decoding %s' % (state == stDecodeValue and concreteDecoder.__class__.__name__ or "<none>", state == stDecodeValue and 'value' or 'as explicit tag'))
+                if logger:
+                    logger('codec %s chosen by ASN.1 spec, decoding %s' % (state is stDecodeValue and concreteDecoder.__class__.__name__ or "<none>", state is stDecodeValue and 'value' or 'as explicit tag'))
                     debug.scope.push(chosenSpec is None and '?' or chosenSpec.__class__.__name__)
-            if state == stTryAsExplicitTag:
+            if state is stTryAsExplicitTag:
                 if tagSet and tagSet[0].tagFormat == tag.tagFormatConstructed and tagSet[0].tagClass != tag.tagClassUniversal:
                     # Assume explicit tagging
                     concreteDecoder = explicitTagDecoder
@@ -983,13 +987,14 @@ class Decoder(object):
                 else:
                     concreteDecoder = None
                     state = self.defaultErrorState
-                debug.logger and debug.logger & debug.flagDecoder and debug.logger('codec %s chosen, decoding %s' % (concreteDecoder and concreteDecoder.__class__.__name__ or "<none>", state == stDecodeValue and 'value' or 'as failure'))
-            if state == stDumpRawValue:
+                if logger:
+                    logger('codec %s chosen, decoding %s' % (concreteDecoder and concreteDecoder.__class__.__name__ or "<none>", state is stDecodeValue and 'value' or 'as failure'))
+            if state is stDumpRawValue:
                 concreteDecoder = self.defaultRawDecoder
-                debug.logger and debug.logger & debug.flagDecoder and debug.logger(
-                    'codec %s chosen, decoding value' % concreteDecoder.__class__.__name__)
+                if logger:
+                    logger('codec %s chosen, decoding value' % concreteDecoder.__class__.__name__)
                 state = stDecodeValue
-            if state == stDecodeValue:
+            if state is stDecodeValue:
                 if not recursiveFlag and not substrateFun:  # legacy
                     def substrateFun(a, b, c):
                         return a, b[:c]
@@ -1004,15 +1009,15 @@ class Decoder(object):
                         stGetValueDecoder, self, substrateFun
                     )
                 state = stStop
-                debug.logger and debug.logger & debug.flagDecoder and debug.logger(
-                    'codec %s yields type %s, value:\n%s\n...remaining substrate is: %s' % (concreteDecoder.__class__.__name__, value.__class__.__name__, value.prettyPrint(), substrate and debug.hexdump(substrate) or '<none>'))
-            if state == stErrorCondition:
+                if logger:
+                    logger('codec %s yields type %s, value:\n%s\n...remaining substrate is: %s' % (concreteDecoder.__class__.__name__, value.__class__.__name__, value.prettyPrint(), substrate and debug.hexdump(substrate) or '<none>'))
+            if state is stErrorCondition:
                 raise error.PyAsn1Error(
                     '%s not in asn1Spec: %s' % (tagSet, asn1Spec)
                 )
-        if debug.logger and debug.logger & debug.flagDecoder:
+        if logger:
             debug.scope.pop()
-            debug.logger('decoder left scope %s, call completed' % debug.scope)
+            logger('decoder left scope %s, call completed' % debug.scope)
         return value, substrate
 
 
