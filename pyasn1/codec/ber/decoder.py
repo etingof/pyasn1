@@ -776,7 +776,7 @@ class Decoder(object):
     def __call__(self, substrate, asn1Spec=None, tagSet=None,
                  length=None, state=stDecodeTag, recursiveFlag=True,
                  substrateFun=None, allowEoo=False):
-        if debug.logger and debug.logger & debug.flagDecoder:
+        if debug.logger & debug.flagDecoder:
             logger = debug.logger
         else:
             logger = None

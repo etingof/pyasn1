@@ -152,7 +152,7 @@ class Decoder(object):
             except KeyError:
                 raise error.PyAsn1Error('Unknown ASN.1 tag %s' % asn1Spec.tagSet)
 
-        if loggerr:
+        if logger:
             logger('calling decoder %s on Python type %s <%s>' % (type(valueDecoder).__name__, type(pyObject).__name__, repr(pyObject)))
 
         value = valueDecoder(pyObject, asn1Spec, self)
