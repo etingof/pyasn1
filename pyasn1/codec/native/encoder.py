@@ -159,8 +159,12 @@ class Encoder(object):
             raise error.PyAsn1Error('value is not valid (should be an instance of an ASN.1 Item)')
 
         if debug.logger & debug.flagEncoder:
+            logger = debug.logger
+        else:
+            logger = None
+        if logger:
             debug.scope.push(type(asn1Value).__name__)
-            debug.logger('encoder called for type %s <%s>' % (type(asn1Value).__name__, asn1Value.prettyPrint()))
+            logger('encoder called for type %s <%s>' % (type(asn1Value).__name__, asn1Value.prettyPrint()))
 
         tagSet = asn1Value.tagSet
         if len(tagSet) > 1:
@@ -177,12 +181,13 @@ class Encoder(object):
                 else:
                     raise error.PyAsn1Error('No encoder for %s' % (asn1Value,))
 
-        debug.logger & debug.flagEncoder and debug.logger('using value codec %s chosen by %s' % (type(concreteEncoder).__name__, tagSet))
+        if logger:
+            logger('using value codec %s chosen by %s' % (type(concreteEncoder).__name__, tagSet))
 
         pyObject = concreteEncoder.encode(self, asn1Value)
 
-        if debug.logger & debug.flagEncoder:
-            debug.logger('encoder %s produced: %s' % (type(concreteEncoder).__name__, repr(pyObject)))
+        if logger:
+            logger('encoder %s produced: %s' % (type(concreteEncoder).__name__, repr(pyObject)))
             debug.scope.pop()
 
         return pyObject
