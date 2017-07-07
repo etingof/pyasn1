@@ -394,7 +394,7 @@ class NamedTypes(object):
             for namedType in self.__namedTypes:
                 asn1Object = namedType.asn1Object
                 try:
-                    tagSet = asn1Object.getMinTagSet()
+                    tagSet = asn1Object.minTagSet
 
                 except AttributeError:
                     tagSet = asn1Object.tagSet
