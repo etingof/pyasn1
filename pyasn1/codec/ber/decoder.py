@@ -529,18 +529,19 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                 )
                 idx += 1
 
-        for holeName, governingName, typesMap in namedTypes.holes:
-            holeComponent = asn1Object[holeName]
-            if holeComponent.isValue:
-                governingComponent = asn1Object[governingName]
-                if governingComponent in typesMap:
-                    component, rest = decodeFun(
-                        holeComponent.asOctets(),
-                        asn1Spec=typesMap[governingComponent]
-                    )
+        if namedTypes:
+            for holeName, governingName, typesMap in namedTypes.holes:
+                holeComponent = asn1Object[holeName]
+                if holeComponent.isValue:
+                    governingComponent = asn1Object[governingName]
+                    if governingComponent in typesMap:
+                        component, rest = decodeFun(
+                            holeComponent.asOctets(),
+                            asn1Spec=typesMap[governingComponent]
+                        )
                     asn1Object.setComponentByName(holeName, component, matchTags=False, matchConstraints=False)
 
-        if not namedTypes:
+        else:
             asn1Object.verifySizeSpec()
 
         return asn1Object, tail
