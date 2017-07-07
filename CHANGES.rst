@@ -42,6 +42,9 @@ Revision 0.2.4, released XX-03-2017
 - Fixed BitString named bits initialization bug.
 - Fixed non-functional tag cache (when running Python 2) at DER decoder.
 - Fixed chunked encoding restriction on DER encoder.
+- Fixed SET components ordering at DER encoder.
+- Fixed BIT STRING & OCTET STRING encoding to be always non-chunked (e.g.
+  primitive) at DER encoder
 
 Revision 0.2.3, released 25-02-2017
 -----------------------------------
