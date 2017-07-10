@@ -39,6 +39,7 @@ Revision 0.2.4, released XX-03-2017
 - OctetsString and Any decoder optimized to avoid creating ASN.1
   objects for chunks of substrate. Instead they now join substrate
   chunks together and create ASN.1 object from it just once.
+- Unit tests added for the `compat` sub-package.
 - Fixed BitString named bits initialization bug.
 - Fixed non-functional tag cache (when running Python 2) at DER decoder.
 - Fixed chunked encoding restriction on DER encoder.
