@@ -40,9 +40,8 @@ class IntegerTestCase(unittest.TestCase):
         def test_from_bytes_signed(self):
             assert 66051 == integer.from_bytes('\x01\x02\x03', signed=False)
 
-# TODO: fix from_bytes()
-#        def test_from_bytes_empty(self):
-#            assert 0 == integer.from_bytes('')
+        def test_from_bytes_empty(self):
+            assert 0 == integer.from_bytes('')
 
 
 suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])

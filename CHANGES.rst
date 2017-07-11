@@ -43,6 +43,7 @@ Revision 0.2.4, released XX-03-2017
 - Fixed BitString named bits initialization bug.
 - Fixed non-functional tag cache (when running Python 2) at DER decoder.
 - Fixed chunked encoding restriction on DER encoder.
+- Fixed `compat.integer.from_bytes()` behaviour on empty input.
 
 Revision 0.2.3, released 25-02-2017
 -----------------------------------
