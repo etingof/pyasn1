@@ -47,19 +47,22 @@ class SetWithChoiceEncoderTestCase(unittest.TestCase):
     def setUp(self):
         c = univ.Choice(componentType=namedtype.NamedTypes(
             namedtype.NamedType('name', univ.OctetString()),
-            namedtype.NamedType('amount', univ.Integer(0)))
+            namedtype.NamedType('amount', univ.Boolean()))
         )
         self.s = univ.Set(componentType=namedtype.NamedTypes(
-            namedtype.NamedType('place-holder', univ.Null()),
+            namedtype.NamedType('value', univ.Integer(5)),
             namedtype.NamedType('status', c))
         )
 
-    def testDefMode(self):
-        self.s.setComponentByPosition(0, '')
+    def testComponentsOrdering1(self):
         self.s.setComponentByName('status')
-        self.s.getComponentByName('status').setComponentByPosition(0, 'ann')
-        assert encoder.encode(self.s) == ints2octs((49, 7, 4, 3, 97, 110, 110, 5, 0))
+        self.s.getComponentByName('status').setComponentByPosition(0, 'A')
+        assert encoder.encode(self.s) == ints2octs((49, 6, 2, 1, 5, 4, 1, 65))
 
+    def testComponentsOrdering2(self):
+        self.s.setComponentByName('status')
+        self.s.getComponentByName('status').setComponentByPosition(1, True)
+        assert encoder.encode(self.s) == ints2octs((49, 6, 1, 1, 255, 2, 1, 5))
 
 suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])
 

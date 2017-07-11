@@ -11,24 +11,40 @@ from pyasn1 import error
 __all__ = ['encode']
 
 
+class BitStringEncoder(encoder.BitStringEncoder):
+    def encodeValue(self, encodeFun, client, defMode, maxChunkSize):
+        return encoder.BitStringEncoder.encodeValue(
+            self, encodeFun, client, defMode, 0
+        )
+
+class OctetStringEncoder(encoder.OctetStringEncoder):
+    def encodeValue(self, encodeFun, client, defMode, maxChunkSize):
+        return encoder.OctetStringEncoder.encodeValue(
+            self, encodeFun, client, defMode, 0
+        )
+
 class SetOfEncoder(encoder.SetOfEncoder):
     @staticmethod
-    def _cmpSetComponents(c1, c2):
-        tagSet1 = isinstance(c1, univ.Choice) and c1.effectiveTagSet or c1.tagSet
-        tagSet2 = isinstance(c2, univ.Choice) and c2.effectiveTagSet or c2.tagSet
-        return cmp(tagSet1, tagSet2)
-
+    def _sortComponents(components):
+        # sort by tags depending on the actual Choice value (dynamic sort)
+        return sorted(components, key=lambda x: isinstance(x, univ.Choice) and x.getComponent().tagSet or x.tagSet)
 
 tagMap = encoder.tagMap.copy()
 tagMap.update({
-    # Overload CER encoders with BER ones (a bit hackerish XXX)
-    univ.BitString.tagSet: encoder.encoder.BitStringEncoder(),
-    univ.OctetString.tagSet: encoder.encoder.OctetStringEncoder(),
+    univ.BitString.tagSet: BitStringEncoder(),
+    univ.OctetString.tagSet: OctetStringEncoder(),
     # Set & SetOf have same tags
-    univ.SetOf().tagSet: SetOfEncoder()
+    univ.SetOf.tagSet: SetOfEncoder()
 })
 
 typeMap = encoder.typeMap.copy()
+typeMap.update({
+    univ.BitString.typeId: BitStringEncoder(),
+    univ.OctetString.typeId: OctetStringEncoder(),
+    # Set & SetOf have same tags
+    univ.Set.typeId: SetOfEncoder(),
+    univ.SetOf.typeId: SetOfEncoder()
+})
 
 
 class Encoder(encoder.Encoder):

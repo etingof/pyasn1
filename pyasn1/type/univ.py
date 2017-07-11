@@ -2694,7 +2694,8 @@ class Choice(Set):
             self._componentValues[oldIdx] = None
         return self
 
-    def getMinTagSet(self):
+    @property
+    def minTagSet(self):
         if self._tagSet:
             return self._tagSet
         else:
@@ -2774,6 +2775,12 @@ class Choice(Set):
             return False
 
         return self._componentValues[self._currentIdx].isValue
+
+
+    # compatibility stubs
+
+    def getMinTagSet(self):
+        return self.minTagSet
 
 
 class Any(OctetString):

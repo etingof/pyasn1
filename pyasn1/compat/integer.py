@@ -18,6 +18,9 @@ from pyasn1.compat.octets import oct2int, null
 
 if sys.version_info[0:2] < (3, 2) or implementation != 'CPython':
     def from_bytes(octets, signed=False):
+        if not octets:
+            return 0
+
         value = long(b2a_hex(str(octets)), 16)
 
         if signed and oct2int(octets[0]) & 0x80:
