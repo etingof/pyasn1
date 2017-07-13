@@ -24,6 +24,10 @@ class ObjectDescriptor(char.GraphicString):
 
 
 class TimeMixIn(object):
+
+    yearsDigits = 4
+    hasSubsecond = False
+
     class FixedOffset(datetime.tzinfo):
         """Fixed offset in minutes east from UTC."""
 
@@ -40,16 +44,18 @@ class TimeMixIn(object):
         def dst(self, dt):
             return datetime.timedelta(0)
 
+    UTC = FixedOffset(0, 'UTC')
+
     @property
     def asDateTime(self):
         string = str(self)
         if string.endswith('Z'):
-            tzinfo = TimeMixIn.FixedOffset(0, 'UTC')
+            tzinfo = TimeMixIn.UTC
             string = string[:-1]
 
         elif string[-5] in ('-', '+'):
             try:
-                minutes = int(string[-4:-2]) * 60 + int(string[:-2])
+                minutes = int(string[-4:-2]) * 60 + int(string[-2:])
                 if string[-5] == '-':
                     minutes *= -1
 
@@ -62,10 +68,14 @@ class TimeMixIn(object):
         else:
             tzinfo = None
 
-        if '.' in string:
-            try:
+        if '.' in string or ',' in string:
+            if '.' in string:
                 string, _, ms = string.partition('.')
-                ms = int(ms) * 100000
+            else:
+                string, _, ms = string.partition(',')
+
+            try:
+                ms = int(ms) * 10000
 
             except ValueError:
                 raise error.PyAsn1Error('bad sub-second time specification %s' % self)
@@ -73,15 +83,21 @@ class TimeMixIn(object):
         else:
             ms = 0
 
-        dt = datetime.datetime.strptime(string, '%Y%m%d%H%M%S')
-        dt.replace(microsecond=ms, tzinfo=tzinfo)
+        if len(string) - self.yearsDigits == 6:
+            string += '0000'
+        elif len(string) - self.yearsDigits == 8:
+            string += '00'
 
-        return dt
+        dt = datetime.datetime.strptime(string, self.yearsDigits == 4 and '%Y%m%d%H%M%S' or '%y%m%d%H%M%S')
+
+        return dt.replace(microsecond=ms, tzinfo=tzinfo)
 
     @classmethod
     def fromDateTime(cls, dt):
-        string = dt.strftime('%Y%m%d%H%M%S.%%d')
-        string = string % (dt.microsecond // 10000)
+        string = dt.strftime(cls.yearsDigits == 4 and '%Y%m%d%H%M%S' or '%y%m%d%H%M%S')
+        if cls.hasSubsecond:
+            string += '.%d' % (dt.microsecond // 10000)
+
         if dt.utcoffset():
             seconds = dt.utcoffset().seconds
             if seconds < 0:
@@ -91,6 +107,7 @@ class TimeMixIn(object):
             string += '%.2d%.2d' % (seconds // 3600, seconds % 3600)
         else:
             string += 'Z'
+
         return cls(string)
 
 
@@ -102,6 +119,9 @@ class GeneralizedTime(char.VisibleString, TimeMixIn):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 24)
     )
 
+    yearsDigits = 4
+    hasSubsecond = True
+
 
 class UTCTime(char.VisibleString, TimeMixIn):
     __doc__ = char.VisibleString.__doc__
@@ -110,3 +130,6 @@ class UTCTime(char.VisibleString, TimeMixIn):
     tagSet = char.VisibleString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 23)
     )
+
+    yearsDigits = 2
+    hasSubsecond = False

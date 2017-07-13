@@ -16,7 +16,6 @@ except ImportError:
 
 
 class FixedOffset(datetime.tzinfo):
-
     def __init__(self, offset, name):
         self.__offset = datetime.timedelta(minutes=offset)
         self.__name = name
@@ -32,28 +31,65 @@ class FixedOffset(datetime.tzinfo):
 
 
 UTC = FixedOffset(0, 'UTC')
+UTC2 = FixedOffset(120, 'UTC')
 
 
 class ObjectDescriptorTestCase(unittest.TestCase):
     pass
+
 
 class GeneralizedTimeTestCase(unittest.TestCase):
 
     def testFromDateTime(self):
         assert useful.GeneralizedTime.fromDateTime(datetime.datetime(2017, 7, 11, 0, 1, 2, 30000, tzinfo=UTC)) == '20170711000102.3Z'
 
-    def testToDateTime(self):
+    def testToDateTime0(self):
+        assert datetime.datetime(2017, 7, 11, 0, 1, 2) == useful.GeneralizedTime('20170711000102').asDateTime
+
+    def testToDateTime1(self):
+        assert datetime.datetime(2017, 7, 11, 0, 1, 2, tzinfo=UTC) == useful.GeneralizedTime('20170711000102Z').asDateTime
+
+    def testToDateTime2(self):
         assert datetime.datetime(2017, 7, 11, 0, 1, 2, 30000, tzinfo=UTC) == useful.GeneralizedTime('20170711000102.3Z').asDateTime
+
+    def testToDateTime3(self):
+        assert datetime.datetime(2017, 7, 11, 0, 1, 2, 30000, tzinfo=UTC) == useful.GeneralizedTime('20170711000102,3Z').asDateTime
+
+    def testToDateTime4(self):
+        assert datetime.datetime(2017, 7, 11, 0, 1, 2, 30000, tzinfo=UTC) == useful.GeneralizedTime('20170711000102.3+0000').asDateTime
+
+    def testToDateTime5(self):
+        assert datetime.datetime(2017, 7, 11, 0, 1, 2, 30000, tzinfo=UTC2) == useful.GeneralizedTime('20170711000102.3+0200').asDateTime
+
+    def testToDateTime6(self):
+        assert datetime.datetime(2017, 7, 11, 0, 1) == useful.GeneralizedTime('201707110001').asDateTime
+
+    def testToDateTime7(self):
+        assert datetime.datetime(2017, 7, 11, 0) == useful.GeneralizedTime('2017071100').asDateTime
 
 
 class UTCTimeTestCase(unittest.TestCase):
 
-
     def testFromDateTime(self):
-        assert useful.UTCTime.fromDateTime(datetime.datetime(2017, 7, 11, 0, 1, 2, 30000, tzinfo=UTC)) == '20170711000102.3Z'
+        assert useful.UTCTime.fromDateTime(datetime.datetime(2017, 7, 11, 0, 1, 2, tzinfo=UTC)) == '170711000102Z'
 
-    def testToDateTime(self):
-        assert datetime.datetime(2017, 7, 11, 0, 1, 2, 30000, tzinfo=UTC) == useful.UTCTime('20170711000102.3Z').asDateTime
+    def testToDateTime0(self):
+        assert datetime.datetime(2017, 7, 11, 0, 1, 2) == useful.UTCTime('170711000102').asDateTime
+
+    def testToDateTime1(self):
+        assert datetime.datetime(2017, 7, 11, 0, 1, 2, tzinfo=UTC) == useful.UTCTime('170711000102Z').asDateTime
+
+    def testToDateTime2(self):
+        assert datetime.datetime(2017, 7, 11, 0, 1, 2, tzinfo=UTC) == useful.UTCTime('170711000102+0000').asDateTime
+
+    def testToDateTime3(self):
+        assert datetime.datetime(2017, 7, 11, 0, 1, 2, tzinfo=UTC2) == useful.UTCTime('170711000102+0200').asDateTime
+
+    def testToDateTime4(self):
+        assert datetime.datetime(2017, 7, 11, 0, 1) == useful.UTCTime('1707110001').asDateTime
+
+    def testToDateTime5(self):
+        assert datetime.datetime(2017, 7, 11, 0) == useful.UTCTime('17071100').asDateTime
 
 
 suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])
