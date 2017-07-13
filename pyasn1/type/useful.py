@@ -88,7 +88,11 @@ class TimeMixIn(object):
         elif len(string) - self.yearsDigits == 8:
             string += '00'
 
-        dt = datetime.datetime.strptime(string, self.yearsDigits == 4 and '%Y%m%d%H%M%S' or '%y%m%d%H%M%S')
+        try:
+            dt = datetime.datetime.strptime(string, self.yearsDigits == 4 and '%Y%m%d%H%M%S' or '%y%m%d%H%M%S')
+
+        except ValueError:
+            raise error.PyAsn1Error('malformed datetime format %s' % self)
 
         return dt.replace(microsecond=ms, tzinfo=tzinfo)
 
