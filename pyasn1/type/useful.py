@@ -47,9 +47,12 @@ class TimeMixIn(object):
             tzinfo = TimeMixIn.FixedOffset(0, 'UTC')
             string = string[:-1]
 
-        elif string[-5] == '+':
+        elif string[-5] in ('-', '+'):
             try:
-                minutes = int(string[-4:]) * 60
+                minutes = int(string[-4:-2]) * 60 + int(string[:-2])
+                if string[-5] == '-':
+                    minutes *= -1
+
             except ValueError:
                 raise error.PyAsn1Error('unknown time specification %s' % self)
 
@@ -59,8 +62,19 @@ class TimeMixIn(object):
         else:
             tzinfo = None
 
-        dt = datetime.datetime.strptime(string, '%Y%m%d%H%M%S.%f')
-        dt.replace(tzinfo=tzinfo)
+        if '.' in string:
+            try:
+                string, _, ms = string.partition('.')
+                ms = int(ms) * 100000
+
+            except ValueError:
+                raise error.PyAsn1Error('bad sub-second time specification %s' % self)
+
+        else:
+            ms = 0
+
+        dt = datetime.datetime.strptime(string, '%Y%m%d%H%M%S')
+        dt.replace(microsecond=ms, tzinfo=tzinfo)
 
         return dt
 
@@ -69,7 +83,12 @@ class TimeMixIn(object):
         string = dt.strftime('%Y%m%d%H%M%S.%%d')
         string = string % (dt.microsecond // 10000)
         if dt.utcoffset():
-            string += '+%.4d' % (dt.utcoffset() // 60)
+            seconds = dt.utcoffset().seconds
+            if seconds < 0:
+                string += '-'
+            else:
+                string += '+'
+            string += '%.2d%.2d' % (seconds // 3600, seconds % 3600)
         else:
             string += 'Z'
         return cls(string)

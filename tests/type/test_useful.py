@@ -40,19 +40,20 @@ class ObjectDescriptorTestCase(unittest.TestCase):
 class GeneralizedTimeTestCase(unittest.TestCase):
 
     def testFromDateTime(self):
-        assert useful.GeneralizedTime.fromDateTime(datetime.datetime(2017, 07, 11, 0, 1, 2, 30000, tzinfo=UTC)) == '20170711000102.3Z'
+        assert useful.GeneralizedTime.fromDateTime(datetime.datetime(2017, 7, 11, 0, 1, 2, 30000, tzinfo=UTC)) == '20170711000102.3Z'
 
     def testToDateTime(self):
-        assert datetime.datetime(2017, 07, 11, 0, 1, 2, 30000, tzinfo=UTC) == useful.GeneralizedTime('20170711000102.3Z').asDateTime
+        assert datetime.datetime(2017, 7, 11, 0, 1, 2, 30000, tzinfo=UTC) == useful.GeneralizedTime('20170711000102.3Z').asDateTime
 
 
 class UTCTimeTestCase(unittest.TestCase):
 
+
     def testFromDateTime(self):
-        assert useful.UTCTime.fromDateTime(datetime.datetime(2017, 07, 11, 0, 1, 2, 3, tzinfo=UTC)) == '2017071100010203,4+0000'
+        assert useful.UTCTime.fromDateTime(datetime.datetime(2017, 7, 11, 0, 1, 2, 30000, tzinfo=UTC)) == '20170711000102.3Z'
 
     def testToDateTime(self):
-        assert datetime.datetime(2017, 07, 11, 0, 1, 2, 3, tzinfo=UTC) == useful.UTCTime('2017071100010203,4+0000')
+        assert datetime.datetime(2017, 7, 11, 0, 1, 2, 30000, tzinfo=UTC) == useful.UTCTime('20170711000102.3Z').asDateTime
 
 
 suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])
