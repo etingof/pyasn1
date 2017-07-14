@@ -54,6 +54,7 @@ class TimeMixIn(object):
             string = string[:-1]
 
         elif string[-5] in ('-', '+'):
+            # TODO: handle the case of missing MM
             try:
                 minutes = int(string[-4:-2]) * 60 + int(string[-2:])
                 if string[-5] == '-':
