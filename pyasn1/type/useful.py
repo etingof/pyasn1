@@ -25,8 +25,10 @@ class ObjectDescriptor(char.GraphicString):
 
 class TimeMixIn(object):
 
-    yearsDigits = 4
-    hasSubsecond = False
+    _yearsDigits = 4
+    _hasSubsecond = False
+    _optionalMinutes = False
+    _shortTZ = False
 
     class FixedOffset(datetime.tzinfo):
         """Fixed offset in minutes east from UTC."""
@@ -48,23 +50,39 @@ class TimeMixIn(object):
 
     @property
     def asDateTime(self):
+        """Create :py:class:`datetime.datetime` object from a |ASN.1| object.
+
+        Returns
+        -------
+        :
+            new instance of :py:class:`datetime.datetime` object            
+        """
         string = str(self)
         if string.endswith('Z'):
             tzinfo = TimeMixIn.UTC
             string = string[:-1]
 
-        elif string[-5] in ('-', '+'):
-            # TODO: handle the case of missing MM
+        elif '-' in string or '+' in string:
+            if '+' in string:
+                string, plusminus, tz = string.partition('+')
+            else:
+                string, plusminus, tz = string.partition('-')
+
+            if self._shortTZ and len(tz) == 2:
+                tz += '00'
+
+            if len(tz) != 4:
+                raise error.PyAsn1Error('malformed time zone offset %s' % tz)
+
             try:
-                minutes = int(string[-4:-2]) * 60 + int(string[-2:])
-                if string[-5] == '-':
+                minutes = int(tz[:2]) * 60 + int(tz[2:])
+                if plusminus == '-':
                     minutes *= -1
 
             except ValueError:
                 raise error.PyAsn1Error('unknown time specification %s' % self)
 
             tzinfo = TimeMixIn.FixedOffset(minutes, '?')
-            string = string[:-5]
 
         else:
             tzinfo = None
@@ -84,13 +102,13 @@ class TimeMixIn(object):
         else:
             ms = 0
 
-        if len(string) - self.yearsDigits == 6:
+        if self._optionalMinutes and len(string) - self._yearsDigits == 6:
             string += '0000'
-        elif len(string) - self.yearsDigits == 8:
+        elif len(string) - self._yearsDigits == 8:
             string += '00'
 
         try:
-            dt = datetime.datetime.strptime(string, self.yearsDigits == 4 and '%Y%m%d%H%M%S' or '%y%m%d%H%M%S')
+            dt = datetime.datetime.strptime(string, self._yearsDigits == 4 and '%Y%m%d%H%M%S' or '%y%m%d%H%M%S')
 
         except ValueError:
             raise error.PyAsn1Error('malformed datetime format %s' % self)
@@ -99,8 +117,21 @@ class TimeMixIn(object):
 
     @classmethod
     def fromDateTime(cls, dt):
-        string = dt.strftime(cls.yearsDigits == 4 and '%Y%m%d%H%M%S' or '%y%m%d%H%M%S')
-        if cls.hasSubsecond:
+        """Create |ASN.1| object from a :py:class:`datetime.datetime` object.
+
+        Parameters
+        ----------
+        dt : :py:class:`datetime.datetime` object
+            The `datetime.datetime` object to initialize the |ASN.1| object from
+            
+        
+        Returns
+        -------
+        :
+            new instance of |ASN.1| value
+        """
+        string = dt.strftime(cls._yearsDigits == 4 and '%Y%m%d%H%M%S' or '%y%m%d%H%M%S')
+        if cls._hasSubsecond:
             string += '.%d' % (dt.microsecond // 10000)
 
         if dt.utcoffset():
@@ -124,8 +155,10 @@ class GeneralizedTime(char.VisibleString, TimeMixIn):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 24)
     )
 
-    yearsDigits = 4
-    hasSubsecond = True
+    _yearsDigits = 4
+    _hasSubsecond = True
+    _optionalMinutes = True
+    _shortTZ = True
 
 
 class UTCTime(char.VisibleString, TimeMixIn):
@@ -136,5 +169,7 @@ class UTCTime(char.VisibleString, TimeMixIn):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 23)
     )
 
-    yearsDigits = 2
-    hasSubsecond = False
+    _yearsDigits = 2
+    _hasSubsecond = False
+    _optionalMinutes = False
+    _shortTZ = False
