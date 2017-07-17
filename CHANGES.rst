@@ -1,5 +1,5 @@
 
-Revision 0.2.4, released XX-03-2017
+Revision 0.3.1, released XX-07-2017
 -----------------------------------
 
 - ASN.1 types initialization refactored to minimize the use of
@@ -28,12 +28,12 @@ Revision 0.2.4, released XX-03-2017
 - The .getComponent*() methods of constructed ASN.1 types changed
   to lazily instantiate underlying type rather than return `None`.
   This should simplify its API as initialization like `X[0][1] = 2` becomes
-  possible. Beware that this change introduces a deviation from
-  original API.
+  possible.
+  WARNING: this change introduces a deviation from the original API.
 - The .setComponent*() methods of SetOf/SequenceOf types changed not
   to allow uninitialized "holes" inside the sequences of their components.
-  They now behave similarly to Python lists. Beware that this change
-  introduces a deviation from original API.
+  They now behave similarly to Python lists.
+  WARNING: this change introduces a deviation from the original API.
 - Default and optional components en/decoding of Constructed type
   refactored towards better efficiency and more control.
 - OctetsString and Any decoder optimized to avoid creating ASN.1
