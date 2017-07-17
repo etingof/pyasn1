@@ -267,9 +267,9 @@ class RealEncoder(AbstractItemEncoder):
         return sign, m, encbase, e
 
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
-        if value.isPlusInfinity():
+        if value.isPlusInf:
             return (0x40,), False, False
-        if value.isMinusInfinity():
+        if value.isMinusInf:
             return (0x41,), False, False
         m, b, e = value
         if not m:

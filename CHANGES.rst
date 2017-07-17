@@ -21,6 +21,8 @@ Revision 0.3.1, released XX-07-2017
 - Tags and constraints-related getter methods refactored into descriptors/properties.
 - The .hasValue() method refactored into .isValue property. All ASN.1
   objects now support them, not just scalars.
+- The Real.{isInfinity, isPlusInfinity, isMinusInfinity} methods
+  refactored into properties and renamed into IsInf, IsPlusInf and isMinusInf
 - The end-of-octets type refactored to ensure it is a singleton. Codecs
   changed to rely on that for better performance.
 - Codecs lookup made more efficient at BER/CER/DER decoder main loop by

@@ -1596,12 +1596,13 @@ class Real(base.AbstractSimpleAsn1Item):
             return str(value)
 
     def prettyPrint(self, scope=0):
-        if self.isInfinity():
+        if self.isInf:
             return self.prettyOut(self._value)
         else:
             return str(float(self))
 
-    def isPlusInfinity(self):
+    @property
+    def isPlusInf(self):
         """Indicate PLUS-INFINITY object value
 
         Returns
@@ -1613,7 +1614,8 @@ class Real(base.AbstractSimpleAsn1Item):
         """
         return self._value == self._plusInf
 
-    def isMinusInfinity(self):
+    @property
+    def isMinusInf(self):
         """Indicate MINUS-INFINITY object value
 
         Returns
@@ -1624,8 +1626,20 @@ class Real(base.AbstractSimpleAsn1Item):
         """
         return self._value == self._minusInf
 
-    def isInfinity(self):
+    @property
+    def isInf(self):
         return self._value in self._inf
+
+    # compatibility stubs
+
+    def isPlusInfinity(self):
+        return self.isPlusInf
+
+    def isMinusInfinity(self):
+        return self.isMinusInf
+
+    def isInfinity(self):
+        return self.isInf
 
     def __str__(self):
         return str(float(self))

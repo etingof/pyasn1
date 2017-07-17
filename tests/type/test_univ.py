@@ -637,10 +637,10 @@ class RealTestCase(unittest.TestCase):
         assert univ.Real(float('inf')) == float('inf'), 'prettyIn() fails'
 
     def testPlusInf(self):
-        assert univ.Real('inf').isPlusInfinity(), 'isPlusInfinity failed'
+        assert univ.Real('inf').isPlusInf, 'isPlusInfinity failed'
 
     def testMinusInf(self):
-        assert univ.Real('-inf').isMinusInfinity(), 'isMinusInfinity failed'
+        assert univ.Real('-inf').isMinusInf, 'isMinusInfinity failed'
 
     def testPos(self):
         assert +univ.Real(1.0) == 1.0, '__pos__() fails'
