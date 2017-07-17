@@ -1,5 +1,5 @@
 
-Revision 0.2.4, released XX-03-2017
+Revision 0.3.1, released XX-07-2017
 -----------------------------------
 
 - ANY DEFINED BY clause support implemented
@@ -29,17 +29,19 @@ Revision 0.2.4, released XX-03-2017
 - The .getComponent*() methods of constructed ASN.1 types changed
   to lazily instantiate underlying type rather than return `None`.
   This should simplify its API as initialization like `X[0][1] = 2` becomes
-  possible. Beware that this change introduces a deviation from
-  original API.
+  possible.
+  WARNING: this change introduces a deviation from the original API.
 - The .setComponent*() methods of SetOf/SequenceOf types changed not
   to allow uninitialized "holes" inside the sequences of their components.
-  They now behave similarly to Python lists. Beware that this change
-  introduces a deviation from original API.
+  They now behave similarly to Python lists.
+  WARNING: this change introduces a deviation from the original API.
 - Default and optional components en/decoding of Constructed type
   refactored towards better efficiency and more control.
 - OctetsString and Any decoder optimized to avoid creating ASN.1
   objects for chunks of substrate. Instead they now join substrate
   chunks together and create ASN.1 object from it just once.
+- The GeneralizedTime and UTCTime types now support to/from Python
+  datetime object conversion.
 - Unit tests added for the `compat` sub-package.
 - Fixed BitString named bits initialization bug.
 - Fixed non-functional tag cache (when running Python 2) at DER decoder.
