@@ -24,13 +24,13 @@ class NamedValues(object):
     Parameters
     ----------
 
-    Var-args of tuples:
-
-    name: :py:class:`str`
-        Value name
-
-    value: :py:class:`int`
-        A numerical value
+    \*namedValues: variable number of two-element :py:class:`tuple` 
+        
+        name: :py:class:`str`
+            Value name
+    
+        value: :py:class:`int`
+                A numerical value
     """
     def __init__(self, *namedValues):
         self.nameToValIdx = {}
