@@ -12,6 +12,26 @@ __all__ = ['NamedValues']
 
 
 class NamedValues(object):
+    """Create named values object.
+
+    The |NamedValues| object represents a collection of string names
+    associated with numeric IDs. These objects are used for giving
+    names to otherwise numerical values.
+
+    |NamedValues| objects are immutable and duck-type Python
+    :class:`dict` objects mapping ID to name and vice-versa.
+
+    Parameters
+    ----------
+
+    Var-args of tuples:
+
+    name: :py:class:`str`
+        Value name
+
+    value: :py:class:`int`
+        A numerical value
+    """
     def __init__(self, *namedValues):
         self.nameToValIdx = {}
         self.valToNameIdx = {}
@@ -58,6 +78,26 @@ class NamedValues(object):
 
     def __hash__(self):
         return hash(tuple(self))
+
+    # descriptor protocol
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self
+
+        # This is a bit of hack: look up instance attribute first,
+        # then try class attribute if instance attribute with that
+        # name is not available.
+        # The rationale is to have `.subtypeSpec`/`.sizeSpec` readable-writeable
+        # as a class attribute and read-only as instance attribute.
+        try:
+            return instance._namedValues
+
+        except AttributeError:
+            return self
+
+    def __set__(self, instance, value):
+        raise AttributeError('attribute is read-only')
 
     def getName(self, value):
         if value in self.valToNameIdx:

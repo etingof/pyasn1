@@ -67,16 +67,16 @@ class Integer(base.AbstractSimpleAsn1Item):
     def __init__(self, value=noValue, tagSet=None, subtypeSpec=None,
                  namedValues=None):
         if namedValues is None:
-            self.__namedValues = self.namedValues
+            self._namedValues = self.namedValues
         else:
-            self.__namedValues = namedValues
+            self._namedValues = namedValues
         base.AbstractSimpleAsn1Item.__init__(
             self, value, tagSet, subtypeSpec
         )
 
     def __repr__(self):
-        if self.__namedValues is not self.namedValues:
-            return '%s, %r)' % (base.AbstractSimpleAsn1Item.__repr__(self)[:-1], self.__namedValues)
+        if self._namedValues is not self.namedValues:
+            return '%s, %r)' % (base.AbstractSimpleAsn1Item.__repr__(self)[:-1], self._namedValues)
         else:
             return base.AbstractSimpleAsn1Item.__repr__(self)
 
@@ -231,7 +231,7 @@ class Integer(base.AbstractSimpleAsn1Item):
             return int(value)
 
         except ValueError:
-            valueOfName = self.__namedValues.getValue(value)
+            valueOfName = self._namedValues.getValue(value)
             if valueOfName is not None:
                 return valueOfName
 
@@ -240,11 +240,8 @@ class Integer(base.AbstractSimpleAsn1Item):
             )
 
     def prettyOut(self, value):
-        nameOfValue = self.__namedValues.getName(value)
+        nameOfValue = self._namedValues.getName(value)
         return nameOfValue is None and str(value) or repr(nameOfValue)
-
-    def getNamedValues(self):
-        return self.__namedValues
 
     def clone(self, value=noValue, tagSet=None, subtypeSpec=None, namedValues=None):
         """Create a copy of a |ASN.1| type or object.
@@ -287,7 +284,7 @@ class Integer(base.AbstractSimpleAsn1Item):
         else:
             isModified = True
         if namedValues is None or namedValues is noValue:
-            namedValues = self.__namedValues
+            namedValues = self._namedValues
         else:
             isModified = True
 
@@ -353,15 +350,20 @@ class Integer(base.AbstractSimpleAsn1Item):
             subtypeSpec = self._subtypeSpec + subtypeSpec
             isModified = True
         if namedValues is None or namedValues is noValue:
-            namedValues = self.__namedValues
+            namedValues = self._namedValues
         else:
-            namedValues = namedValues + self.__namedValues
+            namedValues = namedValues + self._namedValues
             isModified = True
 
         if isModified:
             return self.__class__(value, tagSet, subtypeSpec, namedValues)
         else:
             return self
+
+    # backward compatibility
+
+    def getNamedValues(self):
+        return self.namedValues
 
 
 class Boolean(Integer):
@@ -381,7 +383,7 @@ class Boolean(Integer):
 
     #: Default :py:class:`~pyasn1.type.namedval.NamedValues` object
     #: representing symbolic aliases for numbers
-    namedValues = Integer.namedValues.clone(('False', 0), ('True', 1))
+    namedValues = namedval.NamedValues(('False', 0), ('True', 1))
 
     # Optimization for faster codec lookup
     typeId = Integer.getTypeId()
@@ -464,9 +466,9 @@ class BitString(base.AbstractSimpleAsn1Item):
     def __init__(self, value=noValue, tagSet=None, subtypeSpec=None,
                  namedValues=None, binValue=noValue, hexValue=noValue):
         if namedValues is None:
-            self.__namedValues = self.namedValues
+            self._namedValues = self.namedValues
         else:
-            self.__namedValues = namedValues
+            self._namedValues = namedValues
         if binValue is not noValue:
             value = self.fromBinaryString(binValue)
         elif hexValue is not noValue:
@@ -528,7 +530,7 @@ class BitString(base.AbstractSimpleAsn1Item):
         else:
             isModified = True
         if namedValues is None or namedValues is noValue:
-            namedValues = self.__namedValues
+            namedValues = self._namedValues
         else:
             isModified = True
 
@@ -602,9 +604,9 @@ class BitString(base.AbstractSimpleAsn1Item):
             subtypeSpec = self._subtypeSpec + subtypeSpec
             isModified = True
         if namedValues is None or namedValues is noValue:
-            namedValues = self.__namedValues
+            namedValues = self._namedValues
         else:
-            namedValues = namedValues + self.__namedValues
+            namedValues += self._namedValues
             isModified = True
 
         if isModified:
@@ -761,8 +763,8 @@ class BitString(base.AbstractSimpleAsn1Item):
                         'Bad BIT STRING value notation %s' % (value,)
                     )
 
-            elif self.__namedValues and not value.isdigit():  # named bits like 'Urgent, Active'
-                bitPositions = self.__namedValues.getValues(*[x.strip() for x in value.split(',')])
+            elif self._namedValues and not value.isdigit():  # named bits like 'Urgent, Active'
+                bitPositions = self._namedValues.getValues(*[x.strip() for x in value.split(',')])
 
                 rightmostPosition = max(bitPositions)
 
@@ -1630,17 +1632,6 @@ class Real(base.AbstractSimpleAsn1Item):
     def isInf(self):
         return self._value in self._inf
 
-    # compatibility stubs
-
-    def isPlusInfinity(self):
-        return self.isPlusInf
-
-    def isMinusInfinity(self):
-        return self.isMinusInf
-
-    def isInfinity(self):
-        return self.isInf
-
     def __str__(self):
         return str(float(self))
 
@@ -1764,6 +1755,17 @@ class Real(base.AbstractSimpleAsn1Item):
             raise error.PyAsn1Error('Invalid infinite value operation')
         else:
             return self._value[idx]
+
+    # compatibility stubs
+
+    def isPlusInfinity(self):
+        return self.isPlusInf
+
+    def isMinusInfinity(self):
+        return self.isMinusInf
+
+    def isInfinity(self):
+        return self.isInf
 
 
 class Enumerated(Integer):

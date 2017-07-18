@@ -14,6 +14,8 @@ Revision 0.3.1, released XX-07-2017
 - Reduced the frequency of expensive isinstance() calls
 - Tag-related classes optimized, refactored into properties and
   documented.
+- The NamedValues implementation improved, refactored into properties
+  and documented.
 - NamedType family of classes overhauled, optimized and
   documented.
 - Sequence/Set DER/CER/DER decoder optimized to skip the case of
