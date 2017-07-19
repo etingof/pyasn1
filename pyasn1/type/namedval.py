@@ -12,84 +12,190 @@ __all__ = ['NamedValues']
 
 
 class NamedValues(object):
-    def __init__(self, *namedValues):
-        self.nameToValIdx = {}
-        self.valToNameIdx = {}
-        self.namedValues = ()
-        automaticVal = 1
-        for namedValue in namedValues:
-            if isinstance(namedValue, tuple):
-                name, val = namedValue
+    """Create named values object.
+
+    The |NamedValues| object represents a collection of string names
+    associated with numeric IDs. These objects are used for giving
+    names to otherwise numerical values.
+
+    |NamedValues| objects are immutable and duck-type Python
+    :class:`dict` object mapping ID to name and vice-versa.
+
+    Parameters
+    ----------
+
+    \*args: variable number of two-element :py:class:`tuple` 
+    \*\*kwargs: keyword parameters of:
+        
+        name: :py:class:`str`
+            Value name
+    
+        value: :py:class:`int`
+                A numerical value
+
+    Examples
+    --------
+
+    >>> nv = namedval.NamedValues('a', 'b', ('c', 0), d=1)
+    >>> nv
+    >>> {'c': 0, 'd': 1, 'a': 2, 'b': 3}
+    >>> nv[0]
+    'c'
+    >>> nv['a']
+    2
+    """
+    def __init__(self, *args, **kwargs):
+        self.__names = {}
+        self.__numbers = {}
+
+        anonymousNames = []
+
+        for namedValue in args:
+            if isinstance(namedValue, (tuple, list)):
+                try:
+                    name, number = namedValue
+
+                except ValueError:
+                    raise error.PyAsn1Error('Not a proper attribute-value pair %r' % (namedValue,))
+
             else:
-                name = namedValue
-                val = automaticVal
-            if name in self.nameToValIdx:
+                anonymousNames.append(namedValue)
+                continue
+
+            if name in self.__names:
                 raise error.PyAsn1Error('Duplicate name %s' % (name,))
-            self.nameToValIdx[name] = val
-            if val in self.valToNameIdx:
-                raise error.PyAsn1Error('Duplicate value %s=%s' % (name, val))
-            self.valToNameIdx[val] = name
-            self.namedValues = self.namedValues + ((name, val),)
-            automaticVal += 1
+
+            if number in self.__numbers:
+                raise error.PyAsn1Error('Duplicate number  %s=%s' % (name, number))
+
+            self.__names[name] = number
+            self.__numbers[number] = name
+
+        for name, number in kwargs.items():
+            if name in self.__names:
+                raise error.PyAsn1Error('Duplicate name %s' % (name,))
+
+            if number in self.__numbers:
+                raise error.PyAsn1Error('Duplicate number  %s=%s' % (name, number))
+
+            self.__names[name] = number
+            self.__numbers[number] = name
+
+        if anonymousNames:
+
+            number = self.__numbers and max(self.__numbers) + 1 or 0
+
+            for name in anonymousNames:
+
+                if name in self.__names:
+                    raise error.PyAsn1Error('Duplicate name %s' % (name,))
+
+                self.__names[name] = number
+                self.__numbers[number] = name
+
+                number += 1
 
     def __repr__(self):
-        return '%s(%s)' % (self.__class__.__name__, ', '.join([repr(x) for x in self.namedValues]))
+        return '%s(%r)' % (self.__class__.__name__, self.items())
 
     def __str__(self):
-        return str(self.namedValues)
+        return str(self.items())
 
     def __eq__(self, other):
-        return tuple(self) == tuple(other)
+        return dict(self) == other
 
     def __ne__(self, other):
-        return tuple(self) != tuple(other)
+        return dict(self) != other
 
     def __lt__(self, other):
-        return tuple(self) < tuple(other)
+        return dict(self) < other
 
     def __le__(self, other):
-        return tuple(self) <= tuple(other)
+        return dict(self) <= other
 
     def __gt__(self, other):
-        return tuple(self) > tuple(other)
+        return dict(self) > other
 
     def __ge__(self, other):
-        return tuple(self) >= tuple(other)
+        return dict(self) >= other
 
     def __hash__(self):
-        return hash(tuple(self))
+        return hash(self.items())
+
+    # descriptor protocol
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self
+
+        # This is a bit of hack: look up instance attribute first,
+        # then try class attribute if instance attribute with that
+        # name is not available.
+        # The rationale is to have `.subtypeSpec`/`.sizeSpec` readable-writeable
+        # as a class attribute and read-only as instance attribute.
+        try:
+            return instance._namedValues
+
+        except AttributeError:
+            return self
+
+    def __set__(self, instance, value):
+        raise AttributeError('attribute is read-only')
+
+    # Python dict protocol (read-only)
+
+    def __getitem__(self, key):
+        try:
+            return self.__numbers[key]
+
+        except KeyError:
+            return self.__names[key]
+
+    def __len__(self):
+        return len(self.__names)
+
+    def __contains__(self, key):
+        return key in self.__names or key in self.__numbers
+
+    def __iter__(self):
+        return iter(self.__names)
+
+    def values(self):
+        return iter(self.__numbers)
+
+    def keys(self):
+        return iter(self.__names)
+
+    def items(self):
+        for name in self.__names:
+            yield name, self.__names[name]
+
+    # support merging
+
+    def __add__(self, namedValues):
+        return self.__class__(*tuple(self.items()) + tuple(namedValues.items()))
+
+    # XXX clone/subtype?
+
+    def clone(self, *args, **kwargs):
+        new = self.__class__(*args, **kwargs)
+        return self + new
+
+    # legacy protocol
 
     def getName(self, value):
-        if value in self.valToNameIdx:
-            return self.valToNameIdx[value]
+        if value in self.__numbers:
+            return self.__numbers[value]
 
     def getValue(self, name):
-        if name in self.nameToValIdx:
-            return self.nameToValIdx[name]
+        if name in self.__names:
+            return self.__names[name]
 
     def getValues(self, *names):
         try:
-            return [self.nameToValIdx[name] for name in names]
+            return [self.__names[name] for name in names]
 
         except KeyError:
             raise error.PyAsn1Error(
-                'Unknown bit identifier(s): %s' % (set(names).difference(self.nameToValIdx),)
+                'Unknown bit identifier(s): %s' % (set(names).difference(self.__names),)
             )
-
-    # TODO support by-name subscription
-    def __getitem__(self, i):
-        return self.namedValues[i]
-
-    def __len__(self):
-        return len(self.namedValues)
-
-    def __add__(self, namedValues):
-        return self.__class__(*self.namedValues + namedValues)
-
-    def __radd__(self, namedValues):
-        return self.__class__(*namedValues + tuple(self))
-
-    def clone(self, *namedValues):
-        return self.__class__(*tuple(self) + namedValues)
-
-# XXX clone/subtype?
