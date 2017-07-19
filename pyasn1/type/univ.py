@@ -231,17 +231,20 @@ class Integer(base.AbstractSimpleAsn1Item):
             return int(value)
 
         except ValueError:
-            valueOfName = self._namedValues.getValue(value)
-            if valueOfName is not None:
-                return valueOfName
+            try:
+                return self._namedValues[value]
 
-            raise error.PyAsn1Error(
-                'Can\'t coerce %r into integer: %s' % (value, sys.exc_info()[1])
-            )
+            except KeyError:
+                raise error.PyAsn1Error(
+                    'Can\'t coerce %r into integer: %s' % (value, sys.exc_info()[1])
+                )
 
     def prettyOut(self, value):
-        nameOfValue = self._namedValues.getName(value)
-        return nameOfValue is None and str(value) or repr(nameOfValue)
+        try:
+            return repr(self._namedValues[value])
+
+        except KeyError:
+            return str(value)
 
     def clone(self, value=noValue, tagSet=None, subtypeSpec=None, namedValues=None):
         """Create a copy of a |ASN.1| type or object.
@@ -764,7 +767,14 @@ class BitString(base.AbstractSimpleAsn1Item):
                     )
 
             elif self._namedValues and not value.isdigit():  # named bits like 'Urgent, Active'
-                bitPositions = self._namedValues.getValues(*[x.strip() for x in value.split(',')])
+                names = [x.strip() for x in value.split(',')]
+
+                try:
+
+                    bitPositions = [self._namedValues[name] for name in names]
+
+                except KeyError:
+                    raise error.PyAsn1Error('unknown bit name(s) in %r' % (names,))
 
                 rightmostPosition = max(bitPositions)
 
