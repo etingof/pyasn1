@@ -5,7 +5,7 @@
 # License: http://pyasn1.sf.net/license.html
 #
 import sys
-from pyasn1.type import constraint, tagmap, tag
+from pyasn1.type import constraint, tagmap, tag, unnamedtype
 from pyasn1 import error
 
 __all__ = ['Asn1Item', 'Asn1ItemBase', 'AbstractSimpleAsn1Item', 'AbstractConstructedAsn1Item']
@@ -436,13 +436,17 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
     #: otherwise subtype relation is only enforced
     strictConstraints = False
 
+    componentType = None
+    sizeSpec = None
+
     def __init__(self, componentType=None, tagSet=None,
                  subtypeSpec=None, sizeSpec=None):
         Asn1ItemBase.__init__(self, tagSet, subtypeSpec)
         if componentType is None:
-            self._componentType = self.componentType
-        else:
-            self._componentType = componentType
+            componentType = self.componentType
+        if componentType is None or isinstance(componentType, Asn1Item):
+            componentType = unnamedtype.UnnamedType(componentType)
+        self._componentType = componentType
         if sizeSpec is None:
             self._sizeSpec = self.sizeSpec
         else:

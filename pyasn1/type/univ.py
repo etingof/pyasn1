@@ -6,7 +6,7 @@
 #
 import sys
 import math
-from pyasn1.type import base, tag, constraint, namedtype, namedval, tagmap
+from pyasn1.type import base, tag, constraint, namedtype, unnamedtype, namedval, tagmap
 from pyasn1.codec.ber import eoo
 from pyasn1.compat import octets, integer, binary
 from pyasn1 import error
@@ -1823,6 +1823,8 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         Object representing collection size constraint
      """
 
+    componentType = unnamedtype.UnnamedType()
+
     # Python list protocol
 
     def clear(self):
@@ -1925,7 +1927,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         IndexError:
             When idx > len(self)
         """
-        componentType = self._componentType
+        componentType = self._componentType.asn1Object
 
         try:
             currentValue = self._componentValues[idx]
@@ -1972,8 +1974,8 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
 
     @property
     def componentTagMap(self):
-        if self._componentType is not None:
-            return self._componentType.tagMap
+        if self._componentType.asn1Object is not None:
+            return self._componentType.asn1Object.tagMap
 
     def prettyPrint(self, scope=0):
         scope += 1
@@ -1989,9 +1991,9 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
     def prettyPrintType(self, scope=0):
         scope += 1
         representation = '%s -> %s {\n' % (self.tagSet, self.__class__.__name__)
-        if self._componentType is not None:
+        if self._componentType.asn1Object is not None:
             representation += ' ' * scope
-            representation += self._componentType.prettyPrintType(scope)
+            representation += self._componentType.asn1Object.prettyPrintType(scope)
         return representation + '\n' + ' ' * (scope - 1) + '}'
 
 
@@ -2034,7 +2036,7 @@ class SequenceOf(SequenceOfAndSetOfBase):
 
     #: Default :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
     #: object representing ASN.1 type allowed within |ASN.1| type
-    componentType = None
+    componentType = unnamedtype.UnnamedType()
 
     #: Set (class attribute) or return (class or instance attribute) a
     #: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection` object
@@ -2061,7 +2063,7 @@ class SetOf(SequenceOfAndSetOfBase):
 
     #: Default :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
     #: object representing ASN.1 type allowed within |ASN.1| type
-    componentType = None
+    componentType = unnamedtype.UnnamedType()
 
     #: Set (class attribute) or return (class or instance attribute) a
     #: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection` object

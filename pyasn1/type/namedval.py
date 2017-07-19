@@ -131,7 +131,7 @@ class NamedValues(object):
         # This is a bit of hack: look up instance attribute first,
         # then try class attribute if instance attribute with that
         # name is not available.
-        # The rationale is to have `.subtypeSpec`/`.sizeSpec` readable-writeable
+        # The rationale is to have `.namedValues` readable-writeable
         # as a class attribute and read-only as instance attribute.
         try:
             return instance._namedValues
