@@ -597,10 +597,6 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
     def setDefaultComponents(self):
         pass
 
-    @property
-    def componentTagMap(self):
-        raise error.PyAsn1Error('Method not implemented')
-
     def __getitem__(self, idx):
         return self.getComponentByPosition(idx)
 
@@ -612,7 +608,3 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
 
     def clear(self):
         self._componentValues = []
-
-    # backward compatibility
-    def getComponentTagMap(self):
-        return self.componentTagMap

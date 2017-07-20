@@ -2553,7 +2553,7 @@ class Set(SequenceAndSetBase):
     @property
     def componentTagMap(self):
         if self._componentType:
-            return self._componentType.getTagMap(True)
+            return self._componentType.tagMapUnique
 
 
 class Choice(Set):
@@ -2742,7 +2742,7 @@ class Choice(Set):
         if self._tagSet:
             return Set.tagMap.fget(self)
         else:
-            return Set.componentTagMap.fget(self)
+            return self.componentType.tagMapUnique
 
     def getComponent(self, innerFlag=0):
         """Return currently assigned component of the |ASN.1| object.
@@ -2799,7 +2799,6 @@ class Choice(Set):
             return False
 
         return self._componentValues[self._currentIdx].isValue
-
 
     # compatibility stubs
 

@@ -16,7 +16,7 @@ class TagMap(object):
 
     *TagMap* objects are immutable and duck-type read-only Python
     :class:`dict` objects holding *TagSet* objects as keys and ASN.1
-     type objects as values.
+    type objects as values.
 
     Parameters
     ----------

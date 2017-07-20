@@ -821,7 +821,7 @@ class SequenceOf(unittest.TestCase):
             assert 0, 'size spec fails'
 
     def testGetComponentTagMap(self):
-        assert self.s1.getComponentTagMap().presentTypes == {
+        assert self.s1.componentType.asn1Object.tagMap.presentTypes == {
             univ.OctetString.tagSet: univ.OctetString('')
         }
 
@@ -1075,7 +1075,7 @@ class Set(unittest.TestCase):
         }
 
     def testGetComponentTagMap(self):
-        assert self.s1.getComponentTagMap().presentTypes == {
+        assert self.s1.componentType.tagMapUnique.presentTypes == {
             univ.OctetString.tagSet: univ.OctetString(''),
             univ.Null.tagSet: univ.Null(''),
             univ.Integer.tagSet: univ.Integer(34)

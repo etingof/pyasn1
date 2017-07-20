@@ -17,8 +17,9 @@ Revision 0.3.1, released XX-07-2017
 - The NamedValues implementation refactored to mimic Python dict, its use
   in ASN.1 types refactored into properties and better documented.
   WARNING: this change introduces a deviation from original API.
-- NamedType family of classes overhauled, optimized and
-  documented.
+- NamedType family of classes overhauled, optimized and documented.
+- The `componentType` attribute of constructed ASN.1 types turned
+  into Python property.
 - Sequence/Set DER/CER/DER decoder optimized to skip the case of
   reordered components handling when not necessary.
 - Tags and constraints-related getter methods refactored into descriptors/properties.
