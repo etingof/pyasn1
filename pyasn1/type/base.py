@@ -5,7 +5,7 @@
 # License: http://pyasn1.sf.net/license.html
 #
 import sys
-from pyasn1.type import constraint, tagmap, tag
+from pyasn1.type import constraint, tagmap, tag, unnamedtype
 from pyasn1 import error
 
 __all__ = ['Asn1Item', 'Asn1ItemBase', 'AbstractSimpleAsn1Item', 'AbstractConstructedAsn1Item']
@@ -436,13 +436,17 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
     #: otherwise subtype relation is only enforced
     strictConstraints = False
 
+    componentType = None
+    sizeSpec = None
+
     def __init__(self, componentType=None, tagSet=None,
                  subtypeSpec=None, sizeSpec=None):
         Asn1ItemBase.__init__(self, tagSet, subtypeSpec)
         if componentType is None:
-            self._componentType = self.componentType
-        else:
-            self._componentType = componentType
+            componentType = self.componentType
+        if componentType is None or isinstance(componentType, Asn1Item):
+            componentType = unnamedtype.UnnamedType(componentType)
+        self._componentType = componentType
         if sizeSpec is None:
             self._sizeSpec = self.sizeSpec
         else:
@@ -451,11 +455,11 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
 
     def __repr__(self):
         representation = []
-        if self._componentType is not self.componentType:
+        if self.componentType is not self.__class__.componentType:
             representation.append('componentType=%r' % (self._componentType,))
-        if self._tagSet is not self.__class__.tagSet:
+        if self.tagSet is not self.__class__.tagSet:
             representation.append('tagSet=%r' % (self._tagSet,))
-        if self._subtypeSpec is not self.subtypeSpec:
+        if self.subtypeSpec is not self.__class__.subtypeSpec:
             representation.append('subtypeSpec=%r' % (self._subtypeSpec,))
         representation = '%s(%s)' % (self.__class__.__name__, ', '.join(representation))
         if self._componentValues:
@@ -593,10 +597,6 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
     def setDefaultComponents(self):
         pass
 
-    @property
-    def componentTagMap(self):
-        raise error.PyAsn1Error('Method not implemented')
-
     def __getitem__(self, idx):
         return self.getComponentByPosition(idx)
 
@@ -608,7 +608,3 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
 
     def clear(self):
         self._componentValues = []
-
-    # backward compatibility
-    def getComponentTagMap(self):
-        return self.componentTagMap

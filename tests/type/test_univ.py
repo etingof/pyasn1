@@ -6,7 +6,7 @@
 #
 import sys
 import math
-from pyasn1.type import univ, tag, constraint, namedtype, namedval, error
+from pyasn1.type import univ, tag, constraint, namedtype, unnamedtype, namedval, error
 from pyasn1.compat.octets import str2octs, ints2octs, octs2ints
 from pyasn1.error import PyAsn1Error
 
@@ -730,7 +730,9 @@ class SequenceOf(unittest.TestCase):
 
     def testRepr(self):
         assert eval(repr(self.s1.clone().setComponents('a', 'b')),
-                    {'SequenceOf': univ.SequenceOf, 'OctetString': univ.OctetString}) == self.s1.clone().setComponents(
+                    {'UnnamedType': unnamedtype.UnnamedType,
+                     'SequenceOf': univ.SequenceOf,
+                     'OctetString': univ.OctetString}) == self.s1.clone().setComponents(
             'a', 'b'), 'repr() fails'
 
     def testTag(self):
@@ -819,7 +821,7 @@ class SequenceOf(unittest.TestCase):
             assert 0, 'size spec fails'
 
     def testGetComponentTagMap(self):
-        assert self.s1.getComponentTagMap().presentTypes == {
+        assert self.s1.componentType.asn1Object.tagMap.presentTypes == {
             univ.OctetString.tagSet: univ.OctetString('')
         }
 
@@ -1073,14 +1075,14 @@ class Set(unittest.TestCase):
         }
 
     def testGetComponentTagMap(self):
-        assert self.s1.getComponentTagMap().presentTypes == {
+        assert self.s1.componentType.tagMapUnique.presentTypes == {
             univ.OctetString.tagSet: univ.OctetString(''),
             univ.Null.tagSet: univ.Null(''),
             univ.Integer.tagSet: univ.Integer(34)
         }
 
     def testGetPositionByType(self):
-        assert self.s1.getComponentPositionByType(univ.Null().tagSet) == 1
+        assert self.s1.componentType.getPositionByType(univ.Null().tagSet) == 1
 
     def testSetToDefault(self):
         self.s1.setComponentByName('name', univ.noValue)
@@ -1092,14 +1094,18 @@ class Set(unittest.TestCase):
 
 class Choice(unittest.TestCase):
     def setUp(self):
-        innerComp = univ.Choice(componentType=namedtype.NamedTypes(
-            namedtype.NamedType('count', univ.Integer()),
-            namedtype.NamedType('flag', univ.Boolean())
-        ))
-        self.s1 = univ.Choice(componentType=namedtype.NamedTypes(
-            namedtype.NamedType('name', univ.OctetString()),
-            namedtype.NamedType('sex', innerComp)
-        ))
+        innerComp = univ.Choice(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType('count', univ.Integer()),
+                namedtype.NamedType('flag', univ.Boolean())
+            )
+        )
+        self.s1 = univ.Choice(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType('name', univ.OctetString()),
+                namedtype.NamedType('sex', innerComp)
+            )
+        )
 
     def testTag(self):
         assert self.s1.tagSet == tag.TagSet(), 'wrong tagSet'

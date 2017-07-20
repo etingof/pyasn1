@@ -530,14 +530,13 @@ class SetDecoder(SequenceAndSetDecoderBase):
     orderedComponents = False
 
     def _getComponentTagMap(self, asn1Object, idx):
-        return asn1Object.componentTagMap
+        return asn1Object.componentType.tagMapUnique
 
     def _getComponentPositionByType(self, asn1Object, tagSet, idx):
-        nextIdx = asn1Object.getComponentPositionByType(tagSet)
-        if nextIdx is None:
-            return idx
+        if asn1Object.componentType:
+            return asn1Object.componentType.getPositionByType(tagSet)
         else:
-            return nextIdx
+            return idx
 
 
 class SetOfDecoder(SequenceOfDecoder):
@@ -577,14 +576,14 @@ class ChoiceDecoder(AbstractConstructedDecoder):
         if substrateFun:
             return substrateFun(asn1Object, substrate, length)
         if asn1Object.tagSet == tagSet:  # explicitly tagged Choice
-            component, substrate = decodeFun(substrate, asn1Object.componentTagMap)
+            component, substrate = decodeFun(substrate, asn1Object.componentType.tagMapUnique)
             # eat up EOO marker
             eooMarker, substrate = decodeFun(substrate, allowEoo=True)
             if eooMarker is not eoo.endOfOctets:
                 raise error.PyAsn1Error('No EOO seen before substrate ends')
         else:
             component, substrate = decodeFun(
-                substrate, asn1Object.componentTagMap, tagSet, length, state
+                substrate, asn1Object.componentType.tagMapUnique, tagSet, length, state
             )
         effectiveTagSet = component.effectiveTagSet
         asn1Object.setComponentByType(
