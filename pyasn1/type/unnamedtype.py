@@ -19,6 +19,9 @@ class UnnamedType(object):
     def __init__(self, asn1Object=None):
         self.__asn1Object = asn1Object
 
+    def __repr__(self):
+        return '%s(%r)' % (self.__class__.__name__, self.__asn1Object)
+
     # descriptor protocol
 
     def __get__(self, instance, owner):

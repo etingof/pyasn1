@@ -455,11 +455,11 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
 
     def __repr__(self):
         representation = []
-        if self._componentType is not self.componentType:
+        if self.componentType is not self.__class__.componentType:
             representation.append('componentType=%r' % (self._componentType,))
-        if self._tagSet is not self.__class__.tagSet:
+        if self.tagSet is not self.__class__.tagSet:
             representation.append('tagSet=%r' % (self._tagSet,))
-        if self._subtypeSpec is not self.subtypeSpec:
+        if self.subtypeSpec is not self.__class__.subtypeSpec:
             representation.append('subtypeSpec=%r' % (self._subtypeSpec,))
         representation = '%s(%s)' % (self.__class__.__name__, ', '.join(representation))
         if self._componentValues:

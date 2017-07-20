@@ -2555,10 +2555,6 @@ class Set(SequenceAndSetBase):
         if self._componentType:
             return self._componentType.getTagMap(True)
 
-    def getComponentPositionByType(self, tagSet):
-        if self._componentType:
-            return self._componentType.getPositionByType(tagSet)
-
 
 class Choice(Set):
     __doc__ = Set.__doc__

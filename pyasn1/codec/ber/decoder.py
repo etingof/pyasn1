@@ -533,11 +533,10 @@ class SetDecoder(SequenceAndSetDecoderBase):
         return asn1Object.componentTagMap
 
     def _getComponentPositionByType(self, asn1Object, tagSet, idx):
-        nextIdx = asn1Object.getComponentPositionByType(tagSet)
-        if nextIdx is None:
-            return idx
+        if asn1Object.componentType:
+            return asn1Object.componentType.getPositionByType(tagSet)
         else:
-            return nextIdx
+            return idx
 
 
 class SetOfDecoder(SequenceOfDecoder):
