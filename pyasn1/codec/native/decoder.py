@@ -24,7 +24,7 @@ class SequenceOrSetDecoder(object):
     def __call__(self, pyObject, asn1Spec, decoderFunc):
         asn1Value = asn1Spec.clone()
 
-        componentsTypes = asn1Spec.getComponentType()
+        componentsTypes = asn1Spec.componentType
 
         for field in asn1Value:
             if field in pyObject:
@@ -38,7 +38,7 @@ class SequenceOfOrSetOfDecoder(object):
         asn1Value = asn1Spec.clone()
 
         for pyValue in pyObject:
-            asn1Value.append(decoderFunc(pyValue, asn1Spec.getComponentType()))
+            asn1Value.append(decoderFunc(pyValue, asn1Spec.componentType.asn1Object))
 
         return asn1Value
 
@@ -47,7 +47,7 @@ class ChoiceDecoder(object):
     def __call__(self, pyObject, asn1Spec, decoderFunc):
         asn1Value = asn1Spec.clone()
 
-        componentsTypes = asn1Spec.getComponentType()
+        componentsTypes = asn1Spec.componentType
 
         for field in pyObject:
             if field in componentsTypes:

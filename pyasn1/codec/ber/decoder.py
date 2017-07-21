@@ -372,7 +372,7 @@ class SequenceAndSetDecoderBase(AbstractConstructedDecoder):
         if substrateFun:
             return substrateFun(asn1Object, substrate, length)
 
-        namedTypes = asn1Object.getComponentType()
+        namedTypes = asn1Object.componentType
 
         if not self.orderedComponents or not namedTypes or namedTypes.hasOptionalOrDefault:
             seenIndices = set()
@@ -414,7 +414,7 @@ class SequenceAndSetDecoderBase(AbstractConstructedDecoder):
         if substrateFun:
             return substrateFun(asn1Object, substrate, length)
 
-        namedTypes = asn1Object.getComponentType()
+        namedTypes = asn1Object.componentType
 
         if not namedTypes or namedTypes.hasOptionalOrDefault:
             seenIndices = set()
@@ -487,7 +487,7 @@ class SequenceOfDecoder(AbstractConstructedDecoder):
         asn1Object = self._createComponent(asn1Spec, tagSet)
         if substrateFun:
             return substrateFun(asn1Object, substrate, length)
-        asn1Spec = asn1Object.getComponentType()
+        asn1Spec = asn1Object.componentType.asn1Object
         idx = 0
         while head:
             component, head = decodeFun(head, asn1Spec)
@@ -505,7 +505,7 @@ class SequenceOfDecoder(AbstractConstructedDecoder):
         asn1Object = self._createComponent(asn1Spec, tagSet)
         if substrateFun:
             return substrateFun(asn1Object, substrate, length)
-        asn1Spec = asn1Object.getComponentType()
+        asn1Spec = asn1Object.componentType.asn1Object
         idx = 0
         while substrate:
             component, substrate = decodeFun(substrate, asn1Spec, allowEoo=True)

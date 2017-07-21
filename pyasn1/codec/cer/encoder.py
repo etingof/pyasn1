@@ -98,7 +98,7 @@ class SetOfEncoder(encoder.SequenceOfEncoder):
         # from Set if they have the same tags&constraints?
         if isinstance(client, univ.SequenceAndSetBase):
             # Set
-            namedTypes = client.getComponentType()
+            namedTypes = client.componentType
             comps = []
             while idx > 0:
                 idx -= 1

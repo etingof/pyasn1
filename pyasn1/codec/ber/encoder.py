@@ -339,7 +339,7 @@ class RealEncoder(AbstractItemEncoder):
 class SequenceEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         value.verifySizeSpec()
-        namedTypes = value.getComponentType()
+        namedTypes = value.componentType
         substrate = null
         idx = len(value)
         while idx > 0:
