@@ -1803,6 +1803,26 @@ class Enumerated(Integer):
 
 # "Structured" ASN.1 types
 
+class MetaSingleComponentWrapping(type):
+
+    def __init__(cls, name, bases, dct):
+        if not isinstance(cls.componentType, unnamedtype.UnnamedType):
+            cls.componentType = unnamedtype.UnnamedType(cls.componentType)
+
+        super(MetaSingleComponentWrapping, cls).__init__(name, bases, dct)
+
+    def __call__(cls, *args, **kwargs):
+        try:
+            if not isinstance(kwargs['componentType'], unnamedtype.UnnamedType):
+                kwargs['componentType'] = unnamedtype.UnnamedType(
+                    kwargs['componentType']
+                )
+        except KeyError:
+            pass
+
+        return type.__call__(cls, *args, **kwargs)
+
+
 class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
     """Create |ASN.1| type.
 
@@ -2022,6 +2042,15 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
                 return False
 
         return True
+
+# Portable way to involve a metaclass
+__class_body = vars(SequenceOfAndSetOfBase).copy()
+__class_body.pop('__dict__', None)
+__class_body.pop('__weakref__', None)
+
+SequenceOfAndSetOfBase = MetaSingleComponentWrapping(
+    SequenceOfAndSetOfBase.__name__, SequenceOfAndSetOfBase.__bases__, __class_body
+)
 
 
 class SequenceOf(SequenceOfAndSetOfBase):
@@ -2332,10 +2361,6 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         if self._componentTypeLen:
             return self._componentType.getNameByPosition(idx)
 
-    def getComponentType(self):
-        if self._componentTypeLen:
-            return self._componentType
-
     @property
     def isValue(self):
         """Indicate if |ASN.1| object components represent ASN.1 type or ASN.1 value.
@@ -2382,11 +2407,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         for idx in range(len(self._componentValues)):
             if self._componentValues[idx] is not None:
                 representation += ' ' * scope
-                componentType = self.getComponentType()
-                if componentType is None:
-                    representation += '<no-name>'
-                else:
-                    representation += componentType.getNameByPosition(idx)
+                representation += self.componentType.getNameByPosition(idx)
                 representation = '%s=%s\n' % (
                     representation, self._componentValues[idx].prettyPrint(scope)
                 )
@@ -2403,9 +2424,14 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             )
         return representation + '\n' + ' ' * (scope - 1) + '}'
 
-    # backward compatibility -- no-op
+    # backward compatibility
+
     def setDefaultComponents(self):
         return self
+
+    def getComponentType(self):
+        if self._componentTypeLen:
+            return self.componentType
 
 
 class Sequence(SequenceAndSetBase):

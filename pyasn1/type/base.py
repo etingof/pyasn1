@@ -436,7 +436,7 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
     #: otherwise subtype relation is only enforced
     strictConstraints = False
 
-    componentType = None
+    componentType = unnamedtype.UnnamedType()
     sizeSpec = None
 
     def __init__(self, componentType=None, tagSet=None,
@@ -444,8 +444,6 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         Asn1ItemBase.__init__(self, tagSet, subtypeSpec)
         if componentType is None:
             componentType = self.componentType
-        if componentType is None or isinstance(componentType, Asn1Item):
-            componentType = unnamedtype.UnnamedType(componentType)
         self._componentType = componentType
         if sizeSpec is None:
             self._sizeSpec = self.sizeSpec
@@ -590,13 +588,6 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
             self[k] = kwargs[k]
         return self
 
-    def getComponentType(self):
-        return self._componentType
-
-    # backward compatibility -- no-op
-    def setDefaultComponents(self):
-        pass
-
     def __getitem__(self, idx):
         return self.getComponentByPosition(idx)
 
@@ -608,3 +599,11 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
 
     def clear(self):
         self._componentValues = []
+
+    # backward compatibility
+
+    def setDefaultComponents(self):
+        pass
+
+    def getComponentType(self):
+        return self.componentType

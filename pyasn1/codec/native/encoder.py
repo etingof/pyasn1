@@ -77,7 +77,7 @@ class SetEncoder(AbstractItemEncoder):
     protoDict = dict
     def encode(self, encodeFun, value):
         value.verifySizeSpec()
-        namedTypes = value.getComponentType()
+        namedTypes = value.componentType
         substrate = self.protoDict()
         for idx, (key, subValue) in enumerate(value.items()):
             if namedTypes[idx].isOptional and not value[idx].isValue:
