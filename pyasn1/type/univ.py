@@ -1803,13 +1803,13 @@ class Enumerated(Integer):
 
 # "Structured" ASN.1 types
 
-class ComponentWrappingMeta(type):
+class MetaSingleComponentWrapping(type):
 
     def __init__(cls, name, bases, dct):
         if not isinstance(cls.componentType, unnamedtype.UnnamedType):
             cls.componentType = unnamedtype.UnnamedType(cls.componentType)
 
-        super(ComponentWrappingMeta, cls).__init__(name, bases, dct)
+        super(MetaSingleComponentWrapping, cls).__init__(name, bases, dct)
 
     def __call__(cls, *args, **kwargs):
         try:
@@ -1823,18 +1823,7 @@ class ComponentWrappingMeta(type):
         return type.__call__(cls, *args, **kwargs)
 
 
-if sys.version_info[0] < 3:
-    class ComponentWrapper(base.AbstractConstructedAsn1Item):
-        __metaclass__ = ComponentWrappingMeta
-
-else:
-    class ComponentWrapper(base.AbstractConstructedAsn1Item):
-# TODO: make this portable
-#                           metaclass=ComponentWrappingMeta):
-        pass
-
-
-class SequenceOfAndSetOfBase(ComponentWrapper):
+class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
     """Create |ASN.1| type.
 
     |ASN.1| objects are mutable and duck-type Python :class:`list` objects.
@@ -2053,6 +2042,15 @@ class SequenceOfAndSetOfBase(ComponentWrapper):
                 return False
 
         return True
+
+# Portable way to involve a metaclass
+__class_body = vars(SequenceOfAndSetOfBase).copy()
+__class_body.pop('__dict__', None)
+__class_body.pop('__weakref__', None)
+
+SequenceOfAndSetOfBase = MetaSingleComponentWrapping(
+    SequenceOfAndSetOfBase.__name__, SequenceOfAndSetOfBase.__bases__, __class_body
+)
 
 
 class SequenceOf(SequenceOfAndSetOfBase):
