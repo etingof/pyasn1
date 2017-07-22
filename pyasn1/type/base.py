@@ -35,18 +35,37 @@ class Asn1ItemBase(Asn1Item):
     typeId = None
 
     def __init__(self, tagSet=None, subtypeSpec=None):
-        self._readOnlyAttrs = set()
         if tagSet is not None:
             self.tagSet = tagSet
         if subtypeSpec is not None:
             self.subtypeSpec = subtypeSpec
-        self._readOnlyAttrs.update(('subtypeSpec', 'tagSet'))
+        self.readOnly = 'subtypeSpec'
+        self.readOnly = 'tagSet'
 
     def __setattr__(self, name, value):
-        if not name.startswith('_') and name in self._readOnlyAttrs:
-            raise error.PyAsn1Error('read-only instance attribute "%s"' % name)
+        if not name.startswith('_'):
+            try:
+                if name in self._readOnly:
+                    raise error.PyAsn1Error('read-only instance attribute "%s"' % name)
+
+            except AttributeError:
+                pass
 
         super(Asn1ItemBase, self).__setattr__(name, value)
+
+    @property
+    def readOnly(self):
+        return self._readOnly
+
+    @readOnly.setter
+    def readOnly(self, value):
+        try:
+            self._readOnly.add(value)
+
+        except AttributeError:
+            self._readOnly = set()
+
+        self._readOnly.add(value)
 
     @property
     def effectiveTagSet(self):
@@ -455,7 +474,8 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         if sizeSpec is not None:
             self.sizeSpec = sizeSpec
         self._componentValues = []
-        self._readOnlyAttrs.update(('componentType', 'sizeSpec'))
+        self.readOnly = 'componentType'
+        self.readOnly = 'sizeSpec'
 
     def __repr__(self):
         representation = []

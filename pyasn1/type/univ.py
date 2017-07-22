@@ -66,17 +66,16 @@ class Integer(base.AbstractSimpleAsn1Item):
 
     def __init__(self, value=noValue, tagSet=None, subtypeSpec=None,
                  namedValues=None):
-        if namedValues is None:
-            self._namedValues = self.namedValues
-        else:
-            self._namedValues = namedValues
+        if namedValues is not None:
+            self.namedValues = namedValues
         base.AbstractSimpleAsn1Item.__init__(
             self, value, tagSet, subtypeSpec
         )
+        self.readOnly = 'namedValues'
 
     def __repr__(self):
-        if self._namedValues is not self.namedValues:
-            return '%s, %r)' % (base.AbstractSimpleAsn1Item.__repr__(self)[:-1], self._namedValues)
+        if self.namedValues is not self.__class__.namedValues:
+            return '%s, %r)' % (base.AbstractSimpleAsn1Item.__repr__(self)[:-1], self.namedValues)
         else:
             return base.AbstractSimpleAsn1Item.__repr__(self)
 
@@ -232,7 +231,7 @@ class Integer(base.AbstractSimpleAsn1Item):
 
         except ValueError:
             try:
-                return self._namedValues[value]
+                return self.namedValues[value]
 
             except KeyError:
                 raise error.PyAsn1Error(
@@ -241,7 +240,7 @@ class Integer(base.AbstractSimpleAsn1Item):
 
     def prettyOut(self, value):
         try:
-            return repr(self._namedValues[value])
+            return repr(self.namedValues[value])
 
         except KeyError:
             return str(value)
@@ -287,7 +286,7 @@ class Integer(base.AbstractSimpleAsn1Item):
         else:
             isModified = True
         if namedValues is None or namedValues is noValue:
-            namedValues = self._namedValues
+            namedValues = self.namedValues
         else:
             isModified = True
 
@@ -353,9 +352,9 @@ class Integer(base.AbstractSimpleAsn1Item):
             subtypeSpec += self.subtypeSpec
             isModified = True
         if namedValues is None or namedValues is noValue:
-            namedValues = self._namedValues
+            namedValues = self.namedValues
         else:
-            namedValues = namedValues + self._namedValues
+            namedValues += self.namedValues
             isModified = True
 
         if isModified:
@@ -468,10 +467,8 @@ class BitString(base.AbstractSimpleAsn1Item):
 
     def __init__(self, value=noValue, tagSet=None, subtypeSpec=None,
                  namedValues=None, binValue=noValue, hexValue=noValue):
-        if namedValues is None:
-            self._namedValues = self.namedValues
-        else:
-            self._namedValues = namedValues
+        if namedValues is not None:
+            self.namedValues = namedValues
         if binValue is not noValue:
             value = self.fromBinaryString(binValue)
         elif hexValue is not noValue:
@@ -482,6 +479,7 @@ class BitString(base.AbstractSimpleAsn1Item):
             elif self.defaultHexValue is not noValue:
                 value = self.fromHexString(self.defaultHexValue)
         base.AbstractSimpleAsn1Item.__init__(self, value, tagSet, subtypeSpec)
+        self._readOnly.add('namedValues')
 
     def clone(self, value=noValue, tagSet=None, subtypeSpec=None,
               namedValues=None, binValue=noValue, hexValue=noValue):
@@ -533,7 +531,7 @@ class BitString(base.AbstractSimpleAsn1Item):
         else:
             isModified = True
         if namedValues is None or namedValues is noValue:
-            namedValues = self._namedValues
+            namedValues = self.namedValues
         else:
             isModified = True
 
@@ -607,9 +605,9 @@ class BitString(base.AbstractSimpleAsn1Item):
             subtypeSpec += self.subtypeSpec
             isModified = True
         if namedValues is None or namedValues is noValue:
-            namedValues = self._namedValues
+            namedValues = self.namedValues
         else:
-            namedValues += self._namedValues
+            namedValues += self.namedValues
             isModified = True
 
         if isModified:
@@ -766,12 +764,12 @@ class BitString(base.AbstractSimpleAsn1Item):
                         'Bad BIT STRING value notation %s' % (value,)
                     )
 
-            elif self._namedValues and not value.isdigit():  # named bits like 'Urgent, Active'
+            elif self.namedValues and not value.isdigit():  # named bits like 'Urgent, Active'
                 names = [x.strip() for x in value.split(',')]
 
                 try:
 
-                    bitPositions = [self._namedValues[name] for name in names]
+                    bitPositions = [self.namedValues[name] for name in names]
 
                 except KeyError:
                     raise error.PyAsn1Error('unknown bit name(s) in %r' % (names,))

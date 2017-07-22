@@ -122,26 +122,6 @@ class NamedValues(object):
     def __hash__(self):
         return hash(self.items())
 
-    # descriptor protocol
-
-    def __get__(self, instance, owner):
-        if instance is None:
-            return self
-
-        # This is a bit of hack: look up instance attribute first,
-        # then try class attribute if instance attribute with that
-        # name is not available.
-        # The rationale is to have `.namedValues` readable-writeable
-        # as a class attribute and read-only as instance attribute.
-        try:
-            return instance._namedValues
-
-        except AttributeError:
-            return self
-
-    def __set__(self, instance, value):
-        raise AttributeError('attribute is read-only')
-
     # Python dict protocol (read-only)
 
     def __getitem__(self, key):
