@@ -6,6 +6,7 @@
 #
 import datetime
 from pyasn1.type import univ, char, tag
+from pyasn1.compat import string, dateandtime
 from pyasn1 import error
 
 __all__ = ['ObjectDescriptor', 'GeneralizedTime', 'UTCTime']
@@ -57,16 +58,16 @@ class TimeMixIn(object):
         :
             new instance of :py:class:`datetime.datetime` object            
         """
-        string = str(self)
-        if string.endswith('Z'):
+        text = str(self)
+        if text.endswith('Z'):
             tzinfo = TimeMixIn.UTC
-            string = string[:-1]
+            text = text[:-1]
 
-        elif '-' in string or '+' in string:
-            if '+' in string:
-                string, plusminus, tz = string.partition('+')
+        elif '-' in text or '+' in text:
+            if '+' in text:
+                text, plusminus, tz = string.partition(text, '+')
             else:
-                string, plusminus, tz = string.partition('-')
+                text, plusminus, tz = string.partition(text, '-')
 
             if self._shortTZ and len(tz) == 2:
                 tz += '00'
@@ -87,11 +88,11 @@ class TimeMixIn(object):
         else:
             tzinfo = None
 
-        if '.' in string or ',' in string:
-            if '.' in string:
-                string, _, ms = string.partition('.')
+        if '.' in text or ',' in text:
+            if '.' in text:
+                text, _, ms = string.partition(text, '.')
             else:
-                string, _, ms = string.partition(',')
+                text, _, ms = string.partition(text, ',')
 
             try:
                 ms = int(ms) * 10000
@@ -102,13 +103,13 @@ class TimeMixIn(object):
         else:
             ms = 0
 
-        if self._optionalMinutes and len(string) - self._yearsDigits == 6:
-            string += '0000'
-        elif len(string) - self._yearsDigits == 8:
-            string += '00'
+        if self._optionalMinutes and len(text) - self._yearsDigits == 6:
+            text += '0000'
+        elif len(text) - self._yearsDigits == 8:
+            text += '00'
 
         try:
-            dt = datetime.datetime.strptime(string, self._yearsDigits == 4 and '%Y%m%d%H%M%S' or '%y%m%d%H%M%S')
+            dt = dateandtime.strptime(text, self._yearsDigits == 4 and '%Y%m%d%H%M%S' or '%y%m%d%H%M%S')
 
         except ValueError:
             raise error.PyAsn1Error('malformed datetime format %s' % self)
@@ -130,21 +131,21 @@ class TimeMixIn(object):
         :
             new instance of |ASN.1| value
         """
-        string = dt.strftime(cls._yearsDigits == 4 and '%Y%m%d%H%M%S' or '%y%m%d%H%M%S')
+        text = dt.strftime(cls._yearsDigits == 4 and '%Y%m%d%H%M%S' or '%y%m%d%H%M%S')
         if cls._hasSubsecond:
-            string += '.%d' % (dt.microsecond // 10000)
+            text += '.%d' % (dt.microsecond // 10000)
 
         if dt.utcoffset():
             seconds = dt.utcoffset().seconds
             if seconds < 0:
-                string += '-'
+                text += '-'
             else:
-                string += '+'
-            string += '%.2d%.2d' % (seconds // 3600, seconds % 3600)
+                text += '+'
+            text += '%.2d%.2d' % (seconds // 3600, seconds % 3600)
         else:
-            string += 'Z'
+            text += 'Z'
 
-        return cls(string)
+        return cls(text)
 
 
 class GeneralizedTime(char.VisibleString, TimeMixIn):
