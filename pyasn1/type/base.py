@@ -6,6 +6,7 @@
 #
 import sys
 from pyasn1.type import constraint, tagmap, tag, unnamedtype
+from pyasn1.compat import calling
 from pyasn1 import error
 
 __all__ = ['Asn1Item', 'Asn1ItemBase', 'AbstractSimpleAsn1Item', 'AbstractConstructedAsn1Item']
@@ -162,7 +163,10 @@ class NoValue(object):
             op_names = [name
                         for typ in (str, int, list, dict)
                         for name in dir(typ)
-                        if name not in cls.skipMethods and name.startswith('__') and name.endswith('__') and callable(getattr(typ, name))]
+                        if (name not in cls.skipMethods and
+                            name.startswith('__') and
+                            name.endswith('__') and
+                            calling.callable(getattr(typ, name)))]
 
             for name in set(op_names):
                 setattr(cls, name, getPlug(name))
