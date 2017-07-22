@@ -279,7 +279,7 @@ class Integer(base.AbstractSimpleAsn1Item):
         else:
             isModified = True
         if tagSet is None or tagSet is noValue:
-            tagSet = self._tagSet
+            tagSet = self.tagSet
         else:
             isModified = True
         if subtypeSpec is None or subtypeSpec is noValue:
@@ -340,13 +340,13 @@ class Integer(base.AbstractSimpleAsn1Item):
         else:
             isModified = True
         if implicitTag is not None and implicitTag is not noValue:
-            tagSet = self._tagSet.tagImplicitly(implicitTag)
+            tagSet = self.tagSet.tagImplicitly(implicitTag)
             isModified = True
         elif explicitTag is not None and explicitTag is not noValue:
-            tagSet = self._tagSet.tagExplicitly(explicitTag)
+            tagSet = self.tagSet.tagExplicitly(explicitTag)
             isModified = True
         else:
-            tagSet = self._tagSet
+            tagSet = self.tagSet
         if subtypeSpec is None or subtypeSpec is noValue:
             subtypeSpec = self.subtypeSpec
         else:
@@ -525,7 +525,7 @@ class BitString(base.AbstractSimpleAsn1Item):
         else:
             isModified = True
         if tagSet is None or tagSet is noValue:
-            tagSet = self._tagSet
+            tagSet = self.tagSet
         else:
             isModified = True
         if subtypeSpec is None or subtypeSpec is noValue:
@@ -594,13 +594,13 @@ class BitString(base.AbstractSimpleAsn1Item):
         else:
             isModified = True
         if implicitTag is not None and implicitTag is not noValue:
-            tagSet = self._tagSet.tagImplicitly(implicitTag)
+            tagSet = self.tagSet.tagImplicitly(implicitTag)
             isModified = True
         elif explicitTag is not None and explicitTag is not noValue:
-            tagSet = self._tagSet.tagExplicitly(explicitTag)
+            tagSet = self.tagSet.tagExplicitly(explicitTag)
             isModified = True
         else:
-            tagSet = self._tagSet
+            tagSet = self.tagSet
         if subtypeSpec is None or subtypeSpec is noValue:
             subtypeSpec = self.subtypeSpec
         else:
@@ -939,7 +939,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
         else:
             isModified = True
         if tagSet is None or tagSet is noValue:
-            tagSet = self._tagSet
+            tagSet = self.tagSet
         else:
             isModified = True
         if subtypeSpec is None or subtypeSpec is noValue:
@@ -1007,13 +1007,13 @@ class OctetString(base.AbstractSimpleAsn1Item):
         else:
             isModified = True
         if implicitTag is not None and implicitTag is not noValue:
-            tagSet = self._tagSet.tagImplicitly(implicitTag)
+            tagSet = self.tagSet.tagImplicitly(implicitTag)
             isModified = True
         elif explicitTag is not None and explicitTag is not noValue:
-            tagSet = self._tagSet.tagExplicitly(explicitTag)
+            tagSet = self.tagSet.tagExplicitly(explicitTag)
             isModified = True
         else:
-            tagSet = self._tagSet
+            tagSet = self.tagSet
         if subtypeSpec is None or subtypeSpec is noValue:
             subtypeSpec = self.subtypeSpec
         else:
@@ -1177,8 +1177,8 @@ class OctetString(base.AbstractSimpleAsn1Item):
                     break
             if not doHex:
                 r.append('%r' % (self._value,))
-        if self._tagSet is not self.__class__.tagSet:
-            r.append('tagSet=%r' % (self._tagSet,))
+        if self.tagSet is not self.__class__.tagSet:
+            r.append('tagSet=%r' % (self.tagSet,))
         if self.subtypeSpec is not self.__class__.subtypeSpec:
             r.append('subtypeSpec=%r' % (self.subtypeSpec,))
         if self.encoding is not self._encoding:
@@ -2715,16 +2715,16 @@ class Choice(Set):
 
     @property
     def minTagSet(self):
-        if self._tagSet:
-            return self._tagSet
+        if self.tagSet:
+            return self.tagSet
         else:
             return self.componentType.minTagSet
 
     @property
     def effectiveTagSet(self):
         """Return a :class:`~pyasn1.type.tag.TagSet` object of the currently initialized component or self (if |ASN.1| is tagged)."""
-        if self._tagSet:
-            return self._tagSet
+        if self.tagSet:
+            return self.tagSet
         else:
             component = self.getComponent()
             return component.effectiveTagSet
@@ -2734,7 +2734,7 @@ class Choice(Set):
         """"Return a :class:`~pyasn1.type.tagmap.TagMap` object mapping
             ASN.1 tags to ASN.1 objects contained within callee.
         """
-        if self._tagSet:
+        if self.tagSet:
             return Set.tagMap.fget(self)
         else:
             return self.componentType.tagMapUnique

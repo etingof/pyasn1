@@ -36,13 +36,11 @@ class Asn1ItemBase(Asn1Item):
 
     def __init__(self, tagSet=None, subtypeSpec=None):
         self._readOnlyAttrs = set()
-        if tagSet is None:
-            self._tagSet = self.__class__.tagSet
-        else:
-            self._tagSet = tagSet
+        if tagSet is not None:
+            self.tagSet = tagSet
         if subtypeSpec is not None:
             self.subtypeSpec = subtypeSpec
-        self._readOnlyAttrs.add('subtypeSpec')
+        self._readOnlyAttrs.update(('subtypeSpec', 'tagSet'))
 
     def __setattr__(self, name, value):
         if not name.startswith('_') and name in self._readOnlyAttrs:
@@ -54,7 +52,7 @@ class Asn1ItemBase(Asn1Item):
     def effectiveTagSet(self):
         """For |ASN.1| type is equivalent to *tagSet*
         """
-        return self._tagSet  # used by untagged types
+        return self.tagSet  # used by untagged types
 
     @property
     def tagMap(self):
@@ -64,7 +62,7 @@ class Asn1ItemBase(Asn1Item):
             return self._tagMap
 
         except AttributeError:
-            self._tagMap = tagmap.TagMap({self._tagSet: self})
+            self._tagMap = tagmap.TagMap({self.tagSet: self})
             return self._tagMap
 
     def isSameTypeWith(self, other, matchTags=True, matchConstraints=True):
@@ -89,7 +87,7 @@ class Asn1ItemBase(Asn1Item):
         """
         return self is other or \
             (not matchTags or
-             self._tagSet == other.tagSet) and \
+             self.tagSet == other.tagSet) and \
             (not matchConstraints or
              self.subtypeSpec == other.subtypeSpec)
 
@@ -115,7 +113,7 @@ class Asn1ItemBase(Asn1Item):
                 :class:`False` otherwise.
         """
         return (not matchTags or
-                self._tagSet.isSuperTagSetOf(other.tagSet)) and \
+                self.tagSet.isSuperTagSetOf(other.tagSet)) and \
                (not matchConstraints or
                 (self.subtypeSpec.isSuperTypeOf(other.subtypeSpec)))
 
@@ -218,8 +216,8 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         representation = []
         if self._value is not self.defaultValue:
             representation.append(self.prettyOut(self._value))
-        if self._tagSet is not self.__class__.tagSet:
-            representation.append('tagSet=%r' % (self._tagSet,))
+        if self.tagSet is not self.__class__.tagSet:
+            representation.append('tagSet=%r' % (self.tagSet,))
         if self.subtypeSpec is not self.__class__.subtypeSpec:
             representation.append('subtypeSpec=%r' % (self.subtypeSpec,))
         return '%s(%s)' % (self.__class__.__name__, ', '.join(representation))
@@ -307,7 +305,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         else:
             isModified = True
         if tagSet is None or tagSet is noValue:
-            tagSet = self._tagSet
+            tagSet = self.tagSet
         else:
             isModified = True
         if subtypeSpec is None or subtypeSpec is noValue:
@@ -359,13 +357,13 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         else:
             isModified = True
         if implicitTag is not None and implicitTag is not noValue:
-            tagSet = self._tagSet.tagImplicitly(implicitTag)
+            tagSet = self.tagSet.tagImplicitly(implicitTag)
             isModified = True
         elif explicitTag is not None and explicitTag is not noValue:
-            tagSet = self._tagSet.tagExplicitly(explicitTag)
+            tagSet = self.tagSet.tagExplicitly(explicitTag)
             isModified = True
         else:
-            tagSet = self._tagSet
+            tagSet = self.tagSet
         if subtypeSpec is None or subtypeSpec is noValue:
             subtypeSpec = self.subtypeSpec
         else:
@@ -464,7 +462,7 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         if self.componentType is not self.__class__.componentType:
             representation.append('componentType=%r' % (self.componentType,))
         if self.tagSet is not self.__class__.tagSet:
-            representation.append('tagSet=%r' % (self._tagSet,))
+            representation.append('tagSet=%r' % (self.tagSet,))
         if self.subtypeSpec is not self.__class__.subtypeSpec:
             representation.append('subtypeSpec=%r' % (self.subtypeSpec,))
         representation = '%s(%s)' % (self.__class__.__name__, ', '.join(representation))
@@ -527,7 +525,7 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
 
         """
         if tagSet is None:
-            tagSet = self._tagSet
+            tagSet = self.tagSet
         if subtypeSpec is None:
             subtypeSpec = self.subtypeSpec
         if sizeSpec is None:
@@ -562,11 +560,11 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
 
         """
         if implicitTag is not None and implicitTag is not noValue:
-            tagSet = self._tagSet.tagImplicitly(implicitTag)
+            tagSet = self.tagSet.tagImplicitly(implicitTag)
         elif explicitTag is not None and explicitTag is not noValue:
-            tagSet = self._tagSet.tagExplicitly(explicitTag)
+            tagSet = self.tagSet.tagExplicitly(explicitTag)
         else:
-            tagSet = self._tagSet
+            tagSet = self.tagSet
         if subtypeSpec is None or subtypeSpec is noValue:
             subtypeSpec = self.subtypeSpec
         else:
