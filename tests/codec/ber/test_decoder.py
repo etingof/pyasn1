@@ -484,10 +484,12 @@ class UTF8StringDecoderTestCase(unittest.TestCase):
 
 class SequenceDecoderTestCase(unittest.TestCase):
     def setUp(self):
-        self.s = univ.Sequence(componentType=namedtype.NamedTypes(
-            namedtype.NamedType('place-holder', univ.Null(null)),
-            namedtype.NamedType('first-name', univ.OctetString(null)),
-            namedtype.NamedType('age', univ.Integer(33)))
+        self.s = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType('place-holder', univ.Null(null)),
+                namedtype.NamedType('first-name', univ.OctetString(null)),
+                namedtype.NamedType('age', univ.Integer(33))
+            )
         )
         self.s.setComponentByPosition(0, univ.Null(null))
         self.s.setComponentByPosition(1, univ.OctetString('quick brown'))
@@ -543,11 +545,13 @@ class SequenceDecoderTestCase(unittest.TestCase):
 
 class GuidedSequenceDecoderTestCase(unittest.TestCase):
     def setUp(self):
-        self.s = univ.Sequence(componentType=namedtype.NamedTypes(
-            namedtype.NamedType('place-holder', univ.Null(null)),
-            namedtype.OptionalNamedType('first-name', univ.OctetString(null)),
-            namedtype.DefaultedNamedType('age', univ.Integer(33)),
-        ))
+        self.s = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType('place-holder', univ.Null(null)),
+                namedtype.OptionalNamedType('first-name', univ.OctetString()),
+                namedtype.DefaultedNamedType('age', univ.Integer(33)),
+            )
+        )
 
     def __init(self):
         self.s.clear()
@@ -677,11 +681,13 @@ class GuidedSequenceDecoderTestCase(unittest.TestCase):
 
 class ChoiceDecoderTestCase(unittest.TestCase):
     def setUp(self):
-        self.s = univ.Choice(componentType=namedtype.NamedTypes(
-            namedtype.NamedType('place-holder', univ.Null(null)),
-            namedtype.NamedType('number', univ.Integer(0)),
-            namedtype.NamedType('string', univ.OctetString())
-        ))
+        self.s = univ.Choice(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType('place-holder', univ.Null(null)),
+                namedtype.NamedType('number', univ.Integer(0)),
+                namedtype.NamedType('string', univ.OctetString())
+            )
+        )
 
     def testBySpec(self):
         self.s.setComponentByPosition(0, univ.Null(null))
