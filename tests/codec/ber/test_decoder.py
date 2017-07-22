@@ -482,6 +482,32 @@ class UTF8StringDecoderTestCase(unittest.TestCase):
         assert decoder.decode(ints2octs((12, 3, 97, 98, 99))) == (char.UTF8String(sys.version_info[0] == 3 and 'abc' or unicode('abc')), null)
 
 
+class SequenceOfDecoderTestCase(unittest.TestCase):
+    def setUp(self):
+        self.s = univ.SequenceOf(componentType=univ.OctetString())
+        self.s.setComponentByPosition(0, univ.OctetString('quick brown'))
+
+    def testDefMode(self):
+        assert decoder.decode(
+            ints2octs((48, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110))
+        ) == (self.s, null)
+
+    def testIndefMode(self):
+        assert decoder.decode(
+            ints2octs((48, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0))
+        ) == (self.s, null)
+
+    def testDefModeChunked(self):
+        assert decoder.decode(
+            ints2octs((48, 19, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110))
+        ) == (self.s, null)
+
+    def testIndefModeChunked(self):
+        assert decoder.decode(
+            ints2octs((48, 128, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 0, 0))
+        ) == (self.s, null)
+
+
 class SequenceDecoderTestCase(unittest.TestCase):
     def setUp(self):
         self.s = univ.Sequence(
