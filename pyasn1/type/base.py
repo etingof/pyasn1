@@ -55,7 +55,13 @@ class Asn1ItemBase(Asn1Item):
 
     @property
     def readOnly(self):
-        return self._readOnly
+        try:
+            return self._readOnly
+
+        except AttributeError:
+            self._readOnly = set()
+
+        return frozenset(self._readOnly)
 
     @readOnly.setter
     def readOnly(self, value):
