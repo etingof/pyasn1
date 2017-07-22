@@ -5,7 +5,7 @@
 # License: http://pyasn1.sf.net/license.html
 #
 import sys
-from pyasn1.type import constraint, tagmap, tag, unnamedtype
+from pyasn1.type import constraint, tagmap, tag
 from pyasn1.compat import calling
 from pyasn1 import error
 
@@ -35,6 +35,7 @@ class Asn1ItemBase(Asn1Item):
     typeId = None
 
     def __init__(self, tagSet=None, subtypeSpec=None):
+        self._readOnlyAttrs = set()
         if tagSet is None:
             self._tagSet = self.__class__.tagSet
         else:
@@ -43,6 +44,12 @@ class Asn1ItemBase(Asn1Item):
             self._subtypeSpec = self.__class__.subtypeSpec
         else:
             self._subtypeSpec = subtypeSpec
+
+    def __setattr__(self, name, value):
+        if not name.startswith('_') and name in self._readOnlyAttrs:
+            raise error.PyAsn1Error('read-only instance attribute "%s"' % name)
+
+        super(Asn1ItemBase, self).__setattr__(name, value)
 
     @property
     def effectiveTagSet(self):
@@ -440,25 +447,25 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
     #: otherwise subtype relation is only enforced
     strictConstraints = False
 
-    componentType = unnamedtype.UnnamedType()
+    componentType = None
     sizeSpec = None
 
     def __init__(self, componentType=None, tagSet=None,
                  subtypeSpec=None, sizeSpec=None):
         Asn1ItemBase.__init__(self, tagSet, subtypeSpec)
-        if componentType is None:
-            componentType = self.componentType
-        self._componentType = componentType
+        if componentType is not None:
+            self.componentType = componentType
         if sizeSpec is None:
             self._sizeSpec = self.sizeSpec
         else:
             self._sizeSpec = sizeSpec
         self._componentValues = []
+        self._readOnlyAttrs.add('componentType')
 
     def __repr__(self):
         representation = []
         if self.componentType is not self.__class__.componentType:
-            representation.append('componentType=%r' % (self._componentType,))
+            representation.append('componentType=%r' % (self.componentType,))
         if self.tagSet is not self.__class__.tagSet:
             representation.append('tagSet=%r' % (self._tagSet,))
         if self.subtypeSpec is not self.__class__.subtypeSpec:
@@ -528,7 +535,7 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
             subtypeSpec = self._subtypeSpec
         if sizeSpec is None:
             sizeSpec = self._sizeSpec
-        clone = self.__class__(self._componentType, tagSet, subtypeSpec, sizeSpec)
+        clone = self.__class__(self.componentType, tagSet, subtypeSpec, sizeSpec)
         if cloneValueFlag:
             self._cloneComponentValues(clone, cloneValueFlag)
         return clone
@@ -571,7 +578,7 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
             sizeSpec = self._sizeSpec
         else:
             sizeSpec += self._sizeSpec
-        clone = self.__class__(self._componentType, tagSet, subtypeSpec, sizeSpec)
+        clone = self.__class__(self.componentType, tagSet, subtypeSpec, sizeSpec)
         if cloneValueFlag:
             self._cloneComponentValues(clone, cloneValueFlag)
         return clone

@@ -10,7 +10,7 @@ Revision 0.3.1, released XX-07-2017
 - The __getitem__() implementation of some ASN.1 types & tag object
   refactored for better performance
 - BER/CER/DER value encoders refactored to produce either tuple of
-  bytes or octetstream depending on what is more optimal
+  bytes or octet-stream depending on what is more optimal
 - Reduced the frequency of expensive isinstance() calls
 - Tag-related classes optimized, refactored into properties and
   documented.
@@ -19,7 +19,7 @@ Revision 0.3.1, released XX-07-2017
   WARNING: this change introduces a deviation from original API.
 - NamedType family of classes overhauled, optimized and documented.
 - The `componentType` attribute of constructed ASN.1 types turned
-  into Python property.
+  read-only on instances.
 - Sequence/Set DER/CER/DER decoder optimized to skip the case of
   reordered components handling when not necessary.
 - Tags and constraints-related getter methods refactored into descriptors/properties.
