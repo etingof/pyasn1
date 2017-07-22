@@ -6,7 +6,7 @@
 #
 import sys
 import math
-from pyasn1.type import univ, tag, constraint, namedtype, unnamedtype, namedval, error
+from pyasn1.type import univ, tag, constraint, namedtype, namedval, error
 from pyasn1.compat.octets import str2octs, ints2octs, octs2ints
 from pyasn1.error import PyAsn1Error
 
@@ -770,8 +770,7 @@ class SequenceOf(unittest.TestCase):
 
     def testRepr(self):
         assert eval(repr(self.s1.clone().setComponents('a', 'b')),
-                    {'UnnamedType': unnamedtype.UnnamedType,
-                     'SequenceOf': univ.SequenceOf,
+                    {'SequenceOf': univ.SequenceOf,
                      'OctetString': univ.OctetString}) == self.s1.clone().setComponents(
             'a', 'b'), 'repr() fails'
 
@@ -861,7 +860,7 @@ class SequenceOf(unittest.TestCase):
             assert 0, 'size spec fails'
 
     def testGetComponentTagMap(self):
-        assert self.s1.componentType.asn1Object.tagMap.presentTypes == {
+        assert self.s1.componentType.tagMap.presentTypes == {
             univ.OctetString.tagSet: univ.OctetString('')
         }
 

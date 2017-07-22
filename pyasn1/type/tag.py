@@ -226,26 +226,6 @@ class TagSet(object):
     def __len__(self):
         return self.__lenOfSuperTags
 
-    # descriptor protocol
-
-    def __get__(self, instance, owner):
-        if instance is None:
-            return self
-
-        # This is a bit of hack: look up instance attribute first,
-        # then try class attribute if instance attribute with that
-        # name is not available.
-        # The rationale is to have `.tagSet` readable-writeable
-        # as a class attribute and read-only as instance attribute.
-        try:
-            return instance._tagSet
-
-        except AttributeError:
-            return self
-
-    def __set__(self, instance, value):
-        raise AttributeError('attribute is read-only')
-
     @property
     def baseTag(self):
         """Return base ASN.1 tag

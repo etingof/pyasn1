@@ -6,7 +6,7 @@
 #
 import sys
 import math
-from pyasn1.type import base, tag, constraint, namedtype, unnamedtype, namedval, tagmap
+from pyasn1.type import base, tag, constraint, namedtype, namedval, tagmap
 from pyasn1.codec.ber import eoo
 from pyasn1.compat import octets, integer, binary
 from pyasn1 import error
@@ -66,17 +66,16 @@ class Integer(base.AbstractSimpleAsn1Item):
 
     def __init__(self, value=noValue, tagSet=None, subtypeSpec=None,
                  namedValues=None):
-        if namedValues is None:
-            self._namedValues = self.namedValues
-        else:
-            self._namedValues = namedValues
+        if namedValues is not None:
+            self.namedValues = namedValues
         base.AbstractSimpleAsn1Item.__init__(
             self, value, tagSet, subtypeSpec
         )
+        self.readOnly = 'namedValues'
 
     def __repr__(self):
-        if self._namedValues is not self.namedValues:
-            return '%s, %r)' % (base.AbstractSimpleAsn1Item.__repr__(self)[:-1], self._namedValues)
+        if self.namedValues is not self.__class__.namedValues:
+            return '%s, %r)' % (base.AbstractSimpleAsn1Item.__repr__(self)[:-1], self.namedValues)
         else:
             return base.AbstractSimpleAsn1Item.__repr__(self)
 
@@ -232,7 +231,7 @@ class Integer(base.AbstractSimpleAsn1Item):
 
         except ValueError:
             try:
-                return self._namedValues[value]
+                return self.namedValues[value]
 
             except KeyError:
                 raise error.PyAsn1Error(
@@ -241,7 +240,7 @@ class Integer(base.AbstractSimpleAsn1Item):
 
     def prettyOut(self, value):
         try:
-            return repr(self._namedValues[value])
+            return repr(self.namedValues[value])
 
         except KeyError:
             return str(value)
@@ -279,15 +278,15 @@ class Integer(base.AbstractSimpleAsn1Item):
         else:
             isModified = True
         if tagSet is None or tagSet is noValue:
-            tagSet = self._tagSet
+            tagSet = self.tagSet
         else:
             isModified = True
         if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self._subtypeSpec
+            subtypeSpec = self.subtypeSpec
         else:
             isModified = True
         if namedValues is None or namedValues is noValue:
-            namedValues = self._namedValues
+            namedValues = self.namedValues
         else:
             isModified = True
 
@@ -340,22 +339,22 @@ class Integer(base.AbstractSimpleAsn1Item):
         else:
             isModified = True
         if implicitTag is not None and implicitTag is not noValue:
-            tagSet = self._tagSet.tagImplicitly(implicitTag)
+            tagSet = self.tagSet.tagImplicitly(implicitTag)
             isModified = True
         elif explicitTag is not None and explicitTag is not noValue:
-            tagSet = self._tagSet.tagExplicitly(explicitTag)
+            tagSet = self.tagSet.tagExplicitly(explicitTag)
             isModified = True
         else:
-            tagSet = self._tagSet
+            tagSet = self.tagSet
         if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self._subtypeSpec
+            subtypeSpec = self.subtypeSpec
         else:
-            subtypeSpec = self._subtypeSpec + subtypeSpec
+            subtypeSpec += self.subtypeSpec
             isModified = True
         if namedValues is None or namedValues is noValue:
-            namedValues = self._namedValues
+            namedValues = self.namedValues
         else:
-            namedValues = namedValues + self._namedValues
+            namedValues += self.namedValues
             isModified = True
 
         if isModified:
@@ -468,10 +467,8 @@ class BitString(base.AbstractSimpleAsn1Item):
 
     def __init__(self, value=noValue, tagSet=None, subtypeSpec=None,
                  namedValues=None, binValue=noValue, hexValue=noValue):
-        if namedValues is None:
-            self._namedValues = self.namedValues
-        else:
-            self._namedValues = namedValues
+        if namedValues is not None:
+            self.namedValues = namedValues
         if binValue is not noValue:
             value = self.fromBinaryString(binValue)
         elif hexValue is not noValue:
@@ -482,6 +479,7 @@ class BitString(base.AbstractSimpleAsn1Item):
             elif self.defaultHexValue is not noValue:
                 value = self.fromHexString(self.defaultHexValue)
         base.AbstractSimpleAsn1Item.__init__(self, value, tagSet, subtypeSpec)
+        self._readOnly.add('namedValues')
 
     def clone(self, value=noValue, tagSet=None, subtypeSpec=None,
               namedValues=None, binValue=noValue, hexValue=noValue):
@@ -525,15 +523,15 @@ class BitString(base.AbstractSimpleAsn1Item):
         else:
             isModified = True
         if tagSet is None or tagSet is noValue:
-            tagSet = self._tagSet
+            tagSet = self.tagSet
         else:
             isModified = True
         if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self._subtypeSpec
+            subtypeSpec = self.subtypeSpec
         else:
             isModified = True
         if namedValues is None or namedValues is noValue:
-            namedValues = self._namedValues
+            namedValues = self.namedValues
         else:
             isModified = True
 
@@ -594,22 +592,22 @@ class BitString(base.AbstractSimpleAsn1Item):
         else:
             isModified = True
         if implicitTag is not None and implicitTag is not noValue:
-            tagSet = self._tagSet.tagImplicitly(implicitTag)
+            tagSet = self.tagSet.tagImplicitly(implicitTag)
             isModified = True
         elif explicitTag is not None and explicitTag is not noValue:
-            tagSet = self._tagSet.tagExplicitly(explicitTag)
+            tagSet = self.tagSet.tagExplicitly(explicitTag)
             isModified = True
         else:
-            tagSet = self._tagSet
+            tagSet = self.tagSet
         if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self._subtypeSpec
+            subtypeSpec = self.subtypeSpec
         else:
-            subtypeSpec = self._subtypeSpec + subtypeSpec
+            subtypeSpec += self.subtypeSpec
             isModified = True
         if namedValues is None or namedValues is noValue:
-            namedValues = self._namedValues
+            namedValues = self.namedValues
         else:
-            namedValues += self._namedValues
+            namedValues += self.namedValues
             isModified = True
 
         if isModified:
@@ -766,12 +764,12 @@ class BitString(base.AbstractSimpleAsn1Item):
                         'Bad BIT STRING value notation %s' % (value,)
                     )
 
-            elif self._namedValues and not value.isdigit():  # named bits like 'Urgent, Active'
+            elif self.namedValues and not value.isdigit():  # named bits like 'Urgent, Active'
                 names = [x.strip() for x in value.split(',')]
 
                 try:
 
-                    bitPositions = [self._namedValues[name] for name in names]
+                    bitPositions = [self.namedValues[name] for name in names]
 
                 except KeyError:
                     raise error.PyAsn1Error('unknown bit name(s) in %r' % (names,))
@@ -939,11 +937,11 @@ class OctetString(base.AbstractSimpleAsn1Item):
         else:
             isModified = True
         if tagSet is None or tagSet is noValue:
-            tagSet = self._tagSet
+            tagSet = self.tagSet
         else:
             isModified = True
         if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self._subtypeSpec
+            subtypeSpec = self.subtypeSpec
         else:
             isModified = True
         if encoding is None or encoding is noValue:
@@ -1007,17 +1005,17 @@ class OctetString(base.AbstractSimpleAsn1Item):
         else:
             isModified = True
         if implicitTag is not None and implicitTag is not noValue:
-            tagSet = self._tagSet.tagImplicitly(implicitTag)
+            tagSet = self.tagSet.tagImplicitly(implicitTag)
             isModified = True
         elif explicitTag is not None and explicitTag is not noValue:
-            tagSet = self._tagSet.tagExplicitly(explicitTag)
+            tagSet = self.tagSet.tagExplicitly(explicitTag)
             isModified = True
         else:
-            tagSet = self._tagSet
+            tagSet = self.tagSet
         if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self._subtypeSpec
+            subtypeSpec = self.subtypeSpec
         else:
-            subtypeSpec = self._subtypeSpec + subtypeSpec
+            subtypeSpec += self.subtypeSpec
             isModified = True
         if encoding is None or encoding is noValue:
             encoding = self._encoding
@@ -1177,10 +1175,10 @@ class OctetString(base.AbstractSimpleAsn1Item):
                     break
             if not doHex:
                 r.append('%r' % (self._value,))
-        if self._tagSet is not self.__class__.tagSet:
-            r.append('tagSet=%r' % (self._tagSet,))
-        if self._subtypeSpec is not self.subtypeSpec:
-            r.append('subtypeSpec=%r' % (self._subtypeSpec,))
+        if self.tagSet is not self.__class__.tagSet:
+            r.append('tagSet=%r' % (self.tagSet,))
+        if self.subtypeSpec is not self.__class__.subtypeSpec:
+            r.append('subtypeSpec=%r' % (self.subtypeSpec,))
         if self.encoding is not self._encoding:
             r.append('encoding=%r' % (self._encoding,))
         if doHex:
@@ -1803,26 +1801,6 @@ class Enumerated(Integer):
 
 # "Structured" ASN.1 types
 
-class MetaSingleComponentWrapping(type):
-
-    def __init__(cls, name, bases, dct):
-        if not isinstance(cls.componentType, unnamedtype.UnnamedType):
-            cls.componentType = unnamedtype.UnnamedType(cls.componentType)
-
-        super(MetaSingleComponentWrapping, cls).__init__(name, bases, dct)
-
-    def __call__(cls, *args, **kwargs):
-        try:
-            if not isinstance(kwargs['componentType'], unnamedtype.UnnamedType):
-                kwargs['componentType'] = unnamedtype.UnnamedType(
-                    kwargs['componentType']
-                )
-        except KeyError:
-            pass
-
-        return type.__call__(cls, *args, **kwargs)
-
-
 class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
     """Create |ASN.1| type.
 
@@ -1843,7 +1821,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         Object representing collection size constraint
      """
 
-    componentType = unnamedtype.UnnamedType()
+    componentType = None
 
     # Python list protocol
 
@@ -1947,7 +1925,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         IndexError:
             When idx > len(self)
         """
-        componentType = self._componentType.asn1Object
+        componentType = self.componentType
 
         try:
             currentValue = self._componentValues[idx]
@@ -1979,7 +1957,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
 
         if verifyConstraints and value.isValue:
             try:
-                self._subtypeSpec(value, idx)
+                self.subtypeSpec(value, idx)
 
             except error.PyAsn1Error:
                 exType, exValue, exTb = sys.exc_info()
@@ -1994,8 +1972,8 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
 
     @property
     def componentTagMap(self):
-        if self._componentType.asn1Object is not None:
-            return self._componentType.asn1Object.tagMap
+        if self.componentType.asn1Object is not None:
+            return self.componentType.asn1Object.tagMap
 
     def prettyPrint(self, scope=0):
         scope += 1
@@ -2011,9 +1989,9 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
     def prettyPrintType(self, scope=0):
         scope += 1
         representation = '%s -> %s {\n' % (self.tagSet, self.__class__.__name__)
-        if self._componentType.asn1Object is not None:
+        if self.componentType.asn1Object is not None:
             representation += ' ' * scope
-            representation += self._componentType.asn1Object.prettyPrintType(scope)
+            representation += self.componentType.asn1Object.prettyPrintType(scope)
         return representation + '\n' + ' ' * (scope - 1) + '}'
 
 
@@ -2043,15 +2021,6 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
 
         return True
 
-# Portable way to involve a metaclass
-__class_body = vars(SequenceOfAndSetOfBase).copy()
-__class_body.pop('__dict__', None)
-__class_body.pop('__weakref__', None)
-
-SequenceOfAndSetOfBase = MetaSingleComponentWrapping(
-    SequenceOfAndSetOfBase.__name__, SequenceOfAndSetOfBase.__bases__, __class_body
-)
-
 
 class SequenceOf(SequenceOfAndSetOfBase):
     __doc__ = SequenceOfAndSetOfBase.__doc__
@@ -2065,7 +2034,7 @@ class SequenceOf(SequenceOfAndSetOfBase):
 
     #: Default :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
     #: object representing ASN.1 type allowed within |ASN.1| type
-    componentType = unnamedtype.UnnamedType()
+    componentType = None
 
     #: Set (class attribute) or return (class or instance attribute) a
     #: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection` object
@@ -2092,7 +2061,7 @@ class SetOf(SequenceOfAndSetOfBase):
 
     #: Default :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
     #: object representing ASN.1 type allowed within |ASN.1| type
-    componentType = unnamedtype.UnnamedType()
+    componentType = None
 
     #: Set (class attribute) or return (class or instance attribute) a
     #: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection` object
@@ -2132,12 +2101,10 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
     def __init__(self, componentType=None, tagSet=None,
                  subtypeSpec=None, sizeSpec=None):
-        if componentType is None:
-            componentType = self.componentType
         base.AbstractConstructedAsn1Item.__init__(
             self, componentType, tagSet, subtypeSpec, sizeSpec
         )
-        self._componentTypeLen = len(self._componentType)
+        self._componentTypeLen = len(self.componentType)
 
     def __getitem__(self, idx):
         if octets.isStringType(idx):
@@ -2152,10 +2119,10 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             base.AbstractConstructedAsn1Item.__setitem__(self, idx, value)
 
     def __contains__(self, key):
-        return key in self._componentType
+        return key in self.componentType
 
     def __iter__(self):
-        return iter(self._componentType)
+        return iter(self.componentType)
 
     # Python dict protocol
 
@@ -2164,11 +2131,11 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             yield self[idx]
 
     def keys(self):
-        return iter(self._componentType)
+        return iter(self.componentType)
 
     def items(self):
         for idx in range(self._componentTypeLen):
-            yield self._componentType[idx].getName(), self[idx]
+            yield self.componentType[idx].getName(), self[idx]
 
     def update(self, *iterValue, **mappingValue):
         for k, v in iterValue:
@@ -2205,7 +2172,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             Instantiate |ASN.1| component type or return existing component value
         """
         return self.getComponentByPosition(
-            self._componentType.getPositionByName(name)
+            self.componentType.getPositionByName(name)
         )
 
     def setComponentByName(self, name, value=noValue,
@@ -2239,7 +2206,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         self
         """
         return self.setComponentByPosition(
-            self._componentType.getPositionByName(name), value, verifyConstraints, matchTags, matchConstraints
+            self.componentType.getPositionByName(name), value, verifyConstraints, matchTags, matchConstraints
         )
 
     def getComponentByPosition(self, idx):
@@ -2302,7 +2269,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         -------
         self
         """
-        componentType = self._componentType
+        componentType = self.componentType
         componentTypeLen = self._componentTypeLen
 
         try:
@@ -2342,7 +2309,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
         if verifyConstraints and value.isValue:
             try:
-                self._subtypeSpec(value, idx)
+                self.subtypeSpec(value, idx)
 
             except error.PyAsn1Error:
                 exType, exValue, exTb = sys.exc_info()
@@ -2359,7 +2326,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
     def getNameByPosition(self, idx):
         if self._componentTypeLen:
-            return self._componentType.getNameByPosition(idx)
+            return self.componentType.getNameByPosition(idx)
 
     @property
     def isValue(self):
@@ -2378,7 +2345,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             :class:`True` if all |ASN.1| components represent value and type,
             :class:`False` if at least one |ASN.1| component represents just ASN.1 type.
         """
-        componentType = self._componentType
+        componentType = self.componentType
 
         if componentType:
             for idx, subComponentType in enumerate(componentType.namedTypes):
@@ -2420,7 +2387,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             representation += ' ' * scope
             representation += '"%s"' % self.componentType.getNameByPosition(idx)
             representation = '%s = %s\n' % (
-                representation, self._componentType.getTypeByPosition(idx).prettyPrintType(scope)
+                representation, self.componentType.getTypeByPosition(idx).prettyPrintType(scope)
             )
         return representation + '\n' + ' ' * (scope - 1) + '}'
 
@@ -2461,12 +2428,12 @@ class Sequence(SequenceAndSetBase):
     typeId = SequenceAndSetBase.getTypeId()
 
     def getComponentTagMapNearPosition(self, idx):
-        if self._componentType:
-            return self._componentType.getTagMapNearPosition(idx)
+        if self.componentType:
+            return self.componentType.getTagMapNearPosition(idx)
 
     def getComponentPositionNearType(self, tagSet, idx):
-        if self._componentType:
-            return self._componentType.getPositionNearType(tagSet, idx)
+        if self.componentType:
+            return self.componentType.getPositionNearType(tagSet, idx)
         else:
             return idx
 
@@ -2515,7 +2482,7 @@ class Set(SequenceAndSetBase):
             a pyasn1 object
         """
         component = self.getComponentByPosition(
-            self._componentType.getPositionByType(tagSet)
+            self.componentType.getPositionByType(tagSet)
         )
         if innerFlag and isinstance(component, Set):
             # get inner component by inner tagSet
@@ -2557,10 +2524,10 @@ class Set(SequenceAndSetBase):
         -------
         self
         """
-        idx = self._componentType.getPositionByType(tagSet)
+        idx = self.componentType.getPositionByType(tagSet)
 
         if innerFlag:  # set inner component by inner tagSet
-            componentType = self._componentType.getTypeByPosition(idx)
+            componentType = self.componentType.getTypeByPosition(idx)
 
             if componentType.tagSet:
                 return self.setComponentByPosition(
@@ -2578,8 +2545,8 @@ class Set(SequenceAndSetBase):
 
     @property
     def componentTagMap(self):
-        if self._componentType:
-            return self._componentType.tagMapUnique
+        if self.componentType:
+            return self.componentType.tagMapUnique
 
 
 class Choice(Set):
@@ -2653,12 +2620,12 @@ class Choice(Set):
     def __contains__(self, key):
         if self._currentIdx is None:
             return False
-        return key == self._componentType[self._currentIdx].getName()
+        return key == self.componentType[self._currentIdx].getName()
 
     def __iter__(self):
         if self._currentIdx is None:
             raise StopIteration
-        yield self._componentType[self._currentIdx].getName()
+        yield self.componentType[self._currentIdx].getName()
 
     # Python dict protocol
 
@@ -2668,11 +2635,11 @@ class Choice(Set):
 
     def keys(self):
         if self._currentIdx is not None:
-            yield self._componentType[self._currentIdx].getName()
+            yield self.componentType[self._currentIdx].getName()
 
     def items(self):
         if self._currentIdx is not None:
-            yield self._componentType[self._currentIdx].getName(), self[self._currentIdx]
+            yield self.componentType[self._currentIdx].getName(), self[self._currentIdx]
 
     def verifySizeSpec(self):
         if self._currentIdx is None:
@@ -2746,16 +2713,16 @@ class Choice(Set):
 
     @property
     def minTagSet(self):
-        if self._tagSet:
-            return self._tagSet
+        if self.tagSet:
+            return self.tagSet
         else:
-            return self._componentType.minTagSet
+            return self.componentType.minTagSet
 
     @property
     def effectiveTagSet(self):
         """Return a :class:`~pyasn1.type.tag.TagSet` object of the currently initialized component or self (if |ASN.1| is tagged)."""
-        if self._tagSet:
-            return self._tagSet
+        if self.tagSet:
+            return self.tagSet
         else:
             component = self.getComponent()
             return component.effectiveTagSet
@@ -2765,7 +2732,7 @@ class Choice(Set):
         """"Return a :class:`~pyasn1.type.tagmap.TagMap` object mapping
             ASN.1 tags to ASN.1 objects contained within callee.
         """
-        if self._tagSet:
+        if self.tagSet:
             return Set.tagMap.fget(self)
         else:
             return self.componentType.tagMapUnique
@@ -2802,7 +2769,7 @@ class Choice(Set):
                 c = self._componentValues[self._currentIdx]
                 if isinstance(c, Choice):
                     return c.getName(innerFlag)
-            return self._componentType.getNameByPosition(self._currentIdx)
+            return self.componentType.getNameByPosition(self._currentIdx)
 
     @property
     def isValue(self):
