@@ -40,10 +40,9 @@ class Asn1ItemBase(Asn1Item):
             self._tagSet = self.__class__.tagSet
         else:
             self._tagSet = tagSet
-        if subtypeSpec is None:
-            self._subtypeSpec = self.__class__.subtypeSpec
-        else:
-            self._subtypeSpec = subtypeSpec
+        if subtypeSpec is not None:
+            self.subtypeSpec = subtypeSpec
+        self._readOnlyAttrs.add('subtypeSpec')
 
     def __setattr__(self, name, value):
         if not name.startswith('_') and name in self._readOnlyAttrs:
@@ -92,7 +91,7 @@ class Asn1ItemBase(Asn1Item):
             (not matchTags or
              self._tagSet == other.tagSet) and \
             (not matchConstraints or
-             self._subtypeSpec == other.subtypeSpec)
+             self.subtypeSpec == other.subtypeSpec)
 
     def isSuperTypeOf(self, other, matchTags=True, matchConstraints=True):
         """Examine |ASN.1| type for subtype relationship with other ASN.1 type.
@@ -118,7 +117,7 @@ class Asn1ItemBase(Asn1Item):
         return (not matchTags or
                 self._tagSet.isSuperTagSetOf(other.tagSet)) and \
                (not matchConstraints or
-                (self._subtypeSpec.isSuperTypeOf(other.subtypeSpec)))
+                (self.subtypeSpec.isSuperTypeOf(other.subtypeSpec)))
 
     @staticmethod
     def isNoValue(*values):
@@ -205,7 +204,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         else:
             value = self.prettyIn(value)
             try:
-                self._subtypeSpec(value)
+                self.subtypeSpec(value)
 
             except error.PyAsn1Error:
                 exType, exValue, exTb = sys.exc_info()
@@ -221,8 +220,8 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
             representation.append(self.prettyOut(self._value))
         if self._tagSet is not self.__class__.tagSet:
             representation.append('tagSet=%r' % (self._tagSet,))
-        if self._subtypeSpec is not self.subtypeSpec:
-            representation.append('subtypeSpec=%r' % (self._subtypeSpec,))
+        if self.subtypeSpec is not self.__class__.subtypeSpec:
+            representation.append('subtypeSpec=%r' % (self.subtypeSpec,))
         return '%s(%s)' % (self.__class__.__name__, ', '.join(representation))
 
     def __str__(self):
@@ -312,7 +311,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         else:
             isModified = True
         if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self._subtypeSpec
+            subtypeSpec = self.subtypeSpec
         else:
             isModified = True
 
@@ -368,9 +367,9 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         else:
             tagSet = self._tagSet
         if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self._subtypeSpec
+            subtypeSpec = self.subtypeSpec
         else:
-            subtypeSpec = self._subtypeSpec + subtypeSpec
+            subtypeSpec += self.subtypeSpec
             isModified = True
 
         if isModified:
@@ -455,12 +454,10 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         Asn1ItemBase.__init__(self, tagSet, subtypeSpec)
         if componentType is not None:
             self.componentType = componentType
-        if sizeSpec is None:
-            self._sizeSpec = self.sizeSpec
-        else:
-            self._sizeSpec = sizeSpec
+        if sizeSpec is not None:
+            self.sizeSpec = sizeSpec
         self._componentValues = []
-        self._readOnlyAttrs.add('componentType')
+        self._readOnlyAttrs.update(('componentType', 'sizeSpec'))
 
     def __repr__(self):
         representation = []
@@ -469,7 +466,7 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         if self.tagSet is not self.__class__.tagSet:
             representation.append('tagSet=%r' % (self._tagSet,))
         if self.subtypeSpec is not self.__class__.subtypeSpec:
-            representation.append('subtypeSpec=%r' % (self._subtypeSpec,))
+            representation.append('subtypeSpec=%r' % (self.subtypeSpec,))
         representation = '%s(%s)' % (self.__class__.__name__, ', '.join(representation))
         if self._componentValues:
             for idx, component in enumerate(self._componentValues):
@@ -532,9 +529,9 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         if tagSet is None:
             tagSet = self._tagSet
         if subtypeSpec is None:
-            subtypeSpec = self._subtypeSpec
+            subtypeSpec = self.subtypeSpec
         if sizeSpec is None:
-            sizeSpec = self._sizeSpec
+            sizeSpec = self.sizeSpec
         clone = self.__class__(self.componentType, tagSet, subtypeSpec, sizeSpec)
         if cloneValueFlag:
             self._cloneComponentValues(clone, cloneValueFlag)
@@ -571,20 +568,20 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         else:
             tagSet = self._tagSet
         if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self._subtypeSpec
+            subtypeSpec = self.subtypeSpec
         else:
-            subtypeSpec = self._subtypeSpec + subtypeSpec
+            subtypeSpec += self.subtypeSpec
         if sizeSpec is None or sizeSpec is noValue:
-            sizeSpec = self._sizeSpec
+            sizeSpec = self.sizeSpec
         else:
-            sizeSpec += self._sizeSpec
+            sizeSpec += self.sizeSpec
         clone = self.__class__(self.componentType, tagSet, subtypeSpec, sizeSpec)
         if cloneValueFlag:
             self._cloneComponentValues(clone, cloneValueFlag)
         return clone
 
     def verifySizeSpec(self):
-        self._sizeSpec(self)
+        self.sizeSpec(self)
 
     def getComponentByPosition(self, idx):
         raise error.PyAsn1Error('Method not implemented')

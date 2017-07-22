@@ -283,7 +283,7 @@ class Integer(base.AbstractSimpleAsn1Item):
         else:
             isModified = True
         if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self._subtypeSpec
+            subtypeSpec = self.subtypeSpec
         else:
             isModified = True
         if namedValues is None or namedValues is noValue:
@@ -348,9 +348,9 @@ class Integer(base.AbstractSimpleAsn1Item):
         else:
             tagSet = self._tagSet
         if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self._subtypeSpec
+            subtypeSpec = self.subtypeSpec
         else:
-            subtypeSpec = self._subtypeSpec + subtypeSpec
+            subtypeSpec += self.subtypeSpec
             isModified = True
         if namedValues is None or namedValues is noValue:
             namedValues = self._namedValues
@@ -529,7 +529,7 @@ class BitString(base.AbstractSimpleAsn1Item):
         else:
             isModified = True
         if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self._subtypeSpec
+            subtypeSpec = self.subtypeSpec
         else:
             isModified = True
         if namedValues is None or namedValues is noValue:
@@ -602,9 +602,9 @@ class BitString(base.AbstractSimpleAsn1Item):
         else:
             tagSet = self._tagSet
         if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self._subtypeSpec
+            subtypeSpec = self.subtypeSpec
         else:
-            subtypeSpec = self._subtypeSpec + subtypeSpec
+            subtypeSpec += self.subtypeSpec
             isModified = True
         if namedValues is None or namedValues is noValue:
             namedValues = self._namedValues
@@ -943,7 +943,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
         else:
             isModified = True
         if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self._subtypeSpec
+            subtypeSpec = self.subtypeSpec
         else:
             isModified = True
         if encoding is None or encoding is noValue:
@@ -1015,9 +1015,9 @@ class OctetString(base.AbstractSimpleAsn1Item):
         else:
             tagSet = self._tagSet
         if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self._subtypeSpec
+            subtypeSpec = self.subtypeSpec
         else:
-            subtypeSpec = self._subtypeSpec + subtypeSpec
+            subtypeSpec += self.subtypeSpec
             isModified = True
         if encoding is None or encoding is noValue:
             encoding = self._encoding
@@ -1179,8 +1179,8 @@ class OctetString(base.AbstractSimpleAsn1Item):
                 r.append('%r' % (self._value,))
         if self._tagSet is not self.__class__.tagSet:
             r.append('tagSet=%r' % (self._tagSet,))
-        if self._subtypeSpec is not self.subtypeSpec:
-            r.append('subtypeSpec=%r' % (self._subtypeSpec,))
+        if self.subtypeSpec is not self.__class__.subtypeSpec:
+            r.append('subtypeSpec=%r' % (self.subtypeSpec,))
         if self.encoding is not self._encoding:
             r.append('encoding=%r' % (self._encoding,))
         if doHex:
@@ -1959,7 +1959,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
 
         if verifyConstraints and value.isValue:
             try:
-                self._subtypeSpec(value, idx)
+                self.subtypeSpec(value, idx)
 
             except error.PyAsn1Error:
                 exType, exValue, exTb = sys.exc_info()
@@ -2311,7 +2311,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
         if verifyConstraints and value.isValue:
             try:
-                self._subtypeSpec(value, idx)
+                self.subtypeSpec(value, idx)
 
             except error.PyAsn1Error:
                 exType, exValue, exTb = sys.exc_info()

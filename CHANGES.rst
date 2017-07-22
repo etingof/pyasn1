@@ -22,7 +22,8 @@ Revision 0.3.1, released XX-07-2017
   read-only on instances.
 - Sequence/Set DER/CER/DER decoder optimized to skip the case of
   reordered components handling when not necessary.
-- Tags and constraints-related getter methods refactored into descriptors/properties.
+- Tags and constraints-related getter methods refactored into read-only
+  instance attributes.
 - The .hasValue() method refactored into .isValue property. All ASN.1
   objects now support them, not just scalars.
 - The Real.{isInfinity, isPlusInfinity, isMinusInfinity} methods
