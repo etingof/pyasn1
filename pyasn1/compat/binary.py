@@ -10,6 +10,14 @@ if version_info[0:2] < (2, 6):
     def bin(value):
         bitstring = []
 
+        if value > 0:
+            prefix = '0b'
+        elif value < 0:
+            prefix = '-0b'
+            value = abs(value)
+        else:
+            prefix = '0b0'
+
         while value:
             if value & 1 == 1:
                 bitstring.append('1')
@@ -20,6 +28,6 @@ if version_info[0:2] < (2, 6):
 
         bitstring.reverse()
 
-        return '0b' + ''.join(bitstring)
+        return prefix + ''.join(bitstring)
 else:
     bin = bin
