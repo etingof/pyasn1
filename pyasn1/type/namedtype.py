@@ -355,7 +355,7 @@ class NamedTypes(object):
             If given position is out of fields range
         """
         try:
-            return self.__ambigiousTypes[idx].getTagMap()
+            return self.__ambigiousTypes[idx].tagMap
 
         except KeyError:
             raise error.PyAsn1Error('Type position out of range')
@@ -418,39 +418,7 @@ class NamedTypes(object):
                     self.__minTagSet = tagSet
         return self.__minTagSet
 
-    def getTagMap(self, unique=False):
-        """Create a *TagMap* object from tags and types recursively.
-
-        Create a new :class:`~pyasn1.type.tagmap.TagMap` object by
-        combining tags from *TagMap* objects of children types and
-        associating them with their immediate child type.
-
-        Example
-        -------
-
-        .. code-block:: python
-
-            OuterType ::= CHOICE {
-                innerType INTEGER
-            }
-
-        Calling *.getTagMap()* on *OuterType* will yield a map like this:
-
-        .. code-block:: python
-
-            Integer.tagSet -> Choice
-
-        Parameters
-        ----------
-        unique: :py:class:`bool`
-            If `True`, duplicate *TagSet* objects occurring while building
-            new *TagMap* would cause error.
-
-        Returns
-        -------
-        : :class:`~pyasn1.type.tagmap.TagMap`
-            New *TagMap* holding *TagSet* object gathered from childen types.
-        """
+    def __getTagMap(self, unique):
         if unique not in self.__tagMap:
             presentTypes = {}
             skipTypes = {}
@@ -471,6 +439,62 @@ class NamedTypes(object):
             self.__tagMap[unique] = tagmap.TagMap(presentTypes, skipTypes, defaultType)
 
         return self.__tagMap[unique]
+
+    @property
+    def tagMap(self):
+        """Return a *TagMap* object from tags and types recursively.
+
+        Return a :class:`~pyasn1.type.tagmap.TagMap` object by
+        combining tags from *TagMap* objects of children types and
+        associating them with their immediate child type.
+
+        Example
+        -------
+
+        .. code-block:: python
+
+           OuterType ::= CHOICE {
+               innerType INTEGER
+           }
+
+        Calling *.tagMap* on *OuterType* will yield a map like this:
+
+        .. code-block:: python
+
+           Integer.tagSet -> Choice
+        """
+        return self.__getTagMap(unique=False)
+
+    @property
+    def tagMapUnique(self):
+        """Return a *TagMap* object from unique tags and types recursively.
+
+        Return a :class:`~pyasn1.type.tagmap.TagMap` object by
+        combining tags from *TagMap* objects of children types and
+        associating them with their immediate child type.
+
+        Example
+        -------
+
+        .. code-block:: python
+
+           OuterType ::= CHOICE {
+               innerType INTEGER
+           }
+
+        Calling *.tagMapUnique* on *OuterType* will yield a map like this:
+
+        .. code-block:: python
+
+           Integer.tagSet -> Choice
+
+        Note
+        ----
+
+        Duplicate *TagSet* objects found in the tree of children
+        types would cause error.
+        """
+        return self.__getTagMap(unique=True)
 
     @property
     def hasOptionalOrDefault(self):

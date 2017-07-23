@@ -3,6 +3,8 @@ Revision 0.3.1, released XX-07-2017
 -----------------------------------
 
 - ANY DEFINED BY clause support implemented
+- ASN.1 types __init__(), .clone() and .subtype() signatures
+  refactored into keyword arguments to simplify their signatures.
 - ASN.1 types initialization refactored to minimize the use of
   relatively expensive isNoValue() call
 - Lazily pre-populate list of values of Sequence/Set/Choice types
@@ -11,17 +13,24 @@ Revision 0.3.1, released XX-07-2017
 - The __getitem__() implementation of some ASN.1 types & tag object
   refactored for better performance
 - BER/CER/DER value encoders refactored to produce either tuple of
-  bytes or octetstream depending on what is more optimal
+  bytes or octet-stream depending on what is more optimal
 - Reduced the frequency of expensive isinstance() calls
 - Tag-related classes optimized, refactored into properties and
   documented.
-- NamedType family of classes overhauled, optimized and
-  documented.
+- The NamedValues implementation refactored to mimic Python dict, its use
+  in ASN.1 types refactored into properties and better documented.
+  WARNING: this change introduces a deviation from original API.
+- NamedType family of classes overhauled, optimized and documented.
+- The `componentType` attribute of constructed ASN.1 types turned
+  read-only on instances.
 - Sequence/Set DER/CER/DER decoder optimized to skip the case of
   reordered components handling when not necessary.
-- Tags and constraints-related getter methods refactored into descriptors/properties.
+- Tags and constraints-related getter methods refactored into read-only
+  instance attributes.
 - The .hasValue() method refactored into .isValue property. All ASN.1
   objects now support them, not just scalars.
+- The Real.{isInfinity, isPlusInfinity, isMinusInfinity} methods
+  refactored into properties and renamed into IsInf, IsPlusInf and isMinusInf
 - The end-of-octets type refactored to ensure it is a singleton. Codecs
   changed to rely on that for better performance.
 - Codecs lookup made more efficient at BER/CER/DER decoder main loop by

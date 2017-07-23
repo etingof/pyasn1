@@ -88,7 +88,7 @@ class EndOfOctetsEncoder(AbstractItemEncoder):
 class ExplicitlyTaggedItemEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         if isinstance(value, base.AbstractConstructedAsn1Item):
-            value = value.clone(tagSet=value.tagSet[:-1], cloneValueFlag=1)
+            value = value.clone(tagSet=value.tagSet[:-1], cloneValueFlag=True)
         else:
             value = value.clone(tagSet=value.tagSet[:-1])
         return encodeFun(value, defMode, maxChunkSize), True, True
@@ -267,9 +267,9 @@ class RealEncoder(AbstractItemEncoder):
         return sign, m, encbase, e
 
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
-        if value.isPlusInfinity():
+        if value.isPlusInf:
             return (0x40,), False, False
-        if value.isMinusInfinity():
+        if value.isMinusInf:
             return (0x41,), False, False
         m, b, e = value
         if not m:
@@ -339,7 +339,7 @@ class RealEncoder(AbstractItemEncoder):
 class SequenceEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         value.verifySizeSpec()
-        namedTypes = value.getComponentType()
+        namedTypes = value.componentType
         substrate = null
         idx = len(value)
         while idx > 0:

@@ -32,11 +32,11 @@ class AbstractSimpleDecoder(AbstractDecoder):
     def substrateCollector(asn1Object, substrate, length):
             return substrate[:length], substrate[length:]
 
-    def _createComponent(self, asn1Spec, tagSet, value=None):
+    def _createComponent(self, asn1Spec, tagSet, value=base.noValue):
         if tagSet[0].tagFormat not in self.tagFormats:
             raise error.PyAsn1Error('Invalid tag format %s for %s' % (tagSet[0], self.protoComponent.prettyPrintType()))
         if asn1Spec is None:
-            return self.protoComponent.clone(value, tagSet)
+            return self.protoComponent.clone(value, tagSet=tagSet)
         elif value is None:
             return asn1Spec
         else:
@@ -47,11 +47,11 @@ class AbstractConstructedDecoder(AbstractDecoder):
     tagFormats = (tag.tagFormatConstructed,)
 
     # noinspection PyUnusedLocal
-    def _createComponent(self, asn1Spec, tagSet, value=None):
+    def _createComponent(self, asn1Spec, tagSet, value=base.noValue):
         if tagSet[0].tagFormat not in self.tagFormats:
             raise error.PyAsn1Error('Invalid tag format %s for %s' % (tagSet[0], self.protoComponent.prettyPrintType()))
         if asn1Spec is None:
-            return self.protoComponent.clone(tagSet)
+            return self.protoComponent.clone(tagSet=tagSet)
         else:
             return asn1Spec.clone()
 
@@ -107,7 +107,7 @@ class IntegerDecoder(AbstractSimpleDecoder):
 class BooleanDecoder(IntegerDecoder):
     protoComponent = univ.Boolean(0)
 
-    def _createComponent(self, asn1Spec, tagSet, value=None):
+    def _createComponent(self, asn1Spec, tagSet, value=base.noValue):
         return IntegerDecoder._createComponent(self, asn1Spec, tagSet, value and 1 or 0)
 
 
@@ -372,7 +372,7 @@ class SequenceAndSetDecoderBase(AbstractConstructedDecoder):
         if substrateFun:
             return substrateFun(asn1Object, substrate, length)
 
-        namedTypes = asn1Object.getComponentType()
+        namedTypes = asn1Object.componentType
 
         if not self.orderedComponents or not namedTypes or namedTypes.hasOptionalOrDefault:
             seenIndices = set()
@@ -426,7 +426,7 @@ class SequenceAndSetDecoderBase(AbstractConstructedDecoder):
         if substrateFun:
             return substrateFun(asn1Object, substrate, length)
 
-        namedTypes = asn1Object.getComponentType()
+        namedTypes = asn1Object.componentType
 
         if not namedTypes or namedTypes.hasOptionalOrDefault:
             seenIndices = set()
@@ -511,7 +511,7 @@ class SequenceOfDecoder(AbstractConstructedDecoder):
         asn1Object = self._createComponent(asn1Spec, tagSet)
         if substrateFun:
             return substrateFun(asn1Object, substrate, length)
-        asn1Spec = asn1Object.getComponentType()
+        asn1Spec = asn1Object.componentType
         idx = 0
         while head:
             component, head = decodeFun(head, asn1Spec)
@@ -529,7 +529,7 @@ class SequenceOfDecoder(AbstractConstructedDecoder):
         asn1Object = self._createComponent(asn1Spec, tagSet)
         if substrateFun:
             return substrateFun(asn1Object, substrate, length)
-        asn1Spec = asn1Object.getComponentType()
+        asn1Spec = asn1Object.componentType
         idx = 0
         while substrate:
             component, substrate = decodeFun(substrate, asn1Spec, allowEoo=True)
@@ -554,14 +554,13 @@ class SetDecoder(SequenceAndSetDecoderBase):
     orderedComponents = False
 
     def _getComponentTagMap(self, asn1Object, idx):
-        return asn1Object.componentTagMap
+        return asn1Object.componentType.tagMapUnique
 
     def _getComponentPositionByType(self, asn1Object, tagSet, idx):
-        nextIdx = asn1Object.getComponentPositionByType(tagSet)
-        if nextIdx is None:
-            return idx
+        if asn1Object.componentType:
+            return asn1Object.componentType.getPositionByType(tagSet)
         else:
-            return nextIdx
+            return idx
 
 
 class SetOfDecoder(SequenceOfDecoder):
@@ -601,14 +600,14 @@ class ChoiceDecoder(AbstractConstructedDecoder):
         if substrateFun:
             return substrateFun(asn1Object, substrate, length)
         if asn1Object.tagSet == tagSet:  # explicitly tagged Choice
-            component, substrate = decodeFun(substrate, asn1Object.componentTagMap)
+            component, substrate = decodeFun(substrate, asn1Object.componentType.tagMapUnique)
             # eat up EOO marker
             eooMarker, substrate = decodeFun(substrate, allowEoo=True)
             if eooMarker is not eoo.endOfOctets:
                 raise error.PyAsn1Error('No EOO seen before substrate ends')
         else:
             component, substrate = decodeFun(
-                substrate, asn1Object.componentTagMap, tagSet, length, state
+                substrate, asn1Object.componentType.tagMapUnique, tagSet, length, state
             )
         effectiveTagSet = component.effectiveTagSet
         asn1Object.setComponentByType(

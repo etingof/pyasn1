@@ -9,7 +9,7 @@ try:
     import platform
     implementation = platform.python_implementation()
 
-except ImportError:
+except (ImportError, AttributeError):
     implementation = 'CPython'
 
 if sys.version_info[0:2] < (3, 2):

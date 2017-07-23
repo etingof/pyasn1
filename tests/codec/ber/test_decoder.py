@@ -482,12 +482,40 @@ class UTF8StringDecoderTestCase(unittest.TestCase):
         assert decoder.decode(ints2octs((12, 3, 97, 98, 99))) == (char.UTF8String(sys.version_info[0] == 3 and 'abc' or unicode('abc')), null)
 
 
+class SequenceOfDecoderTestCase(unittest.TestCase):
+    def setUp(self):
+        self.s = univ.SequenceOf(componentType=univ.OctetString())
+        self.s.setComponentByPosition(0, univ.OctetString('quick brown'))
+
+    def testDefMode(self):
+        assert decoder.decode(
+            ints2octs((48, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110))
+        ) == (self.s, null)
+
+    def testIndefMode(self):
+        assert decoder.decode(
+            ints2octs((48, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0))
+        ) == (self.s, null)
+
+    def testDefModeChunked(self):
+        assert decoder.decode(
+            ints2octs((48, 19, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110))
+        ) == (self.s, null)
+
+    def testIndefModeChunked(self):
+        assert decoder.decode(
+            ints2octs((48, 128, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 0, 0))
+        ) == (self.s, null)
+
+
 class SequenceDecoderTestCase(unittest.TestCase):
     def setUp(self):
-        self.s = univ.Sequence(componentType=namedtype.NamedTypes(
-            namedtype.NamedType('place-holder', univ.Null(null)),
-            namedtype.NamedType('first-name', univ.OctetString(null)),
-            namedtype.NamedType('age', univ.Integer(33)))
+        self.s = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType('place-holder', univ.Null(null)),
+                namedtype.NamedType('first-name', univ.OctetString(null)),
+                namedtype.NamedType('age', univ.Integer(33))
+            )
         )
         self.s.setComponentByPosition(0, univ.Null(null))
         self.s.setComponentByPosition(1, univ.OctetString('quick brown'))
@@ -543,11 +571,13 @@ class SequenceDecoderTestCase(unittest.TestCase):
 
 class GuidedSequenceDecoderTestCase(unittest.TestCase):
     def setUp(self):
-        self.s = univ.Sequence(componentType=namedtype.NamedTypes(
-            namedtype.NamedType('place-holder', univ.Null(null)),
-            namedtype.OptionalNamedType('first-name', univ.OctetString(null)),
-            namedtype.DefaultedNamedType('age', univ.Integer(33)),
-        ))
+        self.s = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType('place-holder', univ.Null(null)),
+                namedtype.OptionalNamedType('first-name', univ.OctetString()),
+                namedtype.DefaultedNamedType('age', univ.Integer(33)),
+            )
+        )
 
     def __init(self):
         self.s.clear()
@@ -677,11 +707,13 @@ class GuidedSequenceDecoderTestCase(unittest.TestCase):
 
 class ChoiceDecoderTestCase(unittest.TestCase):
     def setUp(self):
-        self.s = univ.Choice(componentType=namedtype.NamedTypes(
-            namedtype.NamedType('place-holder', univ.Null(null)),
-            namedtype.NamedType('number', univ.Integer(0)),
-            namedtype.NamedType('string', univ.OctetString())
-        ))
+        self.s = univ.Choice(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType('place-holder', univ.Null(null)),
+                namedtype.NamedType('number', univ.Integer(0)),
+                namedtype.NamedType('string', univ.OctetString())
+            )
+        )
 
     def testBySpec(self):
         self.s.setComponentByPosition(0, univ.Null(null))
