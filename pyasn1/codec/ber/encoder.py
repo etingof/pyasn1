@@ -88,7 +88,7 @@ class EndOfOctetsEncoder(AbstractItemEncoder):
 class ExplicitlyTaggedItemEncoder(AbstractItemEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         if isinstance(value, base.AbstractConstructedAsn1Item):
-            value = value.clone(tagSet=value.tagSet[:-1], cloneValueFlag=1)
+            value = value.clone(tagSet=value.tagSet[:-1], cloneValueFlag=True)
         else:
             value = value.clone(tagSet=value.tagSet[:-1])
         return encodeFun(value, defMode, maxChunkSize), True, True

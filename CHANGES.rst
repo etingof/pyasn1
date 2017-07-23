@@ -2,6 +2,8 @@
 Revision 0.3.1, released XX-07-2017
 -----------------------------------
 
+- ASN.1 types __init__(), .clone() and .subtype() signatures
+  refactored into keyword arguments to simplify their signatures.
 - ASN.1 types initialization refactored to minimize the use of
   relatively expensive isNoValue() call
 - Lazily pre-populate list of values of Sequence/Set/Choice types

@@ -50,10 +50,10 @@ class AbstractCharacterString(univ.OctetString):
     if sys.version_info[0] <= 2:
         def __str__(self):
             try:
-                return self._value.encode(self._encoding)
+                return self._value.encode(self.encoding)
             except UnicodeEncodeError:
                 raise error.PyAsn1Error(
-                    'Can\'t encode string \'%s\' with \'%s\' codec' % (self._value, self._encoding)
+                    'Can\'t encode string \'%s\' with \'%s\' codec' % (self._value, self.encoding)
                 )
 
         def __unicode__(self):
@@ -64,10 +64,10 @@ class AbstractCharacterString(univ.OctetString):
                 return value
             elif isinstance(value, str):
                 try:
-                    return value.decode(self._encoding)
+                    return value.decode(self.encoding)
                 except (LookupError, UnicodeDecodeError):
                     raise error.PyAsn1Error(
-                        'Can\'t decode string \'%s\' with \'%s\' codec' % (value, self._encoding)
+                        'Can\'t decode string \'%s\' with \'%s\' codec' % (value, self.encoding)
                     )
             elif isinstance(value, (tuple, list)):
                 try:
@@ -96,10 +96,10 @@ class AbstractCharacterString(univ.OctetString):
 
         def __bytes__(self):
             try:
-                return self._value.encode(self._encoding)
+                return self._value.encode(self.encoding)
             except UnicodeEncodeError:
                 raise error.PyAsn1Error(
-                    'Can\'t encode string \'%s\' with \'%s\' codec' % (self._value, self._encoding)
+                    'Can\'t encode string \'%s\' with \'%s\' codec' % (self._value, self.encoding)
                 )
 
         def prettyIn(self, value):
@@ -107,10 +107,10 @@ class AbstractCharacterString(univ.OctetString):
                 return value
             elif isinstance(value, bytes):
                 try:
-                    return value.decode(self._encoding)
+                    return value.decode(self.encoding)
                 except UnicodeDecodeError:
                     raise error.PyAsn1Error(
-                        'Can\'t decode string \'%s\' with \'%s\' codec' % (value, self._encoding)
+                        'Can\'t decode string \'%s\' with \'%s\' codec' % (value, self.encoding)
                     )
             elif isinstance(value, (tuple, list)):
                 return self.prettyIn(bytes(value))
@@ -134,8 +134,7 @@ class AbstractCharacterString(univ.OctetString):
     def __reversed__(self):
         return reversed(self._value)
 
-    def clone(self, value=noValue, tagSet=None, subtypeSpec=None,
-              encoding=None, binValue=noValue, hexValue=noValue):
+    def clone(self, value=noValue, **kwargs):
         """Creates a copy of a |ASN.1| type or object.
 
         Any parameters to the *clone()* method will replace corresponding
@@ -165,10 +164,9 @@ class AbstractCharacterString(univ.OctetString):
             new instance of |ASN.1| type/value
 
         """
-        return univ.OctetString.clone(self, value, tagSet, subtypeSpec, encoding, binValue, hexValue)
+        return univ.OctetString.clone(self, value, **kwargs)
 
-    def subtype(self, value=noValue, implicitTag=None, explicitTag=None,
-                subtypeSpec=None, encoding=None, binValue=noValue, hexValue=noValue):
+    def subtype(self, value=noValue, **kwargs):
         """Creates a copy of a |ASN.1| type or object.
 
         Any parameters to the *subtype()* method will be added to the corresponding
@@ -205,8 +203,7 @@ class AbstractCharacterString(univ.OctetString):
             new instance of |ASN.1| type/value
 
         """
-        return univ.OctetString.subtype(self, value, implicitTag, explicitTag, subtypeSpec, encoding, binValue, hexValue)
-
+        return univ.OctetString.subtype(self, value, **kwargs)
 
 class NumericString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__

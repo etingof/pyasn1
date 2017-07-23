@@ -64,14 +64,11 @@ class Integer(base.AbstractSimpleAsn1Item):
     # Optimization for faster codec lookup
     typeId = base.AbstractSimpleAsn1Item.getTypeId()
 
-    def __init__(self, value=noValue, tagSet=None, subtypeSpec=None,
-                 namedValues=None):
-        if namedValues is not None:
-            self.namedValues = namedValues
-        base.AbstractSimpleAsn1Item.__init__(
-            self, value, tagSet, subtypeSpec
-        )
-        self.readOnly = 'namedValues'
+    def __init__(self, value=noValue, **kwargs):
+        if 'namedValues' not in kwargs:
+            kwargs['namedValues'] = self.namedValues
+
+        base.AbstractSimpleAsn1Item.__init__(self, value, **kwargs)
 
     def __repr__(self):
         if self.namedValues is not self.__class__.namedValues:
@@ -245,7 +242,7 @@ class Integer(base.AbstractSimpleAsn1Item):
         except KeyError:
             return str(value)
 
-    def clone(self, value=noValue, tagSet=None, subtypeSpec=None, namedValues=None):
+    def clone(self, value=noValue, **kwargs):
         """Create a copy of a |ASN.1| type or object.
 
         Any parameters to the *clone()* method will replace corresponding
@@ -271,32 +268,9 @@ class Integer(base.AbstractSimpleAsn1Item):
         :
             new instance of |ASN.1| type/value
         """
-        isModified = False
+        return base.AbstractSimpleAsn1Item.clone(self, value, **kwargs)
 
-        if value is None or value is noValue:
-            value = self._value
-        else:
-            isModified = True
-        if tagSet is None or tagSet is noValue:
-            tagSet = self.tagSet
-        else:
-            isModified = True
-        if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self.subtypeSpec
-        else:
-            isModified = True
-        if namedValues is None or namedValues is noValue:
-            namedValues = self.namedValues
-        else:
-            isModified = True
-
-        if isModified:
-            return self.__class__(value, tagSet, subtypeSpec, namedValues)
-        else:
-            return self
-
-    def subtype(self, value=noValue, implicitTag=None, explicitTag=None,
-                subtypeSpec=None, namedValues=None):
+    def subtype(self, value=noValue, **kwargs):
         """Create a copy of a |ASN.1| type or object.
 
         Any parameters to the *subtype()* method will be added to the corresponding
@@ -332,35 +306,7 @@ class Integer(base.AbstractSimpleAsn1Item):
         :
             new instance of |ASN.1| type/value
         """
-        isModified = False
-
-        if value is None or value is noValue:
-            value = self._value
-        else:
-            isModified = True
-        if implicitTag is not None and implicitTag is not noValue:
-            tagSet = self.tagSet.tagImplicitly(implicitTag)
-            isModified = True
-        elif explicitTag is not None and explicitTag is not noValue:
-            tagSet = self.tagSet.tagExplicitly(explicitTag)
-            isModified = True
-        else:
-            tagSet = self.tagSet
-        if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self.subtypeSpec
-        else:
-            subtypeSpec += self.subtypeSpec
-            isModified = True
-        if namedValues is None or namedValues is noValue:
-            namedValues = self.namedValues
-        else:
-            namedValues += self.namedValues
-            isModified = True
-
-        if isModified:
-            return self.__class__(value, tagSet, subtypeSpec, namedValues)
-        else:
-            return self
+        return base.AbstractSimpleAsn1Item.subtype(self, value, **kwargs)
 
     # backward compatibility
 
@@ -465,24 +411,34 @@ class BitString(base.AbstractSimpleAsn1Item):
 
             return self.bitLength
 
-    def __init__(self, value=noValue, tagSet=None, subtypeSpec=None,
-                 namedValues=None, binValue=noValue, hexValue=noValue):
-        if namedValues is not None:
-            self.namedValues = namedValues
-        if binValue is not noValue:
-            value = self.fromBinaryString(binValue)
-        elif hexValue is not noValue:
-            value = self.fromHexString(hexValue)
-        elif value is None or value is noValue:
+    def __init__(self, value=noValue, **kwargs):
+        if value is noValue or value is None:
+            if kwargs:
+                try:
+                    value = self.fromBinaryString(kwargs.pop('binValue'))
+
+                except KeyError:
+                    pass
+
+                try:
+                    value = self.fromHexString(kwargs.pop('hexValue'))
+
+                except KeyError:
+                    pass
+
+        if value is noValue or value is None:
             if self.defaultBinValue is not noValue:
                 value = self.fromBinaryString(self.defaultBinValue)
+
             elif self.defaultHexValue is not noValue:
                 value = self.fromHexString(self.defaultHexValue)
-        base.AbstractSimpleAsn1Item.__init__(self, value, tagSet, subtypeSpec)
-        self._readOnly.add('namedValues')
 
-    def clone(self, value=noValue, tagSet=None, subtypeSpec=None,
-              namedValues=None, binValue=noValue, hexValue=noValue):
+        if 'namedValues' not in kwargs:
+            kwargs['namedValues'] = self.namedValues
+
+        base.AbstractSimpleAsn1Item.__init__(self, value, **kwargs)
+
+    def clone(self, value=noValue, **kwargs):
         """Create a copy of a |ASN.1| type or object.
 
         Any parameters to the *clone()* method will replace corresponding
@@ -516,32 +472,9 @@ class BitString(base.AbstractSimpleAsn1Item):
         :
             new instance of |ASN.1| type/value
         """
-        isModified = False
+        return base.AbstractSimpleAsn1Item.clone(self, value, **kwargs)
 
-        if (value is None or value is noValue) and binValue is noValue and hexValue is noValue:
-            value = self._value
-        else:
-            isModified = True
-        if tagSet is None or tagSet is noValue:
-            tagSet = self.tagSet
-        else:
-            isModified = True
-        if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self.subtypeSpec
-        else:
-            isModified = True
-        if namedValues is None or namedValues is noValue:
-            namedValues = self.namedValues
-        else:
-            isModified = True
-
-        if isModified:
-            return self.__class__(value, tagSet, subtypeSpec, namedValues, binValue, hexValue)
-        else:
-            return self
-
-    def subtype(self, value=noValue, implicitTag=None, explicitTag=None,
-                subtypeSpec=None, namedValues=None, binValue=noValue, hexValue=noValue):
+    def subtype(self, value=noValue, **kwargs):
         """Create a copy of a |ASN.1| type or object.
 
         Any parameters to the *subtype()* method will be added to the corresponding
@@ -585,35 +518,7 @@ class BitString(base.AbstractSimpleAsn1Item):
         :
             new instance of |ASN.1| type/value
         """
-        isModified = False
-
-        if (value is None or value is noValue) and binValue is noValue and hexValue is noValue:
-            value = self._value
-        else:
-            isModified = True
-        if implicitTag is not None and implicitTag is not noValue:
-            tagSet = self.tagSet.tagImplicitly(implicitTag)
-            isModified = True
-        elif explicitTag is not None and explicitTag is not noValue:
-            tagSet = self.tagSet.tagExplicitly(explicitTag)
-            isModified = True
-        else:
-            tagSet = self.tagSet
-        if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self.subtypeSpec
-        else:
-            subtypeSpec += self.subtypeSpec
-            isModified = True
-        if namedValues is None or namedValues is noValue:
-            namedValues = self.namedValues
-        else:
-            namedValues += self.namedValues
-            isModified = True
-
-        if isModified:
-            return self.__class__(value, tagSet, subtypeSpec, namedValues, binValue, hexValue)
-        else:
-            return self
+        return base.AbstractSimpleAsn1Item.subtype(self, value, **kwargs)
 
     def __str__(self):
         return self.asBinary()
@@ -877,26 +782,36 @@ class OctetString(base.AbstractSimpleAsn1Item):
     defaultBinValue = defaultHexValue = noValue
     encoding = 'iso-8859-1'
 
-    def __init__(self, value=noValue, tagSet=None, subtypeSpec=None,
-                 encoding=None, binValue=noValue, hexValue=noValue):
-        if encoding is None:
-            self._encoding = self.encoding
-        else:
-            self._encoding = encoding
-        if binValue is not noValue:
-            value = self.fromBinaryString(binValue)
-        elif hexValue is not noValue:
-            value = self.fromHexString(hexValue)
-        elif value is None or value is noValue:
+    def __init__(self, value=noValue, **kwargs):
+        if kwargs:
+            if value is noValue or value is None:
+                try:
+                    value = self.fromBinaryString(kwargs.pop('binValue'))
+
+                except KeyError:
+                    pass
+
+                try:
+                    value = self.fromHexString(kwargs.pop('hexValue'))
+
+                except KeyError:
+                    pass
+
+        if value is noValue or value is None:
             if self.defaultBinValue is not noValue:
                 value = self.fromBinaryString(self.defaultBinValue)
+
             elif self.defaultHexValue is not noValue:
                 value = self.fromHexString(self.defaultHexValue)
-        self.__asNumbersCache = None
-        base.AbstractSimpleAsn1Item.__init__(self, value, tagSet, subtypeSpec)
 
-    def clone(self, value=noValue, tagSet=None, subtypeSpec=None,
-              encoding=None, binValue=noValue, hexValue=noValue):
+        if 'encoding' not in kwargs:
+            kwargs['encoding'] = self.encoding
+
+        self.__asNumbersCache = None
+
+        base.AbstractSimpleAsn1Item.__init__(self, value, **kwargs)
+
+    def clone(self, value=noValue, **kwargs):
         """Create a copy of a |ASN.1| type or object.
 
         Any parameters to the *clone()* method will replace corresponding
@@ -930,33 +845,9 @@ class OctetString(base.AbstractSimpleAsn1Item):
         :
             new instance of |ASN.1| type/value
         """
-        isModified = False
+        return base.AbstractSimpleAsn1Item.clone(self, value, **kwargs)
 
-        if (value is None or value is noValue) and binValue is noValue and hexValue is noValue:
-            value = self._value
-        else:
-            isModified = True
-        if tagSet is None or tagSet is noValue:
-            tagSet = self.tagSet
-        else:
-            isModified = True
-        if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self.subtypeSpec
-        else:
-            isModified = True
-        if encoding is None or encoding is noValue:
-            encoding = self._encoding
-        else:
-            isModified = True
-
-        if isModified:
-            return self.__class__(value, tagSet, subtypeSpec, encoding, binValue, hexValue)
-        else:
-            return self
-
-    def subtype(self, value=noValue, implicitTag=None, explicitTag=None,
-                subtypeSpec=None, encoding=None, binValue=noValue,
-                hexValue=noValue):
+    def subtype(self, value=noValue, **kwargs):
         """Create a copy of a |ASN.1| type or object.
 
         Any parameters to the *subtype()* method will be added to the corresponding
@@ -998,34 +889,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
         :
              new instance of |ASN.1| type/value
         """
-        isModified = False
-
-        if (value is None or value is noValue) and binValue is noValue and hexValue is noValue:
-            value = self._value
-        else:
-            isModified = True
-        if implicitTag is not None and implicitTag is not noValue:
-            tagSet = self.tagSet.tagImplicitly(implicitTag)
-            isModified = True
-        elif explicitTag is not None and explicitTag is not noValue:
-            tagSet = self.tagSet.tagExplicitly(explicitTag)
-            isModified = True
-        else:
-            tagSet = self.tagSet
-        if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self.subtypeSpec
-        else:
-            subtypeSpec += self.subtypeSpec
-            isModified = True
-        if encoding is None or encoding is noValue:
-            encoding = self._encoding
-        else:
-            isModified = True
-
-        if isModified:
-            return self.__class__(value, tagSet, subtypeSpec, encoding, binValue, hexValue)
-        else:
-            return self
+        return base.AbstractSimpleAsn1Item.subtype(self, value, **kwargs)
 
     if sys.version_info[0] <= 2:
         def prettyIn(self, value):
@@ -1033,10 +897,10 @@ class OctetString(base.AbstractSimpleAsn1Item):
                 return value
             elif isinstance(value, unicode):
                 try:
-                    return value.encode(self._encoding)
+                    return value.encode(self.encoding)
                 except (LookupError, UnicodeEncodeError):
                     raise error.PyAsn1Error(
-                        'Can\'t encode string \'%s\' with \'%s\' codec' % (value, self._encoding)
+                        'Can\'t encode string \'%s\' with \'%s\' codec' % (value, self.encoding)
                     )
             elif isinstance(value, (tuple, list)):
                 try:
@@ -1053,11 +917,11 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
         def __unicode__(self):
             try:
-                return self._value.decode(self._encoding)
+                return self._value.decode(self.encoding)
 
             except UnicodeDecodeError:
                 raise error.PyAsn1Error(
-                    'Can\'t decode string \'%s\' with \'%s\' codec' % (self._value, self._encoding)
+                    'Can\'t decode string \'%s\' with \'%s\' codec' % (self._value, self.encoding)
                 )
 
         def asOctets(self):
@@ -1074,10 +938,10 @@ class OctetString(base.AbstractSimpleAsn1Item):
                 return value
             elif isinstance(value, str):
                 try:
-                    return value.encode(self._encoding)
+                    return value.encode(self.encoding)
                 except UnicodeEncodeError:
                     raise error.PyAsn1Error(
-                        'Can\'t encode string \'%s\' with \'%s\' codec' % (value, self._encoding)
+                        'Can\'t encode string \'%s\' with \'%s\' codec' % (value, self.encoding)
                     )
             elif isinstance(value, OctetString):  # a shortcut, bytes() would work the same way
                 return value.asOctets()
@@ -1090,11 +954,11 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
         def __str__(self):
             try:
-                return self._value.decode(self._encoding)
+                return self._value.decode(self.encoding)
 
             except UnicodeDecodeError:
                 raise error.PyAsn1Error(
-                    'Can\'t decode string \'%s\' with \'%s\' codec at \'%s\'' % (self._value, self._encoding, self.__class__.__name__)
+                    'Can\'t decode string \'%s\' with \'%s\' codec at \'%s\'' % (self._value, self.encoding, self.__class__.__name__)
                 )
 
         def __bytes__(self):
@@ -1118,12 +982,12 @@ class OctetString(base.AbstractSimpleAsn1Item):
                 return octets.octs2str('0x') + ''.join(('%.2x' % x for x in numbers))
         else:
             try:
-                return value.decode(self._encoding)
+                return value.decode(self.encoding)
 
             except UnicodeDecodeError:
                 raise error.PyAsn1Error(
                     'Can\'t decode string \'%s\' with \'%s\' codec at \'%s\'' % (
-                    value, self._encoding, self.__class__.__name__)
+                    value, self.encoding, self.__class__.__name__)
                 )
 
     @staticmethod
@@ -1179,8 +1043,8 @@ class OctetString(base.AbstractSimpleAsn1Item):
             r.append('tagSet=%r' % (self.tagSet,))
         if self.subtypeSpec is not self.__class__.subtypeSpec:
             r.append('subtypeSpec=%r' % (self.subtypeSpec,))
-        if self.encoding is not self._encoding:
-            r.append('encoding=%r' % (self._encoding,))
+        if self.encoding is not self.__class__.encoding:
+            r.append('encoding=%r' % (self.encoding,))
         if doHex:
             r.append('hexValue=%r' % ''.join(['%.2x' % x for x in self.asNumbers()]))
         return '%s(%s)' % (self.__class__.__name__, ', '.join(r))
@@ -1257,7 +1121,7 @@ class Null(OctetString):
     # Optimization for faster codec lookup
     typeId = OctetString.getTypeId()
 
-    def clone(self, value=noValue, tagSet=None):
+    def clone(self, value=noValue, **kwargs):
         """Create a copy of a |ASN.1| type or object.
 
         Any parameters to the *clone()* method will replace corresponding
@@ -1277,9 +1141,9 @@ class Null(OctetString):
         : :py:class:`~pyasn1.type.univ.Null`
             new instance of NULL type/value
         """
-        return OctetString.clone(self, value, tagSet)
+        return OctetString.clone(self, value, **kwargs)
 
-    def subtype(self, value=noValue, implicitTag=None, explicitTag=None):
+    def subtype(self, value=noValue, **kwargs):
         """Create a copy of a |ASN.1| type or object.
 
         Any parameters to the *subtype()* method will be added to the corresponding
@@ -1306,7 +1170,7 @@ class Null(OctetString):
         : :py:class:`~pyasn1.type.univ.Null`
             new instance of NULL type/value
         """
-        return OctetString.subtype(self, value, implicitTag, explicitTag)
+        return OctetString.subtype(self, value, **kwargs)
 
 
 if sys.version_info[0] <= 2:
@@ -1493,7 +1357,7 @@ class Real(base.AbstractSimpleAsn1Item):
     # Optimization for faster codec lookup
     typeId = base.AbstractSimpleAsn1Item.getTypeId()
 
-    def clone(self, value=noValue, tagSet=None, subtypeSpec=None):
+    def clone(self, value=noValue, **kwargs):
         """Create a copy of a |ASN.1| type or object.
 
         Any parameters to the *clone()* method will replace corresponding
@@ -1516,10 +1380,9 @@ class Real(base.AbstractSimpleAsn1Item):
         :
             new instance of |ASN.1| type/value
         """
-        return base.AbstractSimpleAsn1Item.clone(self, value, tagSet, subtypeSpec)
+        return base.AbstractSimpleAsn1Item.clone(self, value, **kwargs)
 
-    def subtype(self, value=noValue, implicitTag=None, explicitTag=None,
-                subtypeSpec=None):
+    def subtype(self, value=noValue, **kwargs):
         """Create a copy of a |ASN.1| type or object.
 
         Any parameters to the *subtype()* method will be added to the corresponding
@@ -1549,7 +1412,7 @@ class Real(base.AbstractSimpleAsn1Item):
         :
             new instance of |ASN.1| type/value
         """
-        return base.AbstractSimpleAsn1Item.subtype(self, value, implicitTag, explicitTag)
+        return base.AbstractSimpleAsn1Item.subtype(self, value, **kwargs)
 
     @staticmethod
     def __normalizeBase10(value):
@@ -1821,8 +1684,6 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         Object representing collection size constraint
      """
 
-    componentType = None
-
     # Python list protocol
 
     def clear(self):
@@ -1935,7 +1796,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
             if len(self._componentValues) < idx:
                 raise error.PyAsn1Error('Component index out of range')
 
-        if value is None or value is noValue:
+        if value is noValue or value is None:
             if componentType is not None:
                 value = componentType.clone()
             elif currentValue is None:
@@ -2099,11 +1960,8 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
     #: object representing named ASN.1 types allowed within |ASN.1| type
     componentType = namedtype.NamedTypes()
 
-    def __init__(self, componentType=None, tagSet=None,
-                 subtypeSpec=None, sizeSpec=None):
-        base.AbstractConstructedAsn1Item.__init__(
-            self, componentType, tagSet, subtypeSpec, sizeSpec
-        )
+    def __init__(self, **kwargs):
+        base.AbstractConstructedAsn1Item.__init__(self, **kwargs)
         self._componentTypeLen = len(self.componentType)
 
     def __getitem__(self, idx):
