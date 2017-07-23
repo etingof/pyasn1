@@ -34,13 +34,14 @@ class Asn1ItemBase(Asn1Item):
     # Disambiguation ASN.1 types identification
     typeId = None
 
-    def __init__(self, tagSet=None, subtypeSpec=None):
-        if tagSet is not None:
-            self.tagSet = tagSet
-        if subtypeSpec is not None:
-            self.subtypeSpec = subtypeSpec
-        self.readOnly = 'subtypeSpec'
-        self.readOnly = 'tagSet'
+    def __init__(self, **kwargs):
+        for key in ('tagSet', 'subtypeSpec'):
+            if key not in kwargs:
+                kwargs[key] = getattr(self, key)
+
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+            self.readOnly = key
 
     def __setattr__(self, name, value):
         if not name.startswith('_'):
@@ -220,8 +221,8 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
     #: Default payload value
     defaultValue = noValue
 
-    def __init__(self, value=noValue, tagSet=None, subtypeSpec=None):
-        Asn1ItemBase.__init__(self, tagSet, subtypeSpec)
+    def __init__(self, value=noValue, **kwargs):
+        Asn1ItemBase.__init__(self, **kwargs)
         if value is None or value is noValue:
             value = self.defaultValue
         else:
@@ -300,7 +301,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         """
         return self._value is not noValue
 
-    def clone(self, value=noValue, tagSet=None, subtypeSpec=None):
+    def clone(self, value=noValue, **kwargs):
         """Create a copy of a |ASN.1| type or object.
 
           Any parameters to the *clone()* method will replace corresponding
@@ -323,28 +324,19 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
           :
               new instance of |ASN.1| type/value
         """
-        isModified = False
-
         if value is None or value is noValue:
+            if not kwargs:
+                return self
+
             value = self._value
-        else:
-            isModified = True
-        if tagSet is None or tagSet is noValue:
-            tagSet = self.tagSet
-        else:
-            isModified = True
-        if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self.subtypeSpec
-        else:
-            isModified = True
 
-        if isModified:
-            return self.__class__(value, tagSet, subtypeSpec)
-        else:
-            return self
+        for arg in self.readOnly:
+            if arg not in kwargs:
+                kwargs[arg] = getattr(self, arg)
 
-    def subtype(self, value=noValue, implicitTag=None, explicitTag=None,
-                subtypeSpec=None):
+        return self.__class__(value, **kwargs)
+
+    def subtype(self, value=noValue, **kwargs):
         """Create a copy of a |ASN.1| type or object.
 
          Any parameters to the *subtype()* method will be added to the corresponding
@@ -374,31 +366,32 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
          -------
          :
              new instance of |ASN.1| type/value
-         """
-        isModified = False
-
+        """
         if value is None or value is noValue:
-            value = self._value
-        else:
-            isModified = True
-        if implicitTag is not None and implicitTag is not noValue:
-            tagSet = self.tagSet.tagImplicitly(implicitTag)
-            isModified = True
-        elif explicitTag is not None and explicitTag is not noValue:
-            tagSet = self.tagSet.tagExplicitly(explicitTag)
-            isModified = True
-        else:
-            tagSet = self.tagSet
-        if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self.subtypeSpec
-        else:
-            subtypeSpec += self.subtypeSpec
-            isModified = True
+            if not kwargs:
+                return self
 
-        if isModified:
-            return self.__class__(value, tagSet, subtypeSpec)
-        else:
-            return self
+            value = self._value
+
+        for arg in self.readOnly:
+            if arg in kwargs:
+                kwargs[arg] += getattr(self, arg)
+            else:
+                kwargs[arg] = getattr(self, arg)
+
+        try:
+            kwargs['tagSet'] = self.tagSet.tagImplicitly(kwargs['implicitTag'])
+
+        except KeyError:
+            pass
+
+        try:
+            kwargs['tagSet'] = self.tagSet.tagExplicitly(kwargs['explicitTag'])
+
+        except KeyError:
+            pass
+
+        return self.__class__(value, **kwargs)
 
     def prettyIn(self, value):
         return value
@@ -472,16 +465,14 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
     componentType = None
     sizeSpec = None
 
-    def __init__(self, componentType=None, tagSet=None,
-                 subtypeSpec=None, sizeSpec=None):
-        Asn1ItemBase.__init__(self, tagSet, subtypeSpec)
-        if componentType is not None:
-            self.componentType = componentType
-        if sizeSpec is not None:
-            self.sizeSpec = sizeSpec
+    def __init__(self, **kwargs):
+        for key in ('componentType', 'sizeSpec'):
+            if key not in kwargs:
+                kwargs[key] = getattr(self, key)
+
+        Asn1ItemBase.__init__(self, **kwargs)
+
         self._componentValues = []
-        self.readOnly = 'componentType'
-        self.readOnly = 'sizeSpec'
 
     def __repr__(self):
         representation = []
@@ -527,7 +518,7 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         pass
 
-    def clone(self, tagSet=None, subtypeSpec=None, sizeSpec=None, cloneValueFlag=None):
+    def clone(self, **kwargs):
         """Create a copy of a |ASN.1| type or object.
 
         Any parameters to the *clone()* method will replace corresponding
@@ -550,19 +541,20 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
             new instance of |ASN.1| type/value
 
         """
-        if tagSet is None:
-            tagSet = self.tagSet
-        if subtypeSpec is None:
-            subtypeSpec = self.subtypeSpec
-        if sizeSpec is None:
-            sizeSpec = self.sizeSpec
-        clone = self.__class__(self.componentType, tagSet, subtypeSpec, sizeSpec)
+        cloneValueFlag = kwargs.pop('cloneValueFlag', False)
+
+        for arg in self.readOnly:
+            if arg not in kwargs:
+                kwargs[arg] = getattr(self, arg)
+
+        clone = self.__class__(**kwargs)
+
         if cloneValueFlag:
             self._cloneComponentValues(clone, cloneValueFlag)
+
         return clone
 
-    def subtype(self, implicitTag=None, explicitTag=None, subtypeSpec=None,
-                sizeSpec=None, cloneValueFlag=None):
+    def subtype(self, **kwargs):
         """Create a copy of a |ASN.1| type or object.
 
         Any parameters to the *subtype()* method will be added to the corresponding
@@ -585,23 +577,31 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
             new instance of |ASN.1| type/value
 
         """
-        if implicitTag is not None and implicitTag is not noValue:
-            tagSet = self.tagSet.tagImplicitly(implicitTag)
-        elif explicitTag is not None and explicitTag is not noValue:
-            tagSet = self.tagSet.tagExplicitly(explicitTag)
-        else:
-            tagSet = self.tagSet
-        if subtypeSpec is None or subtypeSpec is noValue:
-            subtypeSpec = self.subtypeSpec
-        else:
-            subtypeSpec += self.subtypeSpec
-        if sizeSpec is None or sizeSpec is noValue:
-            sizeSpec = self.sizeSpec
-        else:
-            sizeSpec += self.sizeSpec
-        clone = self.__class__(self.componentType, tagSet, subtypeSpec, sizeSpec)
+        cloneValueFlag = kwargs.pop('cloneValueFlag', False)
+
+        for arg in self.readOnly:
+            if arg in kwargs:
+                kwargs[arg] += getattr(self, arg)
+            else:
+                kwargs[arg] = getattr(self, arg)
+
+        try:
+            kwargs['tagSet'] = self.tagSet.tagImplicitly(kwargs['implicitTag'])
+
+        except KeyError:
+            pass
+
+        try:
+            kwargs['tagSet'] = self.tagSet.tagExplicitly(kwargs['explicitTag'])
+
+        except KeyError:
+            pass
+
+        clone = self.__class__(**kwargs)
+
         if cloneValueFlag:
             self._cloneComponentValues(clone, cloneValueFlag)
+
         return clone
 
     def verifySizeSpec(self):

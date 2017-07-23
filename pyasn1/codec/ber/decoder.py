@@ -32,11 +32,11 @@ class AbstractSimpleDecoder(AbstractDecoder):
     def substrateCollector(asn1Object, substrate, length):
             return substrate[:length], substrate[length:]
 
-    def _createComponent(self, asn1Spec, tagSet, value=None):
+    def _createComponent(self, asn1Spec, tagSet, value=base.noValue):
         if tagSet[0].tagFormat not in self.tagFormats:
             raise error.PyAsn1Error('Invalid tag format %s for %s' % (tagSet[0], self.protoComponent.prettyPrintType()))
         if asn1Spec is None:
-            return self.protoComponent.clone(value, tagSet)
+            return self.protoComponent.clone(value, tagSet=tagSet)
         elif value is None:
             return asn1Spec
         else:
@@ -47,11 +47,11 @@ class AbstractConstructedDecoder(AbstractDecoder):
     tagFormats = (tag.tagFormatConstructed,)
 
     # noinspection PyUnusedLocal
-    def _createComponent(self, asn1Spec, tagSet, value=None):
+    def _createComponent(self, asn1Spec, tagSet, value=base.noValue):
         if tagSet[0].tagFormat not in self.tagFormats:
             raise error.PyAsn1Error('Invalid tag format %s for %s' % (tagSet[0], self.protoComponent.prettyPrintType()))
         if asn1Spec is None:
-            return self.protoComponent.clone(tagSet)
+            return self.protoComponent.clone(tagSet=tagSet)
         else:
             return asn1Spec.clone()
 
@@ -107,7 +107,7 @@ class IntegerDecoder(AbstractSimpleDecoder):
 class BooleanDecoder(IntegerDecoder):
     protoComponent = univ.Boolean(0)
 
-    def _createComponent(self, asn1Spec, tagSet, value=None):
+    def _createComponent(self, asn1Spec, tagSet, value=base.noValue):
         return IntegerDecoder._createComponent(self, asn1Spec, tagSet, value and 1 or 0)
 
 
