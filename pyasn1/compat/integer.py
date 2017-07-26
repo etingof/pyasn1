@@ -17,6 +17,9 @@ if sys.version_info[0:2] < (3, 2):
 from pyasn1.compat.octets import oct2int, null
 
 if sys.version_info[0:2] < (3, 2) or implementation != 'CPython':
+    if sys.version_info[0] > 2:
+        long = int
+
     def from_bytes(octets, signed=False):
         if not octets:
             return 0
