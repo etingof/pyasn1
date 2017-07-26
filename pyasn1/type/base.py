@@ -54,8 +54,7 @@ class Asn1ItemBase(Asn1Item):
 
         super(Asn1ItemBase, self).__setattr__(name, value)
 
-    @property
-    def readOnly(self):
+    def __getReadOnly(self):
         try:
             return self._readOnly
 
@@ -64,8 +63,7 @@ class Asn1ItemBase(Asn1Item):
 
         return frozenset(self._readOnly)
 
-    @readOnly.setter
-    def readOnly(self, value):
+    def __setReadOnly(self, value):
         try:
             self._readOnly.add(value)
 
@@ -73,6 +71,9 @@ class Asn1ItemBase(Asn1Item):
             self._readOnly = set()
 
         self._readOnly.add(value)
+
+    # property.setter is only available past Python 2.5
+    readOnly = property(__getReadOnly, __setReadOnly)
 
     @property
     def effectiveTagSet(self):
