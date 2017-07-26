@@ -1,5 +1,5 @@
 
-Revision 0.3.1, released XX-07-2017
+Revision 0.3.1, released 26-07-2017
 -----------------------------------
 
 - ASN.1 types __init__(), .clone() and .subtype() signatures
