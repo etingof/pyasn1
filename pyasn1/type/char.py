@@ -246,9 +246,15 @@ class TeletexString(AbstractCharacterString):
     )
     encoding = 'iso-8859-1'
 
+    # Optimization for faster codec lookup
+    typeId = AbstractCharacterString.getTypeId()
+
 
 class T61String(TeletexString):
     __doc__ = TeletexString.__doc__
+
+    # Optimization for faster codec lookup
+    typeId = AbstractCharacterString.getTypeId()
 
 
 class VideotexString(AbstractCharacterString):
@@ -314,6 +320,8 @@ class VisibleString(AbstractCharacterString):
 class ISO646String(VisibleString):
     __doc__ = VisibleString.__doc__
 
+    # Optimization for faster codec lookup
+    typeId = AbstractCharacterString.getTypeId()
 
 class GeneralString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__

@@ -23,6 +23,9 @@ class ObjectDescriptor(char.GraphicString):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 7)
     )
 
+    # Optimization for faster codec lookup
+    typeId = char.GraphicString.getTypeId()
+
 
 class TimeMixIn(object):
 
@@ -156,6 +159,9 @@ class GeneralizedTime(char.VisibleString, TimeMixIn):
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 24)
     )
 
+    # Optimization for faster codec lookup
+    typeId = char.VideotexString.getTypeId()
+
     _yearsDigits = 4
     _hasSubsecond = True
     _optionalMinutes = True
@@ -169,6 +175,9 @@ class UTCTime(char.VisibleString, TimeMixIn):
     tagSet = char.VisibleString.tagSet.tagImplicitly(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 23)
     )
+
+    # Optimization for faster codec lookup
+    typeId = char.VideotexString.getTypeId()
 
     _yearsDigits = 2
     _hasSubsecond = False
