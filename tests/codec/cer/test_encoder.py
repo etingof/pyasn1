@@ -146,17 +146,31 @@ class GeneralizedTimeEncoderTestCase(unittest.TestCase):
             assert 0, 'Missing timezone tolerated'
 
 
-# When enabled, this breaks many existing encodings
-#
-#    def testDecimalPoint(self):
-#        try:
-#            assert encoder.encode(
-#                    useful.GeneralizedTime('20150501120112Z')
-#             )
-#        except PyAsn1Error:
-#            pass
-#        else:
-#            assert 0, 'Missing decimal point tolerated'
+    def testDecimalCommaPoint(self):
+        try:
+            assert encoder.encode(
+                    useful.GeneralizedTime('20150501120112,1Z')
+             )
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'Decimal comma tolerated'
+
+    def testWithSubseconds(self):
+        assert encoder.encode(
+                    useful.GeneralizedTime('20170801120112.59Z')
+             ) == ints2octs((24, 18, 50, 48, 49, 55, 48, 56, 48, 49, 49, 50, 48, 49, 49, 50, 46, 53, 57, 90))
+
+    def testWithSeconds(self):
+        assert encoder.encode(
+                    useful.GeneralizedTime('20170801120112Z')
+             ) == ints2octs((24, 15, 50, 48, 49, 55, 48, 56, 48, 49, 49, 50, 48, 49, 49, 50, 90))
+
+    def testWithMinutes(self):
+        assert encoder.encode(
+                    useful.GeneralizedTime('201708011201Z')
+             ) == ints2octs((24, 13, 50, 48, 49, 55, 48, 56, 48, 49, 49, 50, 48, 49, 90))
+
 
 class UTCTimeEncoderTestCase(unittest.TestCase):
     def testFractionOfSecond(self):
@@ -170,9 +184,14 @@ class UTCTimeEncoderTestCase(unittest.TestCase):
             assert 0, 'Decimal point tolerated'
 
     def testMissingTimezone(self):
-        assert encoder.encode(
-            useful.UTCTime('150501120112')
-        ) == ints2octs((23, 13, 49, 53, 48, 53, 48, 49, 49, 50, 48, 49, 49, 50, 90)), 'Missing timezone not added'
+        try:
+            assert encoder.encode(
+                useful.UTCTime('150501120112')
+            ) == ints2octs((23, 13, 49, 53, 48, 53, 48, 49, 49, 50, 48, 49, 49, 50, 90))
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'Missing timezone tolerated'
 
     def testLocalTimezone(self):
         try:
@@ -183,6 +202,16 @@ class UTCTimeEncoderTestCase(unittest.TestCase):
             pass
         else:
             assert 0, 'Local timezone tolerated'
+
+    def testWithSeconds(self):
+        assert encoder.encode(
+                    useful.UTCTime('990801120112Z')
+             ) == ints2octs((23, 13, 57, 57, 48, 56, 48, 49, 49, 50, 48, 49, 49, 50, 90))
+
+    def testWithMinutes(self):
+        assert encoder.encode(
+                    useful.UTCTime('9908011201Z')
+             ) == ints2octs((23, 11, 57, 57, 48, 56, 48, 49, 49, 50, 48, 49, 90))
 
 
 suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])
