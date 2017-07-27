@@ -1,4 +1,9 @@
 
+Revision 0.3.1, released XX-07-2017
+-----------------------------------
+
+- Fixed UTCTimeEncoder CER encoder time string format verification
+
 Revision 0.3.1, released 26-07-2017
 -----------------------------------
 
