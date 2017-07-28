@@ -208,7 +208,7 @@ class AbstractCharacterString(univ.OctetString):
 class NumericString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
 
-    #: Set (class attribute) or return (class or instance attribute) a
+    #: Set (on class, not on instance) or return a
     #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
     #: associated with |ASN.1| type.
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
@@ -223,7 +223,7 @@ class NumericString(AbstractCharacterString):
 class PrintableString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
 
-    #: Set (class attribute) or return (class or instance attribute) a
+    #: Set (on class, not on instance) or return a
     #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
     #: associated with |ASN.1| type.
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
@@ -238,7 +238,7 @@ class PrintableString(AbstractCharacterString):
 class TeletexString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
 
-    #: Set (class attribute) or return (class or instance attribute) a
+    #: Set (on class, not on instance) or return a
     #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
     #: associated with |ASN.1| type.
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
@@ -260,7 +260,7 @@ class T61String(TeletexString):
 class VideotexString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
 
-    #: Set (class attribute) or return (class or instance attribute) a
+    #: Set (on class, not on instance) or return a
     #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
     #: associated with |ASN.1| type.
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
@@ -275,7 +275,7 @@ class VideotexString(AbstractCharacterString):
 class IA5String(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
 
-    #: Set (class attribute) or return (class or instance attribute) a
+    #: Set (on class, not on instance) or return a
     #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
     #: associated with |ASN.1| type.
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
@@ -290,7 +290,7 @@ class IA5String(AbstractCharacterString):
 class GraphicString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
 
-    #: Set (class attribute) or return (class or instance attribute) a
+    #: Set (on class, not on instance) or return a
     #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
     #: associated with |ASN.1| type.
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
@@ -305,7 +305,7 @@ class GraphicString(AbstractCharacterString):
 class VisibleString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
 
-    #: Set (class attribute) or return (class or instance attribute) a
+    #: Set (on class, not on instance) or return a
     #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
     #: associated with |ASN.1| type.
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
@@ -326,7 +326,7 @@ class ISO646String(VisibleString):
 class GeneralString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
 
-    #: Set (class attribute) or return (class or instance attribute) a
+    #: Set (on class, not on instance) or return a
     #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
     #: associated with |ASN.1| type.
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
@@ -341,7 +341,7 @@ class GeneralString(AbstractCharacterString):
 class UniversalString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
 
-    #: Set (class attribute) or return (class or instance attribute) a
+    #: Set (on class, not on instance) or return a
     #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
     #: associated with |ASN.1| type.
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
@@ -356,7 +356,7 @@ class UniversalString(AbstractCharacterString):
 class BMPString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
 
-    #: Set (class attribute) or return (class or instance attribute) a
+    #: Set (on class, not on instance) or return a
     #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
     #: associated with |ASN.1| type.
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
@@ -371,7 +371,7 @@ class BMPString(AbstractCharacterString):
 class UTF8String(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
 
-    #: Set (class attribute) or return (class or instance attribute) a
+    #: Set (on class, not on instance) or return a
     #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
     #: associated with |ASN.1| type.
     tagSet = AbstractCharacterString.tagSet.tagImplicitly(
