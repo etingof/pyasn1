@@ -3,6 +3,7 @@ Revision 0.3.1, released XX-07-2017
 -----------------------------------
 
 - Fixed GeneralizedTime/UTCTime CER/DER codecs to actually get invoked
+- Fixed documentation markup issues.
 
 Revision 0.3.1, released 26-07-2017
 -----------------------------------

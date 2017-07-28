@@ -17,7 +17,7 @@ it and weed out data structures specification into a local file:
 
 .. code-block:: python
 
-    $ cat pkcs-1.asn
+    # pkcs-1.asn
 
     PKCS-1 {iso(1) member(2) us(840) rsadsi(113549) pkcs(1) pkcs-1(1) modules(0) pkcs-1(1)}
 
@@ -64,7 +64,8 @@ this:
 
 .. code-block:: python
 
-    $ cat rsakey.py
+    # rsakey.py
+
     class Version(Integer):
         pass
 
@@ -107,6 +108,8 @@ set on the key file):
 
 Once we have Python ASN.1 structures initialized, we could inspect them:
 
+.. code-block:: pycon
+
     >>> print(private_key.prettyPrint())
     RSAPrivateKey:
      version=0
@@ -124,7 +127,7 @@ Play with the keys
 
 As well as use them nearly as we do with native Python types:
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> pk = private_key
     >>>
@@ -147,7 +150,7 @@ ASN.1 data structures exhibit a way more complicated behaviour compared to
 Python types. You may wish to simplify things by turning the whole tree of
 pyasn1 objects into an analogous tree made of base Python types:
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> from pyasn1.codec.native.encoder import encode
     >>> ...
@@ -160,7 +163,7 @@ pyasn1 objects into an analogous tree made of base Python types:
 
 You can do vice-versa: initialize ASN.1 structure from a dict:
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> from pyasn1.codec.native.decoder import decode
     >>> py_private_key = {'modulus': 280789907761334970323210643584308373}

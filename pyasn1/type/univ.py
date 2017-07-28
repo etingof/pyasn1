@@ -1732,7 +1732,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         ----------
         idx : :class:`int`
             Component index (zero-based). Must either refer to an existing
-            component or to N+1 component (of *componentType is set). In the latter
+            component or to N+1 component (if *componentType* is set). In the latter
             case a new component type gets instantiated and appended to the |ASN.1|
             sequence.
 
