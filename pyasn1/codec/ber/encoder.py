@@ -56,11 +56,16 @@ class AbstractItemEncoder(object):
         else:
             return encodeFun(eoo.endOfOctets, defMode)
 
-    def encode(self, encodeFun, value, defMode, maxChunkSize):
+    def encode(self, encodeFun, value, defMode, maxChunkSize, isOptional=False):
         substrate, isConstructed, isOctets = self.encodeValue(
             encodeFun, value, defMode, maxChunkSize
         )
+
+        if isOptional and not substrate:
+            return substrate
+
         tagSet = value.tagSet
+
         # tagged value?
         if tagSet:
             if not isConstructed:  # primitive form implies definite mode
@@ -450,7 +455,7 @@ class Encoder(object):
         self.__tagMap = tagMap
         self.__typeMap = typeMap
 
-    def __call__(self, value, defMode=True, maxChunkSize=0):
+    def __call__(self, value, defMode=True, maxChunkSize=0, isOptional=False):
         if not defMode and not self.supportIndefLength:
             raise error.PyAsn1Error('Indefinite length encoding not supported by this codec')
         if debug.logger & debug.flagEncoder:
@@ -475,7 +480,7 @@ class Encoder(object):
             if logger:
                 logger('using value codec %s chosen by %s' % (concreteEncoder.__class__.__name__, tagSet))
         substrate = concreteEncoder.encode(
-            self, value, defMode, maxChunkSize
+            self, value, defMode, maxChunkSize, isOptional
         )
         if logger:
             logger('built %s octets of substrate: %s\nencoder completed' % (len(substrate), debug.hexdump(substrate)))

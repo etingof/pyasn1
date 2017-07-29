@@ -214,6 +214,93 @@ class UTCTimeEncoderTestCase(unittest.TestCase):
              ) == ints2octs((23, 11, 57, 57, 48, 56, 48, 49, 49, 50, 48, 49, 90))
 
 
+class NestedOptionalSequenceEncoderTestCase(unittest.TestCase):
+    def setUp(self):
+        inner = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.OptionalNamedType('first-name', univ.OctetString()),
+                namedtype.DefaultedNamedType('age', univ.Integer(33)),
+            )
+        )
+
+        outerWithOptional = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.OptionalNamedType('inner', inner),
+            )
+        )
+
+        outerWithDefault = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.DefaultedNamedType('inner', inner),
+            )
+        )
+
+        self.s1 = outerWithOptional
+        self.s2 = outerWithDefault
+
+    def __initOptionalWithDefaultAndOptional(self):
+        self.s1.clear()
+        self.s1[0][0] = 'test'
+        self.s1[0][1] = 123
+        return self.s1
+
+    def __initOptionalWithDefault(self):
+        self.s1.clear()
+        self.s1[0][1] = 123
+        return self.s1
+
+    def __initOptionalWithOptional(self):
+        self.s1.clear()
+        self.s1[0][0] = 'test'
+        return self.s1
+
+    def __initOptional(self):
+        self.s1.clear()
+        return self.s1
+
+    def __initDefaultWithDefaultAndOptional(self):
+        self.s2.clear()
+        self.s2[0][0] = 'test'
+        self.s2[0][1] = 123
+        return self.s2
+
+    def __initDefaultWithDefault(self):
+        self.s2.clear()
+        self.s2[0][0] = 'test'
+        return self.s2
+
+    def __initDefaultWithOptional(self):
+        self.s2.clear()
+        self.s2[0][1] = 123
+        return self.s2
+
+    def testDefModeOptionalWithDefaultAndOptional(self):
+        s = self.__initOptionalWithDefaultAndOptional()
+        assert encoder.encode(s) == ints2octs((48, 128, 48, 128, 4, 4, 116, 101, 115, 116, 2, 1, 123, 0, 0, 0, 0))
+    def testDefModeOptionalWithDefault(self):
+        s = self.__initOptionalWithDefault()
+        assert encoder.encode(s) == ints2octs((48, 128, 48, 128, 2, 1, 123, 0, 0, 0, 0))
+
+    def testDefModeOptionalWithOptional(self):
+        s = self.__initOptionalWithOptional()
+        assert encoder.encode(s) == ints2octs((48, 128, 48, 128, 4, 4, 116, 101, 115, 116, 0, 0, 0, 0))
+
+    def testDefModeOptional(self):
+        s = self.__initOptional()
+        assert encoder.encode(s) == ints2octs((48, 128, 0, 0))
+
+    def testDefModeDefaultWithDefaultAndOptional(self):
+        s = self.__initDefaultWithDefaultAndOptional()
+        assert encoder.encode(s) == ints2octs((48, 128, 48, 128, 4, 4, 116, 101, 115, 116, 2, 1, 123, 0, 0, 0, 0))
+
+    def testDefModeDefaultWithDefault(self):
+        s = self.__initDefaultWithDefault()
+        assert encoder.encode(s) == ints2octs((48, 128, 48, 128, 4, 4, 116, 101, 115, 116, 0, 0, 0, 0))
+
+    def testDefModeDefaultWithOptional(self):
+        s = self.__initDefaultWithOptional()
+        assert encoder.encode(s) == ints2octs((48, 128, 48, 128, 2, 1, 123, 0, 0, 0, 0))
+
 suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])
 
 if __name__ == '__main__':

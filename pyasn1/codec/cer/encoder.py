@@ -105,15 +105,20 @@ class SetOfEncoder(encoder.SequenceOfEncoder):
             # Set
             namedTypes = client.componentType
             comps = []
+            compsMap = {}
             while idx > 0:
                 idx -= 1
-                if namedTypes[idx].isOptional and not client[idx].isValue:
-                    continue
-                if namedTypes[idx].isDefaulted and client[idx] == namedTypes[idx].asn1Object:
-                    continue
+                if namedTypes:
+                    if namedTypes[idx].isOptional and not client[idx].isValue:
+                        continue
+                    if namedTypes[idx].isDefaulted and client[idx] == namedTypes[idx].asn1Object:
+                        continue
+
                 comps.append(client[idx])
+                compsMap[id(client[idx])] = namedTypes[idx].isOptional
+
             for comp in self._sortComponents(comps):
-                substrate += encodeFun(comp, defMode, maxChunkSize)
+                substrate += encodeFun(comp, defMode, maxChunkSize, compsMap[id(comp)])
         else:
             # SetOf
             compSubs = []
@@ -129,6 +134,24 @@ class SetOfEncoder(encoder.SequenceOfEncoder):
         return substrate, True, True
 
 
+class SequenceEncoder(encoder.SequenceEncoder):
+    def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
+        value.verifySizeSpec()
+        namedTypes = value.componentType
+        substrate = null
+        idx = len(value)
+        while idx > 0:
+            idx -= 1
+            if namedTypes:
+                if namedTypes[idx].isOptional and not value[idx].isValue:
+                    continue
+                if namedTypes[idx].isDefaulted and value[idx] == namedTypes[idx].asn1Object:
+                    continue
+
+            substrate = encodeFun(value[idx], defMode, maxChunkSize, namedTypes[idx].isOptional) + substrate
+
+        return substrate, True, True
+
 tagMap = encoder.tagMap.copy()
 tagMap.update({
     univ.Boolean.tagSet: BooleanEncoder(),
@@ -137,7 +160,9 @@ tagMap.update({
     univ.Real.tagSet: RealEncoder(),
     useful.GeneralizedTime.tagSet: GeneralizedTimeEncoder(),
     useful.UTCTime.tagSet: UTCTimeEncoder(),
-    univ.SetOf.tagSet: SetOfEncoder()  # conflcts with Set
+    # Sequence & Set have same tags as SequenceOf & SetOf
+    univ.SetOf.tagSet: SetOfEncoder(),
+    univ.Sequence.typeId: SequenceEncoder()
 })
 
 typeMap = encoder.typeMap.copy()
@@ -148,15 +173,17 @@ typeMap.update({
     univ.Real.typeId: RealEncoder(),
     useful.GeneralizedTime.typeId: GeneralizedTimeEncoder(),
     useful.UTCTime.typeId: UTCTimeEncoder(),
+    # Sequence & Set have same tags as SequenceOf & SetOf
     univ.Set.typeId: SetOfEncoder(),
-    univ.SetOf.typeId: SetOfEncoder()
+    univ.SetOf.typeId: SetOfEncoder(),
+    univ.Sequence.typeId: SequenceEncoder()
 })
 
 
 class Encoder(encoder.Encoder):
 
-    def __call__(self, client, defMode=False, maxChunkSize=0):
-        return encoder.Encoder.__call__(self, client, defMode, maxChunkSize)
+    def __call__(self, client, defMode=False, maxChunkSize=0, isOptional=False):
+        return encoder.Encoder.__call__(self, client, defMode, maxChunkSize, isOptional)
 
 
 #: Turns ASN.1 object into CER octet stream.
