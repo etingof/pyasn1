@@ -2209,7 +2209,9 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             for idx, subComponentType in enumerate(componentType.namedTypes):
                 if subComponentType.isDefaulted or subComponentType.isOptional:
                     continue
-                if not self._componentValues or self._componentValues[idx] is None or not self._componentValues[idx].isValue:
+                if (not self._componentValues or
+                        self._componentValues[idx] is None or
+                        not self._componentValues[idx].isValue):
                     return False
 
         else:

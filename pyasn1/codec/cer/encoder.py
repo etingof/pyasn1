@@ -89,7 +89,29 @@ class UTCTimeEncoder(TimeEncoderMixIn, encoder.OctetStringEncoder):
     maxLength = 14
 
 
-class SetOfEncoder(encoder.SequenceOfEncoder):
+class SetAndSequenceEncoderMixIn(object):
+    def componentsToEncode(self, value):
+        namedTypes = value.componentType
+        componentsToEncode = []
+        idx = len(value)
+        while idx > 0:
+            idx -= 1
+            if namedTypes:
+                if namedTypes[idx].isOptional:
+                    if isinstance(value[idx], (univ.Sequence, univ.Set)):
+                        if not self.componentsToEncode(value[idx]):
+                            continue
+                    elif not value[idx].isValue:
+                        continue
+                if namedTypes[idx].isDefaulted and value[idx] == namedTypes[idx].asn1Object:
+                    continue
+
+            componentsToEncode.append(idx)
+
+        return componentsToEncode
+
+
+class SetOfEncoder(encoder.SequenceOfEncoder, SetAndSequenceEncoderMixIn):
     @staticmethod
     def _sortComponents(components):
         # sort by tags regardless of the Choice value (static sort)
@@ -105,12 +127,7 @@ class SetOfEncoder(encoder.SequenceOfEncoder):
             # Set
             namedTypes = client.componentType
             comps = []
-            while idx > 0:
-                idx -= 1
-                if namedTypes[idx].isOptional and not client[idx].isValue:
-                    continue
-                if namedTypes[idx].isDefaulted and client[idx] == namedTypes[idx].asn1Object:
-                    continue
+            for idx in self.componentsToEncode(client):
                 comps.append(client[idx])
             for comp in self._sortComponents(comps):
                 substrate += encodeFun(comp, defMode, maxChunkSize)
@@ -129,6 +146,15 @@ class SetOfEncoder(encoder.SequenceOfEncoder):
         return substrate, True, True
 
 
+class SequenceEncoder(encoder.SequenceEncoder, SetAndSequenceEncoderMixIn):
+    def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
+        value.verifySizeSpec()
+        substrate = null
+        for idx in self.componentsToEncode(value):
+            substrate = encodeFun(value[idx], defMode, maxChunkSize) + substrate
+
+        return substrate, True, True
+
 tagMap = encoder.tagMap.copy()
 tagMap.update({
     univ.Boolean.tagSet: BooleanEncoder(),
@@ -137,7 +163,9 @@ tagMap.update({
     univ.Real.tagSet: RealEncoder(),
     useful.GeneralizedTime.tagSet: GeneralizedTimeEncoder(),
     useful.UTCTime.tagSet: UTCTimeEncoder(),
-    univ.SetOf.tagSet: SetOfEncoder()  # conflcts with Set
+    # Sequence & Set have same tags as SequenceOf & SetOf
+    univ.SetOf.tagSet: SetOfEncoder(),
+    univ.Sequence.typeId: SequenceEncoder()
 })
 
 typeMap = encoder.typeMap.copy()
@@ -148,8 +176,10 @@ typeMap.update({
     univ.Real.typeId: RealEncoder(),
     useful.GeneralizedTime.typeId: GeneralizedTimeEncoder(),
     useful.UTCTime.typeId: UTCTimeEncoder(),
+    # Sequence & Set have same tags as SequenceOf & SetOf
     univ.Set.typeId: SetOfEncoder(),
-    univ.SetOf.typeId: SetOfEncoder()
+    univ.SetOf.typeId: SetOfEncoder(),
+    univ.Sequence.typeId: SequenceEncoder()
 })
 
 
