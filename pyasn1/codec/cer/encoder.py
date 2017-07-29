@@ -89,29 +89,7 @@ class UTCTimeEncoder(TimeEncoderMixIn, encoder.OctetStringEncoder):
     maxLength = 14
 
 
-class SetAndSequenceEncoderMixIn(object):
-    def componentsToEncode(self, value):
-        namedTypes = value.componentType
-        componentsToEncode = []
-        idx = len(value)
-        while idx > 0:
-            idx -= 1
-            if namedTypes:
-                if namedTypes[idx].isOptional:
-                    if isinstance(value[idx], (univ.Sequence, univ.Set)):
-                        if not self.componentsToEncode(value[idx]):
-                            continue
-                    elif not value[idx].isValue:
-                        continue
-                if namedTypes[idx].isDefaulted and value[idx] == namedTypes[idx].asn1Object:
-                    continue
-
-            componentsToEncode.append(idx)
-
-        return componentsToEncode
-
-
-class SetOfEncoder(encoder.SequenceOfEncoder, SetAndSequenceEncoderMixIn):
+class SetOfEncoder(encoder.SequenceOfEncoder):
     @staticmethod
     def _sortComponents(components):
         # sort by tags regardless of the Choice value (static sort)
@@ -127,10 +105,20 @@ class SetOfEncoder(encoder.SequenceOfEncoder, SetAndSequenceEncoderMixIn):
             # Set
             namedTypes = client.componentType
             comps = []
-            for idx in self.componentsToEncode(client):
+            compsMap = {}
+            while idx > 0:
+                idx -= 1
+                if namedTypes:
+                    if namedTypes[idx].isOptional and not client[idx].isValue:
+                        continue
+                    if namedTypes[idx].isDefaulted and client[idx] == namedTypes[idx].asn1Object:
+                        continue
+
                 comps.append(client[idx])
+                compsMap[id(client[idx])] = namedTypes[idx].isOptional
+
             for comp in self._sortComponents(comps):
-                substrate += encodeFun(comp, defMode, maxChunkSize)
+                substrate += encodeFun(comp, defMode, maxChunkSize, compsMap[id(comp)])
         else:
             # SetOf
             compSubs = []
@@ -146,12 +134,21 @@ class SetOfEncoder(encoder.SequenceOfEncoder, SetAndSequenceEncoderMixIn):
         return substrate, True, True
 
 
-class SequenceEncoder(encoder.SequenceEncoder, SetAndSequenceEncoderMixIn):
+class SequenceEncoder(encoder.SequenceEncoder):
     def encodeValue(self, encodeFun, value, defMode, maxChunkSize):
         value.verifySizeSpec()
+        namedTypes = value.componentType
         substrate = null
-        for idx in self.componentsToEncode(value):
-            substrate = encodeFun(value[idx], defMode, maxChunkSize) + substrate
+        idx = len(value)
+        while idx > 0:
+            idx -= 1
+            if namedTypes:
+                if namedTypes[idx].isOptional and not value[idx].isValue:
+                    continue
+                if namedTypes[idx].isDefaulted and value[idx] == namedTypes[idx].asn1Object:
+                    continue
+
+            substrate = encodeFun(value[idx], defMode, maxChunkSize, namedTypes[idx].isOptional) + substrate
 
         return substrate, True, True
 
@@ -185,8 +182,8 @@ typeMap.update({
 
 class Encoder(encoder.Encoder):
 
-    def __call__(self, client, defMode=False, maxChunkSize=0):
-        return encoder.Encoder.__call__(self, client, defMode, maxChunkSize)
+    def __call__(self, client, defMode=False, maxChunkSize=0, isOptional=False):
+        return encoder.Encoder.__call__(self, client, defMode, maxChunkSize, isOptional)
 
 
 #: Turns ASN.1 object into CER octet stream.
