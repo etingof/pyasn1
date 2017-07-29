@@ -1833,15 +1833,17 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
 
     @property
     def componentTagMap(self):
-        if self.componentType.asn1Object is not None:
-            return self.componentType.asn1Object.tagMap
+        if (self.componentType is not None and
+                    self.componentType is not noValue):
+            return self.componentType.tagMap
 
     def prettyPrint(self, scope=0):
         scope += 1
         representation = self.__class__.__name__ + ':\n'
         for idx in range(len(self._componentValues)):
             representation += ' ' * scope
-            if self._componentValues[idx] is None:
+            if (self._componentValues[idx] is None and
+                        self.componentType is not noValue):
                 representation += '<empty>'
             else:
                 representation += self._componentValues[idx].prettyPrint(scope)
@@ -1850,9 +1852,10 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
     def prettyPrintType(self, scope=0):
         scope += 1
         representation = '%s -> %s {\n' % (self.tagSet, self.__class__.__name__)
-        if self.componentType.asn1Object is not None:
+        if (self.componentType is not None and
+                    self.componentType is not noValue):
             representation += ' ' * scope
-            representation += self.componentType.asn1Object.prettyPrintType(scope)
+            representation += self.componentType.prettyPrintType(scope)
         return representation + '\n' + ' ' * (scope - 1) + '}'
 
 
