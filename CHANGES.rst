@@ -5,6 +5,7 @@ Revision 0.3.2, released XX-07-2017
 - Fixed GeneralizedTime/UTCTime CER/DER codecs to actually get invoked
 - Fixed DER/CER encoders handling optional SEQUENCE/SET fields containing
   nested SEQUENCE/SET with optional fields.
+- Fixed documentation markup issues.
 
 Revision 0.3.1, released 26-07-2017
 -----------------------------------
