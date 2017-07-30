@@ -21,6 +21,7 @@ __all__ = ['Integer', 'Boolean', 'BitString', 'OctetString', 'Null',
 
 # "Simple" ASN.1 types (yet incomplete)
 
+
 class Integer(base.AbstractSimpleAsn1Item):
     """Create |ASN.1| type or object.
 
@@ -167,7 +168,8 @@ class Integer(base.AbstractSimpleAsn1Item):
         return int(self._value)
 
     if sys.version_info[0] <= 2:
-        def __long__(self): return long(self._value)
+        def __long__(self):
+            return long(self._value)
 
     def __float__(self):
         return float(self._value)
@@ -632,7 +634,7 @@ class BitString(base.AbstractSimpleAsn1Item):
         """Get |ASN.1| value as a text string of bits.
         """
         binString = binary.bin(self._value)[2:]
-        return '0'*(len(self._value) - len(binString)) + binString
+        return '0' * (len(self._value) - len(binString)) + binString
 
     @classmethod
     def fromHexString(cls, value):
@@ -986,8 +988,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
             except UnicodeDecodeError:
                 raise error.PyAsn1Error(
-                    'Can\'t decode string \'%s\' with \'%s\' codec at \'%s\'' % (
-                    value, self.encoding, self.__class__.__name__)
+                    "Can't decode string '%s' with '%s' codec at '%s'" % (value, self.encoding, self.__class__.__name__)
                 )
 
     @staticmethod
@@ -1559,7 +1560,8 @@ class Real(base.AbstractSimpleAsn1Item):
         return int(float(self))
 
     if sys.version_info[0] <= 2:
-        def __long__(self): return long(float(self))
+        def __long__(self):
+            return long(float(self))
 
     def __float__(self):
         if self._value in self._inf:
@@ -1592,7 +1594,8 @@ class Real(base.AbstractSimpleAsn1Item):
         return self.clone(math.ceil(float(self)))
 
     if sys.version_info[0:2] > (2, 5):
-        def __trunc__(self): return self.clone(math.trunc(float(self)))
+        def __trunc__(self):
+            return self.clone(math.trunc(float(self)))
 
     def __lt__(self, value):
         return float(self) < value
@@ -1834,7 +1837,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
     @property
     def componentTagMap(self):
         if (self.componentType is not None and
-                    self.componentType is not noValue):
+                self.componentType is not noValue):
             return self.componentType.tagMap
 
     def prettyPrint(self, scope=0):
@@ -1843,7 +1846,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         for idx in range(len(self._componentValues)):
             representation += ' ' * scope
             if (self._componentValues[idx] is None and
-                        self.componentType is not noValue):
+                    self.componentType is not noValue):
                 representation += '<empty>'
             else:
                 representation += self._componentValues[idx].prettyPrint(scope)
@@ -1853,7 +1856,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         scope += 1
         representation = '%s -> %s {\n' % (self.tagSet, self.__class__.__name__)
         if (self.componentType is not None and
-                    self.componentType is not noValue):
+                self.componentType is not noValue):
             representation += ' ' * scope
             representation += self.componentType.prettyPrintType(scope)
         return representation + '\n' + ' ' * (scope - 1) + '}'
