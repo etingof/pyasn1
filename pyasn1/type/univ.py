@@ -1904,6 +1904,9 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         In other words, if *isValue* is `True`, then the ASN.1 object is
         initialized.
 
+        For the purpose of this check, empty |ASN.1| object is considered
+        as initialized.
+
         Returns
         -------
         : :class:`bool`
@@ -1920,9 +1923,6 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         The PyASN1 value objects can additionally participate in most
         of built-in Python operations.
         """
-        if not self._componentValues:
-            return False
-
         for componentValue in self._componentValues:
             if not componentValue.isValue:
                 return False

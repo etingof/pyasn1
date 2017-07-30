@@ -2,6 +2,8 @@
 Revision 0.3.2, released XX-07-2017
 -----------------------------------
 
+- Fixed .isValue property to return True for empty SetOf/SequenceOf
+  objects
 - Fixed GeneralizedTime/UTCTime CER/DER codecs to actually get invoked
 - Fixed DER/CER encoders handling optional SEQUENCE/SET fields containing
   nested SEQUENCE/SET with optional fields.
