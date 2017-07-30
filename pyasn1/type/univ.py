@@ -673,7 +673,7 @@ class BitString(base.AbstractSimpleAsn1Item):
         Parameters
         ----------
         value: :class:`str` (Py2) or :class:`bytes` (Py3)
-            Text string like '\x01\xff' (Py2) or b'\x01\xff' (Py3)
+            Text string like '\\\\x01\\\\xff' (Py2) or b'\\\\x01\\\\xff' (Py3)
         """
         return cls(cls.SizedInteger(integer.from_bytes(value) >> padding).setBitLength(len(value) * 8 - padding))
 
@@ -1899,20 +1899,26 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
 
     @property
     def isValue(self):
-        """Indicate if |ASN.1| object components represent ASN.1 type or ASN.1 value.
+        """Indicate if |ASN.1| object represents ASN.1 type or ASN.1 value.
 
-        The PyASN1 type objects can only participate in types comparison
-        and serve as a blueprint for serialization codecs to resolve
-        ambiguous types.
-
-        The PyASN1 value objects can additionally participate in most
-        of built-in Python operations.
+        In other words, if *isValue* is `True`, then the ASN.1 object is
+        initialized.
 
         Returns
         -------
         : :class:`bool`
-            :class:`True` if all |ASN.1| components represent value and type,
-            :class:`False` if at least one |ASN.1| component represents just ASN.1 type.
+            :class:`True` if object represents ASN.1 value and type,
+            :class:`False` if object represents just ASN.1 type.
+
+        Note
+        ----
+        There is an important distinction between PyASN1 type and value objects.
+        The PyASN1 type objects can only participate in ASN.1 type
+        operations (subtyping, comparison etc) and serve as a
+        blueprint for serialization codecs to resolve ambiguous types.
+
+        The PyASN1 value objects can additionally participate in most
+        of built-in Python operations.
         """
         if not self._componentValues:
             return False
@@ -2229,20 +2235,29 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
     @property
     def isValue(self):
-        """Indicate if |ASN.1| object components represent ASN.1 type or ASN.1 value.
+        """Indicate if |ASN.1| object represents ASN.1 type or ASN.1 value.
 
-        The PyASN1 type objects can only participate in types comparison
-        and serve as a blueprint for serialization codecs to resolve
-        ambiguous types.
+        In other words, if *isValue* is `True`, then the ASN.1 object is
+        initialized.
 
-        The PyASN1 value objects can additionally participate in most
-        of built-in Python operations.
+        For the purpose of check, the *OPTIONAL* and *DEFAULT* fields are
+        unconditionally considered as initialized.
 
         Returns
         -------
         : :class:`bool`
-            :class:`True` if all |ASN.1| components represent value and type,
-            :class:`False` if at least one |ASN.1| component represents just ASN.1 type.
+            :class:`True` if object represents ASN.1 value and type,
+            :class:`False` if object represents just ASN.1 type.
+
+        Note
+        ----
+        There is an important distinction between PyASN1 type and value objects.
+        The PyASN1 type objects can only participate in ASN.1 type
+        operations (subtyping, comparison etc) and serve as a
+        blueprint for serialization codecs to resolve ambiguous types.
+
+        The PyASN1 value objects can additionally participate in most
+        of built-in Python operations.
         """
         componentType = self.componentType
 

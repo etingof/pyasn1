@@ -286,12 +286,8 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
     def isValue(self):
         """Indicate if |ASN.1| object represents ASN.1 type or ASN.1 value.
 
-        The PyASN1 type objects can only participate in types comparison
-        and serve as a blueprint for serialization codecs to resolve
-        ambiguous types.
-
-        The PyASN1 value objects can additionally participate in most
-        of built-in Python operations.
+        In other words, if *isValue* is `True`, then the ASN.1 object is
+        initialized.
 
         Returns
         -------
@@ -299,6 +295,15 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
             :class:`True` if object represents ASN.1 value and type,
             :class:`False` if object represents just ASN.1 type.
 
+        Note
+        ----
+        There is an important distinction between PyASN1 type and value objects.
+        The PyASN1 type objects can only participate in ASN.1 type
+        operations (subtyping, comparison etc) and serve as a
+        blueprint for serialization codecs to resolve ambiguous types.
+
+        The PyASN1 value objects can additionally participate in most
+        of built-in Python operations.
         """
         return self._value is not noValue
 
