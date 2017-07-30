@@ -484,7 +484,7 @@ class BitString(base.AbstractSimpleAsn1Item):
 
         Parameters
         ----------
-        value : :class:`int`, :class:`str` or |ASN.1| object
+        value: :class:`int`, :class:`str` or |ASN.1| object
             Initialization value to pass to new ASN.1 object instead of
             inheriting one from the caller.
 
@@ -638,6 +638,13 @@ class BitString(base.AbstractSimpleAsn1Item):
 
     @classmethod
     def fromHexString(cls, value):
+        """Create a |ASN.1| object initialized from the hex string.
+        
+        Parameters
+        ----------
+        value: :class:`str`
+            Text string like 'DEADBEEF'
+        """
         try:
             return cls.SizedInteger(value, 16).setBitLength(len(value) * 4)
 
@@ -646,6 +653,13 @@ class BitString(base.AbstractSimpleAsn1Item):
 
     @classmethod
     def fromBinaryString(cls, value):
+        """Create a |ASN.1| object initialized from a string of '0' and '1'.
+
+        Parameters
+        ----------
+        value: :class:`str`
+            Text string like '1010111'
+        """
         try:
             return cls.SizedInteger(value or '0', 2).setBitLength(len(value))
 
@@ -654,6 +668,13 @@ class BitString(base.AbstractSimpleAsn1Item):
 
     @classmethod
     def fromOctetString(cls, value, padding=0):
+        """Create a |ASN.1| object initialized from a string.
+
+        Parameters
+        ----------
+        value: :class:`str` (Py2) or :class:`bytes` (Py3)
+            Text string like '\x01\xff' (Py2) or b'\x01\xff' (Py3)
+        """
         return cls(cls.SizedInteger(integer.from_bytes(value) >> padding).setBitLength(len(value) * 8 - padding))
 
     def prettyIn(self, value):
@@ -993,6 +1014,13 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
     @staticmethod
     def fromBinaryString(value):
+        """Create a |ASN.1| object initialized from a string of '0' and '1'.
+
+        Parameters
+        ----------
+        value: :class:`str`
+            Text string like '1010111'
+        """
         bitNo = 8
         byte = 0
         r = []
@@ -1017,6 +1045,13 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
     @staticmethod
     def fromHexString(value):
+        """Create a |ASN.1| object initialized from the hex string.
+
+        Parameters
+        ----------
+        value: :class:`str`
+            Text string like 'DEADBEEF'
+        """
         r = []
         p = []
         for v in value:

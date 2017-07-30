@@ -5,7 +5,7 @@
 ------------
 
 .. autoclass:: pyasn1.type.univ.BitString(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), namedValues=NamedValues(),binValue=NoValue(), hexValue=NoValue())
-   :members: isValue, isSameTypeWith, isSuperTypeOf, tagSet, effectiveTagSet, tagMap, subtypeSpec, asInteger, asNumbers, asOctets, asBinary
+   :members: isValue, isSameTypeWith, isSuperTypeOf, tagSet, effectiveTagSet, tagMap, subtypeSpec, asInteger, asNumbers, asOctets, asBinary, fromHexString, fromBinaryString, fromOctetString
 
    .. note::
 
