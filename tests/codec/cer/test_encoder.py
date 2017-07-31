@@ -274,32 +274,127 @@ class NestedOptionalSequenceEncoderTestCase(unittest.TestCase):
         self.s2[0][1] = 123
         return self.s2
 
-    def testDefModeOptionalWithDefaultAndOptional(self):
+    def testOptionalWithDefaultAndOptional(self):
         s = self.__initOptionalWithDefaultAndOptional()
         assert encoder.encode(s) == ints2octs((48, 128, 48, 128, 4, 4, 116, 101, 115, 116, 2, 1, 123, 0, 0, 0, 0))
-    def testDefModeOptionalWithDefault(self):
+
+    def testOptionalWithDefault(self):
         s = self.__initOptionalWithDefault()
         assert encoder.encode(s) == ints2octs((48, 128, 48, 128, 2, 1, 123, 0, 0, 0, 0))
 
-    def testDefModeOptionalWithOptional(self):
+    def testOptionalWithOptional(self):
         s = self.__initOptionalWithOptional()
         assert encoder.encode(s) == ints2octs((48, 128, 48, 128, 4, 4, 116, 101, 115, 116, 0, 0, 0, 0))
 
-    def testDefModeOptional(self):
+    def testOptional(self):
         s = self.__initOptional()
         assert encoder.encode(s) == ints2octs((48, 128, 0, 0))
 
-    def testDefModeDefaultWithDefaultAndOptional(self):
+    def testDefaultWithDefaultAndOptional(self):
         s = self.__initDefaultWithDefaultAndOptional()
         assert encoder.encode(s) == ints2octs((48, 128, 48, 128, 4, 4, 116, 101, 115, 116, 2, 1, 123, 0, 0, 0, 0))
 
-    def testDefModeDefaultWithDefault(self):
+    def testDefaultWithDefault(self):
         s = self.__initDefaultWithDefault()
         assert encoder.encode(s) == ints2octs((48, 128, 48, 128, 4, 4, 116, 101, 115, 116, 0, 0, 0, 0))
 
-    def testDefModeDefaultWithOptional(self):
+    def testDefaultWithOptional(self):
         s = self.__initDefaultWithOptional()
         assert encoder.encode(s) == ints2octs((48, 128, 48, 128, 2, 1, 123, 0, 0, 0, 0))
+
+
+class NestedOptionalChoiceEncoderTestCase(unittest.TestCase):
+    def setUp(self):
+        layer3 = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.OptionalNamedType('first-name', univ.OctetString()),
+                namedtype.DefaultedNamedType('age', univ.Integer(33)),
+            )
+        )
+
+        layer2 = univ.Choice(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType('inner', layer3),
+                namedtype.NamedType('first-name', univ.OctetString())
+            )
+        )
+
+        layer1 = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.OptionalNamedType('inner', layer2),
+            )
+        )
+
+        self.s = layer1
+
+    def __initOptionalWithDefaultAndOptional(self):
+        self.s.clear()
+        self.s[0][0][0] = 'test'
+        self.s[0][0][1] = 123
+        return self.s
+
+    def __initOptionalWithDefault(self):
+        self.s.clear()
+        self.s[0][0][1] = 123
+        return self.s
+
+    def __initOptionalWithOptional(self):
+        self.s.clear()
+        self.s[0][0][0] = 'test'
+        return self.s
+
+    def __initOptional(self):
+        self.s.clear()
+        return self.s
+
+    def testOptionalWithDefaultAndOptional(self):
+        s = self.__initOptionalWithDefaultAndOptional()
+        assert encoder.encode(s) == ints2octs((48, 128, 48, 128, 4, 4, 116, 101, 115, 116, 2, 1, 123, 0, 0, 0, 0))
+
+    def testOptionalWithDefault(self):
+        s = self.__initOptionalWithDefault()
+        assert encoder.encode(s) == ints2octs((48, 128, 48, 128, 2, 1, 123, 0, 0, 0, 0))
+
+    def testOptionalWithOptional(self):
+        s = self.__initOptionalWithOptional()
+        assert encoder.encode(s) == ints2octs((48, 128, 48, 128, 4, 4, 116, 101, 115, 116, 0, 0, 0, 0))
+
+    def testOptional(self):
+        s = self.__initOptional()
+        assert encoder.encode(s) == ints2octs((48, 128, 0, 0))
+
+
+class NestedOptionalSequenceOfEncoderTestCase(unittest.TestCase):
+    def setUp(self):
+        layer2 = univ.SequenceOf(
+            componentType=univ.OctetString()
+        )
+
+        layer1 = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.OptionalNamedType('inner', layer2),
+            )
+        )
+
+        self.s = layer1
+
+    def __initOptionalWithValue(self):
+        self.s.clear()
+        self.s[0][0] = 'test'
+        return self.s
+
+    def __initOptional(self):
+        self.s.clear()
+        return self.s
+
+    def testOptionalWithValue(self):
+        s = self.__initOptionalWithValue()
+        assert encoder.encode(s) == ints2octs((48, 128, 48, 128, 4, 4, 116, 101, 115, 116, 0, 0, 0, 0))
+
+    def testOptional(self):
+        s = self.__initOptional()
+        assert encoder.encode(s) == ints2octs((48, 128, 0, 0))
+
 
 suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])
 
