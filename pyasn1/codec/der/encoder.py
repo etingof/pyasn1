@@ -12,15 +12,15 @@ __all__ = ['encode']
 
 
 class BitStringEncoder(encoder.BitStringEncoder):
-    def encodeValue(self, encodeFun, client, defMode, maxChunkSize):
+    def encodeValue(self, encodeFun, value, defMode, maxChunkSize, ifNotEmpty=False):
         return encoder.BitStringEncoder.encodeValue(
-            self, encodeFun, client, defMode, 0
+            self, encodeFun, value, defMode, 0, ifNotEmpty=ifNotEmpty
         )
 
 class OctetStringEncoder(encoder.OctetStringEncoder):
-    def encodeValue(self, encodeFun, client, defMode, maxChunkSize):
+    def encodeValue(self, encodeFun, value, defMode, maxChunkSize, ifNotEmpty=False):
         return encoder.OctetStringEncoder.encodeValue(
-            self, encodeFun, client, defMode, 0
+            self, encodeFun, value, defMode, 0, ifNotEmpty=ifNotEmpty
         )
 
 class SetOfEncoder(encoder.SetOfEncoder):
@@ -50,10 +50,10 @@ typeMap.update({
 class Encoder(encoder.Encoder):
     supportIndefLength = False
 
-    def __call__(self, client, defMode=True, maxChunkSize=0, isOptional=False):
+    def __call__(self, value, defMode=True, maxChunkSize=0, ifNotEmpty=False):
         if not defMode:
             raise error.PyAsn1Error('DER forbids indefinite length mode')
-        return encoder.Encoder.__call__(self, client, defMode, maxChunkSize, isOptional)
+        return encoder.Encoder.__call__(self, value, defMode, maxChunkSize, ifNotEmpty=ifNotEmpty)
 
 #: Turns ASN.1 object into DER octet stream.
 #:
