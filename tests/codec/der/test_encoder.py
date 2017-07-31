@@ -64,6 +64,189 @@ class SetWithChoiceEncoderTestCase(unittest.TestCase):
         self.s.getComponentByName('status').setComponentByPosition(1, True)
         assert encoder.encode(self.s) == ints2octs((49, 6, 1, 1, 255, 2, 1, 5))
 
+
+class NestedOptionalSequenceEncoderTestCase(unittest.TestCase):
+    def setUp(self):
+        inner = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.OptionalNamedType('first-name', univ.OctetString()),
+                namedtype.DefaultedNamedType('age', univ.Integer(33)),
+            )
+        )
+
+        outerWithOptional = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.OptionalNamedType('inner', inner),
+            )
+        )
+
+        outerWithDefault = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.DefaultedNamedType('inner', inner),
+            )
+        )
+
+        self.s1 = outerWithOptional
+        self.s2 = outerWithDefault
+
+    def __initOptionalWithDefaultAndOptional(self):
+        self.s1.clear()
+        self.s1[0][0] = 'test'
+        self.s1[0][1] = 123
+        return self.s1
+
+    def __initOptionalWithDefault(self):
+        self.s1.clear()
+        self.s1[0][1] = 123
+        return self.s1
+
+    def __initOptionalWithOptional(self):
+        self.s1.clear()
+        self.s1[0][0] = 'test'
+        return self.s1
+
+    def __initOptional(self):
+        self.s1.clear()
+        return self.s1
+
+    def __initDefaultWithDefaultAndOptional(self):
+        self.s2.clear()
+        self.s2[0][0] = 'test'
+        self.s2[0][1] = 123
+        return self.s2
+
+    def __initDefaultWithDefault(self):
+        self.s2.clear()
+        self.s2[0][0] = 'test'
+        return self.s2
+
+    def __initDefaultWithOptional(self):
+        self.s2.clear()
+        self.s2[0][1] = 123
+        return self.s2
+
+    def testDefModeOptionalWithDefaultAndOptional(self):
+        s = self.__initOptionalWithDefaultAndOptional()
+        assert encoder.encode(s) == ints2octs((48, 11, 48, 9, 4, 4, 116, 101, 115, 116, 2, 1, 123))
+
+    def testDefModeOptionalWithDefault(self):
+        s = self.__initOptionalWithDefault()
+        assert encoder.encode(s) == ints2octs((48, 5, 48, 3, 2, 1, 123))
+
+    def testDefModeOptionalWithOptional(self):
+        s = self.__initOptionalWithOptional()
+        assert encoder.encode(s) == ints2octs((48, 8, 48, 6, 4, 4, 116, 101, 115, 116))
+
+    def testDefModeOptional(self):
+        s = self.__initOptional()
+        assert encoder.encode(s) == ints2octs((48, 0))
+
+    def testDefModeDefaultWithDefaultAndOptional(self):
+        s = self.__initDefaultWithDefaultAndOptional()
+        assert encoder.encode(s) == ints2octs((48, 11, 48, 9, 4, 4, 116, 101, 115, 116, 2, 1, 123))
+
+    def testDefModeDefaultWithDefault(self):
+        s = self.__initDefaultWithDefault()
+        assert encoder.encode(s) == ints2octs((48, 8, 48, 6, 4, 4, 116, 101, 115, 116))
+
+    def testDefModeDefaultWithOptional(self):
+        s = self.__initDefaultWithOptional()
+        assert encoder.encode(s) == ints2octs((48, 5, 48, 3, 2, 1, 123))
+
+
+class NestedOptionalChoiceEncoderTestCase(unittest.TestCase):
+    def setUp(self):
+        layer3 = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.OptionalNamedType('first-name', univ.OctetString()),
+                namedtype.DefaultedNamedType('age', univ.Integer(33)),
+            )
+        )
+
+        layer2 = univ.Choice(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType('inner', layer3),
+                namedtype.NamedType('first-name', univ.OctetString())
+            )
+        )
+
+        layer1 = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.OptionalNamedType('inner', layer2),
+            )
+        )
+
+        self.s = layer1
+
+    def __initOptionalWithDefaultAndOptional(self):
+        self.s.clear()
+        self.s[0][0][0] = 'test'
+        self.s[0][0][1] = 123
+        return self.s
+
+    def __initOptionalWithDefault(self):
+        self.s.clear()
+        self.s[0][0][1] = 123
+        return self.s
+
+    def __initOptionalWithOptional(self):
+        self.s.clear()
+        self.s[0][0][0] = 'test'
+        return self.s
+
+    def __initOptional(self):
+        self.s.clear()
+        return self.s
+
+    def testDefModeOptionalWithDefaultAndOptional(self):
+        s = self.__initOptionalWithDefaultAndOptional()
+        assert encoder.encode(s) == ints2octs((48, 11, 48, 9, 4, 4, 116, 101, 115, 116, 2, 1, 123))
+
+    def testDefModeOptionalWithDefault(self):
+        s = self.__initOptionalWithDefault()
+        assert encoder.encode(s) == ints2octs((48, 5, 48, 3, 2, 1, 123))
+
+    def testDefModeOptionalWithOptional(self):
+        s = self.__initOptionalWithOptional()
+        assert encoder.encode(s) == ints2octs((48, 8, 48, 6, 4, 4, 116, 101, 115, 116))
+
+    def testDefModeOptional(self):
+        s = self.__initOptional()
+        assert encoder.encode(s) == ints2octs((48, 0))
+
+
+class NestedOptionalSequenceOfEncoderTestCase(unittest.TestCase):
+    def setUp(self):
+        layer2 = univ.SequenceOf(
+            componentType=univ.OctetString()
+        )
+
+        layer1 = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.OptionalNamedType('inner', layer2),
+            )
+        )
+
+        self.s = layer1
+
+    def __initOptionalWithValue(self):
+        self.s.clear()
+        self.s[0][0] = 'test'
+        return self.s
+
+    def __initOptional(self):
+        self.s.clear()
+        return self.s
+
+    def testDefModeOptionalWithValue(self):
+        s = self.__initOptionalWithValue()
+        assert encoder.encode(s) == ints2octs((48, 8, 48, 6, 4, 4, 116, 101, 115, 116))
+
+    def testDefModeOptional(self):
+        s = self.__initOptional()
+        assert encoder.encode(s) == ints2octs((48, 0))
+
+
 suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])
 
 if __name__ == '__main__':
