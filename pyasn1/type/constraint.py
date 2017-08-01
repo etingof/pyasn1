@@ -25,7 +25,7 @@ class AbstractConstraint(object):
     def __init__(self, *values):
         self._valueMap = set()
         self._setValues(values)
-        self.__hashedValues = None
+        self.__hash = hash((self.__class__.__name__, self._values))
 
     def __call__(self, value, idx=None):
         if not self._values:
@@ -71,9 +71,7 @@ class AbstractConstraint(object):
             return self._values and True or False
 
     def __hash__(self):
-        if self.__hashedValues is None:
-            self.__hashedValues = hash((self.__class__.__name__, self._values))
-        return self.__hashedValues
+        return self.__hash
 
     def _setValues(self, values):
         self._values = values

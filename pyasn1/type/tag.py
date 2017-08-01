@@ -178,7 +178,7 @@ class TagSet(object):
             [(superTag.tagClass, superTag.tagId) for superTag in superTags]
         )
         self.__lenOfSuperTags = len(superTags)
-        self.__lazyHash = None
+        self.__hash = hash(self.__superTags)
 
     def __str__(self):
         return self.__superTags and '+'.join([str(x) for x in self.__superTags]) or '[untagged]'
@@ -219,9 +219,7 @@ class TagSet(object):
         return self.__superTagsSignature >= other
 
     def __hash__(self):
-        if self.__lazyHash is None:
-            self.__lazyHash = hash(self.__superTags)
-        return self.__lazyHash
+        return self.__hash
 
     def __len__(self):
         return self.__lenOfSuperTags
@@ -266,7 +264,7 @@ class TagSet(object):
             New *TagSet* object
         """
         if superTag.tagClass == tagClassUniversal:
-            raise error.PyAsn1Error('Can\'t tag with UNIVERSAL class tag')
+            raise error.PyAsn1Error("Can't tag with UNIVERSAL class tag")
         if superTag.tagFormat != tagFormatConstructed:
             superTag = Tag(superTag.tagClass, tagFormatConstructed, superTag.tagId)
         return self + superTag

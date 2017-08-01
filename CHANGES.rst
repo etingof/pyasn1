@@ -1,7 +1,9 @@
 
-Revision 0.3.2, released XX-07-2017
+Revision 0.3.2, released XX-08-2017
 -----------------------------------
 
+- Fixed threading concurrency issues by moving lazy computation
+  into instance initializer.
 - Fixed .isValue property to return True for empty SetOf/SequenceOf
   objects
 - Fixed GeneralizedTime/UTCTime CER/DER codecs to actually get invoked
