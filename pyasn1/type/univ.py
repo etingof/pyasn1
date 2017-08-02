@@ -951,9 +951,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
             return str(self._value)
 
         def asNumbers(self):
-            if self.__asNumbersCache is None:
-                self.__asNumbersCache = tuple([ord(x) for x in self._value])
-            return self.__asNumbersCache
+            return tuple([ord(x) for x in self._value])
 
     else:
         def prettyIn(self, value):
@@ -991,9 +989,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
             return bytes(self._value)
 
         def asNumbers(self):
-            if self.__asNumbersCache is None:
-                self.__asNumbersCache = tuple(self._value)
-            return self.__asNumbersCache
+            return tuple(self._value)
 
     def prettyOut(self, value):
         if sys.version_info[0] <= 2:

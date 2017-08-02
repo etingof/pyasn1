@@ -61,7 +61,7 @@ class Tag(object):
         self.__tagFormat = tagFormat
         self.__tagId = tagId
         self.__tagClassId = tagClass, tagId
-        self.__lazyHash = None
+        self.__hash = hash(self.__tagClassId)
 
     def __str__(self):
         return '[%s:%s:%s]' % (self.__tagClass, self.__tagFormat, self.__tagId)
@@ -90,9 +90,7 @@ class Tag(object):
         return self.__tagClassId >= other
 
     def __hash__(self):
-        if self.__lazyHash is None:
-            self.__lazyHash = hash(self.__tagClassId)
-        return self.__lazyHash
+        return self.__hash
 
     def __getitem__(self, idx):
         if idx == 0:
