@@ -1012,7 +1012,7 @@ class Decoder(object):
                     logger('codec %s yields type %s, value:\n%s\n...remaining substrate is: %s' % (concreteDecoder.__class__.__name__, value.__class__.__name__, value.prettyPrint(), substrate and debug.hexdump(substrate) or '<none>'))
             if state is stErrorCondition:
                 raise error.PyAsn1Error(
-                    '%s not in asn1Spec: %s' % (tagSet, asn1Spec)
+                    '%s not in asn1Spec: %r' % (tagSet, asn1Spec)
                 )
         if logger:
             debug.scope.pop()
