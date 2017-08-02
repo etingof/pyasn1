@@ -939,6 +939,20 @@ class SequenceOf(unittest.TestCase):
         assert len(s) == 1
         assert s == [str2octs('abc')]
 
+    def testLegacyInitializer(self):
+        n = univ.SequenceOf(
+            componentType=univ.OctetString()
+        )
+        o = univ.SequenceOf(
+            univ.OctetString()  # this is the old way
+        )
+
+        assert n.isSameTypeWith(o) and o.isSameTypeWith(n)
+
+        n[0] = 'fox'
+        o[0] = 'fox'
+
+        assert n == o
 
 class Sequence(unittest.TestCase):
     def setUp(self):
