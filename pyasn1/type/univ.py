@@ -1718,6 +1718,17 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         Object representing collection size constraint
      """
 
+    def __init__(self, *args, **kwargs):
+        # support positional params for backward compatibility
+        if args:
+            for key, value in zip(('componentType', 'tagSet',
+                                   'subtypeSpec', 'sizeSpec'), args):
+                if key in kwargs:
+                    raise error.PyAsn1Error('Conflicting positional and keyword params!')
+                kwargs['componentType'] = value
+
+        base.AbstractConstructedAsn1Item.__init__(self, **kwargs)
+
     # Python list protocol
 
     def clear(self):

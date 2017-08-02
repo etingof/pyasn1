@@ -2,6 +2,8 @@
 Revision 0.3.2, released XX-08-2017
 -----------------------------------
 
+- Fixed SequenceOf/SetOf types initialization syntax to remain
+  backward compatible with pyasn1 0.2.*
 - Rectified thread safety issues by moving lazy, run-time computation
   into object initializer.
 - Fixed .isValue property to return True for empty SetOf/SequenceOf
