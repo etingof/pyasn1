@@ -5,7 +5,7 @@
 # License: http://pyasn1.sf.net/license.html
 #
 import sys
-from pyasn1.type import tagmap
+from pyasn1.type import tag, tagmap
 from pyasn1 import error
 
 __all__ = ['NamedType', 'OptionalNamedType', 'DefaultedNamedType', 'NamedTypes']
@@ -109,13 +109,17 @@ class NamedTypes(object):
     def __init__(self, *namedTypes):
         self.__namedTypes = namedTypes
         self.__namedTypesLen = len(self.__namedTypes)
-        self.__minTagSet = None
-        self.__tagToPosMapImpl = None
-        self.__nameToPosMapImpl = None
-        self.__ambigiousTypesImpl = None
-        self.__tagMap = {}
-        self.__hasOptionalOrDefault = None
-        self.__requiredComponents = None
+        self.__minTagSet = self.__computeMinTagSet()
+        self.__nameToPosMap = self.__computeNameToPosMap()
+        self.__tagToPosMap = self.__computeTagToPosMap()
+        self.__ambiguousTypes = self.__computeAmbiguousTypes()
+        self.__uniqueTagMap = self.__computeTagMaps(unique=True)
+        self.__nonUniqueTagMap = self.__computeTagMaps(unique=False)
+        self.__hasOptionalOrDefault = bool([True for namedType in self.__namedTypes
+                                            if namedType.isDefaulted or namedType.isOptional])
+        self.__requiredComponents = frozenset(
+                [idx for idx, nt in enumerate(self.__namedTypes) if not nt.isOptional and not nt.isDefaulted]
+            )
 
     def __repr__(self):
         return '%s(%s)' % (
@@ -180,44 +184,50 @@ class NamedTypes(object):
     def clone(self):
         return self.__class__(*self.__namedTypes)
 
-    @property
-    def __tagToPosMap(self):
-        if self.__tagToPosMapImpl is None:
-            self.__tagToPosMapImpl = {}
-            for idx, namedType in enumerate(self.__namedTypes):
-                tagMap = namedType.asn1Object.tagMap
-                if not tagMap:
-                    continue
-                for _tagSet in tagMap.presentTypes:
-                    if _tagSet in self.__tagToPosMapImpl:
-                        raise error.PyAsn1Error('Duplicate type %s in %s' % (_tagSet, namedType))
-                    self.__tagToPosMapImpl[_tagSet] = idx
+    class PostponedError(object):
+        def __init__(self, errorMsg):
+            self.__errorMsg = errorMsg
 
-        return self.__tagToPosMapImpl
+        def __getitem__(self, item):
+            raise  error.PyAsn1Error(self.__errorMsg)
 
-    @property
-    def __nameToPosMap(self):
-        if self.__nameToPosMapImpl is None:
-            self.__nameToPosMapImpl = {}
-            for idx, namedType in enumerate(self.__namedTypes):
-                if namedType.name in self.__nameToPosMapImpl:
-                    raise error.PyAsn1Error('Duplicate name %s in %s' % (namedType.name, namedType))
-                self.__nameToPosMapImpl[namedType.name] = idx
+    def __computeTagToPosMap(self):
+        tagToPosMap = {}
+        for idx, namedType in enumerate(self.__namedTypes):
+            tagMap = namedType.asn1Object.tagMap
+            if isinstance(tagMap, NamedTypes.PostponedError):
+                return tagMap
+            if not tagMap:
+                continue
+            for _tagSet in tagMap.presentTypes:
+                if _tagSet in tagToPosMap:
+                    return NamedTypes.PostponedError('Duplicate component tag %s at %s' % (_tagSet, namedType))
+                tagToPosMap[_tagSet] = idx
 
-        return self.__nameToPosMapImpl
+        return tagToPosMap
 
-    @property
-    def __ambigiousTypes(self):
-        if self.__ambigiousTypesImpl is None:
-            self.__ambigiousTypesImpl = {}
-            ambigiousTypes = ()
-            for idx, namedType in reversed(tuple(enumerate(self.__namedTypes))):
-                if namedType.isOptional or namedType.isDefaulted:
-                    ambigiousTypes = (namedType,) + ambigiousTypes
-                else:
-                    ambigiousTypes = (namedType,)
-                self.__ambigiousTypesImpl[idx] = NamedTypes(*ambigiousTypes)
-        return self.__ambigiousTypesImpl
+    def __computeNameToPosMap(self):
+        nameToPosMap = {}
+        for idx, namedType in enumerate(self.__namedTypes):
+            if namedType.name in nameToPosMap:
+                return NamedTypes.PostponedError('Duplicate component name %s at %s' % (namedType.name, namedType))
+            nameToPosMap[namedType.name] = idx
+
+        return nameToPosMap
+
+    def __computeAmbiguousTypes(self):
+        ambigiousTypes = {}
+        partialAmbigiousTypes = ()
+        for idx, namedType in reversed(tuple(enumerate(self.__namedTypes))):
+            if namedType.isOptional or namedType.isDefaulted:
+                partialAmbigiousTypes = (namedType,) + partialAmbigiousTypes
+            else:
+                partialAmbigiousTypes = (namedType,)
+            if len(partialAmbigiousTypes) == len(self.__namedTypes):
+                ambigiousTypes[idx] = self
+            else:
+                ambigiousTypes[idx] = NamedTypes(*partialAmbigiousTypes)
+        return ambigiousTypes
 
     def getTypeByPosition(self, idx):
         """Return ASN.1 type object by its position in fields set.
@@ -339,7 +349,7 @@ class NamedTypes(object):
             If given position is out of fields range
         """
         try:
-            return self.__ambigiousTypes[idx].tagMap
+            return self.__ambiguousTypes[idx].tagMap
 
         except KeyError:
             raise error.PyAsn1Error('Type position out of range')
@@ -372,10 +382,23 @@ class NamedTypes(object):
             or *idx* is out of fields range
         """
         try:
-            return idx + self.__ambigiousTypes[idx].getPositionByType(tagSet)
+            return idx + self.__ambiguousTypes[idx].getPositionByType(tagSet)
 
         except KeyError:
             raise error.PyAsn1Error('Type position out of range')
+
+    def __computeMinTagSet(self):
+        minTagSet = None
+        for namedType in self.__namedTypes:
+            asn1Object = namedType.asn1Object
+            try:
+                tagSet = asn1Object.minTagSet
+
+            except AttributeError:
+                tagSet = asn1Object.tagSet
+            if minTagSet is None or tagSet < minTagSet:
+                minTagSet = tagSet
+        return minTagSet or tag.TagSet()
 
     @property
     def minTagSet(self):
@@ -390,39 +413,28 @@ class NamedTypes(object):
         : :class:`~pyasn1.type.tagset.TagSet`
             Minimal TagSet among ASN.1 types in callee *NamedTypes*
         """
-        if self.__minTagSet is None:
-            for namedType in self.__namedTypes:
-                asn1Object = namedType.asn1Object
-                try:
-                    tagSet = asn1Object.minTagSet
-
-                except AttributeError:
-                    tagSet = asn1Object.tagSet
-                if self.__minTagSet is None or tagSet < self.__minTagSet:
-                    self.__minTagSet = tagSet
         return self.__minTagSet
 
-    def __getTagMap(self, unique):
-        if unique not in self.__tagMap:
-            presentTypes = {}
-            skipTypes = {}
-            defaultType = None
-            for namedType in self.__namedTypes:
-                tagMap = namedType.asn1Object.tagMap
-                for tagSet in tagMap:
-                    if unique and tagSet in presentTypes:
-                        raise error.PyAsn1Error('Non-unique tagSet %s' % (tagSet,))
-                    presentTypes[tagSet] = namedType.asn1Object
-                skipTypes.update(tagMap.skipTypes)
+    def __computeTagMaps(self, unique):
+        presentTypes = {}
+        skipTypes = {}
+        defaultType = None
+        for namedType in self.__namedTypes:
+            tagMap = namedType.asn1Object.tagMap
+            if isinstance(tagMap, NamedTypes.PostponedError):
+                return tagMap
+            for tagSet in tagMap:
+                if unique and tagSet in presentTypes:
+                    return NamedTypes.PostponedError('Non-unique tagSet %s of %s at %s' % (tagSet, namedType, self))
+                presentTypes[tagSet] = namedType.asn1Object
+            skipTypes.update(tagMap.skipTypes)
 
-                if defaultType is None:
-                    defaultType = tagMap.defaultType
-                elif tagMap.defaultType is not None:
-                    raise error.PyAsn1Error('Duplicate default ASN.1 type at %s' % (self,))
+            if defaultType is None:
+                defaultType = tagMap.defaultType
+            elif tagMap.defaultType is not None:
+                raise error.PyAsn1Error('Duplicate default ASN.1 type at %s' % (self,))
 
-            self.__tagMap[unique] = tagmap.TagMap(presentTypes, skipTypes, defaultType)
-
-        return self.__tagMap[unique]
+        return tagmap.TagMap(presentTypes, skipTypes, defaultType)
 
     @property
     def tagMap(self):
@@ -447,7 +459,7 @@ class NamedTypes(object):
 
            Integer.tagSet -> Choice
         """
-        return self.__getTagMap(unique=False)
+        return self.__nonUniqueTagMap
 
     @property
     def tagMapUnique(self):
@@ -478,12 +490,10 @@ class NamedTypes(object):
         Duplicate *TagSet* objects found in the tree of children
         types would cause error.
         """
-        return self.__getTagMap(unique=True)
+        return self.__uniqueTagMap
 
     @property
     def hasOptionalOrDefault(self):
-        if self.__hasOptionalOrDefault is None:
-            self.__hasOptionalOrDefault = bool([True for namedType in self.__namedTypes if namedType.isDefaulted or namedType.isOptional])
         return self.__hasOptionalOrDefault
 
     @property
@@ -492,8 +502,4 @@ class NamedTypes(object):
 
     @property
     def requiredComponents(self):
-        if self.__requiredComponents is None:
-            self.__requiredComponents = frozenset(
-                [idx for idx, nt in enumerate(self.__namedTypes) if not nt.isOptional and not nt.isDefaulted]
-            )
         return self.__requiredComponents

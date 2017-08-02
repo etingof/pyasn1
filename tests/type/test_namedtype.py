@@ -92,7 +92,7 @@ class NamedTypesCaseBase(unittest.TestCase):
 
     def testGetTagMapWithDups(self):
         try:
-            self.e.tagMapUnique
+            self.e.tagMapUnique[0]
         except PyAsn1Error:
             pass
         else:

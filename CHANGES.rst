@@ -1,7 +1,9 @@
 
-Revision 0.3.2, released XX-07-2017
+Revision 0.3.2, released XX-08-2017
 -----------------------------------
 
+- Rectified thread safety issues by moving lazy, run-time computation
+  into object initializer.
 - Fixed .isValue property to return True for empty SetOf/SequenceOf
   objects
 - Fixed GeneralizedTime/UTCTime CER/DER codecs to actually get invoked
