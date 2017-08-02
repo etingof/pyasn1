@@ -195,6 +195,8 @@ class NamedTypes(object):
         tagToPosMap = {}
         for idx, namedType in enumerate(self.__namedTypes):
             tagMap = namedType.asn1Object.tagMap
+            if isinstance(tagMap, NamedTypes.PostponedError):
+                return tagMap
             if not tagMap:
                 continue
             for _tagSet in tagMap.presentTypes:
@@ -419,6 +421,8 @@ class NamedTypes(object):
         defaultType = None
         for namedType in self.__namedTypes:
             tagMap = namedType.asn1Object.tagMap
+            if isinstance(tagMap, NamedTypes.PostponedError):
+                return tagMap
             for tagSet in tagMap:
                 if unique and tagSet in presentTypes:
                     return NamedTypes.PostponedError('Non-unique tagSet %s of %s at %s' % (tagSet, namedType, self))
