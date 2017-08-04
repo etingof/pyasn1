@@ -5,7 +5,8 @@
 # License: http://pyasn1.sf.net/license.html
 #
 import sys
-from pyasn1.type import tag, tagmap
+import functools
+from pyasn1.type import tag, tagmap, forwardref
 from pyasn1 import error
 
 __all__ = ['NamedType', 'OptionalNamedType', 'DefaultedNamedType', 'NamedTypes']
@@ -109,6 +110,25 @@ class NamedTypes(object):
     def __init__(self, *namedTypes, **kwargs):
         self.__namedTypes = namedTypes
         self.__namedTypesLen = len(self.__namedTypes)
+
+        def updateNameType(self, idx, name, obj):
+            # TODO: better way to do in-place update?
+            nt = list(self.__namedTypes)
+            nt[idx] = NamedType(name, obj)
+            self.__namedTypes = tuple(nt)
+            self.initialize()
+
+        for idx, namedType in enumerate(namedTypes):
+            if isinstance(namedType.asn1Object, forwardref.ForwardRef):
+                cbFun = functools.partial(updateNameType, self, idx, namedType.name)
+                namedType.asn1Object.callLater(cbFun)
+
+        self.initialize()
+
+    def initialize(self):
+        if any(isinstance(x.asn1Object, forwardref.ForwardRef) for x in self.__namedTypes):
+            return
+        # TODO: verify initialization status
         self.__minTagSet = self.__computeMinTagSet()
         self.__nameToPosMap = self.__computeNameToPosMap()
         self.__tagToPosMap = self.__computeTagToPosMap()
