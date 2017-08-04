@@ -6,7 +6,7 @@
 #
 import sys
 import math
-from pyasn1.type import univ, tag, constraint, namedtype, namedval, error
+from pyasn1.type import univ, tag, constraint, namedtype, namedval, forwardref, error
 from pyasn1.compat.octets import str2octs, ints2octs, octs2ints
 from pyasn1.error import PyAsn1Error
 
@@ -956,11 +956,13 @@ class SequenceOf(unittest.TestCase):
 
 class Sequence(unittest.TestCase):
     def setUp(self):
-        self.s1 = univ.Sequence(componentType=namedtype.NamedTypes(
-            namedtype.NamedType('name', univ.OctetString('')),
-            namedtype.OptionalNamedType('nick', univ.OctetString('')),
-            namedtype.DefaultedNamedType('age', univ.Integer(34))
-        ))
+        self.s1 = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType('name', univ.OctetString('')),
+                namedtype.OptionalNamedType('nick', univ.OctetString('')),
+                namedtype.DefaultedNamedType('age', univ.Integer(34))
+            )
+        )
 
     def testRepr(self):
         assert eval(repr(self.s1.clone().setComponents('a', 'b')),
@@ -1100,6 +1102,25 @@ class Sequence(unittest.TestCase):
         s['name'] = 'abc'
         assert s['name'] == str2octs('abc')
 
+    def testSelfReferencingDef(self):
+
+        class SelfRefSequence(univ.Sequence):
+            componentType = namedtype.NamedTypes(
+                namedtype.NamedType('name', univ.Integer()),
+                namedtype.OptionalNamedType('selfref', forwardref.ForwardRef('SelfRefSequence')),
+            )
+
+        s = SelfRefSequence()
+
+        s[0] = 0
+        s[1][0] = 1
+
+        assert s[0] == 0
+        assert s[1][0] == 1
+        assert not s[1][1].isValue
+
+        # TODO: SequenceOf, Choice, en/decoding
+        # TODO: dynamic type def use-case
 
 class SequenceWithoutSchema(unittest.TestCase):
 

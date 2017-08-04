@@ -5,7 +5,7 @@
 # License: http://pyasn1.sf.net/license.html
 #
 import sys
-from pyasn1.type import constraint, tagmap, tag
+from pyasn1.type import constraint, tagmap, tag, forwardref
 from pyasn1.compat import calling
 from pyasn1 import error
 
@@ -424,8 +424,14 @@ def setupComponent():
     """
     return noValue
 
+class AbstractConstructedMeta(type):
+    def __init__(cls, name, bases, nmspc):
+        super(AbstractConstructedMeta, cls).__init__(name, bases, nmspc)
 
-class AbstractConstructedAsn1Item(Asn1ItemBase):
+        forwardref.ForwardRef.newTypeNotification(name, cls)
+
+
+class AbstractConstructedAsn1Item(Asn1ItemBase, metaclass=AbstractConstructedMeta):
 
     #: If `True`, requires exact component type matching,
     #: otherwise subtype relation is only enforced

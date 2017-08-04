@@ -29,6 +29,7 @@ Revision 0.3.3, released 27-08-2017
 Revision 0.3.2, released 04-08-2017
 -----------------------------------
 
+- The syntax for forward referencing ASN.1 types introduced
 - Fixed SequenceOf/SetOf types initialization syntax to remain
   backward compatible with pyasn1 0.2.*
 - Rectified thread safety issues by moving lazy, run-time computation
