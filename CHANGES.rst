@@ -1,5 +1,5 @@
 
-Revision 0.3.2, released XX-08-2017
+Revision 0.3.2, released 04-08-2017
 -----------------------------------
 
 - Fixed SequenceOf/SetOf types initialization syntax to remain
