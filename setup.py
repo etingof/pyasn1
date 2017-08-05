@@ -112,6 +112,9 @@ class PyTest(Command):
 
         unittest.TextTestRunner(verbosity=2).run(suite)
 
-params['cmdclass'] = {'test': PyTest}
+params['cmdclass'] = {
+    'test': PyTest,
+    'tests': PyTest,
+}
 
 setup(**params)
