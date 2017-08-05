@@ -110,6 +110,7 @@ class NamedTypes(object):
     def __init__(self, *namedTypes, **kwargs):
         self.__namedTypes = namedTypes
         self.__namedTypesLen = len(self.__namedTypes)
+        self.__nameToPosMap = self.__computeNameToPosMap()
 
         def updateNameType(self, idx, name, obj):
             # TODO: better way to do in-place update?
@@ -130,7 +131,6 @@ class NamedTypes(object):
             return
         # TODO: verify initialization status
         self.__minTagSet = self.__computeMinTagSet()
-        self.__nameToPosMap = self.__computeNameToPosMap()
         self.__tagToPosMap = self.__computeTagToPosMap()
         self.__ambiguousTypes = 'terminal' not in kwargs and self.__computeAmbiguousTypes() or {}
         self.__uniqueTagMap = self.__computeTagMaps(unique=True)
