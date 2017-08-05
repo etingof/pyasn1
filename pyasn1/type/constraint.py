@@ -25,7 +25,7 @@ class AbstractConstraint(object):
     def __init__(self, *values):
         self._valueMap = set()
         self._setValues(values)
-        self.__hashedValues = None
+        self.__hash = hash((self.__class__.__name__, self._values))
 
     def __call__(self, value, idx=None):
         if not self._values:
@@ -71,33 +71,7 @@ class AbstractConstraint(object):
             return self._values and True or False
 
     def __hash__(self):
-        if self.__hashedValues is None:
-            self.__hashedValues = hash((self.__class__.__name__, self._values))
-        return self.__hashedValues
-
-    # descriptor protocol
-
-    def __get__(self, instance, owner):
-        if instance is None:
-            return self
-
-        # This is a bit of hack: look up instance attribute first,
-        # then try class attribute if instance attribute with that
-        # name is not available.
-        # The rationale is to have `.subtypeSpec`/`.sizeSpec` readable-writeable
-        # as a class attribute and read-only as instance attribute.
-        try:
-            return instance._subtypeSpec
-
-        except AttributeError:
-            try:
-                return instance._sizeSpec
-
-            except AttributeError:
-                return self
-
-    def __set__(self, instance, value):
-        raise AttributeError('attribute is read-only')
+        return self.__hash
 
     def _setValues(self, values):
         self._values = values

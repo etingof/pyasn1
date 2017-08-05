@@ -342,13 +342,46 @@ class UTF8StringEncoderTestCase(unittest.TestCase):
             (12, 3, 97, 98, 99)), 'Incorrect encoding'
 
 
+class SequenceOfEncoderTestCase(unittest.TestCase):
+    def setUp(self):
+        self.s = univ.SequenceOf(componentType=univ.OctetString())
+
+    def __init(self):
+        self.s.clear()
+        self.s.setComponentByPosition(0, 'quick brown')
+
+    def testDefMode(self):
+        self.__init()
+        assert encoder.encode(self.s) == ints2octs((48, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110))
+
+    def testIndefMode(self):
+        self.__init()
+        assert encoder.encode(
+            self.s, defMode=False
+        ) == ints2octs((48, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0))
+
+    def testDefModeChunked(self):
+        self.__init()
+        assert encoder.encode(
+            self.s, defMode=True, maxChunkSize=4
+        ) == ints2octs((48, 19, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110))
+
+    def testIndefModeChunked(self):
+        self.__init()
+        assert encoder.encode(
+            self.s, defMode=False, maxChunkSize=4
+        ) == ints2octs((48, 128, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 0, 0))
+
+
 class SequenceEncoderTestCase(unittest.TestCase):
     def setUp(self):
-        self.s = univ.Sequence(componentType=namedtype.NamedTypes(
-            namedtype.NamedType('place-holder', univ.Null()),
-            namedtype.OptionalNamedType('first-name', univ.OctetString()),
-            namedtype.DefaultedNamedType('age', univ.Integer(33)),
-        ))
+        self.s = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType('place-holder', univ.Null()),
+                namedtype.OptionalNamedType('first-name', univ.OctetString()),
+                namedtype.DefaultedNamedType('age', univ.Integer(33)),
+            )
+        )
 
     def __init(self):
         self.s.clear()
@@ -466,11 +499,13 @@ class SequenceEncoderTestCase(unittest.TestCase):
 
 class ChoiceEncoderTestCase(unittest.TestCase):
     def setUp(self):
-        self.s = univ.Choice(componentType=namedtype.NamedTypes(
-            namedtype.NamedType('place-holder', univ.Null('')),
-            namedtype.NamedType('number', univ.Integer(0)),
-            namedtype.NamedType('string', univ.OctetString())
-        ))
+        self.s = univ.Choice(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType('place-holder', univ.Null('')),
+                namedtype.NamedType('number', univ.Integer(0)),
+                namedtype.NamedType('string', univ.OctetString())
+            )
+        )
 
     def testEmpty(self):
         try:

@@ -1,8 +1,36 @@
 
-Revision 0.2.4, released XX-03-2017
+
+Revision 0.4.1, released XX-08-2017
 -----------------------------------
 
 - ANY DEFINED BY clause support implemented
+
+Revision 0.3.3, released XX-08-2017
+-----------------------------------
+
+- Fixed SetOf ordering at CER/DER encoder
+
+Revision 0.3.2, released 04-08-2017
+-----------------------------------
+
+- Fixed SequenceOf/SetOf types initialization syntax to remain
+  backward compatible with pyasn1 0.2.*
+- Rectified thread safety issues by moving lazy, run-time computation
+  into object initializer.
+- Fixed .isValue property to return True for empty SetOf/SequenceOf
+  objects
+- Fixed GeneralizedTime/UTCTime CER/DER codecs to actually get invoked
+- Fixed DER/CER encoders handling optional SEQUENCE/SET fields containing
+  nested SEQUENCE/SET with optional fields.
+- Fixed crash in SequenceOf/SetOf pretty printing and decoding (in some
+  cases)
+- Fixed documentation markup issues.
+
+Revision 0.3.1, released 26-07-2017
+-----------------------------------
+
+- ASN.1 types __init__(), .clone() and .subtype() signatures
+  refactored into keyword arguments to simplify their signatures.
 - ASN.1 types initialization refactored to minimize the use of
   relatively expensive isNoValue() call
 - Lazily pre-populate list of values of Sequence/Set/Choice types
@@ -11,17 +39,24 @@ Revision 0.2.4, released XX-03-2017
 - The __getitem__() implementation of some ASN.1 types & tag object
   refactored for better performance
 - BER/CER/DER value encoders refactored to produce either tuple of
-  bytes or octetstream depending on what is more optimal
+  bytes or octet-stream depending on what is more optimal
 - Reduced the frequency of expensive isinstance() calls
 - Tag-related classes optimized, refactored into properties and
   documented.
-- NamedType family of classes overhauled, optimized and
-  documented.
+- The NamedValues implementation refactored to mimic Python dict, its use
+  in ASN.1 types refactored into properties and better documented.
+  WARNING: this change introduces a deviation from original API.
+- NamedType family of classes overhauled, optimized and documented.
+- The `componentType` attribute of constructed ASN.1 types turned
+  read-only on instances.
 - Sequence/Set DER/CER/DER decoder optimized to skip the case of
   reordered components handling when not necessary.
-- Tags and constraints-related getter methods refactored into descriptors/properties.
+- Tags and constraints-related getter methods refactored into read-only
+  instance attributes.
 - The .hasValue() method refactored into .isValue property. All ASN.1
   objects now support them, not just scalars.
+- The Real.{isInfinity, isPlusInfinity, isMinusInfinity} methods
+  refactored into properties and renamed into IsInf, IsPlusInf and isMinusInf
 - The end-of-octets type refactored to ensure it is a singleton. Codecs
   changed to rely on that for better performance.
 - Codecs lookup made more efficient at BER/CER/DER decoder main loop by
@@ -29,17 +64,19 @@ Revision 0.2.4, released XX-03-2017
 - The .getComponent*() methods of constructed ASN.1 types changed
   to lazily instantiate underlying type rather than return `None`.
   This should simplify its API as initialization like `X[0][1] = 2` becomes
-  possible. Beware that this change introduces a deviation from
-  original API.
+  possible.
+  WARNING: this change introduces a deviation from the original API.
 - The .setComponent*() methods of SetOf/SequenceOf types changed not
   to allow uninitialized "holes" inside the sequences of their components.
-  They now behave similarly to Python lists. Beware that this change
-  introduces a deviation from original API.
+  They now behave similarly to Python lists.
+  WARNING: this change introduces a deviation from the original API.
 - Default and optional components en/decoding of Constructed type
   refactored towards better efficiency and more control.
 - OctetsString and Any decoder optimized to avoid creating ASN.1
   objects for chunks of substrate. Instead they now join substrate
   chunks together and create ASN.1 object from it just once.
+- The GeneralizedTime and UTCTime types now support to/from Python
+  datetime object conversion.
 - Unit tests added for the `compat` sub-package.
 - Fixed BitString named bits initialization bug.
 - Fixed non-functional tag cache (when running Python 2) at DER decoder.

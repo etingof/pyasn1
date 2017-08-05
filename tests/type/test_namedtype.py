@@ -75,24 +75,24 @@ class NamedTypesCaseBase(unittest.TestCase):
         }
 
     def testGetTagMap(self):
-        assert self.e.getTagMap().presentTypes == {
+        assert self.e.tagMap.presentTypes == {
             univ.OctetString.tagSet: univ.OctetString(''),
             univ.Integer.tagSet: univ.Integer(0)
         }
 
     def testStrTagMap(self):
-        assert 'TagMap' in str(self.e.getTagMap())
-        assert 'OctetString' in str(self.e.getTagMap())
-        assert 'Integer' in str(self.e.getTagMap())
+        assert 'TagMap' in str(self.e.tagMap)
+        assert 'OctetString' in str(self.e.tagMap)
+        assert 'Integer' in str(self.e.tagMap)
 
     def testReprTagMap(self):
-        assert 'TagMap' in repr(self.e.getTagMap())
-        assert 'OctetString' in repr(self.e.getTagMap())
-        assert 'Integer' in repr(self.e.getTagMap())
+        assert 'TagMap' in repr(self.e.tagMap)
+        assert 'OctetString' in repr(self.e.tagMap)
+        assert 'Integer' in repr(self.e.tagMap)
 
     def testGetTagMapWithDups(self):
         try:
-            self.e.getTagMap(True)
+            self.e.tagMapUnique[0]
         except PyAsn1Error:
             pass
         else:

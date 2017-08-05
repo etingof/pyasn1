@@ -5,7 +5,7 @@
 ------------
 
 .. autoclass:: pyasn1.type.univ.Choice(componentType=None, tagSet=tagSet(), subtypeSpec=ConstraintsIntersection(), sizeSpec=ConstraintsIntersection())
-   :members: isSameTypeWith, isSuperTypeOf, tagSet, effectiveTagSet, tagMap, componentType, subtypeSpec, sizeSpec,
+   :members: isValue, isSameTypeWith, isSuperTypeOf, tagSet, effectiveTagSet, tagMap, componentType, subtypeSpec, sizeSpec,
              getComponentByPosition, setComponentByPosition, getComponentByName, setComponentByName, setDefaultComponents,
              getComponentByType, setComponentByType, getName, getComponent
 

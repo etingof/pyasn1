@@ -26,7 +26,7 @@ There values could be used just like corresponding native Python
 values (integers, strings/bytes etc) and freely mixed with them in
 expressions.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ
    >>> asn1IntegerValue = univ.Integer(12)
@@ -40,7 +40,7 @@ expressions.
 It would be an error to perform an operation on a pyasn1 type object
 as it holds no value to deal with:
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ
    >>> asn1IntegerType = univ.Integer()
@@ -73,7 +73,7 @@ False.
 
 And here's pyasn1 version of :py:class:`~pyasn1.type.univ.Boolean`:
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ
    >>> class FunFactorPresent(univ.Boolean): pass
@@ -108,7 +108,7 @@ information.
 We will explain the CHOICE type later on, meanwhile the
 :py:class:`~pyasn1.type.univ.Null` type:
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ
    >>> skip = univ.Null()
@@ -134,7 +134,7 @@ Keep that in mind when designing new data structures.
 A rather strigntforward mapping into pyasn1 -
 :py:class:`~pyasn1.type.univ.Integer`:
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ
    >>> ageOfUniverse = univ.Integer(13750000000)
@@ -158,7 +158,7 @@ an INTEGER type.
 
 The Temperature type expressed in pyasn1:
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ, namedval
    >>> class Temperature(univ.Integer):
@@ -205,7 +205,7 @@ When constructing :py:class:`~pyasn1.type.univ.Enumerated` type we
 will use two pyasn1 features: values labels (as mentioned above) and
 value constraint (will be described in more details later on).
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ, namedval, constraint
    >>> class ErrorStatus(univ.Enumerated):
@@ -249,7 +249,7 @@ initialized with either a three-component tuple or a Python float.
 Infinite values could be expressed in a way, compatible with Python
 float type.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ
    >>> pi = univ.Real((314159, 10, -5))
@@ -287,7 +287,7 @@ The pyasn1 :py:class:`~pyasn1.type.univ.BitString` objects can
 initialize from native ASN.1 notation (base 2 or base 16 strings) or
 from a Python tuple of binary components.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ
    >>> publicKey = univ.BitString(
@@ -325,7 +325,7 @@ method, all not explicitly mentioned bits are doomed to be zeros.
 To express this in pyasn1, we will employ the named values feature (as
 with Enumeration type).
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ, namedval
    >>> class BitMask(univ.BitString):
@@ -376,7 +376,7 @@ STRING style and quoted text initializers for the
 :py:class:`~pyasn1.type.univ.OctetString` objects.  To avoid possible
 collisions, quoted text is the default initialization syntax.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ
    >>> thumbnail = univ.OctetString(
@@ -394,7 +394,7 @@ collisions, quoted text is the default initialization syntax.
 Most frequent usage of the OctetString class is to instantiate it with
 a text string.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ
    >>> welcomeMessage = univ.OctetString('Welcome to ASN.1 wilderness!')
@@ -414,7 +414,7 @@ OctetString instantiation, as it's more reliable and efficient.
 Additionally, OctetString's can also be instantiated with a sequence of
 8-bit integers (ASCII codes).
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> univ.OctetString((77, 101, 101, 103, 111))
    OctetString(b'Meego')
@@ -422,7 +422,7 @@ Additionally, OctetString's can also be instantiated with a sequence of
 It is sometimes convenient to express OctetString instances as 8-bit
 characters (Python 3 bytes or Python 2 strings) or 8-bit integers.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> octetString = univ.OctetString('ABCDEF')
    >>> octetString.asNumbers()
@@ -448,7 +448,7 @@ One of the natural ways to map OBJECT IDENTIFIER type into a Python
 one is to use Python tuples of integers. So this approach is taken by
 pyasn1's :py:class:`~pyasn1.type.univ.ObjectIdentifier` class.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ
    >>> internetId = univ.ObjectIdentifier((1, 3, 6, 1))
@@ -461,7 +461,7 @@ pyasn1's :py:class:`~pyasn1.type.univ.ObjectIdentifier` class.
 
 A more human-friendly "dotted" notation is also supported.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ
    >>> univ.ObjectIdentifier('1.3.6.1')
@@ -496,7 +496,7 @@ Values of the ANY type contain serialized ASN.1 value(s) in form of an
 octet string. Therefore pyasn1 :py:class:`~pyasn1.type.univ.Any` value
 object share the properties of pyasn1 OctetString object.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ
    >>> someValue = univ.Any(b'\x02\x01\x01')
@@ -542,7 +542,7 @@ Their pyasn1 implementations are
 :py:class:`~pyasn1.type.char.PrintableString` and
 :py:class:`~pyasn1.type.char.NumericString`:
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import char
    >>> '%s' % char.PrintableString("Welcome to ASN.1 text types")
@@ -562,7 +562,7 @@ The :py:class:`~pyasn1.type.char.VisibleString`,
 :py:class:`~pyasn1.type.char.GeneralString` types came to ASN.1 from
 ISO standards on character sets.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import char
    >>> char.VisibleString("abc")
@@ -584,7 +584,7 @@ character string types: :py:class:`~pyasn1.type.char.UniversalString`,
 :py:class:`~pyasn1.type.char.BMPString` and
 :py:class:`~pyasn1.type.char.UTF8String`.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import char
    >>> char.UniversalString("abc")
@@ -620,7 +620,7 @@ corresponding instance of OBJECT IDENTIFIER type. There are no formal
 linkage between these instances and provision for ObjectDescriptor
 uniqueness in the standard.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import useful
    >>> descrBER = useful.ObjectDescriptor(
@@ -644,7 +644,7 @@ strict but has Y2K issues.
 
 In pyasn1 parlance:
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import useful
    >>> moscowTime = useful.GeneralizedTime("20110308120000.0")
@@ -688,7 +688,7 @@ and one for constructed types (will be discussed later on).
 
 In pyasn1, tags are implemented as immutable, tuple-like objects:
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import tag
    >>> myTag = tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 10)
@@ -724,7 +724,7 @@ and replaced with a new one.
 To model both modes of tagging, a specialized container TagSet object
 (holding zero, one or more Tag objects) is used in pyasn1.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import tag
    >>> tagSet = tag.TagSet(
@@ -761,7 +761,7 @@ Any two TagSet objects could be compared to see if one is a derivative
 of the other. Figuring this out is also useful in cases when a type-specific
 data processing algorithms are to be chosen.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import tag
    >>> tagSet1 = tag.TagSet(
@@ -786,7 +786,7 @@ following ASN.1 tagged type:
 
 could be expressed in pyasn1 like this:
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ, tag
    >>> class MyIntegerType(univ.Integer):
@@ -852,7 +852,7 @@ subtyping in pyasn1, a cloning operation on an existing pyasn1 type
 object can be invoked what creates a new instance of original object
 with possibly modified properties.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ, namedtype, tag
    >>> class Record(univ.Sequence):
@@ -888,7 +888,7 @@ the code above returns an implicitly tagged copy of original object.
 Once a SEQUENCE or SET type is decleared with pyasn1, it can be
 instantiated and initialized (continuing the above code):
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> record = Record()
    >>> record['id'] = 123
@@ -912,7 +912,7 @@ instantiated and initialized (continuing the above code):
 Inner components of pyasn1 Sequence/Set objects could be accessed
 using the following methods:
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> record['id']
    Integer(123)
@@ -931,7 +931,7 @@ The Set type share all the properties of Sequence type, and additionally
 support by-tag component addressing (as all Set components have distinct
 types).
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ, namedtype, tag
    >>> class Gamer(univ.Set):
@@ -970,7 +970,7 @@ position and they both have a property of automatic resize.
 To specify inner component type, the **componentType** class
 attribute should refer to another pyasn1 type object.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ
    >>> class Progression(univ.SequenceOf):
@@ -1016,7 +1016,7 @@ In pyasn1 implementation,
 accepts only a single inner component at a time. It also offers a few
 additional methods specific to its behaviour.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ, namedtype
    >>> class CodeOrMessage(univ.Choice):
@@ -1042,7 +1042,7 @@ Since there could be only a single inner component value in the pyasn1
 Choice value object, either of the following methods could be used for
 fetching it (continuing previous code):
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> codeOrMessage.getName()
    'message'
@@ -1084,7 +1084,7 @@ of values.
 
 Its pyasn1 implementation would look like:
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import constraint
    >>> c = constraint.SingleValueConstraint('0','1','2','3','4','5','6','7','8','9')
@@ -1094,16 +1094,16 @@ Its pyasn1 implementation would look like:
    >>> c('A')
    Traceback (most recent call last):
    ...
-   pyasn1.type.error.ValueConstraintError: 
+   ValueConstraintError:
      SingleValueConstraint(0, 1, 2, 3, 4, 5, 6, 7, 8, 9) failed at: A
-   >>> 
+   >>>
 
 As can be seen in the snippet above, if a value violates the
 constraint, an exception will be thrown. A constrainted pyasn1 type
 object holds a reference to a constraint object (or their combination,
 as will be explained later) and calls it for value verification.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ, constraint
    >>> class DialButton(univ.OctetString):
@@ -1115,7 +1115,7 @@ as will be explained later) and calls it for value verification.
    >>> DialButton('A')
    Traceback (most recent call last):
    ...
-   pyasn1.type.error.ValueConstraintError:
+   ValueConstraintError:
      SingleValueConstraint(0, 1, 2, 3, 4, 5, 6, 7, 8, 9) failed at: A
    >>> 
 
@@ -1133,7 +1133,7 @@ and upper bounds of allowed range of values of a type.
 
 And in pyasn1 terms:
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ, constraint
    >>> class Teenagers(univ.Integer):
@@ -1143,7 +1143,7 @@ And in pyasn1 terms:
    >>> Teenagers(20)
    Traceback (most recent call last):
    ...
-   pyasn1.type.error.ValueConstraintError:
+   ValueConstraintError:
      ValueRangeConstraint(13, 19) failed at: 20
    >>> 
 
@@ -1157,7 +1157,7 @@ infinity values.
 
 And in pyasn1 terms:
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ, constraint
    >>> class NegativeInt(univ.Integer):
@@ -1167,7 +1167,7 @@ And in pyasn1 terms:
    >>> NegativeInt(0)
    Traceback (most recent call last):
    ...
-   pyasn1.type.error.ValueConstraintError:
+   ValueConstraintError:
      ValueConstraintError: ValueRangeConstraint() failed at: "0" at NegativeInt
    >>> class PositiveInt(univ.Integer):
    ...   subtypeSpec = constraint.ValueRangeConstraint(1, float('inf'))
@@ -1178,7 +1178,7 @@ And in pyasn1 terms:
    >> PositiveInt(-1)
    Traceback (most recent call last):
    ...
-   pyasn1.type.error.ValueConstraintError:
+   ValueConstraintError:
      ValueConstraintError: ValueRangeConstraint() failed at: "-1" at PositiveInt
 
 Value range constraint usually applies to numeric types.
@@ -1197,7 +1197,7 @@ upper bounds of the size of a valid value.
 
 Express the same grammar in pyasn1:
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ, constraint
    >>> class TwoBits(univ.BitString):
@@ -1207,7 +1207,7 @@ Express the same grammar in pyasn1:
    >>> TwoBits((1,1,0))
    Traceback (most recent call last):
    ...
-   pyasn1.type.error.ValueConstraintError: ValueSizeConstraint(2, 2) failed at: (1, 1, 0)
+   ValueConstraintError: ValueSizeConstraint(2, 2) failed at: (1, 1, 0)
    >>> 
 
 Size constraint can be applied to potentially massive values - bit or
@@ -1225,7 +1225,7 @@ constraint but constraint applies to individual characters of a value.
 
 And in pyasn1:
 
-.. code-block:: bash
+.. code-block:: pycon
 
    >>> from pyasn1.type import char, constraint
    >>> class MorseCode(char.PrintableString):
@@ -1235,7 +1235,7 @@ And in pyasn1:
    >>> MorseCode("?")
    Traceback (most recent call last):
    ...
-   pyasn1.type.error.ValueConstraintError: PermittedAlphabetConstraint(".", "-", " ") failed at: "?"
+   ValueConstraintError: PermittedAlphabetConstraint(".", "-", " ") failed at: "?"
    >>> 
 
 Current implementation does not handle ranges of characters in
@@ -1266,7 +1266,7 @@ specification will constitute a valid telephone number:
 
 Constraint intersection object serves the logic above:
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import char, constraint
    >>> class PhoneNumber(char.NumericString):
@@ -1279,11 +1279,11 @@ Constraint intersection object serves the logic above:
    >>> PhoneNumber('?9039343212')
    Traceback (most recent call last):
    ...
-   pyasn1.type.error.ValueConstraintError: ConstraintsIntersection(PermittedAlphabetConstraint('0','1','2','3','4','5','6','7','8','9'), ValueSizeConstraint(11, 11)) failed at: PermittedAlphabetConstraint('0','1','2','3','4','5','6','7','8','9') failed at: "?039343212"
+   ValueConstraintError: ConstraintsIntersection(PermittedAlphabetConstraint('0','1','2','3','4','5','6','7','8','9'), ValueSizeConstraint(11, 11)) failed at: PermittedAlphabetConstraint('0','1','2','3','4','5','6','7','8','9') failed at: "?039343212"
    >>> PhoneNumber('9343212')
    Traceback (most recent call last):
    ...
-   pyasn1.type.error.ValueConstraintError:
+   ValueConstraintError:
      ConstraintsIntersection(PermittedAlphabetConstraint('0','1','2','3','4','5','6','7','8','9'), ValueSizeConstraint(11, 11)) failed at: ValueSizeConstraint(10, 10) failed at: "9343212"
    >>>
 
@@ -1299,7 +1299,7 @@ constraint in a set. In the specification above, a value of all small
 or all capital letters is compliant, but a mix of small&capitals is
 not.  Here's its pyasn1 analogue:
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import char, constraint
    >>> class CapitalOrSmall(char.IA5String):
@@ -1314,20 +1314,20 @@ not.  Here's its pyasn1 analogue:
    >>> CapitalOrSmall('Abba')
    Traceback (most recent call last):
    ...
-   pyasn1.type.error.ValueConstraintError: ConstraintsUnion(PermittedAlphabetConstraint('A', 'B', 'C'), PermittedAlphabetConstraint('a', 'b', 'c')) failed at: failed for "Abba"
+   ValueConstraintError: ConstraintsUnion(PermittedAlphabetConstraint('A', 'B', 'C'), PermittedAlphabetConstraint('a', 'b', 'c')) failed at: failed for "Abba"
    >>>
 
 Finally, the exclusion constraint simply negates the logic of value
 verification at a constraint. In the following example, any integer
 value is allowed in a type but not zero.
 
-.. code-block:: python
+.. code-block:: bash
 
    NoZero ::= INTEGER (ALL EXCEPT 0)
 
 In pyasn1 the above definition would read:
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ, constraint
    >>> class NoZero(univ.Integer):
@@ -1339,7 +1339,7 @@ In pyasn1 the above definition would read:
    >>> NoZero(0)
    Traceback (most recent call last):
    ...
-   pyasn1.type.error.ValueConstraintError: ConstraintsExclusion(SingleValueConstraint(0)) failed at: 0
+   ValueConstraintError: ConstraintsExclusion(SingleValueConstraint(0)) failed at: 0
    >>>
 
 The depth of such a constraints tree, built with constraint
@@ -1360,7 +1360,7 @@ TagSet and Constraint objects are a derivation of one another.
 The following example illustrates the concept (we use the same tagset
 but different constraints for simplicity):
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ, constraint
    >>> i1 = univ.Integer(subtypeSpec=constraint.ValueRangeConstraint(3,8))
@@ -1380,7 +1380,7 @@ but different constraints for simplicity):
 
 As can be seen in the above code snippet, there are two methods of any
 pyasn1 type/value object that test types for their relationship:
-**isSameTypeWith**() and **isSuperTypeOf**(). The former is
+*isSameTypeWith()* and *isSuperTypeOf()*. The former is
 self-descriptive while the latter yields true if the argument appears
 to be a pyasn1 object which has tagset and constraints derived from
 those of the object being called.
@@ -1428,7 +1428,7 @@ pyasn1 type objects will cause encoder failure.
 The following code will create a pyasn1 Integer object and serialize
 it with BER encoder:
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ
    >>> from pyasn1.codec.ber import encoder
@@ -1455,7 +1455,7 @@ encode data item all at once. However, even in this case, generating
 indefinite length encoding may help a low-memory receiver, running a
 restartable decoder, to process a large data item.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ
    >>> from pyasn1.codec.ber import encoder
@@ -1480,7 +1480,7 @@ decoder's end.
 To use CER or DER encoders one needs to explicitly import and call them - the
 APIs are all compatible.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ
    >>> from pyasn1.codec.ber import encoder as ber_encoder
@@ -1501,7 +1501,7 @@ In the process of decoding, pyasn1 value objects are created and
 linked to each other, based on the information containted in the
 substrate. Thus, the original pyasn1 value object(s) are recovered.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ
    >>> from pyasn1.codec.ber import encoder, decoder
@@ -1519,7 +1519,7 @@ All pyasn1 decoders can handle both definite and indefinite length
 encoding modes automatically, explicit switching into one mode to
 another is not required.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ
    >>> from pyasn1.codec.ber import encoder, decoder
@@ -1548,7 +1548,7 @@ incomplete] tags recovered from substrate with those found in prototype pyasn1
 type objects (also called pyasn1 specification object further in this
 document).
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.codec.ber import decoder
    >>> decoder.decode(b'\x02\x01\x0c', asn1Spec=univ.Integer())
@@ -1560,7 +1560,7 @@ current values (if it's a pyasn1 value object), but rather use it as a
 hint for choosing proper decoder and as a pattern for creating new
 objects:
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ, tag
    >>> from pyasn1.codec.ber import encoder, decoder
@@ -1587,7 +1587,7 @@ values constraints possibly present in pyasn1 specification object.
 To explain this, we will decode a random integer object into generic Integer
 and the constrained one.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ, constraint
    >>> from pyasn1.codec.ber import encoder, decoder
@@ -1599,14 +1599,14 @@ and the constrained one.
    >>> decoder.decode(substrate, asn1Spec=DialDigit())
    Traceback (most recent call last):
    ...
-   pyasn1.type.error.ValueConstraintError:
+   ValueConstraintError:
      ValueRangeConstraint(0, 9) failed at: 13
    >>> 
 
 Similarily to encoders, to use CER or DER decoders application has to
 explicitly import and call them - all APIs are compatible.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ
    >>> from pyasn1.codec.ber import encoder as ber_encoder
@@ -1642,7 +1642,7 @@ specification object to decoder.
 
 To explain the issue, we will first prepare a Choice object to deal with:
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ, namedtype
    >>> class CodeOrMessage(univ.Choice):
@@ -1661,7 +1661,7 @@ To explain the issue, we will first prepare a Choice object to deal with:
 Let's now encode this Choice object and then decode its substrate
 with and without pyasn1 specification object:
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.codec.ber import encoder, decoder
    >>> substrate = encoder.encode(codeOrMessage)
@@ -1704,7 +1704,7 @@ To illustrate the working of Any type, we'll have to make the stage by
 encoding a pyasn1 object and then putting its substrate into an any
 object.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ
    >>> from pyasn1.codec.ber import encoder, decoder
@@ -1724,7 +1724,7 @@ substrate.  Obviously, the substrate we are dealing with, will decode
 into the inner [Integer] component, unless pyasn1 specification is
 given to guide the decoder. Continuing previous code:
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ
    >>> from pyasn1.codec.ber import encoder, decoder
@@ -1753,7 +1753,7 @@ convenient then to turn decoder into a recovery mode. Whilst there,
 decoder will not bail out when hit an unknown tag but rather treat it
 as an Any type.
 
-.. code-block:: python
+.. code-block:: pycon
 
    >>> from pyasn1.type import univ, tag
    >>> from pyasn1.codec.ber import encoder, decoder
