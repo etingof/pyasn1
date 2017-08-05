@@ -1120,7 +1120,25 @@ class Sequence(unittest.TestCase):
         assert not s[1][1].isValue
 
         # TODO: SequenceOf, Choice, en/decoding
-        # TODO: dynamic type def use-case
+
+    def testSelfReferencingDynamicDef(self):
+
+        s = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType('name', univ.Integer()),
+                namedtype.OptionalNamedType('selfref', forwardref.ForwardRef('sft'))
+            )
+        )
+
+        s.componentType['selfref'].asn1Object.newTypeNotification('sft', s)
+
+        s[0] = 0
+        s[1][0] = 1
+
+        assert s[0] == 0
+        assert s[1][0] == 1
+        assert not s[1][1].isValue
+
 
 class SetOf(unittest.TestCase):
     def setUp(self):

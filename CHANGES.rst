@@ -1,4 +1,10 @@
 
+Revision 0.4.1, released XX-08-2017
+-----------------------------------
+
+- Forward-referencing ASN.1 types implemented to handle
+  the case of recursive ASN.1 schemas.
+
 Revision 0.3.4, released XX-08-2017
 -----------------------------------
 

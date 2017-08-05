@@ -1723,6 +1723,17 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
 
         base.AbstractConstructedAsn1Item.__init__(self, **kwargs)
 
+        def updateComponentType(self, obj):
+            self._componentType = obj
+
+        import functools
+        from pyasn1.type import forwardref
+
+        if isinstance(self.componentType, forwardref.ForwardRef):
+            cbFun = functools.partial(updateComponentType, self)
+            self.componentType.callLater(cbFun)
+
+
     # Python list protocol
 
     def clear(self):

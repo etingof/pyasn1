@@ -428,7 +428,7 @@ class AbstractConstructedMeta(type):
     def __init__(cls, name, bases, nmspc):
         super(AbstractConstructedMeta, cls).__init__(name, bases, nmspc)
 
-        forwardref.ForwardRef.newTypeNotification(name, cls)
+        forwardref.ForwardRef.newTypeNotification(name, cls())
 
 
 class AbstractConstructedAsn1Item(Asn1ItemBase, metaclass=AbstractConstructedMeta):
