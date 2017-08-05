@@ -121,16 +121,21 @@ class SetOfEncoder(encoder.SequenceOfEncoder):
                 substrate += encodeFun(comp, defMode, maxChunkSize, ifNotEmpty=compsMap[id(comp)])
         else:
             # SetOf
-            compSubs = []
-            while idx > 0:
-                idx -= 1
-                compSubs.append(
-                    encodeFun(value[idx], defMode, maxChunkSize)
-                )
-            compSubs.sort()  # perhaps padding's not needed
-            substrate = null
-            for compSub in compSubs:
-                substrate += compSub
+            components = [encodeFun(x, defMode, maxChunkSize) for x in value]
+
+            # sort by serialized and padded components
+            if len(components) > 1:
+                zero = str2octs('\x00')
+                maxLen = max(map(len, components))
+                paddedComponents = [
+                    (x.ljust(maxLen, zero), x) for x in components
+                ]
+                paddedComponents.sort(key=lambda x: x[0])
+
+                components = [x[1] for x in paddedComponents]
+
+            substrate = null.join(components)
+
         return substrate, True, True
 
 

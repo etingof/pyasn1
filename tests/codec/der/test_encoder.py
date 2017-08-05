@@ -43,6 +43,38 @@ class BitStringEncoderTestCase(unittest.TestCase):
         ) == ints2octs((3, 2, 7, 128))
 
 
+class SetOfEncoderTestCase(unittest.TestCase):
+    def setUp(self):
+        self.s = univ.SetOf(componentType=univ.OctetString())
+
+    def testDefMode1(self):
+        self.s.clear()
+        self.s.append('a')
+        self.s.append('ab')
+
+        assert encoder.encode(self.s) == ints2octs((49, 7, 4, 1, 97, 4, 2, 97, 98))
+
+    def testDefMode2(self):
+        self.s.clear()
+        self.s.append('ab')
+        self.s.append('a')
+
+        assert encoder.encode(self.s) == ints2octs((49, 7, 4, 1, 97, 4, 2, 97, 98))
+
+    def testDefMode3(self):
+        self.s.clear()
+        self.s.append('b')
+        self.s.append('a')
+
+        assert encoder.encode(self.s) == ints2octs((49, 6, 4, 1, 97, 4, 1, 98))
+
+    def testDefMode4(self):
+        self.s.clear()
+        self.s.append('a')
+        self.s.append('b')
+
+        assert encoder.encode(self.s) == ints2octs((49, 6, 4, 1, 97, 4, 1, 98))
+
 class SetWithChoiceEncoderTestCase(unittest.TestCase):
     def setUp(self):
         c = univ.Choice(componentType=namedtype.NamedTypes(

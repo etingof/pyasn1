@@ -1,4 +1,9 @@
 
+Revision 0.3.3, released XX-08-2017
+-----------------------------------
+
+- Fixed SetOf ordering at CER/DER encoder
+
 Revision 0.3.2, released 04-08-2017
 -----------------------------------
 
