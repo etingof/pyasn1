@@ -12,11 +12,11 @@ try:
 except (ImportError, AttributeError):
     implementation = 'CPython'
 
-if sys.version_info[0:2] < (3, 2):
-    from binascii import a2b_hex, b2a_hex
 from pyasn1.compat.octets import oct2int, null, ensureString
 
 if sys.version_info[0:2] < (3, 2) or implementation != 'CPython':
+    from binascii import a2b_hex, b2a_hex
+
     if sys.version_info[0] > 2:
         long = int
 
