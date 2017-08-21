@@ -830,8 +830,6 @@ class OctetString(base.AbstractSimpleAsn1Item):
         if 'encoding' not in kwargs:
             kwargs['encoding'] = self.encoding
 
-        self.__asNumbersCache = None
-
         base.AbstractSimpleAsn1Item.__init__(self, value, **kwargs)
 
     def clone(self, value=noValue, **kwargs):
@@ -1084,9 +1082,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
     # Immutable sequence object protocol
 
     def __len__(self):
-        if self._len is None:
-            self._len = len(self._value)
-        return self._len
+        return len(self._value)
 
     def __getitem__(self, i):
         if i.__class__ is slice:
@@ -1261,9 +1257,7 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
     # Sequence object protocol
 
     def __len__(self):
-        if self._len is None:
-            self._len = len(self._value)
-        return self._len
+        return len(self._value)
 
     def __getitem__(self, i):
         if i.__class__ is slice:
@@ -2193,7 +2187,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                     raise IndexError('component index out of range')
                 self._componentValues = [None] * componentTypeLen
 
-        if value is None or value is noValue:
+        if value is noValue or value is None:
             if componentTypeLen:
                 value = componentType.getTypeByPosition(idx).clone()
             elif currentValue is None:

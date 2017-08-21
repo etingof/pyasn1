@@ -35,45 +35,26 @@ class Asn1ItemBase(Asn1Item):
     typeId = None
 
     def __init__(self, **kwargs):
-        for key in ('tagSet', 'subtypeSpec'):
-            if key not in kwargs:
-                kwargs[key] = getattr(self, key)
+        readOnly = {
+           'tagSet': self.tagSet,
+            'subtypeSpec': self.subtypeSpec
+        }
 
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-            self.readOnly = key
+        readOnly.update(kwargs)
+
+        self.__dict__.update(readOnly)
+
+        self._readOnly = readOnly
 
     def __setattr__(self, name, value):
-        if not name.startswith('_'):
-            try:
-                if name in self._readOnly:
-                    raise error.PyAsn1Error('read-only instance attribute "%s"' % name)
+        if name[0] != '_' and name in self._readOnly:
+            raise error.PyAsn1Error('read-only instance attribute "%s"' % name)
 
-            except AttributeError:
-                pass
+        self.__dict__[name] = value
 
-        super(Asn1ItemBase, self).__setattr__(name, value)
-
-    def __getReadOnly(self):
-        try:
-            return self._readOnly
-
-        except AttributeError:
-            self._readOnly = set()
-
-        return frozenset(self._readOnly)
-
-    def __setReadOnly(self, value):
-        try:
-            self._readOnly.add(value)
-
-        except AttributeError:
-            self._readOnly = set()
-
-        self._readOnly.add(value)
-
-    # property.setter is only available past Python 2.5
-    readOnly = property(__getReadOnly, __setReadOnly)
+    @property
+    def readOnly(self):
+        return self._readOnly
 
     @property
     def effectiveTagSet(self):
@@ -107,11 +88,9 @@ class Asn1ItemBase(Asn1Item):
             :class:`True` if *other* is |ASN.1| type,
             :class:`False` otherwise.
         """
-        return self is other or \
-            (not matchTags or
-             self.tagSet == other.tagSet) and \
-            (not matchConstraints or
-             self.subtypeSpec == other.subtypeSpec)
+        return (self is other or
+                (not matchTags or self.tagSet == other.tagSet) and
+                (not matchConstraints or self.subtypeSpec == other.subtypeSpec))
 
     def isSuperTypeOf(self, other, matchTags=True, matchConstraints=True):
         """Examine |ASN.1| type for subtype relationship with other ASN.1 type.
@@ -135,9 +114,8 @@ class Asn1ItemBase(Asn1Item):
                 :class:`False` otherwise.
         """
         return (not matchTags or
-                self.tagSet.isSuperTagSetOf(other.tagSet)) and \
-               (not matchConstraints or
-                (self.subtypeSpec.isSuperTypeOf(other.subtypeSpec)))
+                (self.tagSet.isSuperTagSetOf(other.tagSet)) and
+                 (not matchConstraints or self.subtypeSpec.isSuperTypeOf(other.subtypeSpec)))
 
     @staticmethod
     def isNoValue(*values):
@@ -219,7 +197,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
 
     def __init__(self, value=noValue, **kwargs):
         Asn1ItemBase.__init__(self, **kwargs)
-        if value is None or value is noValue:
+        if value is noValue or value is None:
             value = self.defaultValue
         else:
             value = self.prettyIn(value)
@@ -231,7 +209,6 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
                 raise exType('%s at %s' % (exValue, self.__class__.__name__))
 
         self._value = value
-        self._len = None
 
     def __repr__(self):
         representation = []
@@ -322,17 +299,16 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
           :
               new instance of |ASN.1| type/value
         """
-        if value is None or value is noValue:
+        if value is noValue or value is None:
             if not kwargs:
                 return self
 
             value = self._value
 
-        for arg in self.readOnly:
-            if arg not in kwargs:
-                kwargs[arg] = getattr(self, arg)
+        initilaizers = self.readOnly.copy()
+        initilaizers.update(kwargs)
 
-        return self.__class__(value, **kwargs)
+        return self.__class__(value, **initilaizers)
 
     def subtype(self, value=noValue, **kwargs):
         """Create a copy of a |ASN.1| type or object.
@@ -365,31 +341,26 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
          :
              new instance of |ASN.1| type/value
         """
-        if value is None or value is noValue:
+        if value is noValue or value is None:
             if not kwargs:
                 return self
 
             value = self._value
 
-        for arg in self.readOnly:
-            if arg in kwargs:
-                kwargs[arg] += getattr(self, arg)
-            else:
-                kwargs[arg] = getattr(self, arg)
+        initializers = self.readOnly.copy()
 
-        try:
-            kwargs['tagSet'] = self.tagSet.tagImplicitly(kwargs['implicitTag'])
+        implicitTag = kwargs.pop('implicitTag', None)
+        if implicitTag is not None:
+            initializers['tagSet'] = self.tagSet.tagImplicitly(implicitTag)
 
-        except KeyError:
-            pass
+        explicitTag = kwargs.pop('explicitTag', None)
+        if explicitTag is not None:
+            initializers['tagSet'] = self.tagSet.tagExplicitly(explicitTag)
 
-        try:
-            kwargs['tagSet'] = self.tagSet.tagExplicitly(kwargs['explicitTag'])
+        for arg, option in kwargs.items():
+            initializers[arg] += option
 
-        except KeyError:
-            pass
-
-        return self.__class__(value, **kwargs)
+        return self.__class__(value, **initializers)
 
     def prettyIn(self, value):
         return value
@@ -541,11 +512,10 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         """
         cloneValueFlag = kwargs.pop('cloneValueFlag', False)
 
-        for arg in self.readOnly:
-            if arg not in kwargs:
-                kwargs[arg] = getattr(self, arg)
+        initilaizers = self.readOnly.copy()
+        initilaizers.update(kwargs)
 
-        clone = self.__class__(**kwargs)
+        clone = self.__class__(**initilaizers)
 
         if cloneValueFlag:
             self._cloneComponentValues(clone, cloneValueFlag)
@@ -575,27 +545,23 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
             new instance of |ASN.1| type/value
 
         """
+
+        initializers = self.readOnly.copy()
+
         cloneValueFlag = kwargs.pop('cloneValueFlag', False)
 
-        for arg in self.readOnly:
-            if arg in kwargs:
-                kwargs[arg] += getattr(self, arg)
-            else:
-                kwargs[arg] = getattr(self, arg)
+        implicitTag = kwargs.pop('implicitTag', None)
+        if implicitTag is not None:
+            initializers['tagSet'] = self.tagSet.tagImplicitly(implicitTag)
 
-        try:
-            kwargs['tagSet'] = self.tagSet.tagImplicitly(kwargs['implicitTag'])
+        explicitTag = kwargs.pop('explicitTag', None)
+        if explicitTag is not None:
+            initializers['tagSet'] = self.tagSet.tagExplicitly(explicitTag)
 
-        except KeyError:
-            pass
+        for arg, option in kwargs.items():
+            initializers[arg] += option
 
-        try:
-            kwargs['tagSet'] = self.tagSet.tagExplicitly(kwargs['explicitTag'])
-
-        except KeyError:
-            pass
-
-        clone = self.__class__(**kwargs)
+        clone = self.__class__(**initializers)
 
         if cloneValueFlag:
             self._cloneComponentValues(clone, cloneValueFlag)

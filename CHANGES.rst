@@ -2,6 +2,7 @@
 Revision 0.3.3, released XX-08-2017
 -----------------------------------
 
+- Improved ASN.1 types instantiation performance
 - Fixed SetOf ordering at CER/DER encoder
 - Fixed crash on conditional binascii module import
 

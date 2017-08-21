@@ -30,7 +30,7 @@ class AbstractSimpleDecoder(AbstractDecoder):
 
     @staticmethod
     def substrateCollector(asn1Object, substrate, length):
-            return substrate[:length], substrate[length:]
+        return substrate[:length], substrate[length:]
 
     def _createComponent(self, asn1Spec, tagSet, value=base.noValue):
         if tagSet[0].tagFormat not in self.tagFormats:

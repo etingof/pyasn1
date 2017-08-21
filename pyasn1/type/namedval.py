@@ -96,7 +96,7 @@ class NamedValues(object):
                 number += 1
 
     def __repr__(self):
-        return '%s(%r)' % (self.__class__.__name__, self.items())
+        return '%s(%r)' % (self.__class__.__name__, tuple(self.items()))
 
     def __str__(self):
         return str(self.items())
