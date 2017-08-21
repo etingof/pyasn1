@@ -1754,7 +1754,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
 
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         for idx, componentValue in enumerate(self._componentValues):
-            if componentValue is not None:
+            if componentValue is not noValue:
                 if isinstance(componentValue, base.AbstractConstructedAsn1Item):
                     myClone.setComponentByPosition(
                         idx, componentValue.clone(cloneValueFlag=cloneValueFlag)
@@ -1825,25 +1825,28 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         IndexError:
             When idx > len(self)
         """
+        if value is None:  # backward compatibility
+            value = noValue
+
         componentType = self.componentType
 
         try:
             currentValue = self._componentValues[idx]
         except IndexError:
-            currentValue = None
+            currentValue = noValue
 
             if len(self._componentValues) < idx:
                 raise error.PyAsn1Error('Component index out of range')
 
-        if value is noValue or value is None:
+        if value is noValue:
             if componentType is not None:
                 value = componentType.clone()
-            elif currentValue is None:
+            elif currentValue is noValue:
                 raise error.PyAsn1Error('Component type not defined')
         elif not isinstance(value, base.Asn1Item):
             if componentType is not None and isinstance(componentType, base.AbstractSimpleAsn1Item):
                 value = componentType.clone(value=value)
-            elif currentValue is not None and isinstance(currentValue, base.AbstractSimpleAsn1Item):
+            elif currentValue is not noValue and isinstance(currentValue, base.AbstractSimpleAsn1Item):
                 value = currentValue.clone(value=value)
             else:
                 raise error.PyAsn1Error('%s undefined component type' % componentType.__class__.__name__)
@@ -1863,7 +1866,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
                 exType, exValue, exTb = sys.exc_info()
                 raise exType('%s at %s' % (exValue, self.__class__.__name__))
 
-        if currentValue is None:
+        if currentValue is noValue:
             self._componentValues.append(value)
         else:
             self._componentValues[idx] = value
@@ -1872,8 +1875,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
 
     @property
     def componentTagMap(self):
-        if (self.componentType is not None and
-                self.componentType is not noValue):
+        if self.componentType is not None:
             return self.componentType.tagMap
 
     def prettyPrint(self, scope=0):
@@ -1881,8 +1883,8 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         representation = self.__class__.__name__ + ':\n'
         for idx in range(len(self._componentValues)):
             representation += ' ' * scope
-            if (self._componentValues[idx] is None and
-                    self.componentType is not noValue):
+            if (self._componentValues[idx] is noValue and
+                    self.componentType is not None):
                 representation += '<empty>'
             else:
                 representation += self._componentValues[idx].prettyPrint(scope)
@@ -1891,8 +1893,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
     def prettyPrintType(self, scope=0):
         scope += 1
         representation = '%s -> %s {\n' % (self.tagSet, self.__class__.__name__)
-        if (self.componentType is not None and
-                self.componentType is not noValue):
+        if self.componentType is not None:
             representation += ' ' * scope
             representation += self.componentType.prettyPrintType(scope)
         return representation + '\n' + ' ' * (scope - 1) + '}'
@@ -2054,7 +2055,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         for idx, componentValue in enumerate(self._componentValues):
-            if componentValue is not None:
+            if componentValue is not noValue:
                 if isinstance(componentValue, base.AbstractConstructedAsn1Item):
                     myClone.setComponentByPosition(
                         idx, componentValue.clone(cloneValueFlag=cloneValueFlag)
@@ -2135,9 +2136,9 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         try:
             componentValue = self._componentValues[idx]
         except IndexError:
-            componentValue = None
+            componentValue = noValue
 
-        if componentValue is None:
+        if componentValue is noValue:
             self.setComponentByPosition(idx)
 
         return self._componentValues[idx]
@@ -2175,22 +2176,25 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         -------
         self
         """
+        if value is None:  # backward compatibility
+            value = noValue
+
         componentType = self.componentType
         componentTypeLen = self._componentTypeLen
 
         try:
             currentValue = self._componentValues[idx]
         except IndexError:
-            currentValue = None
+            currentValue = noValue
             if componentTypeLen:
                 if componentTypeLen < idx:
                     raise IndexError('component index out of range')
-                self._componentValues = [None] * componentTypeLen
+                self._componentValues = [noValue] * componentTypeLen
 
-        if value is noValue or value is None:
+        if value is noValue:
             if componentTypeLen:
                 value = componentType.getTypeByPosition(idx).clone()
-            elif currentValue is None:
+            elif currentValue is noValue:
                 raise error.PyAsn1Error('Component type not defined')
         elif not isinstance(value, base.Asn1Item):
             if componentTypeLen:
@@ -2199,13 +2203,13 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                     value = subComponentType.clone(value=value)
                 else:
                     raise error.PyAsn1Error('%s can cast only scalar values' % componentType.__class__.__name__)
-            elif currentValue is not None and isinstance(currentValue, base.AbstractSimpleAsn1Item):
+            elif currentValue is not noValue and isinstance(currentValue, base.AbstractSimpleAsn1Item):
                 value = currentValue.clone(value=value)
             else:
                 raise error.PyAsn1Error('%s undefined component type' % componentType.__class__.__name__)
         elif (matchTags or matchConstraints) and componentTypeLen:
             subComponentType = componentType.getTypeByPosition(idx)
-            if subComponentType is not None:
+            if subComponentType is not noValue:
                 if self.strictConstraints:
                     if not subComponentType.isSameTypeWith(value, matchTags, matchConstraints):
                         raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
@@ -2267,7 +2271,6 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                 if subComponentType.isDefaulted or subComponentType.isOptional:
                     continue
                 if (not self._componentValues or
-                        self._componentValues[idx] is None or
                         not self._componentValues[idx].isValue):
                     return False
 
@@ -2289,7 +2292,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         scope += 1
         representation = self.__class__.__name__ + ':\n'
         for idx in range(len(self._componentValues)):
-            if self._componentValues[idx] is not None:
+            if self._componentValues[idx] is not noValue:
                 representation += ' ' * scope
                 representation += self.componentType.getNameByPosition(idx)
                 representation = '%s=%s\n' % (
