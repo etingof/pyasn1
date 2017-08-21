@@ -172,11 +172,11 @@ class TagSet(object):
     def __init__(self, baseTag=(), *superTags):
         self.__baseTag = baseTag
         self.__superTags = superTags
-        self.__superTagsSignature = tuple(
+        self.__superTagsClassId = tuple(
             [(superTag.tagClass, superTag.tagId) for superTag in superTags]
         )
         self.__lenOfSuperTags = len(superTags)
-        self.__hash = hash(self.__superTags)
+        self.__hash = hash(self.__superTagsClassId)
 
     def __str__(self):
         return self.__superTags and '+'.join([str(x) for x in self.__superTags]) or '[untagged]'
@@ -199,22 +199,22 @@ class TagSet(object):
             return self.__superTags[i]
 
     def __eq__(self, other):
-        return self.__superTagsSignature == other
+        return self.__superTagsClassId == other
 
     def __ne__(self, other):
-        return self.__superTagsSignature != other
+        return self.__superTagsClassId != other
 
     def __lt__(self, other):
-        return self.__superTagsSignature < other
+        return self.__superTagsClassId < other
 
     def __le__(self, other):
-        return self.__superTagsSignature <= other
+        return self.__superTagsClassId <= other
 
     def __gt__(self, other):
-        return self.__superTagsSignature > other
+        return self.__superTagsClassId > other
 
     def __ge__(self, other):
-        return self.__superTagsSignature >= other
+        return self.__superTagsClassId >= other
 
     def __hash__(self):
         return self.__hash
