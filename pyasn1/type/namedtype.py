@@ -120,6 +120,9 @@ class NamedTypes(object):
         self.__requiredComponents = frozenset(
                 [idx for idx, nt in enumerate(self.__namedTypes) if not nt.isOptional and not nt.isDefaulted]
             )
+        self.__keys = frozenset([namedType.name for namedType in self.__namedTypes])
+        self.__values = tuple([namedType.asn1Object for namedType in self.__namedTypes])
+        self.__items = tuple([(namedType.name, namedType.asn1Object) for namedType in self.__namedTypes])
 
     def __repr__(self):
         return '%s(%s)' % (
@@ -173,13 +176,13 @@ class NamedTypes(object):
     # Python dict protocol
 
     def values(self):
-        return (namedType.asn1Object for namedType in self.__namedTypes)
+        return self.__values
 
     def keys(self):
-        return (namedType.name for namedType in self.__namedTypes)
+        return self.__keys
 
     def items(self):
-        return ((namedType.name, namedType.asn1Object) for namedType in self.__namedTypes)
+        return self.__items
 
     def clone(self):
         return self.__class__(*self.__namedTypes)
