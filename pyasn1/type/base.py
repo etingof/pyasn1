@@ -435,11 +435,13 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
     sizeSpec = None
 
     def __init__(self, **kwargs):
-        for key in ('componentType', 'sizeSpec'):
-            if key not in kwargs:
-                kwargs[key] = getattr(self, key)
+        readOnly = {
+            'componentType': self.componentType,
+            'sizeSpec': self.sizeSpec
+        }
+        readOnly.update(kwargs)
 
-        Asn1ItemBase.__init__(self, **kwargs)
+        Asn1ItemBase.__init__(self, **readOnly)
 
         self._componentValues = []
 
