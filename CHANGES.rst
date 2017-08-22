@@ -3,6 +3,8 @@ Revision 0.3.3, released XX-08-2017
 -----------------------------------
 
 - Improved ASN.1 types instantiation performance
+- Improved BER/CER/DER decoder performance by not unconditionally casting
+  substrate into str/bytes.
 - Fixed SetOf ordering at CER/DER encoder
 - Fixed crash on conditional binascii module import
 - Fix to TagSet hash value build

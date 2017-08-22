@@ -6,7 +6,7 @@
 #
 from pyasn1.type import base, tag, univ, char, useful, tagmap
 from pyasn1.codec.ber import eoo
-from pyasn1.compat.octets import oct2int, octs2ints, ints2octs, ensureString, null
+from pyasn1.compat.octets import oct2int, octs2ints, ints2octs, null
 from pyasn1.compat.integer import from_bytes
 from pyasn1 import debug, error
 
@@ -783,9 +783,16 @@ for typeDecoder in tagMap.values():
         typeMap[typeId] = typeDecoder
 
 
-(stDecodeTag, stDecodeLength, stGetValueDecoder, stGetValueDecoderByAsn1Spec,
- stGetValueDecoderByTag, stTryAsExplicitTag, stDecodeValue,
- stDumpRawValue, stErrorCondition, stStop) = [x for x in range(10)]
+(stDecodeTag,
+ stDecodeLength,
+ stGetValueDecoder,
+ stGetValueDecoderByAsn1Spec,
+ stGetValueDecoderByTag,
+ stTryAsExplicitTag,
+ stDecodeValue,
+ stDumpRawValue,
+ stErrorCondition,
+ stStop) = [x for x in range(10)]
 
 
 class Decoder(object):
@@ -813,8 +820,6 @@ class Decoder(object):
 
         if logger:
             logger('decoder called at scope %s with state %d, working with up to %d octets of substrate: %s' % (debug.scope, state, len(substrate), debug.hexdump(substrate)))
-
-        substrate = ensureString(substrate)
 
         # Look for end-of-octets sentinel
         if allowEoo and self.supportIndefLength:
