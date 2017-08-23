@@ -2294,7 +2294,10 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         for idx, componentValue in enumerate(self._componentValues):
             if componentValue is not noValue:
                 representation += ' ' * scope
-                representation += self.componentType.getNameByPosition(idx)
+                if self.componentType:
+                    representation += self.componentType.getNameByPosition(idx)
+                else:
+                    representation += 'field-%d' % idx
                 representation = '%s=%s\n' % (
                     representation, componentValue.prettyPrint(scope)
                 )
