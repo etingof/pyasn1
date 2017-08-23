@@ -258,7 +258,7 @@ class ObjectIdentifierDecoder(AbstractSimpleDecoder):
             subId = head[index]
             index += 1
             if subId < 128:
-                oid = oid + (subId,)
+                oid += (subId,)
             elif subId > 128:
                 # Construct subid from a number of octets
                 nextSubId = subId
@@ -385,12 +385,12 @@ class SequenceAndSetDecoderBase(AbstractConstructedDecoder):
 
         asn1Object = self._createComponent(asn1Spec, tagSet)
 
-        if substrateFun:
+        if substrateFun is not None:
             return substrateFun(asn1Object, substrate, length)
 
         namedTypes = asn1Object.componentType
 
-        if not self.orderedComponents or not namedTypes or namedTypes.hasOptionalOrDefault:
+        if namedTypes.hasOptionalOrDefault or not self.orderedComponents or not namedTypes:
             seenIndices = set()
             idx = 0
             while head:
@@ -431,7 +431,7 @@ class SequenceAndSetDecoderBase(AbstractConstructedDecoder):
 
         asn1Object = self._createComponent(asn1Spec, tagSet)
 
-        if substrateFun:
+        if substrateFun is not None:
             return substrateFun(asn1Object, substrate, length)
 
         namedTypes = asn1Object.componentType
@@ -746,7 +746,7 @@ tagMap = {
     univ.Enumerated.tagSet: IntegerDecoder(),
     univ.Real.tagSet: RealDecoder(),
     univ.Sequence.tagSet: SequenceDecoder(),  # conflicts with SequenceOf
-    univ.Set.tagSet: SetDecoder(),  # conflicts with SetOf
+    univ.Set.tagSet: SetOfDecoder(),  # conflicts with SetOf
     univ.Choice.tagSet: ChoiceDecoder(),  # conflicts with Any
     # character string types
     char.UTF8String.tagSet: UTF8StringDecoder(),
@@ -837,7 +837,7 @@ class Decoder(object):
 
         fullSubstrate = substrate
 
-        while not state is stStop:
+        while state is not stStop:
             if state is stDecodeTag:
                 if not substrate:
                     raise error.SubstrateUnderrunError(
@@ -902,10 +902,7 @@ class Decoder(object):
                 if firstOctet < 128:
                     size = 1
                     length = firstOctet
-                elif firstOctet == 128:
-                    size = 1
-                    length = -1
-                else:
+                elif firstOctet > 128:
                     size = firstOctet & 0x7F
                     # encoded in size bytes
                     encodedLength = octs2ints(substrate[1:size + 1])
@@ -920,6 +917,10 @@ class Decoder(object):
                         length <<= 8
                         length |= lengthOctet
                     size += 1
+                else:
+                    size = 1
+                    length = -1
+
                 substrate = substrate[size:]
                 if length == -1:
                     if not self.supportIndefLength:
@@ -1019,6 +1020,20 @@ class Decoder(object):
                 if logger:
                     logger('codec %s chosen by ASN.1 spec, decoding %s' % (state is stDecodeValue and concreteDecoder.__class__.__name__ or "<none>", state is stDecodeValue and 'value' or 'as explicit tag'))
                     debug.scope.push(chosenSpec is None and '?' or chosenSpec.__class__.__name__)
+            if state is stDecodeValue:
+                if length == -1:  # indef length
+                    value, substrate = concreteDecoder.indefLenValueDecoder(
+                        fullSubstrate, substrate, asn1Spec, tagSet, length,
+                        stGetValueDecoder, self, substrateFun
+                    )
+                else:
+                    value, substrate = concreteDecoder.valueDecoder(
+                        fullSubstrate, substrate, asn1Spec, tagSet, length,
+                        stGetValueDecoder, self, substrateFun
+                    )
+                if logger:
+                    logger('codec %s yields type %s, value:\n%s\n...remaining substrate is: %s' % (concreteDecoder.__class__.__name__, value.__class__.__name__, value.prettyPrint(), substrate and debug.hexdump(substrate) or '<none>'))
+                state = stStop
             if state is stTryAsExplicitTag:
                 if tagSet and tagSet[0].tagFormat == tag.tagFormatConstructed and tagSet[0].tagClass != tag.tagClassUniversal:
                     # Assume explicit tagging
@@ -1034,20 +1049,6 @@ class Decoder(object):
                 if logger:
                     logger('codec %s chosen, decoding value' % concreteDecoder.__class__.__name__)
                 state = stDecodeValue
-            if state is stDecodeValue:
-                if length == -1:  # indef length
-                    value, substrate = concreteDecoder.indefLenValueDecoder(
-                        fullSubstrate, substrate, asn1Spec, tagSet, length,
-                        stGetValueDecoder, self, substrateFun
-                    )
-                else:
-                    value, substrate = concreteDecoder.valueDecoder(
-                        fullSubstrate, substrate, asn1Spec, tagSet, length,
-                        stGetValueDecoder, self, substrateFun
-                    )
-                state = stStop
-                if logger:
-                    logger('codec %s yields type %s, value:\n%s\n...remaining substrate is: %s' % (concreteDecoder.__class__.__name__, value.__class__.__name__, value.prettyPrint(), substrate and debug.hexdump(substrate) or '<none>'))
             if state is stErrorCondition:
                 raise error.PyAsn1Error(
                     '%s not in asn1Spec: %r' % (tagSet, asn1Spec)
