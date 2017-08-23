@@ -1881,13 +1881,13 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
     def prettyPrint(self, scope=0):
         scope += 1
         representation = self.__class__.__name__ + ':\n'
-        for idx in range(len(self._componentValues)):
+        for idx, componentValue in enumerate(self._componentValues):
             representation += ' ' * scope
-            if (self._componentValues[idx] is noValue and
+            if (componentValue is noValue and
                     self.componentType is not None):
                 representation += '<empty>'
             else:
-                representation += self._componentValues[idx].prettyPrint(scope)
+                representation += componentValue.prettyPrint(scope)
         return representation
 
     def prettyPrintType(self, scope=0):
@@ -2291,23 +2291,23 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         """
         scope += 1
         representation = self.__class__.__name__ + ':\n'
-        for idx in range(len(self._componentValues)):
-            if self._componentValues[idx] is not noValue:
+        for idx, componentValue in enumerate(self._componentValues):
+            if componentValue is not noValue:
                 representation += ' ' * scope
                 representation += self.componentType.getNameByPosition(idx)
                 representation = '%s=%s\n' % (
-                    representation, self._componentValues[idx].prettyPrint(scope)
+                    representation, componentValue.prettyPrint(scope)
                 )
         return representation
 
     def prettyPrintType(self, scope=0):
         scope += 1
         representation = '%s -> %s {\n' % (self.tagSet, self.__class__.__name__)
-        for idx in range(len(self.componentType)):
+        for idx, componentType in enumerate(self.componentType):
             representation += ' ' * scope
             representation += '"%s"' % self.componentType.getNameByPosition(idx)
             representation = '%s = %s\n' % (
-                representation, self.componentType.getTypeByPosition(idx).prettyPrintType(scope)
+                representation, componentType.prettyPrintType(scope)
             )
         return representation + '\n' + ' ' * (scope - 1) + '}'
 

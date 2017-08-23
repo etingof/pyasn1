@@ -920,8 +920,8 @@ using the following methods:
    Integer(321)
    >>> record[2]
    Integer(0)
-   >>> for idx in range(len(record)):
-   ...   print(record.getNameByPosition(idx), record[idx])
+   >>> for idx, field in enumerate(record):
+   ...   print(record.getNameByPosition(idx), field)
    id 123
    room 321
    house 0
@@ -985,8 +985,8 @@ attribute should refer to another pyasn1 type object.
    Progression:
    100 111
    >>>
-   >>> for idx in range(len(arithmeticProgression)):
-   ...    arithmeticProgression[idx]
+   >>> for element in arithmeticProgression:
+   ...    element
    Integer(100)
    Integer(111)
    >>>
