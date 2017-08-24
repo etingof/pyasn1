@@ -507,6 +507,94 @@ class SequenceOfDecoderTestCase(unittest.TestCase):
             ints2octs((48, 128, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 0, 0))
         ) == (self.s, null)
 
+    def testUnguidedDecoder(self):
+        assert decoder.decode(
+            ints2octs((48, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=univ.SequenceOf()
+        ) == (self.s, null)
+
+
+class GuidedSequenceOfDecoderTestCase(unittest.TestCase):
+    def setUp(self):
+        self.s = univ.SequenceOf(componentType=univ.OctetString())
+        self.s.setComponentByPosition(0, univ.OctetString('quick brown'))
+
+    def testDefMode(self):
+        assert decoder.decode(
+            ints2octs((48, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=self.s
+        ) == (self.s, null)
+
+    def testIndefMode(self):
+        assert decoder.decode(
+            ints2octs((48, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0)), asn1Spec=self.s
+        ) == (self.s, null)
+
+    def testDefModeChunked(self):
+        assert decoder.decode(
+            ints2octs((48, 19, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110)), asn1Spec=self.s
+        ) == (self.s, null)
+
+    def testIndefModeChunked(self):
+        assert decoder.decode(
+            ints2octs((48, 128, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 0, 0)), asn1Spec=self.s
+        ) == (self.s, null)
+
+
+class SetOfDecoderTestCase(unittest.TestCase):
+    def setUp(self):
+        self.s = univ.SetOf(componentType=univ.OctetString())
+        self.s.setComponentByPosition(0, univ.OctetString('quick brown'))
+
+    def testDefMode(self):
+        assert decoder.decode(
+            ints2octs((49, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110))
+        ) == (self.s, null)
+
+    def testIndefMode(self):
+        assert decoder.decode(
+            ints2octs((49, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0))
+        ) == (self.s, null)
+
+    def testDefModeChunked(self):
+        assert decoder.decode(
+            ints2octs((49, 19, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110))
+        ) == (self.s, null)
+
+    def testIndefModeChunked(self):
+        assert decoder.decode(
+            ints2octs((49, 128, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 0, 0))
+        ) == (self.s, null)
+
+    def testUnguidedDecoder(self):
+        assert decoder.decode(
+            ints2octs((49, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=univ.SetOf()
+        ) == (self.s, null)
+
+
+class GuidedSetOfDecoderTestCase(unittest.TestCase):
+    def setUp(self):
+        self.s = univ.SetOf(componentType=univ.OctetString())
+        self.s.setComponentByPosition(0, univ.OctetString('quick brown'))
+
+    def testDefMode(self):
+        assert decoder.decode(
+            ints2octs((49, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=self.s
+        ) == (self.s, null)
+
+    def testIndefMode(self):
+        assert decoder.decode(
+            ints2octs((49, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0)), asn1Spec=self.s
+        ) == (self.s, null)
+
+    def testDefModeChunked(self):
+        assert decoder.decode(
+            ints2octs((49, 19, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110)), asn1Spec=self.s
+        ) == (self.s, null)
+
+    def testIndefModeChunked(self):
+        assert decoder.decode(
+            ints2octs((49, 128, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 0, 0)), asn1Spec=self.s
+        ) == (self.s, null)
+
 
 class SequenceDecoderTestCase(unittest.TestCase):
     def setUp(self):
@@ -528,8 +616,7 @@ class SequenceDecoderTestCase(unittest.TestCase):
 
     def testWithOptionalAndDefaultedIndefMode(self):
         assert decoder.decode(
-            ints2octs((48, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1,
-                       0, 0))
+            ints2octs((48, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0))
         ) == (self.s, null)
 
     def testWithOptionalAndDefaultedDefModeChunked(self):
@@ -540,8 +627,7 @@ class SequenceDecoderTestCase(unittest.TestCase):
 
     def testWithOptionalAndDefaultedIndefModeChunked(self):
         assert decoder.decode(
-            ints2octs((48, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0,
-                       0, 2, 1, 1, 0, 0))
+            ints2octs((48, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0))
         ) == (self.s, null)
 
     def testWithOptionalAndDefaultedDefModeSubst(self):
@@ -702,6 +788,191 @@ class GuidedSequenceDecoderTestCase(unittest.TestCase):
         assert decoder.decode(
             ints2octs((48, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0,
                        0, 2, 1, 1, 0, 0)), asn1Spec=self.s
+        ) == (self.s, null)
+
+
+class SetDecoderTestCase(unittest.TestCase):
+    def setUp(self):
+        self.s = univ.Set(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType('place-holder', univ.Null(null)),
+                namedtype.NamedType('first-name', univ.OctetString(null)),
+                namedtype.NamedType('age', univ.Integer(33))
+            )
+        )
+        self.s.setComponentByPosition(0, univ.Null(null))
+        self.s.setComponentByPosition(1, univ.OctetString('quick brown'))
+        self.s.setComponentByPosition(2, univ.Integer(1))
+
+    def testWithOptionalAndDefaultedDefMode(self):
+        assert decoder.decode(
+            ints2octs((49, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1))
+        ) == (self.s, null)
+
+    def testWithOptionalAndDefaultedIndefMode(self):
+        assert decoder.decode(
+            ints2octs((49, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0))
+        ) == (self.s, null)
+
+    def testWithOptionalAndDefaultedDefModeChunked(self):
+        assert decoder.decode(
+            ints2octs(
+                (49, 24, 5, 0, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 2, 1, 1))
+        ) == (self.s, null)
+
+    def testWithOptionalAndDefaultedIndefModeChunked(self):
+        assert decoder.decode(
+            ints2octs((49, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0))
+        ) == (self.s, null)
+
+    def testWithOptionalAndDefaultedDefModeSubst(self):
+        assert decoder.decode(
+            ints2octs((49, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1)),
+            substrateFun=lambda a, b, c: (b, c)
+        ) == (ints2octs((5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1)), 18)
+
+    def testWithOptionalAndDefaultedIndefModeSubst(self):
+        assert decoder.decode(
+            ints2octs((49, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)),
+            substrateFun=lambda a, b, c: (b, c)
+        ) == (ints2octs(
+            (5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)), -1)
+
+    def testTagFormat(self):
+        try:
+            decoder.decode(
+                ints2octs((16, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1))
+            )
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'wrong tagFormat worked out'
+
+
+class GuidedSetDecoderTestCase(unittest.TestCase):
+    def setUp(self):
+        self.s = univ.Set(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType('place-holder', univ.Null(null)),
+                namedtype.OptionalNamedType('first-name', univ.OctetString()),
+                namedtype.DefaultedNamedType('age', univ.Integer(33)),
+            )
+        )
+
+    def __init(self):
+        self.s.clear()
+        self.s.setComponentByPosition(0, univ.Null(null))
+
+    def __initWithOptional(self):
+        self.s.clear()
+        self.s.setComponentByPosition(0, univ.Null(null))
+        self.s.setComponentByPosition(1, univ.OctetString('quick brown'))
+
+    def __initWithDefaulted(self):
+        self.s.clear()
+        self.s.setComponentByPosition(0, univ.Null(null))
+        self.s.setComponentByPosition(2, univ.Integer(1))
+
+    def __initWithOptionalAndDefaulted(self):
+        self.s.clear()
+        self.s.setComponentByPosition(0, univ.Null(null))
+        self.s.setComponentByPosition(1, univ.OctetString('quick brown'))
+        self.s.setComponentByPosition(2, univ.Integer(1))
+
+    def testDefMode(self):
+        self.__init()
+        assert decoder.decode(
+            ints2octs((49, 128, 5, 0, 0, 0)), asn1Spec=self.s
+        ) == (self.s, null)
+
+    def testIndefMode(self):
+        self.__init()
+        assert decoder.decode(
+            ints2octs((49, 128, 5, 0, 0, 0)), asn1Spec=self.s
+        ) == (self.s, null)
+
+    def testDefModeChunked(self):
+        self.__init()
+        assert decoder.decode(
+            ints2octs((49, 2, 5, 0)), asn1Spec=self.s
+        ) == (self.s, null)
+
+    def testIndefModeChunked(self):
+        self.__init()
+        assert decoder.decode(
+            ints2octs((49, 128, 5, 0, 0, 0)), asn1Spec=self.s
+        ) == (self.s, null)
+
+    def testWithOptionalDefMode(self):
+        self.__initWithOptional()
+        assert decoder.decode(
+            ints2octs((49, 15, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=self.s
+        ) == (self.s, null)
+
+    def testWithOptionaIndefMode(self):
+        self.__initWithOptional()
+        assert decoder.decode(
+            ints2octs((49, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 0, 0)), asn1Spec=self.s
+        ) == (self.s, null)
+
+    def testWithOptionalDefModeChunked(self):
+        self.__initWithOptional()
+        assert decoder.decode(
+            ints2octs((49, 21, 5, 0, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110)), asn1Spec=self.s
+        ) == (self.s, null)
+
+    def testWithOptionalIndefModeChunked(self):
+        self.__initWithOptional()
+        assert decoder.decode(
+            ints2octs((49, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 0, 0)), asn1Spec=self.s
+        ) == (self.s, null)
+
+    def testWithDefaultedDefMode(self):
+        self.__initWithDefaulted()
+        assert decoder.decode(
+            ints2octs((49, 5, 5, 0, 2, 1, 1)), asn1Spec=self.s
+        ) == (self.s, null)
+
+    def testWithDefaultedIndefMode(self):
+        self.__initWithDefaulted()
+        assert decoder.decode(
+            ints2octs((49, 128, 5, 0, 2, 1, 1, 0, 0)), asn1Spec=self.s
+        ) == (self.s, null)
+
+    def testWithDefaultedDefModeChunked(self):
+        self.__initWithDefaulted()
+        assert decoder.decode(
+            ints2octs((49, 5, 5, 0, 2, 1, 1)), asn1Spec=self.s
+        ) == (self.s, null)
+
+    def testWithDefaultedIndefModeChunked(self):
+        self.__initWithDefaulted()
+        assert decoder.decode(
+            ints2octs((49, 128, 5, 0, 2, 1, 1, 0, 0)), asn1Spec=self.s
+        ) == (self.s, null)
+
+    def testWithOptionalAndDefaultedDefMode(self):
+        self.__initWithOptionalAndDefaulted()
+        assert decoder.decode(
+            ints2octs((49, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1)), asn1Spec=self.s
+        ) == (self.s, null)
+
+    def testWithOptionalAndDefaultedIndefMode(self):
+        self.__initWithOptionalAndDefaulted()
+        assert decoder.decode(
+            ints2octs((49, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)), asn1Spec=self.s
+        ) == (self.s, null)
+
+    def testWithOptionalAndDefaultedDefModeChunked(self):
+        self.__initWithOptionalAndDefaulted()
+        assert decoder.decode(
+            ints2octs((49, 24, 5, 0, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 2, 1, 1)), asn1Spec=self.s
+        ) == (self.s, null)
+
+    def testWithOptionalAndDefaultedIndefModeChunked(self):
+        self.__initWithOptionalAndDefaulted()
+        assert decoder.decode(
+            ints2octs((49, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)), asn1Spec=self.s
         ) == (self.s, null)
 
 

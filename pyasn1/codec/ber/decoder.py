@@ -359,21 +359,17 @@ class RealDecoder(AbstractSimpleDecoder):
 
 class AbstractConstructedDecoder(AbstractDecoder):
     protoComponent = None
-    orderedComponents = False
-    recordType = None
-    sequenceType = None
 
     # noinspection PyUnusedLocal
     def _createComponent(self, asn1Spec, tagSet, value=noValue):
         if asn1Spec is None:
-            if self.protoComponent is not None:
-                return self.protoComponent.clone(tagSet=tagSet)
+            return self.protoComponent.clone(tagSet=tagSet)
         else:
             return asn1Spec.clone()
 
 class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
-    protoComponent = None
-    orderedComponents = False
+    protoRecordComponent = None
+    protoSequenceComponent = None
 
     def _getComponentTagMap(self, asn1Object, idx):
         raise NotImplementedError()
@@ -397,9 +393,9 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
         # * 1+ components of the same type -> likely SEQUENCE OF/SET OF
         # * otherwise -> likely SEQUENCE/SET
         if len(components) > 1 or len(componentTypes) > 1:
-            asn1Object = self.recordType.clone()
+            asn1Object = self.protoRecordComponent.clone()
         else:
-            asn1Object = self.sequenceType.clone()
+            asn1Object = self.protoSequenceComponent.clone()
 
         for idx, component in enumerate(components):
             asn1Object.setComponentByPosition(
@@ -418,13 +414,16 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
         head, tail = substrate[:length], substrate[length:]
 
         if substrateFun is not None:
-            asn1Object = self._createComponent(asn1Spec, tagSet)
+            if asn1Spec is not None or self.protoComponent is not None:
+                asn1Object = self._createComponent(asn1Spec, tagSet)
+            else:
+                asn1Object = self.protoRecordComponent, self.protoSequenceComponent
             return substrateFun(asn1Object, substrate, length)
 
         if asn1Spec is None:
             asn1Object, trailing = self._decodeComponents(head, decodeFun)
             if trailing:
-                raise error.PyAsn1Error('Unused trailing %d octets found' % len(trailing))
+                raise error.PyAsn1Error('Unused trailing %d octets encountered' % len(trailing))
             return asn1Object, tail
 
         asn1Object = self._createComponent(asn1Spec, tagSet)
@@ -434,7 +433,8 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
             namedTypes = asn1Object.componentType
 
             if (namedTypes.hasOptionalOrDefault or
-                    not self.orderedComponents or not namedTypes):
+                    asn1Object.typeId == univ.Set.typeId or
+                    not namedTypes):
                 seenIndices = set()
                 idx = 0
                 while head:
@@ -488,14 +488,14 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
             raise error.PyAsn1Error('Constructed tag format expected')
 
         if substrateFun is not None:
-            asn1Object = self._createComponent(asn1Spec, tagSet)
+            if asn1Spec is not None or self.protoComponent is not None:
+                asn1Object = self._createComponent(asn1Spec, tagSet)
+            else:
+                asn1Object = self.protoRecordComponent, self.protoSequenceComponent
             return substrateFun(asn1Object, substrate, length)
 
         if asn1Spec is None:
-            asn1Object, trailing = self._decodeComponents(substrate, decodeFun, allowEoo=True)
-            if trailing:
-                raise error.PyAsn1Error('Unused trailing %d octets found' % len(trailing))
-            return asn1Object, trailing
+            return self._decodeComponents(substrate, decodeFun, allowEoo=True)
 
         asn1Object = self._createComponent(asn1Spec, tagSet)
 
@@ -571,13 +571,12 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
         return asn1Object, substrate
 
 class SequenceOrSequenceOfDecoder(UniversalConstructedTypeDecoder):
-    recordType = univ.Sequence()
-    sequenceType = univ.SequenceOf()
+    protoRecordComponent = univ.Sequence()
+    protoSequenceComponent = univ.SequenceOf()
 
 
 class SequenceDecoder(SequenceOrSequenceOfDecoder):
     protoComponent = univ.Sequence()
-    orderedComponents = True
 
     def _getComponentTagMap(self, asn1Object, idx):
         try:
@@ -594,13 +593,12 @@ class SequenceOfDecoder(SequenceOrSequenceOfDecoder):
 
 
 class SetOrSetOfDecoder(UniversalConstructedTypeDecoder):
-    recordType = univ.Set()
-    sequenceType = univ.SetOf()
+    protoRecordComponent = univ.Set()
+    protoSequenceComponent = univ.SetOf()
 
 
 class SetDecoder(SetOrSetOfDecoder):
     protoComponent = univ.Set()
-    orderedComponents = False
 
     def _getComponentTagMap(self, asn1Object, idx):
         return asn1Object.componentType.tagMapUnique
