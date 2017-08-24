@@ -5,6 +5,8 @@ Revision 0.3.3, released XX-08-2017
 - Improved ASN.1 types instantiation performance
 - Improved BER/CER/DER decoder performance by not unconditionally casting
   substrate into str/bytes.
+- Fixed exponential index size growth bug when building ambigious
+  NamedTypes tree
 - Fixed constructed types decoding failure at BER codec if running
   in unguided mode
 - Fixed crash on prettyPrint'ing a SEQUENCE with no defined components

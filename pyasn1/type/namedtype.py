@@ -106,13 +106,13 @@ class NamedTypes(object):
     ----------
     *namedTypes: :class:`~pyasn1.type.namedtype.NamedType`
     """
-    def __init__(self, *namedTypes):
+    def __init__(self, *namedTypes, **kwargs):
         self.__namedTypes = namedTypes
         self.__namedTypesLen = len(self.__namedTypes)
         self.__minTagSet = self.__computeMinTagSet()
         self.__nameToPosMap = self.__computeNameToPosMap()
         self.__tagToPosMap = self.__computeTagToPosMap()
-        self.__ambiguousTypes = self.__computeAmbiguousTypes()
+        self.__ambiguousTypes = 'terminal' not in kwargs and self.__computeAmbiguousTypes() or {}
         self.__uniqueTagMap = self.__computeTagMaps(unique=True)
         self.__nonUniqueTagMap = self.__computeTagMaps(unique=False)
         self.__hasOptionalOrDefault = bool([True for namedType in self.__namedTypes
@@ -229,7 +229,7 @@ class NamedTypes(object):
             if len(partialAmbigiousTypes) == len(self.__namedTypes):
                 ambigiousTypes[idx] = self
             else:
-                ambigiousTypes[idx] = NamedTypes(*partialAmbigiousTypes)
+                ambigiousTypes[idx] = NamedTypes(*partialAmbigiousTypes, terminal=True)
         return ambigiousTypes
 
     def getTypeByPosition(self, idx):
@@ -394,13 +394,16 @@ class NamedTypes(object):
         minTagSet = None
         for namedType in self.__namedTypes:
             asn1Object = namedType.asn1Object
+
             try:
                 tagSet = asn1Object.minTagSet
 
             except AttributeError:
                 tagSet = asn1Object.tagSet
+
             if minTagSet is None or tagSet < minTagSet:
                 minTagSet = tagSet
+
         return minTagSet or tag.TagSet()
 
     @property
