@@ -243,9 +243,11 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
 
     if sys.version_info[0] <= 2:
         def __nonzero__(self):
+            if not self.isValue: return False
             return self._value and True or False
     else:
         def __bool__(self):
+            if not self.isValue: return False
             return self._value and True or False
 
     def __hash__(self):
