@@ -1060,6 +1060,10 @@ class Decoder(object):
                     logger('codec %s chosen by ASN.1 spec, decoding %s' % (state is stDecodeValue and concreteDecoder.__class__.__name__ or "<none>", state is stDecodeValue and 'value' or 'as explicit tag'))
                     debug.scope.push(chosenSpec is None and '?' or chosenSpec.__class__.__name__)
             if state is stDecodeValue:
+                if not recursiveFlag and not substrateFun:  # deprecate this
+                    def substrateFun(a, b, c):
+                        return a, b[:c]
+
                 if length == -1:  # indef length
                     value, substrate = concreteDecoder.indefLenValueDecoder(
                         fullSubstrate, substrate, asn1Spec, tagSet, length,
