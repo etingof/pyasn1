@@ -360,12 +360,6 @@ class RealDecoder(AbstractSimpleDecoder):
 class AbstractConstructedDecoder(AbstractDecoder):
     protoComponent = None
 
-    # noinspection PyUnusedLocal
-    def _createComponent(self, asn1Spec, tagSet, value=noValue):
-        if asn1Spec is None:
-            return self.protoComponent.clone(tagSet=tagSet)
-        else:
-            return asn1Spec.clone()
 
 class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
     protoRecordComponent = None
@@ -414,10 +408,13 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
         head, tail = substrate[:length], substrate[length:]
 
         if substrateFun is not None:
-            if asn1Spec is not None or self.protoComponent is not None:
-                asn1Object = self._createComponent(asn1Spec, tagSet)
+            if asn1Spec is not None:
+                asn1Object = asn1Spec.clone()
+            elif self.protoComponent is not None:
+                asn1Object = self.protoComponent.clone(tagSet=tagSet)
             else:
                 asn1Object = self.protoRecordComponent, self.protoSequenceComponent
+
             return substrateFun(asn1Object, substrate, length)
 
         if asn1Spec is None:
@@ -426,7 +423,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                 raise error.PyAsn1Error('Unused trailing %d octets encountered' % len(trailing))
             return asn1Object, tail
 
-        asn1Object = self._createComponent(asn1Spec, tagSet)
+        asn1Object = asn1Spec.clone()
 
         if asn1Object.typeId in (univ.Sequence.typeId, univ.Set.typeId):
 
@@ -488,16 +485,19 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
             raise error.PyAsn1Error('Constructed tag format expected')
 
         if substrateFun is not None:
-            if asn1Spec is not None or self.protoComponent is not None:
-                asn1Object = self._createComponent(asn1Spec, tagSet)
+            if asn1Spec is not None:
+                asn1Object = asn1Spec.clone()
+            elif self.protoComponent is not None:
+                asn1Object = self.protoComponent.clone(tagSet=tagSet)
             else:
                 asn1Object = self.protoRecordComponent, self.protoSequenceComponent
+
             return substrateFun(asn1Object, substrate, length)
 
         if asn1Spec is None:
             return self._decodeComponents(substrate, decodeFun, allowEoo=True)
 
-        asn1Object = self._createComponent(asn1Spec, tagSet)
+        asn1Object = asn1Spec.clone()
 
         if asn1Object.typeId in (univ.Sequence.typeId, univ.Set.typeId):
 
@@ -620,7 +620,10 @@ class ChoiceDecoder(AbstractConstructedDecoder):
     def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                      length, state, decodeFun, substrateFun):
         head, tail = substrate[:length], substrate[length:]
-        asn1Object = self._createComponent(asn1Spec, tagSet)
+        if asn1Spec is None:
+            asn1Object = self.protoComponent.clone(tagSet=tagSet)
+        else:
+            asn1Object = asn1Spec.clone()
         if substrateFun:
             return substrateFun(asn1Object, substrate, length)
         if asn1Object.tagSet == tagSet:  # explicitly tagged Choice
@@ -642,7 +645,10 @@ class ChoiceDecoder(AbstractConstructedDecoder):
 
     def indefLenValueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet,
                              length, state, decodeFun, substrateFun):
-        asn1Object = self._createComponent(asn1Spec, tagSet)
+        if asn1Spec is None:
+            asn1Object = self.protoComponent.clone(tagSet=tagSet)
+        else:
+            asn1Object = asn1Spec.clone()
         if substrateFun:
             return substrateFun(asn1Object, substrate, length)
         if asn1Object.tagSet == tagSet:  # explicitly tagged Choice
