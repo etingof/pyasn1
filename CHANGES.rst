@@ -1,5 +1,5 @@
 
-Revision 0.3.3, released XX-08-2017
+Revision 0.3.3, released 27-08-2017
 -----------------------------------
 
 - Improved ASN.1 types instantiation performance
