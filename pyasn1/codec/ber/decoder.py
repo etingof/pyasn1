@@ -429,38 +429,51 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
             namedTypes = asn1Object.componentType
 
-            if (namedTypes.hasOptionalOrDefault or
-                    asn1Object.typeId == univ.Set.typeId or
-                    not namedTypes):
-                seenIndices = set()
-                idx = 0
-                while head:
-                    asn1Spec = self._getComponentTagMap(asn1Object, idx)
-                    component, head = decodeFun(head, asn1Spec)
-                    idx = self._getComponentPositionByType(
-                        asn1Object, component.effectiveTagSet, idx
-                    )
+            isUnordered = (not namedTypes or
+                           namedTypes.hasOptionalOrDefault or
+                           asn1Object.typeId == univ.Set.typeId)
 
-                    asn1Object.setComponentByPosition(
-                        idx, component,
-                        verifyConstraints=False,
-                        matchTags=False, matchConstraints=False
-                    )
-                    seenIndices.add(idx)
-                    idx += 1
+            seenIndices = set()
+            idx = 0
+            while head:
+                if not isUnordered:
+                    asn1Spec = namedTypes[idx].asn1Object
+                elif not namedTypes:
+                    asn1Spec = None
+                elif asn1Object.typeId == univ.Set.typeId:
+                    asn1Spec = namedTypes.tagMapUnique
+                else:
+                    try:
+                        if namedTypes[idx].isOptional or namedTypes[idx].isDefaulted:
+                            asn1Spec = namedTypes.getTagMapNearPosition(idx)
+                        else:
+                            asn1Spec = namedTypes[idx].asn1Object
+                    except IndexError:
+                        raise error.PyAsn1Error(
+                            'Excessive components decoded at %r'(asn1Object,)
+                        )
 
-                if namedTypes and not namedTypes.requiredComponents.issubset(seenIndices):
+                component, head = decodeFun(head, asn1Spec)
+
+                if isUnordered and namedTypes:
+                    if asn1Object.typeId == univ.Set.typeId:
+                        idx = namedTypes.getPositionByType(component.tagSet)
+                    elif namedTypes[idx].isOptional or namedTypes[idx].isDefaulted:
+                        idx = namedTypes.getPositionNearType(component.effectiveTagSet, idx)
+
+                asn1Object.setComponentByPosition(
+                    idx, component,
+                    verifyConstraints=False,
+                    matchTags=False, matchConstraints=False
+                )
+
+                seenIndices.add(idx)
+                idx += 1
+
+            if namedTypes:
+                if not namedTypes.requiredComponents.issubset(seenIndices):
                     raise error.PyAsn1Error('ASN.1 object %s has uninitialized components' % asn1Object.__class__.__name__)
             else:
-                for idx, asn1Spec in enumerate(namedTypes.values()):
-                    component, head = decodeFun(head, asn1Spec)
-                    asn1Object.setComponentByPosition(
-                        idx, component,
-                        verifyConstraints=False,
-                        matchTags=False, matchConstraints=False
-                    )
-
-            if not namedTypes:
                 asn1Object.verifySizeSpec()
 
         else:
@@ -503,52 +516,57 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
             namedTypes = asn1Object.componentType
 
-            if (namedTypes.hasOptionalOrDefault or
-                    asn1Object.typeId == univ.Set.typeId or
-                    not namedTypes):
-                seenIndices = set()
-                idx = 0
-                while substrate:
-                    asn1Spec = self._getComponentTagMap(asn1Object, idx)
-                    component, substrate = decodeFun(substrate, asn1Spec, allowEoo=True)
-                    if component is eoo.endOfOctets:
-                        break
-                    idx = self._getComponentPositionByType(
-                        asn1Object, component.effectiveTagSet, idx
-                    )
+            isUnordered = (not namedTypes or
+                           namedTypes.hasOptionalOrDefault or
+                           asn1Object.typeId == univ.Set.typeId)
 
-                    asn1Object.setComponentByPosition(
-                        idx, component,
-                        verifyConstraints=False,
-                        matchTags=False, matchConstraints=False
-                    )
-                    seenIndices.add(idx)
-                    idx += 1
-
+            seenIndices = set()
+            idx = 0
+            while substrate:
+                if not isUnordered:
+                    asn1Spec = namedTypes[idx].asn1Object
+                elif len(namedTypes) <= idx:
+                    asn1Spec = None
+                elif asn1Object.typeId == univ.Set.typeId:
+                    asn1Spec = namedTypes.tagMapUnique
                 else:
-                    raise error.SubstrateUnderrunError(
-                        'No EOO seen before substrate ends'
-                    )
+                    try:
+                        if namedTypes[idx].isOptional or namedTypes[idx].isDefaulted:
+                            asn1Spec = namedTypes.getTagMapNearPosition(idx)
+                        else:
+                            asn1Spec = namedTypes[idx].asn1Object
+                    except IndexError:
+                        raise error.PyAsn1Error(
+                            'Excessive components decoded at %r' (asn1Object,)
+                        )
+                component, substrate = decodeFun(substrate, asn1Spec, allowEoo=True)
+                if component is eoo.endOfOctets:
+                    break
 
-                if namedTypes and not namedTypes.requiredComponents.issubset(seenIndices):
+                if isUnordered and namedTypes:
+                    if asn1Object.typeId == univ.Set.typeId:
+                        idx = namedTypes.getPositionByType(component.tagSet)
+                    elif namedTypes[idx].isOptional or namedTypes[idx].isDefaulted:
+                        idx = namedTypes.getPositionNearType(component.effectiveTagSet, idx)
+
+                asn1Object.setComponentByPosition(
+                    idx, component,
+                    verifyConstraints=False,
+                    matchTags=False, matchConstraints=False
+                )
+
+                seenIndices.add(idx)
+                idx += 1
+
+            else:
+                raise error.SubstrateUnderrunError(
+                    'No EOO seen before substrate ends'
+                )
+
+            if namedTypes:
+                if not namedTypes.requiredComponents.issubset(seenIndices):
                     raise error.PyAsn1Error('ASN.1 object %s has uninitialized components' % asn1Object.__class__.__name__)
             else:
-                for idx, asn1Spec in enumerate(namedTypes.values()):
-                    component, substrate = decodeFun(substrate, asn1Spec)
-
-                    asn1Object.setComponentByPosition(
-                        idx, component,
-                        verifyConstraints=False,
-                        matchTags=False, matchConstraints=False
-                    )
-
-                component, substrate = decodeFun(substrate, eoo.endOfOctets, allowEoo=True)
-                if component is not eoo.endOfOctets:
-                    raise error.SubstrateUnderrunError(
-                        'No EOO seen before substrate ends'
-                    )
-
-            if not namedTypes:
                 asn1Object.verifySizeSpec()
 
         else:
@@ -580,15 +598,6 @@ class SequenceOrSequenceOfDecoder(UniversalConstructedTypeDecoder):
 class SequenceDecoder(SequenceOrSequenceOfDecoder):
     protoComponent = univ.Sequence()
 
-    def _getComponentTagMap(self, asn1Object, idx):
-        try:
-            return asn1Object.getComponentTagMapNearPosition(idx)
-        except error.PyAsn1Error:
-            return
-
-    def _getComponentPositionByType(self, asn1Object, tagSet, idx):
-        return asn1Object.getComponentPositionNearType(tagSet, idx)
-
 
 class SequenceOfDecoder(SequenceOrSequenceOfDecoder):
     protoComponent = univ.SequenceOf()
@@ -602,14 +611,6 @@ class SetOrSetOfDecoder(UniversalConstructedTypeDecoder):
 class SetDecoder(SetOrSetOfDecoder):
     protoComponent = univ.Set()
 
-    def _getComponentTagMap(self, asn1Object, idx):
-        return asn1Object.componentType.tagMapUnique
-
-    def _getComponentPositionByType(self, asn1Object, tagSet, idx):
-        if asn1Object.componentType:
-            return asn1Object.componentType.getPositionByType(tagSet)
-        else:
-            return idx
 
 
 class SetOfDecoder(SetOrSetOfDecoder):

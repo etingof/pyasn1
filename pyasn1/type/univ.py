@@ -2234,10 +2234,6 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
         return self
 
-    def getNameByPosition(self, idx):
-        if self._componentTypeLen:
-            return self.componentType.getNameByPosition(idx)
-
     @property
     def isValue(self):
         """Indicate if |ASN.1| object represents ASN.1 type or ASN.1 value.
@@ -2323,6 +2319,10 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         if self._componentTypeLen:
             return self.componentType
 
+    def getNameByPosition(self, idx):
+        if self._componentTypeLen:
+            return self.componentType[idx].name
+
 
 class Sequence(SequenceAndSetBase):
     __doc__ = SequenceAndSetBase.__doc__
@@ -2349,6 +2349,8 @@ class Sequence(SequenceAndSetBase):
 
     # Disambiguation ASN.1 types identification
     typeId = SequenceAndSetBase.getTypeId()
+
+    # backward compatibility
 
     def getComponentTagMapNearPosition(self, idx):
         if self.componentType:

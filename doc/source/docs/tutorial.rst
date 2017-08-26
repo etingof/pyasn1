@@ -921,7 +921,7 @@ using the following methods:
    >>> record[2]
    Integer(0)
    >>> for idx, field in enumerate(record):
-   ...   print(record.getNameByPosition(idx), field)
+   ...   print(record.componentType[idx].name, field)
    id 123
    room 321
    house 0

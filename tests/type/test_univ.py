@@ -988,11 +988,11 @@ class Sequence(unittest.TestCase):
         assert '<missing>' not in self.s1
 
     def testGetNearPosition(self):
-        assert self.s1.getComponentTagMapNearPosition(1).presentTypes == {
+        assert self.s1.componentType.getTagMapNearPosition(1).presentTypes == {
             univ.OctetString.tagSet: univ.OctetString(''),
             univ.Integer.tagSet: univ.Integer(34)
         }
-        assert self.s1.getComponentPositionNearType(
+        assert self.s1.componentType.getPositionNearType(
             univ.OctetString.tagSet, 1
         ) == 1
 
