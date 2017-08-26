@@ -957,10 +957,22 @@ class GuidedSetDecoderTestCase(unittest.TestCase):
             ints2octs((49, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1)), asn1Spec=self.s
         ) == (self.s, null)
 
+    def testWithOptionalAndDefaultedDefModeReordered(self):
+        self.__initWithOptionalAndDefaulted()
+        assert decoder.decode(
+            ints2octs((49, 18, 2, 1, 1, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 5, 0)), asn1Spec=self.s
+        ) == (self.s, null)
+
     def testWithOptionalAndDefaultedIndefMode(self):
         self.__initWithOptionalAndDefaulted()
         assert decoder.decode(
             ints2octs((49, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)), asn1Spec=self.s
+        ) == (self.s, null)
+
+    def testWithOptionalAndDefaultedIndefModeReordered(self):
+        self.__initWithOptionalAndDefaulted()
+        assert decoder.decode(
+            ints2octs((49, 128, 2, 1, 1, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0,  0, 0)), asn1Spec=self.s
         ) == (self.s, null)
 
     def testWithOptionalAndDefaultedDefModeChunked(self):

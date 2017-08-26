@@ -503,7 +503,9 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
             namedTypes = asn1Object.componentType
 
-            if not namedTypes or namedTypes.hasOptionalOrDefault:
+            if (namedTypes.hasOptionalOrDefault or
+                    asn1Object.typeId == univ.Set.typeId or
+                    not namedTypes):
                 seenIndices = set()
                 idx = 0
                 while substrate:
@@ -1083,6 +1085,7 @@ class Decoder(object):
                 if logger:
                     logger('codec %s yields type %s, value:\n%s\n...remaining substrate is: %s' % (concreteDecoder.__class__.__name__, value.__class__.__name__, value.prettyPrint(), substrate and debug.hexdump(substrate) or '<none>'))
                 state = stStop
+                break
             if state is stTryAsExplicitTag:
                 if tagSet and tagSet[0].tagFormat == tag.tagFormatConstructed and tagSet[0].tagClass != tag.tagClassUniversal:
                     # Assume explicit tagging
