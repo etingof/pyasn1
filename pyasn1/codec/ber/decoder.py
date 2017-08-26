@@ -457,7 +457,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
                 if isUnordered and namedTypes:
                     if asn1Object.typeId == univ.Set.typeId:
-                        idx = namedTypes.getPositionByType(component.tagSet)
+                        idx = namedTypes.getPositionByType(component.effectiveTagSet)
                     elif namedTypes[idx].isOptional or namedTypes[idx].isDefaulted:
                         idx = namedTypes.getPositionNearType(component.effectiveTagSet, idx)
 
@@ -545,7 +545,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
                 if isUnordered and namedTypes:
                     if asn1Object.typeId == univ.Set.typeId:
-                        idx = namedTypes.getPositionByType(component.tagSet)
+                        idx = namedTypes.getPositionByType(component.effectiveTagSet)
                     elif namedTypes[idx].isOptional or namedTypes[idx].isDefaulted:
                         idx = namedTypes.getPositionNearType(component.effectiveTagSet, idx)
 
