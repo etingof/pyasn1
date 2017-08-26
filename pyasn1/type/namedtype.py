@@ -229,7 +229,7 @@ class NamedTypes(object):
             if len(partialAmbigiousTypes) == len(self.__namedTypes):
                 ambigiousTypes[idx] = self
             else:
-                ambigiousTypes[idx] = NamedTypes(*partialAmbigiousTypes, terminal=True)
+                ambigiousTypes[idx] = NamedTypes(*partialAmbigiousTypes, **dict(terminal=True))
         return ambigiousTypes
 
     def getTypeByPosition(self, idx):
