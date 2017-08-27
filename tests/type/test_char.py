@@ -62,6 +62,7 @@ class AbstractStringTestCase:
         assert self.asn1Type(self.pythonString) == self.pythonString
         assert self.asn1Type(self.pythonString.encode(self.encoding)) == self.pythonString
         assert self.asn1Type(univ.OctetString(self.pythonString.encode(self.encoding))) == self.pythonString
+        assert self.asn1Type(self.asn1Type(self.pythonString)) == self.pythonString
         assert self.asn1Type(self.initializer, encoding=self.encoding) == self.pythonString
 
     def testInitFromAsn1(self):

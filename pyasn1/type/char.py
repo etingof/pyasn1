@@ -57,7 +57,7 @@ class AbstractCharacterString(univ.OctetString):
                 )
 
         def __unicode__(self):
-            return self._value
+            return unicode(self._value)
 
         def prettyIn(self, value):
             try:
