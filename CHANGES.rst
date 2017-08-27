@@ -1,4 +1,10 @@
 
+Revision 0.3.4, released XX-08-2017
+-----------------------------------
+
+- Fixed Character types instantiation from OctetString type -- double
+  unicode decoding may have scrambled the data
+
 Revision 0.3.3, released 27-08-2017
 -----------------------------------
 
