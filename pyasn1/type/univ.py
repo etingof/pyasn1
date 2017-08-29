@@ -921,7 +921,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
                     return value.encode(self.encoding)
                 except (LookupError, UnicodeEncodeError):
                     raise error.PyAsn1Error(
-                        'Can\'t encode string \'%s\' with \'%s\' codec' % (value, self.encoding)
+                        "Can't encode string '%s' with codec %s" % (value, self.encoding)
                     )
             elif isinstance(value, (tuple, list)):
                 try:
@@ -942,7 +942,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
             except UnicodeDecodeError:
                 raise error.PyAsn1Error(
-                    'Can\'t decode string \'%s\' with \'%s\' codec' % (self._value, self.encoding)
+                    "Can't decode string '%s' with codec %s" % (self._value, self.encoding)
                 )
 
         def asOctets(self):

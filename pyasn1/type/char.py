@@ -53,36 +53,29 @@ class AbstractCharacterString(univ.OctetString):
                 return self._value.encode(self.encoding)
             except UnicodeEncodeError:
                 raise error.PyAsn1Error(
-                    'Can\'t encode string \'%s\' with \'%s\' codec' % (self._value, self.encoding)
+                    "Can't encode string '%s' with codec %s" % (self._value, self.encoding)
                 )
 
         def __unicode__(self):
             return unicode(self._value)
 
         def prettyIn(self, value):
-            if isinstance(value, unicode):
-                return value
-            elif isinstance(value, str):
-                try:
+            try:
+                if isinstance(value, unicode):
+                    return value
+                elif isinstance(value, str):
                     return value.decode(self.encoding)
-                except (LookupError, UnicodeDecodeError):
-                    raise error.PyAsn1Error(
-                        'Can\'t decode string \'%s\' with \'%s\' codec' % (value, self.encoding)
-                    )
-            elif isinstance(value, (tuple, list)):
-                try:
+                elif isinstance(value, (tuple, list)):
                     return self.prettyIn(''.join([chr(x) for x in value]))
-                except ValueError:
-                    raise error.PyAsn1Error(
-                        'Bad %s initializer \'%s\'' % (self.__class__.__name__, value)
-                    )
-            else:
-                try:
+                elif isinstance(value, univ.OctetString):
+                    return value.asOctets().decode(self.encoding)
+                else:
                     return unicode(value)
-                except UnicodeDecodeError:
-                    raise error.PyAsn1Error(
-                        'Can\'t turn object \'%s\' into unicode' % (value,)
-                    )
+
+            except (UnicodeDecodeError, LookupError):
+                raise error.PyAsn1Error(
+                    "Can't decode string '%s' with codec %s" % (value, self.encoding)
+                )
 
         def asOctets(self, padding=True):
             return str(self)
@@ -99,28 +92,26 @@ class AbstractCharacterString(univ.OctetString):
                 return self._value.encode(self.encoding)
             except UnicodeEncodeError:
                 raise error.PyAsn1Error(
-                    'Can\'t encode string \'%s\' with \'%s\' codec' % (self._value, self.encoding)
+                    "Can't encode string '%s' with codec %s" % (self._value, self.encoding)
                 )
 
         def prettyIn(self, value):
-            if isinstance(value, str):
-                return value
-            elif isinstance(value, bytes):
-                try:
+            try:
+                if isinstance(value, str):
+                    return value
+                elif isinstance(value, bytes):
                     return value.decode(self.encoding)
-                except UnicodeDecodeError:
-                    raise error.PyAsn1Error(
-                        'Can\'t decode string \'%s\' with \'%s\' codec' % (value, self.encoding)
-                    )
-            elif isinstance(value, (tuple, list)):
-                return self.prettyIn(bytes(value))
-            else:
-                try:
+                elif isinstance(value, (tuple, list)):
+                    return self.prettyIn(bytes(value))
+                elif isinstance(value, univ.OctetString):
+                    return value.asOctets().decode(self.encoding)
+                else:
                     return str(value)
-                except (UnicodeDecodeError, ValueError):
-                    raise error.PyAsn1Error(
-                        'Can\'t turn object \'%s\' into unicode' % (value,)
-                    )
+
+            except (UnicodeDecodeError, LookupError):
+                raise error.PyAsn1Error(
+                    "Can't decode string '%s' with codec %s" % (value, self.encoding)
+                )
 
         def asOctets(self, padding=True):
             return bytes(self)
