@@ -99,10 +99,7 @@ class SetOfEncoder(encoder.SequenceOfEncoder):
         value.verifySizeSpec()
         substrate = null
         idx = len(value)
-        # This is certainly a hack but how else do I distinguish SetOf
-        # from Set if they have the same tags&constraints?
-        if isinstance(value, univ.SequenceAndSetBase):
-            # Set
+        if value.typeId == univ.Set.typeId:
             namedTypes = value.componentType
             comps = []
             compsMap = {}
@@ -120,7 +117,6 @@ class SetOfEncoder(encoder.SequenceOfEncoder):
             for comp in self._sortComponents(comps):
                 substrate += encodeFun(comp, defMode, maxChunkSize, ifNotEmpty=compsMap[id(comp)])
         else:
-            # SetOf
             components = [encodeFun(x, defMode, maxChunkSize) for x in value]
 
             # sort by serialized and padded components

@@ -381,7 +381,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
             components.append(component)
             componentTypes.add(component.tagSet)
 
-        # Now we have to guess is it SEQUENC/SETE or SEQUENCE OF/SET OF
+        # Now we have to guess is it SEQUENCE/SET or SEQUENCE OF/SET OF
         # The heuristics is:
         # * 0-1 component -> likely SEQUENCE OF/SET OF
         # * 1+ components of the same type -> likely SEQUENCE OF/SET OF
