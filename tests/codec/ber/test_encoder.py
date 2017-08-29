@@ -343,6 +343,38 @@ class UTF8StringEncoderTestCase(unittest.TestCase):
 
 
 class SequenceOfEncoderTestCase(unittest.TestCase):
+    def testEmpty(self):
+        s = univ.SequenceOf()
+        assert encoder.encode(s) == ints2octs((48, 0))
+
+    def testDefMode(self):
+        s = univ.SequenceOf()
+        s.setComponentByPosition(0, univ.OctetString('quick brown'))
+        assert encoder.encode(s) == ints2octs((48, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110))
+
+    def testIndefMode(self):
+        s = univ.SequenceOf()
+        s.setComponentByPosition(0, univ.OctetString('quick brown'))
+        assert encoder.encode(
+            s, defMode=False
+        ) == ints2octs((48, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0))
+
+    def testDefModeChunked(self):
+        s = univ.SequenceOf()
+        s.setComponentByPosition(0, univ.OctetString('quick brown'))
+        assert encoder.encode(
+            s, defMode=True, maxChunkSize=4
+        ) == ints2octs((48, 19, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110))
+
+    def testIndefModeChunked(self):
+        s = univ.SequenceOf()
+        s.setComponentByPosition(0, univ.OctetString('quick brown'))
+        assert encoder.encode(
+            s, defMode=False, maxChunkSize=4
+        ) == ints2octs((48, 128, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 0, 0))
+
+
+class SequenceOfEncoderWithSchemaTestCase(unittest.TestCase):
     def setUp(self):
         self.s = univ.SequenceOf(componentType=univ.OctetString())
 
@@ -374,8 +406,40 @@ class SequenceOfEncoderTestCase(unittest.TestCase):
 
 
 class SetOfEncoderTestCase(unittest.TestCase):
+    def testEmpty(self):
+        s = univ.SetOf()
+        assert encoder.encode(s) == ints2octs((49, 0))
+
+    def testDefMode(self):
+        s = univ.SetOf()
+        s.setComponentByPosition(0, univ.OctetString('quick brown'))
+        assert encoder.encode(s) == ints2octs((49, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110))
+
+    def testIndefMode(self):
+        s = univ.SetOf()
+        s.setComponentByPosition(0, univ.OctetString('quick brown'))
+        assert encoder.encode(
+            s, defMode=False
+        ) == ints2octs((49, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0))
+
+    def testDefModeChunked(self):
+        s = univ.SetOf()
+        s.setComponentByPosition(0, univ.OctetString('quick brown'))
+        assert encoder.encode(
+            s, defMode=True, maxChunkSize=4
+        ) == ints2octs((49, 19, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110))
+
+    def testIndefModeChunked(self):
+        s = univ.SetOf()
+        s.setComponentByPosition(0, univ.OctetString('quick brown'))
+        assert encoder.encode(
+            s, defMode=False, maxChunkSize=4
+        ) == ints2octs((49, 128, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 0, 0))
+
+
+class SetOfEncoderWithSchemaTestCase(unittest.TestCase):
     def setUp(self):
-        self.s = univ.SequenceOf(componentType=univ.OctetString())
+        self.s = univ.SetOf(componentType=univ.OctetString())
 
     def __init(self):
         self.s.clear()
@@ -383,28 +447,54 @@ class SetOfEncoderTestCase(unittest.TestCase):
 
     def testDefMode(self):
         self.__init()
-        assert encoder.encode(self.s) == ints2octs((48, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110))
+        assert encoder.encode(self.s) == ints2octs((49, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110))
 
     def testIndefMode(self):
         self.__init()
         assert encoder.encode(
             self.s, defMode=False
-        ) == ints2octs((48, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0))
+        ) == ints2octs((49, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0))
 
     def testDefModeChunked(self):
         self.__init()
         assert encoder.encode(
             self.s, defMode=True, maxChunkSize=4
-        ) == ints2octs((48, 19, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110))
+        ) == ints2octs((49, 19, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110))
 
     def testIndefModeChunked(self):
         self.__init()
         assert encoder.encode(
             self.s, defMode=False, maxChunkSize=4
-        ) == ints2octs((48, 128, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 0, 0))
+        ) == ints2octs((49, 128, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 0, 0))
 
 
 class SequenceEncoderTestCase(unittest.TestCase):
+    def setUp(self):
+        self.s = univ.Sequence()
+        self.s.setComponentByPosition(0, univ.Null(''))
+        self.s.setComponentByPosition(1, univ.OctetString('quick brown'))
+        self.s.setComponentByPosition(2, univ.Integer(1))
+
+    def testDefMode(self):
+        assert encoder.encode(self.s) == ints2octs((48, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1))
+
+    def testIndefMode(self):
+        assert encoder.encode(
+            self.s, defMode=False
+        ) == ints2octs((48, 128, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1, 0, 0))
+
+    def testDefModeChunked(self):
+        assert encoder.encode(
+            self.s, defMode=True, maxChunkSize=4
+        ) == ints2octs((48, 24, 5, 0, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 2, 1, 1))
+
+    def testIndefModeChunked(self):
+        assert encoder.encode(
+            self.s, defMode=False, maxChunkSize=4
+        ) == ints2octs((48, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0))
+
+
+class SequenceEncoderWithSchemaTestCase(unittest.TestCase):
     def setUp(self):
         self.s = univ.Sequence(
             componentType=namedtype.NamedTypes(
@@ -530,6 +620,32 @@ class SequenceEncoderTestCase(unittest.TestCase):
 
 class SetEncoderTestCase(unittest.TestCase):
     def setUp(self):
+        self.s = univ.Set()
+        self.s.setComponentByPosition(0, univ.Null(''))
+        self.s.setComponentByPosition(1, univ.OctetString('quick brown'))
+        self.s.setComponentByPosition(2, univ.Integer(1))
+
+    def testDefMode(self):
+        assert encoder.encode(self.s) == ints2octs((49, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1))
+
+    def testIndefMode(self):
+        assert encoder.encode(
+            self.s, defMode=False
+        ) == ints2octs((49, 128, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1, 0, 0))
+
+    def testDefModeChunked(self):
+        assert encoder.encode(
+            self.s, defMode=True, maxChunkSize=4
+        ) == ints2octs((49, 24, 5, 0, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 2, 1, 1))
+
+    def testIndefModeChunked(self):
+        assert encoder.encode(
+            self.s, defMode=False, maxChunkSize=4
+        ) == ints2octs((49, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0))
+
+
+class SetEncoderWithSchemaTestCase(unittest.TestCase):
+    def setUp(self):
         self.s = univ.Set(
             componentType=namedtype.NamedTypes(
                 namedtype.NamedType('place-holder', univ.Null()),
@@ -652,6 +768,49 @@ class SetEncoderTestCase(unittest.TestCase):
 
 
 class ChoiceEncoderTestCase(unittest.TestCase):
+
+    def testEmpty(self):
+        s = univ.Choice()
+        try:
+            encoder.encode(s)
+        except PyAsn1Error:
+            pass
+        else:
+            assert 0, 'encoded unset choice'
+
+    def testDefModeOptionOne(self):
+        s = univ.Choice()
+        s.setComponentByPosition(0, univ.Null(''))
+        assert encoder.encode(s) == ints2octs((5, 0))
+
+    def testDefModeOptionTwo(self):
+        s = univ.Choice()
+        s.setComponentByPosition(0, univ.OctetString('quick brown'))
+        assert encoder.encode(s) == ints2octs((4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110))
+
+    def testIndefMode(self):
+        s = univ.Choice()
+        s.setComponentByPosition(0, univ.OctetString('quick brown'))
+        assert encoder.encode(
+            s, defMode=False
+        ) == ints2octs((4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110))
+
+    def testDefModeChunked(self):
+        s = univ.Choice()
+        s.setComponentByPosition(0, univ.OctetString('quick brown'))
+        assert encoder.encode(
+            s, defMode=True, maxChunkSize=4
+        ) == ints2octs((36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110))
+
+    def testIndefModeChunked(self):
+        s = univ.Choice()
+        s.setComponentByPosition(0, univ.OctetString('quick brown'))
+        assert encoder.encode(
+            s, defMode=False, maxChunkSize=4
+        ) == ints2octs((36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0))
+
+
+class ChoiceEncoderWithSchemaTestCase(unittest.TestCase):
     def setUp(self):
         self.s = univ.Choice(
             componentType=namedtype.NamedTypes(

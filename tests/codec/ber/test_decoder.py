@@ -507,13 +507,13 @@ class SequenceOfDecoderTestCase(unittest.TestCase):
             ints2octs((48, 128, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 0, 0))
         ) == (self.s, null)
 
-    def testUnguidedDecoder(self):
+    def testSchemalessDecoder(self):
         assert decoder.decode(
             ints2octs((48, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=univ.SequenceOf()
         ) == (self.s, null)
 
 
-class GuidedSequenceOfDecoderTestCase(unittest.TestCase):
+class SequenceOfDecoderWithSchemaTestCase(unittest.TestCase):
     def setUp(self):
         self.s = univ.SequenceOf(componentType=univ.OctetString())
         self.s.setComponentByPosition(0, univ.OctetString('quick brown'))
@@ -564,13 +564,13 @@ class SetOfDecoderTestCase(unittest.TestCase):
             ints2octs((49, 128, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 0, 0))
         ) == (self.s, null)
 
-    def testUnguidedDecoder(self):
+    def testSchemalessDecoder(self):
         assert decoder.decode(
             ints2octs((49, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=univ.SetOf()
         ) == (self.s, null)
 
 
-class GuidedSetOfDecoderTestCase(unittest.TestCase):
+class SetOfDecoderWithSchemaTestCase(unittest.TestCase):
     def setUp(self):
         self.s = univ.SetOf(componentType=univ.OctetString())
         self.s.setComponentByPosition(0, univ.OctetString('quick brown'))
@@ -655,7 +655,7 @@ class SequenceDecoderTestCase(unittest.TestCase):
             assert 0, 'wrong tagFormat worked out'
 
 
-class GuidedSequenceDecoderTestCase(unittest.TestCase):
+class SequenceDecoderWithSchemaTestCase(unittest.TestCase):
     def setUp(self):
         self.s = univ.Sequence(
             componentType=namedtype.NamedTypes(
@@ -849,7 +849,7 @@ class SetDecoderTestCase(unittest.TestCase):
             assert 0, 'wrong tagFormat worked out'
 
 
-class GuidedSetDecoderTestCase(unittest.TestCase):
+class SetDecoderWithSchemaTestCase(unittest.TestCase):
     def setUp(self):
         self.s = univ.Set(
             componentType=namedtype.NamedTypes(

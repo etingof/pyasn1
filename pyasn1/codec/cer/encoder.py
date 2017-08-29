@@ -115,7 +115,7 @@ class SetOfEncoder(encoder.SequenceOfEncoder):
                         continue
 
                 comps.append(value[idx])
-                compsMap[id(value[idx])] = namedTypes[idx].isOptional
+                compsMap[id(value[idx])] = namedTypes and namedTypes[idx].isOptional
 
             for comp in self._sortComponents(comps):
                 substrate += encodeFun(comp, defMode, maxChunkSize, ifNotEmpty=compsMap[id(comp)])
@@ -153,7 +153,8 @@ class SequenceEncoder(encoder.SequenceEncoder):
                 if namedTypes[idx].isDefaulted and value[idx] == namedTypes[idx].asn1Object:
                     continue
 
-            substrate = encodeFun(value[idx], defMode, maxChunkSize, namedTypes[idx].isOptional) + substrate
+            substrate = encodeFun(value[idx], defMode, maxChunkSize,
+                                  namedTypes and namedTypes[idx].isOptional) + substrate
 
         return substrate, True, True
 

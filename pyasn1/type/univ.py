@@ -1849,7 +1849,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
             elif currentValue is not noValue and isinstance(currentValue, base.AbstractSimpleAsn1Item):
                 value = currentValue.clone(value=value)
             else:
-                raise error.PyAsn1Error('%s undefined component type' % componentType.__class__.__name__)
+                raise error.PyAsn1Error('Non-ASN.1 value %r and undefined component type at %r' % (value, self))
         elif componentType is not None:
             if self.strictConstraints:
                 if not componentType.isSameTypeWith(value, matchTags, matchConstraints):

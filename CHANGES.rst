@@ -2,6 +2,8 @@
 Revision 0.3.4, released XX-08-2017
 -----------------------------------
 
+- Fixed crash at SEQUENCE and SEQUENCE OF CER encoder when running
+  in schemaless mode
 - Fixed Character types instantiation from OctetString type -- double
   unicode decoding may have scrambled the data
 
@@ -14,7 +16,7 @@ Revision 0.3.3, released 27-08-2017
 - Fixed exponential index size growth bug when building ambiguous
   NamedTypes tree
 - Fixed constructed types decoding failure at BER codec if running
-  in unguided mode
+  in schema-less mode
 - Fixed crash on prettyPrint'ing a SEQUENCE with no defined components
 - Fixed SetOf ordering at CER/DER encoder
 - Fixed crash on conditional binascii module import
@@ -385,7 +387,8 @@ Revision 0.0.13b
 - Objects of Constructed types now support __setitem__()
 - Set/Sequence objects can now be addressed by their field names (string index)
   and position (integer index).
-- Typo fix to ber.SetDecoder code that prevented guided decoding operation.
+- Typo fix to ber.SetDecoder code that prevented with schema decoding
+  operation.
 - Fix to explicitly tagged items decoding support.
 - Fix to OctetString.prettyPrint() to better handle non-printable content.
 - Fix to repr() workings of Choice objects.
@@ -409,7 +412,8 @@ Revision 0.0.13a
   + tag and tagset caches introduced to decoder
   + decoder code improved to prevent unnecessary pyasn1 objects creation
   + allow disabling components verification when setting components to
-    structured types, this is used by decoder whilst running in guided mode.
+    structured types, this is used by decoder whilst running with schema
+    mode.
   + BER decoder for integer values now looks up a small set of pre-computed
     substrate values to save on decoding.
   + a few pre-computed values configured to ObjectIdentifier BER encoder.
