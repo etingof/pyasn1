@@ -2,6 +2,7 @@
 Revision 0.3.4, released XX-08-2017
 -----------------------------------
 
+- Fixed unnecessary duplicate tags detection at NamesType.tagMap
 - Fixed crash at SEQUENCE and SEQUENCE OF CER encoder when running
   in schemaless mode
 - Fixed Character types instantiation from OctetString type -- double

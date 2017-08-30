@@ -116,6 +116,16 @@ class OrderedNamedTypesCaseBase(unittest.TestCase):
             'getTypeByPosition() fails'
 
 
+class DuplicateNamedTypesCaseBase(unittest.TestCase):
+    def testDuplicateDefaultTags(self):
+        nt = namedtype.NamedTypes(
+            namedtype.NamedType('first-name', univ.Any()),
+            namedtype.NamedType('age', univ.Any())
+        )
+
+        assert isinstance(nt.tagMap, namedtype.NamedTypes.PostponedError)
+
+
 suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])
 
 if __name__ == '__main__':

@@ -438,7 +438,7 @@ class NamedTypes(object):
             if defaultType is None:
                 defaultType = tagMap.defaultType
             elif tagMap.defaultType is not None:
-                raise error.PyAsn1Error('Duplicate default ASN.1 type at %s' % (self,))
+                return NamedTypes.PostponedError('Duplicate default ASN.1 type at %s' % (self,))
 
         return tagmap.TagMap(presentTypes, skipTypes, defaultType)
 
