@@ -2369,9 +2369,12 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
     def prettyPrintType(self, scope=0):
         scope += 1
         representation = '%s -> %s {\n' % (self.tagSet, self.__class__.__name__)
-        for idx, componentType in enumerate(self.componentType):
+        for idx, componentType in enumerate(self.componentType.values() or self._componentValues):
             representation += ' ' * scope
-            representation += '"%s"' % self.componentType.getNameByPosition(idx)
+            if self.componentType:
+                representation += '"%s"' % self.componentType.getNameByPosition(idx)
+            else:
+                representation += '"%s"' % self._dynamicNames.getNameByPosition(idx)
             representation = '%s = %s\n' % (
                 representation, componentType.prettyPrintType(scope)
             )
