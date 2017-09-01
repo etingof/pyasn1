@@ -1101,6 +1101,56 @@ class Sequence(unittest.TestCase):
         assert s['name'] == str2octs('abc')
 
 
+class SequenceWithoutSchema(unittest.TestCase):
+
+    def testIter(self):
+        s = univ.Sequence()
+        s.setComponentByPosition(0, univ.OctetString('abc'))
+        s.setComponentByPosition(1, univ.Integer(123))
+        assert list(s) == ['field-0', 'field-1']
+
+    def testKeys(self):
+        s = univ.Sequence()
+        s.setComponentByPosition(0, univ.OctetString('abc'))
+        s.setComponentByPosition(1, univ.Integer(123))
+        assert list(s.keys()) == ['field-0', 'field-1']
+
+    def testValues(self):
+        s = univ.Sequence()
+        s.setComponentByPosition(0, univ.OctetString('abc'))
+        s.setComponentByPosition(1, univ.Integer(123))
+        assert list(s.values()) == [str2octs('abc'), 123]
+
+    def testItems(self):
+        s = univ.Sequence()
+        s.setComponentByPosition(0, univ.OctetString('abc'))
+        s.setComponentByPosition(1, univ.Integer(123))
+        assert list(s.items()) == [('field-0', str2octs('abc')), ('field-1', 123)]
+
+    def testUpdate(self):
+        s = univ.Sequence()
+        assert not s
+        s.setComponentByPosition(0, univ.OctetString('abc'))
+        s.setComponentByPosition(1, univ.Integer(123))
+        assert s
+        assert list(s.keys()) == ['field-0', 'field-1']
+        assert list(s.values()) == [str2octs('abc'), 123]
+        assert list(s.items()) == [('field-0', str2octs('abc')), ('field-1', 123)]
+        s['field-0'] = univ.OctetString('def')
+        assert list(s.values()) == [str2octs('def'), 123]
+        s['field-1'] = univ.OctetString('ghi')
+        assert list(s.values()) == [str2octs('def'), str2octs('ghi')]
+        try:
+            s['field-2'] = univ.OctetString('xxx')
+        except error.PyAsn1Error:
+            pass
+        else:
+            assert False, 'unknown field at schema-less object tolerated'
+        assert 'field-0' in s
+        s.clear()
+        assert 'field-0' not in s
+
+
 class SetOf(unittest.TestCase):
     def setUp(self):
         self.s1 = univ.SetOf(componentType=univ.OctetString(''))

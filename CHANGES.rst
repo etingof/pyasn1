@@ -1,7 +1,8 @@
 
-Revision 0.3.4, released XX-08-2017
+Revision 0.3.4, released XX-09-2017
 -----------------------------------
 
+- Added missing component-less SEQUENCE/SET objects dict duck-typing support
 - Fixed unnecessary duplicate tags detection at NamesType.tagMap
 - Fixed crash at SEQUENCE and SEQUENCE OF CER encoder when running
   in schemaless mode

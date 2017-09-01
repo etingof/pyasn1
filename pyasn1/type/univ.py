@@ -2009,9 +2009,52 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
     #: object representing named ASN.1 types allowed within |ASN.1| type
     componentType = namedtype.NamedTypes()
 
+
+    class DynamicNames(object):
+        """Fields names/positions mapping for component-less objects"""
+        def __init__(self):
+            self._keyToIdxMap = {}
+            self._idxToKeyMap = {}
+
+        def __len__(self):
+            return len(self._keyToIdxMap)
+
+        def __contains__(self, item):
+            return item in self._keyToIdxMap or item in self._idxToKeyMap
+
+        def __iter__(self):
+            return (self._idxToKeyMap[idx] for idx in range(len(self._idxToKeyMap)))
+
+        def __getitem__(self, item):
+            try:
+                return self._keyToIdxMap[item]
+
+            except KeyError:
+                return self._idxToKeyMap[item]
+
+        def getNameByPosition(self, idx):
+            try:
+                return self._idxToKeyMap[idx]
+
+            except KeyError:
+                raise error.PyAsn1Error('Type position out of range')
+
+        def getPositionByName(self, name):
+            try:
+                return self._keyToIdxMap[name]
+
+            except KeyError:
+                raise error.PyAsn1Error('Name %s not found' % (name,))
+
+        def addField(self, idx):
+            self._keyToIdxMap['field-%d' % idx] = idx
+            self._idxToKeyMap[idx] = 'field-%d' % idx
+
+
     def __init__(self, **kwargs):
         base.AbstractConstructedAsn1Item.__init__(self, **kwargs)
         self._componentTypeLen = len(self.componentType)
+        self._dynamicNames = self._componentTypeLen or self.DynamicNames()
 
     def __getitem__(self, idx):
         if octets.isStringType(idx):
@@ -2026,23 +2069,29 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             base.AbstractConstructedAsn1Item.__setitem__(self, idx, value)
 
     def __contains__(self, key):
-        return key in self.componentType
+        if self._componentTypeLen:
+            return key in self.componentType
+        else:
+            return key in self._dynamicNames
 
     def __iter__(self):
-        return iter(self.componentType)
+        return iter(self.componentType or self._dynamicNames)
 
     # Python dict protocol
 
     def values(self):
-        for idx in range(self._componentTypeLen):
+        for idx in range(self._componentTypeLen or len(self._dynamicNames)):
             yield self[idx]
 
     def keys(self):
-        return iter(self.componentType)
+        return iter(self)
 
     def items(self):
-        for idx in range(self._componentTypeLen):
-            yield self.componentType[idx].getName(), self[idx]
+        for idx in range(self._componentTypeLen or len(self._dynamicNames)):
+            if self._componentTypeLen:
+                yield self.componentType[idx].name, self[idx]
+            else:
+                yield self._dynamicNames[idx], self[idx]
 
     def update(self, *iterValue, **mappingValue):
         for k, v in iterValue:
@@ -2052,6 +2101,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
     def clear(self):
         self._componentValues = []
+        self._dynamicNames = self.DynamicNames()
 
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         for idx, componentValue in enumerate(self._componentValues):
@@ -2078,9 +2128,16 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         : :py:class:`~pyasn1.type.base.PyAsn1Item`
             Instantiate |ASN.1| component type or return existing component value
         """
-        return self.getComponentByPosition(
-            self.componentType.getPositionByName(name)
-        )
+        if self._componentTypeLen:
+            idx = self.componentType.getPositionByName(name)
+        else:
+            try:
+                idx = self._dynamicNames.getPositionByName(name)
+
+            except KeyError:
+                raise error.PyAsn1Error('Name %s not found' % (name,))
+
+        return self.getComponentByPosition(idx)
 
     def setComponentByName(self, name, value=noValue,
                            verifyConstraints=True,
@@ -2112,8 +2169,17 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         -------
         self
         """
+        if self._componentTypeLen:
+            idx = self.componentType.getPositionByName(name)
+        else:
+            try:
+                idx = self._dynamicNames.getPositionByName(name)
+
+            except KeyError:
+                raise error.PyAsn1Error('Name %s not found' % (name,))
+
         return self.setComponentByPosition(
-            self.componentType.getPositionByName(name), value, verifyConstraints, matchTags, matchConstraints
+            idx, value, verifyConstraints, matchTags, matchConstraints
         )
 
     def getComponentByPosition(self, idx):
@@ -2225,10 +2291,11 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                 exType, exValue, exTb = sys.exc_info()
                 raise exType('%s at %s' % (exValue, self.__class__.__name__))
 
-        if componentTypeLen:
+        if componentTypeLen or idx in self._dynamicNames:
             self._componentValues[idx] = value
         elif len(self._componentValues) == idx:
             self._componentValues.append(value)
+            self._dynamicNames.addField(idx)
         else:
             raise error.PyAsn1Error('Component index out of range')
 
@@ -2293,7 +2360,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                 if self.componentType:
                     representation += self.componentType.getNameByPosition(idx)
                 else:
-                    representation += 'field-%d' % idx
+                    representation += self._idxToKeyMap[idx]
                 representation = '%s=%s\n' % (
                     representation, componentValue.prettyPrint(scope)
                 )
