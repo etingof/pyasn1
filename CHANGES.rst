@@ -2,6 +2,8 @@
 Revision 0.3.4, released XX-09-2017
 -----------------------------------
 
+- Fixed Native encoder to handle SEQUENCE/SET objects without
+  the componentType property
 - Added missing component-less SEQUENCE/SET objects dict duck-typing support
 - Fixed unnecessary duplicate tags detection at NamesType.tagMap
 - Fixed crash at SEQUENCE and SEQUENCE OF CER encoder when running

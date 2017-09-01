@@ -80,7 +80,7 @@ class SetEncoder(AbstractItemEncoder):
         namedTypes = value.componentType
         substrate = self.protoDict()
         for idx, (key, subValue) in enumerate(value.items()):
-            if namedTypes[idx].isOptional and not value[idx].isValue:
+            if namedTypes and namedTypes[idx].isOptional and not value[idx].isValue:
                 continue
             substrate[key] = encodeFun(subValue)
         return substrate
