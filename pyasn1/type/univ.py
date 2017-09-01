@@ -2360,7 +2360,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                 if self.componentType:
                     representation += self.componentType.getNameByPosition(idx)
                 else:
-                    representation += self._idxToKeyMap[idx]
+                    representation += self._dynamicNames.getNameByPosition(idx)
                 representation = '%s=%s\n' % (
                     representation, componentValue.prettyPrint(scope)
                 )
