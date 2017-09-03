@@ -483,7 +483,7 @@ class Encoder(object):
             self, value, defMode, maxChunkSize, ifNotEmpty=ifNotEmpty
         )
         if logger:
-            logger('built %s octets of substrate: %s\nencoder completed' % (len(substrate), debug.hexdump(substrate)))
+            logger('codec %s built %s octets of substrate: %s\nencoder completed' % (concreteEncoder, len(substrate), debug.hexdump(substrate)))
         return substrate
 
 #: Turns ASN.1 object into BER octet stream.

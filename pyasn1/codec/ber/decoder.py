@@ -429,22 +429,21 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
             namedTypes = asn1Object.componentType
 
-            isUnordered = (not namedTypes or
-                           namedTypes.hasOptionalOrDefault or
-                           asn1Object.typeId == univ.Set.typeId)
+            isSetType = asn1Object.typeId == univ.Set.typeId
+            isDeterministic = not isSetType and not namedTypes.hasOptionalOrDefault
 
             seenIndices = set()
             idx = 0
             while head:
-                if not isUnordered:
-                    asn1Spec = namedTypes[idx].asn1Object
-                elif not namedTypes:
+                if not namedTypes:
                     asn1Spec = None
-                elif asn1Object.typeId == univ.Set.typeId:
+                elif isSetType:
                     asn1Spec = namedTypes.tagMapUnique
                 else:
                     try:
-                        if namedTypes[idx].isOptional or namedTypes[idx].isDefaulted:
+                        if isDeterministic:
+                            asn1Spec = namedTypes[idx].asn1Object
+                        elif namedTypes[idx].isOptional or namedTypes[idx].isDefaulted:
                             asn1Spec = namedTypes.getTagMapNearPosition(idx)
                         else:
                             asn1Spec = namedTypes[idx].asn1Object
@@ -455,8 +454,8 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
                 component, head = decodeFun(head, asn1Spec)
 
-                if isUnordered and namedTypes:
-                    if asn1Object.typeId == univ.Set.typeId:
+                if not isDeterministic and namedTypes:
+                    if isSetType:
                         idx = namedTypes.getPositionByType(component.effectiveTagSet)
                     elif namedTypes[idx].isOptional or namedTypes[idx].isDefaulted:
                         idx = namedTypes.getPositionNearType(component.effectiveTagSet, idx)
@@ -516,35 +515,35 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
             namedTypes = asn1Object.componentType
 
-            isUnordered = (not namedTypes or
-                           namedTypes.hasOptionalOrDefault or
-                           asn1Object.typeId == univ.Set.typeId)
+            isSetType = asn1Object.typeId == univ.Set.typeId
+            isDeterministic = not isSetType and not namedTypes.hasOptionalOrDefault
 
             seenIndices = set()
             idx = 0
             while substrate:
-                if not isUnordered:
-                    asn1Spec = namedTypes[idx].asn1Object
-                elif len(namedTypes) <= idx:
+                if len(namedTypes) <= idx:
                     asn1Spec = None
-                elif asn1Object.typeId == univ.Set.typeId:
+                elif isSetType:
                     asn1Spec = namedTypes.tagMapUnique
                 else:
                     try:
-                        if namedTypes[idx].isOptional or namedTypes[idx].isDefaulted:
+                        if isDeterministic:
+                            asn1Spec = namedTypes[idx].asn1Object
+                        elif namedTypes[idx].isOptional or namedTypes[idx].isDefaulted:
                             asn1Spec = namedTypes.getTagMapNearPosition(idx)
                         else:
                             asn1Spec = namedTypes[idx].asn1Object
                     except IndexError:
                         raise error.PyAsn1Error(
-                            'Excessive components decoded at %r' (asn1Object,)
+                            'Excessive components decoded at %r' % (asn1Object,)
                         )
+
                 component, substrate = decodeFun(substrate, asn1Spec, allowEoo=True)
                 if component is eoo.endOfOctets:
                     break
 
-                if isUnordered and namedTypes:
-                    if asn1Object.typeId == univ.Set.typeId:
+                if not isDeterministic and namedTypes:
+                    if isSetType:
                         idx = namedTypes.getPositionByType(component.effectiveTagSet)
                     elif namedTypes[idx].isOptional or namedTypes[idx].isDefaulted:
                         idx = namedTypes.getPositionNearType(component.effectiveTagSet, idx)
