@@ -195,29 +195,40 @@ class ExpTaggedOctetStringDecoderTestCase(unittest.TestCase):
             ))
 
     def testDefMode(self):
-        assert self.o.isSameTypeWith(decoder.decode(
+        o, r = decoder.decode(
             ints2octs((101, 17, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120))
-        )[0])
+        )
+        assert not r
+        assert self.o == o
+        assert self.o.tagSet == o.tagSet
+        assert self.o.isSameTypeWith(o)
 
     def testIndefMode(self):
-        v, s = decoder.decode(ints2octs((
-                                        101, 128, 36, 128, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32,
-                                        102, 111, 120, 0, 0, 0, 0)))
-        assert self.o.isSameTypeWith(v)
-        assert not s
+        o, r = decoder.decode(
+            ints2octs((101, 128, 36, 128, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120, 0, 0, 0, 0))
+        )
+        assert not r
+        assert self.o == o
+        assert self.o.tagSet == o.tagSet
+        assert self.o.isSameTypeWith(o)
 
     def testDefModeChunked(self):
-        v, s = decoder.decode(ints2octs((
-                                        101, 25, 36, 23, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119,
-                                        110, 32, 4, 3, 102, 111, 120)))
-        assert self.o.isSameTypeWith(v)
-        assert not s
+        o, r = decoder.decode(
+            ints2octs((101, 25, 36, 23, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120))
+        )
+        assert not r
+        assert self.o == o
+        assert self.o.tagSet == o.tagSet
+        assert self.o.isSameTypeWith(o)
 
     def testIndefModeChunked(self):
-        v, s = decoder.decode(ints2octs((101, 128, 36, 128, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111,
-                                         119, 110, 32, 4, 3, 102, 111, 120, 0, 0, 0, 0)))
-        assert self.o.isSameTypeWith(v)
-        assert not s
+        o, r = decoder.decode(
+            ints2octs((101, 128, 36, 128, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120, 0, 0, 0, 0))
+        )
+        assert not r
+        assert self.o == o
+        assert self.o.tagSet == o.tagSet
+        assert self.o.isSameTypeWith(o)
 
     def testDefModeSubst(self):
         assert decoder.decode(
@@ -511,6 +522,27 @@ class SequenceOfDecoderTestCase(unittest.TestCase):
         assert decoder.decode(
             ints2octs((48, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=univ.SequenceOf()
         ) == (self.s, null)
+
+
+class ExpTaggedSequenceOfDecoderTestCase(unittest.TestCase):
+
+    def testWithSchema(self):
+        s = univ.SequenceOf().subtype(explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatConstructed, 3))
+        s2, r = decoder.decode(
+            ints2octs((163, 15, 48, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=s
+        )
+        assert not r
+        assert s2 == [str2octs('quick brown')]
+        assert s.tagSet == s2.tagSet
+
+    def testWithoutSchema(self):
+        s = univ.SequenceOf().subtype(explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatConstructed, 3))
+        s2, r = decoder.decode(
+            ints2octs((163, 15, 48, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110))
+        )
+        assert not r
+        assert s2 == [str2octs('quick brown')]
+        assert s.tagSet == s2.tagSet
 
 
 class SequenceOfDecoderWithSchemaTestCase(unittest.TestCase):
@@ -986,6 +1018,100 @@ class SetDecoderWithSchemaTestCase(unittest.TestCase):
         assert decoder.decode(
             ints2octs((49, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)), asn1Spec=self.s
         ) == (self.s, null)
+
+
+class SequenceOfWithExpTaggedOctetStringDecoder(unittest.TestCase):
+    def setUp(self):
+        self.s = univ.SequenceOf(
+            componentType=univ.OctetString().subtype(explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 3))
+        )
+        self.s.setComponentByPosition(0, 'q')
+        self.s2 = univ.SequenceOf()
+
+    def testDefModeSchema(self):
+        s, r = decoder.decode(ints2octs((48, 5, 163, 3, 4, 1, 113)), asn1Spec=self.s)
+        assert not r
+        assert s == self.s
+        assert s.tagSet == self.s.tagSet
+
+    def testIndefModeSchema(self):
+        s, r = decoder.decode(ints2octs((48, 128, 163, 128, 4, 1, 113, 0, 0, 0, 0)), asn1Spec=self.s)
+        assert not r
+        assert s == self.s
+        assert s.tagSet == self.s.tagSet
+
+    def testDefModeNoComponent(self):
+        s, r = decoder.decode(ints2octs((48, 5, 163, 3, 4, 1, 113)), asn1Spec=self.s2)
+        assert not r
+        assert s == self.s
+        assert s.tagSet == self.s.tagSet
+
+    def testIndefModeNoComponent(self):
+        s, r = decoder.decode(ints2octs((48, 128, 163, 128, 4, 1, 113, 0, 0, 0, 0)), asn1Spec=self.s2)
+        assert not r
+        assert s == self.s
+        assert s.tagSet == self.s.tagSet
+
+    def testDefModeSchemaless(self):
+        s, r = decoder.decode(ints2octs((48, 5, 163, 3, 4, 1, 113)))
+        assert not r
+        assert s == self.s
+        assert s.tagSet == self.s.tagSet
+
+    def testIndefModeSchemaless(self):
+        s, r = decoder.decode(ints2octs((48, 128, 163, 128, 4, 1, 113, 0, 0, 0, 0)))
+        assert not r
+        assert s == self.s
+        assert s.tagSet == self.s.tagSet
+
+
+class SequenceWithExpTaggedOctetStringDecoder(unittest.TestCase):
+    def setUp(self):
+        self.s = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType(
+                    'x', univ.OctetString().subtype(explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 3))
+                )
+            )
+        )
+        self.s.setComponentByPosition(0, 'q')
+        self.s2 = univ.Sequence()
+
+    def testDefModeSchema(self):
+        s, r = decoder.decode(ints2octs((48, 5, 163, 3, 4, 1, 113)), asn1Spec=self.s)
+        assert not r
+        assert s == self.s
+        assert s.tagSet == self.s.tagSet
+
+    def testIndefModeSchema(self):
+        s, r = decoder.decode(ints2octs((48, 128, 163, 128, 4, 1, 113, 0, 0, 0, 0)), asn1Spec=self.s)
+        assert not r
+        assert s == self.s
+        assert s.tagSet == self.s.tagSet
+
+    def testDefModeNoComponent(self):
+        s, r = decoder.decode(ints2octs((48, 5, 163, 3, 4, 1, 113)), asn1Spec=self.s2)
+        assert not r
+        assert s == self.s
+        assert s.tagSet == self.s.tagSet
+
+    def testIndefModeNoComponent(self):
+        s, r = decoder.decode(ints2octs((48, 128, 163, 128, 4, 1, 113, 0, 0, 0, 0)), asn1Spec=self.s2)
+        assert not r
+        assert s == self.s
+        assert s.tagSet == self.s.tagSet
+
+    def testDefModeSchemaless(self):
+        s, r = decoder.decode(ints2octs((48, 5, 163, 3, 4, 1, 113)))
+        assert not r
+        assert s == self.s
+        assert s.tagSet == self.s.tagSet
+
+    def testIndefModeSchemaless(self):
+        s, r = decoder.decode(ints2octs((48, 128, 163, 128, 4, 1, 113, 0, 0, 0, 0)))
+        assert not r
+        assert s == self.s
+        assert s.tagSet == self.s.tagSet
 
 
 class ChoiceDecoderTestCase(unittest.TestCase):

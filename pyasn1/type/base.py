@@ -36,7 +36,7 @@ class Asn1ItemBase(Asn1Item):
 
     def __init__(self, **kwargs):
         readOnly = {
-           'tagSet': self.tagSet,
+            'tagSet': self.tagSet,
             'subtypeSpec': self.subtypeSpec
         }
 

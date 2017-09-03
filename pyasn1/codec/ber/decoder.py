@@ -371,7 +371,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
     def _getComponentPositionByType(self, asn1Object, tagSet, idx):
         raise NotImplementedError()
 
-    def _decodeComponents(self, substrate, decodeFun, allowEoo=True):
+    def _decodeComponents(self, substrate, decodeFun, tagSet, allowEoo=True):
         components = []
         componentTypes = set()
         while substrate:
@@ -387,9 +387,15 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
         # * 1+ components of the same type -> likely SEQUENCE OF/SET OF
         # * otherwise -> likely SEQUENCE/SET
         if len(components) > 1 or len(componentTypes) > 1:
-            asn1Object = self.protoRecordComponent.clone()
+            protoComponent = self.protoRecordComponent
         else:
-            asn1Object = self.protoSequenceComponent.clone()
+            protoComponent = self.protoSequenceComponent
+
+        asn1Object = protoComponent.clone(
+            # construct tagSet from base tag from prototype ASN.1 object
+            # and additional tags recovered from the substrate
+            tagSet=tag.TagSet(protoComponent.tagSet.baseTag, *tagSet.superTags)
+        )
 
         for idx, component in enumerate(components):
             asn1Object.setComponentByPosition(
@@ -418,7 +424,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
             return substrateFun(asn1Object, substrate, length)
 
         if asn1Spec is None:
-            asn1Object, trailing = self._decodeComponents(head, decodeFun)
+            asn1Object, trailing = self._decodeComponents(head, decodeFun, tagSet)
             if trailing:
                 raise error.PyAsn1Error('Unused trailing %d octets encountered' % len(trailing))
             return asn1Object, tail
@@ -507,7 +513,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
             return substrateFun(asn1Object, substrate, length)
 
         if asn1Spec is None:
-            return self._decodeComponents(substrate, decodeFun, allowEoo=True)
+            return self._decodeComponents(substrate, decodeFun, tagSet, allowEoo=True)
 
         asn1Object = asn1Spec.clone()
 
