@@ -1,5 +1,5 @@
 
-Revision 0.3.4, released XX-09-2017
+Revision 0.3.4, released 07-09-2017
 -----------------------------------
 
 - Fixed Native encoder to handle SEQUENCE/SET objects without
