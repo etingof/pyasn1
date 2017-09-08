@@ -1,4 +1,9 @@
 
+Revision 0.3.5, released XX-09-2017
+-----------------------------------
+
+- Codecs signatures unified and pass **options through the call chain
+
 Revision 0.3.4, released 07-09-2017
 -----------------------------------
 
