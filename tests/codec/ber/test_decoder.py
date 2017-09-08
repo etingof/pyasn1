@@ -10,7 +10,7 @@ try:
 except ImportError:
     import unittest
 
-from pyasn1.type import tag, namedtype, univ, char
+from pyasn1.type import tag, namedtype, univ, char, definedby
 from pyasn1.codec.ber import decoder, eoo
 from pyasn1.compat.octets import ints2octs, str2octs, null
 from pyasn1.error import PyAsn1Error
@@ -720,7 +720,7 @@ class SequenceDecoderWithSchemaTestCase(unittest.TestCase):
     def testDefMode(self):
         self.__init()
         assert decoder.decode(
-            ints2octs((48, 128, 5, 0, 0, 0)), asn1Spec=self.s
+            ints2octs((48, 2, 5, 0)), asn1Spec=self.s
         ) == (self.s, null)
 
     def testIndefMode(self):
@@ -821,6 +821,59 @@ class SequenceDecoderWithSchemaTestCase(unittest.TestCase):
             ints2octs((48, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0,
                        0, 2, 1, 1, 0, 0)), asn1Spec=self.s
         ) == (self.s, null)
+
+
+class SequenceDecoderWithIntegerHoleTypesTestCase(unittest.TestCase):
+    def setUp(self):
+        definedBy = definedby.DefinedBy(
+            'id',
+            [(1, univ.Integer()),
+             (2, univ.OctetString())]
+        )
+        self.s = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType('id', univ.Integer()),
+                namedtype.NamedType('blob', univ.Any(), definedBy=definedBy)
+            )
+        )
+
+    # def testChoiceOne(self):
+    #     s, r = decoder.decode(
+    #         ints2octs((48, 6, 2, 1, 1, 2, 1, 12)),
+    #         asn1Spec=self.s
+    #     )
+    #     assert not r
+    #     assert s[0] == 1
+    #     assert s[1] == ints2octs((2, 1, 12))
+    #
+    # def testChoiceTwo(self):
+    #     s, r = decoder.decode(
+    #         ints2octs((48, 16, 2, 1, 2, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)),
+    #         asn1Spec=self.s
+    #     )
+    #     assert not r
+    #     assert s[0] == 1
+    #     assert s[1] == ints2octs((4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110))
+
+    def testChoiceOneResolveHoles(self):
+        s, r = decoder.decode(
+            ints2octs((48, 6, 2, 1, 1, 2, 1, 12)), asn1Spec=self.s
+# TODO
+#            resolveHoleTypes=True
+        )
+        assert not r
+        assert s[0] == 1
+        assert s[1] == 12
+
+    def testChoiceTwoResolveHoles(self):
+        s, r = decoder.decode(
+            ints2octs((48, 16, 2, 1, 2, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=self.s
+# TODO
+#            resolveHoleTypes = True
+        )
+        assert not r
+        assert s[0] == 2
+        assert s[1] == univ.OctetString('quick brown')
 
 
 class SetDecoderTestCase(unittest.TestCase):

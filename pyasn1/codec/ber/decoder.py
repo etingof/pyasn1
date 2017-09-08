@@ -514,6 +514,33 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
             if namedTypes:
                 if not namedTypes.requiredComponents.issubset(seenIndices):
                     raise error.PyAsn1Error('ASN.1 object %s has uninitialized components' % asn1Object.__class__.__name__)
+
+
+                for idx, namedType in enumerate(namedTypes.namedTypes):
+                    if not namedType.definedBy:
+                        continue
+
+                    governingValue = asn1Object.getComponentByName(
+                        namedType.definedBy.name
+                    )
+
+                    try:
+                        asn1Spec = namedType.definedBy[governingValue]
+
+                    except KeyError:
+                        continue
+
+                    component, rest = decodeFun(
+                        asn1Object.getComponentByPosition(idx).asOctets(),
+                        asn1Spec=asn1Spec
+                    )
+
+                    asn1Object.setComponentByPosition(
+                        idx, component,
+                        matchTags=False,
+                        matchConstraints=False
+                    )
+
             else:
                 asn1Object.verifySizeSpec()
 
@@ -528,21 +555,6 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                     matchTags=False, matchConstraints=False
                 )
                 idx += 1
-
-        if namedTypes:
-            for holeName, governingName, typesMap in namedTypes.holes:
-                holeComponent = asn1Object[holeName]
-                if holeComponent.isValue:
-                    governingComponent = asn1Object[governingName]
-                    if governingComponent in typesMap:
-                        component, rest = decodeFun(
-                            holeComponent.asOctets(),
-                            asn1Spec=typesMap[governingComponent]
-                        )
-                    asn1Object.setComponentByName(holeName, component, matchTags=False, matchConstraints=False)
-
-        else:
-            asn1Object.verifySizeSpec()
 
         return asn1Object, tail
 
@@ -624,6 +636,33 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
             if namedTypes:
                 if not namedTypes.requiredComponents.issubset(seenIndices):
                     raise error.PyAsn1Error('ASN.1 object %s has uninitialized components' % asn1Object.__class__.__name__)
+
+                for idx, namedType in enumerate(namedTypes.namedTypes):
+                    if not namedType.definedBy:
+                        continue
+
+                    governingValue = asn1Object.getComponentByName(
+                        namedType.definedBy.name
+                    )
+
+                    try:
+                        asn1Spec = namedType.definedBy[governingValue]
+
+                    except KeyError:
+                        continue
+
+                    component, rest = decodeFun(
+                        asn1Object.getComponentByPosition(idx).asOctets(),
+                        asn1Spec=asn1Spec, allowEoo=True
+                    )
+
+                    if component is not eoo.endOfOctets:
+                        asn1Object.setComponentByPosition(
+                            idx, component,
+                            matchTags=False,
+                            matchConstraints=False
+                        )
+
             else:
                 asn1Object.verifySizeSpec()
 
@@ -644,21 +683,6 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                 raise error.SubstrateUnderrunError(
                     'No EOO seen before substrate ends'
                 )
-
-        if namedTypes:
-            for holeName, governingName, typesMap in namedTypes.holes:
-                holeComponent = asn1Object[holeName]
-                if holeComponent.isValue:
-                    governingComponent = asn1Object[governingName]
-                    if governingComponent in typesMap:
-                        component, rest = decodeFun(
-                            holeComponent.asOctets(),
-                            asn1Spec=typesMap[governingComponent]
-                        )
-                    asn1Object.setComponentByName(holeName, component, matchTags=False, matchConstraints=False)
-
-        else:
-            asn1Object.verifySizeSpec()
 
         return asn1Object, substrate
 
