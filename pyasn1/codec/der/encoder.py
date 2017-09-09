@@ -6,21 +6,20 @@
 #
 from pyasn1.type import univ
 from pyasn1.codec.cer import encoder
-from pyasn1 import error
 
 __all__ = ['encode']
 
 
 class BitStringEncoder(encoder.BitStringEncoder):
-    def encodeValue(self, encodeFun, value, defMode, maxChunkSize, ifNotEmpty=False):
+    def encodeValue(self, value, encodeFun, **options):
         return encoder.BitStringEncoder.encodeValue(
-            self, encodeFun, value, defMode, 0, ifNotEmpty=ifNotEmpty
+            self, value, encodeFun, **options
         )
 
 class OctetStringEncoder(encoder.OctetStringEncoder):
-    def encodeValue(self, encodeFun, value, defMode, maxChunkSize, ifNotEmpty=False):
+    def encodeValue(self, value, encodeFun, **options):
         return encoder.OctetStringEncoder.encodeValue(
-            self, encodeFun, value, defMode, 0, ifNotEmpty=ifNotEmpty
+            self, value, encodeFun, **options
         )
 
 class SetOfEncoder(encoder.SetOfEncoder):
@@ -50,10 +49,10 @@ typeMap.update({
 class Encoder(encoder.Encoder):
     supportIndefLength = False
 
-    def __call__(self, value, defMode=True, maxChunkSize=0, ifNotEmpty=False):
-        if not defMode:
-            raise error.PyAsn1Error('DER forbids indefinite length mode')
-        return encoder.Encoder.__call__(self, value, defMode, maxChunkSize, ifNotEmpty=ifNotEmpty)
+    def __call__(self, value, **options):
+        if 'defMode' not in options:
+            options.update(defMode=True)
+        return encoder.Encoder.__call__(self, value, **options)
 
 #: Turns ASN.1 object into DER octet stream.
 #:

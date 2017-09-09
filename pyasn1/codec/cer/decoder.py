@@ -15,8 +15,10 @@ __all__ = ['decode']
 class BooleanDecoder(decoder.AbstractSimpleDecoder):
     protoComponent = univ.Boolean(0)
 
-    def valueDecoder(self, fullSubstrate, substrate, asn1Spec, tagSet, length,
-                     state, decodeFun, substrateFun):
+    def valueDecoder(self, substrate, asn1Spec,
+                     tagSet=None, length=None, state=None,
+                     decodeFun=None, substrateFun=None,
+                     **options):
         head, tail = substrate[:length], substrate[length:]
         if not head or length != 1:
             raise error.PyAsn1Error('Not single-octet Boolean payload')

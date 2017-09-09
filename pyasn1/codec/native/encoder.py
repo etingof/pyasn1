@@ -17,72 +17,76 @@ __all__ = ['encode']
 
 
 class AbstractItemEncoder(object):
-    def encode(self, encodeFun, value):
+    def encode(self, value, encodeFun, **options):
         raise error.PyAsn1Error('Not implemented')
 
 
 class ExplicitlyTaggedItemEncoder(AbstractItemEncoder):
-    def encode(self, encodeFun, value):
+    def encode(self, value, encodeFun, **options):
         if isinstance(value, base.AbstractConstructedAsn1Item):
             value = value.clone(tagSet=value.tagSet[:-1],
                                 cloneValueFlag=1)
         else:
             value = value.clone(tagSet=value.tagSet[:-1])
-        return encodeFun(value)
+
+        return encodeFun(value, **options)
 
 explicitlyTaggedItemEncoder = ExplicitlyTaggedItemEncoder()
 
 
 class BooleanEncoder(AbstractItemEncoder):
-    def encode(self, encodeFun, value):
+    def encode(self, value, encodeFun, **options):
         return bool(value)
 
 
 class IntegerEncoder(AbstractItemEncoder):
-    def encode(self, encodeFun, value):
+    def encode(self, value, encodeFun, **options):
         return int(value)
 
 
 class BitStringEncoder(AbstractItemEncoder):
-    def encode(self, encodeFun, value):
+    def encode(self, value, encodeFun, **options):
         return str(value)
 
 
 class OctetStringEncoder(AbstractItemEncoder):
-    def encode(self, encodeFun, value):
+    def encode(self, value, encodeFun, **options):
         return value.asOctets()
 
 
 class TextStringEncoder(AbstractItemEncoder):
-    def encode(self, encodeFun, value):
+    def encode(self, value, encodeFun, **options):
         return value.prettyPrint()
 
 
 class NullEncoder(AbstractItemEncoder):
-    def encode(self, encodeFun, value):
+    def encode(self, value, encodeFun, **options):
         return None
 
 
 class ObjectIdentifierEncoder(AbstractItemEncoder):
-    def encode(self, encodeFun, value):
+    def encode(self, value, encodeFun, **options):
         return str(value)
 
 
 class RealEncoder(AbstractItemEncoder):
-    def encode(self, encodeFun, value):
+    def encode(self, value, encodeFun, **options):
         return float(value)
 
 
 class SetEncoder(AbstractItemEncoder):
     protoDict = dict
-    def encode(self, encodeFun, value):
+
+    def encode(self, value, encodeFun, **options):
         value.verifySizeSpec()
+
         namedTypes = value.componentType
         substrate = self.protoDict()
+
         for idx, (key, subValue) in enumerate(value.items()):
             if namedTypes and namedTypes[idx].isOptional and not value[idx].isValue:
                 continue
-            substrate[key] = encodeFun(subValue)
+            substrate[key] = encodeFun(subValue, **options)
         return substrate
 
 
@@ -91,9 +95,9 @@ class SequenceEncoder(SetEncoder):
 
 
 class SequenceOfEncoder(AbstractItemEncoder):
-    def encode(self, encodeFun, value):
+    def encode(self, value, encodeFun, **options):
         value.verifySizeSpec()
-        return [encodeFun(x) for x in value]
+        return [encodeFun(x, **options) for x in value]
 
 
 class ChoiceEncoder(SequenceEncoder):
@@ -101,7 +105,7 @@ class ChoiceEncoder(SequenceEncoder):
 
 
 class AnyEncoder(AbstractItemEncoder):
-    def encode(self, encodeFun, value):
+    def encode(self, value, encodeFun, **options):
         return value.asOctets()
 
 
@@ -154,7 +158,7 @@ class Encoder(object):
         self.__tagMap = tagMap
         self.__typeMap = typeMap
 
-    def __call__(self, asn1Value):
+    def __call__(self, asn1Value, **options):
         if not isinstance(asn1Value, base.Asn1Item):
             raise error.PyAsn1Error('value is not valid (should be an instance of an ASN.1 Item)')
 
@@ -184,7 +188,7 @@ class Encoder(object):
         if logger:
             logger('using value codec %s chosen by %s' % (type(concreteEncoder).__name__, tagSet))
 
-        pyObject = concreteEncoder.encode(self, asn1Value)
+        pyObject = concreteEncoder.encode(asn1Value, self, **options)
 
         if logger:
             logger('encoder %s produced: %s' % (type(concreteEncoder).__name__, repr(pyObject)))
