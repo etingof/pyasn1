@@ -142,8 +142,7 @@ class ExpTaggedOctetStringEncoderTestCase(unittest.TestCase):
     def testIndefModeChunked(self):
         assert encoder.encode(
             self.o, defMode=False, maxChunkSize=4
-        ) == ints2octs((101, 128, 36, 128, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3,
-                        102, 111, 120, 0, 0, 0, 0))
+        ) == ints2octs((101, 128, 36, 128, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120, 0, 0, 0, 0))
 
 
 class NullEncoderTestCase(unittest.TestCase):
@@ -616,6 +615,31 @@ class SequenceEncoderWithSchemaTestCase(unittest.TestCase):
             self.s, defMode=False, maxChunkSize=4
         ) == ints2octs((48, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0,
                         0, 2, 1, 1, 0, 0))
+
+
+class ExpTaggedSequenceEncoderTestCase(unittest.TestCase):
+    def setUp(self):
+        s = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType('number', univ.Integer()),
+            )
+        )
+
+        s = s.subtype(
+            explicitTag=tag.Tag(tag.tagClassApplication, tag.tagFormatConstructed, 5)
+        )
+
+        s[0] = 12
+
+        self.s = s
+
+    def testDefMode(self):
+        assert encoder.encode(self.s) == ints2octs((101, 5, 48, 3, 2, 1, 12))
+
+    def testIndefMode(self):
+        assert encoder.encode(
+            self.s, defMode=False
+        ) == ints2octs((101, 128, 48, 128, 2, 1, 12, 0, 0, 0, 0))
 
 
 class SetEncoderTestCase(unittest.TestCase):
