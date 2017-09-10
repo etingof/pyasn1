@@ -151,14 +151,23 @@ class SequenceEncoder(encoder.SequenceEncoder):
         while idx > 0:
             idx -= 1
             if namedTypes:
-                if namedTypes[idx].isOptional and not value[idx].isValue:
+                namedType = namedTypes[idx]
+                if namedType.isOptional and not value[idx].isValue:
                     continue
-                if namedTypes[idx].isDefaulted and value[idx] == namedTypes[idx].asn1Object:
+                if namedType.isDefaulted and value[idx] == namedType.asn1Object:
                     continue
 
-            options.update(ifNotEmpty=namedTypes and namedTypes[idx].isOptional)
+            options.update(ifNotEmpty=namedTypes and namedType.isOptional)
 
-            substrate = encodeFun(value[idx], **options) + substrate
+            chunk = encodeFun(value[idx], **options)
+
+            # wrap open type blob if needed
+            if namedTypes and namedType.openType:
+                asn1Spec = namedType.asn1Object
+                if asn1Spec.tagSet and not asn1Spec.isSameTypeWith(value[idx]):
+                    chunk = encodeFun(asn1Spec.clone(chunk), **options)
+
+            substrate = chunk + substrate
 
         return substrate, True, True
 
