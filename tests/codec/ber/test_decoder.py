@@ -10,7 +10,7 @@ try:
 except ImportError:
     import unittest
 
-from pyasn1.type import tag, namedtype, univ, char, definedby
+from pyasn1.type import tag, namedtype, opentype, univ, char
 from pyasn1.codec.ber import decoder, eoo
 from pyasn1.compat.octets import ints2octs, str2octs, null
 from pyasn1.error import PyAsn1Error
@@ -825,7 +825,7 @@ class SequenceDecoderWithSchemaTestCase(unittest.TestCase):
 
 class SequenceDecoderWithIntegerHoleTypesTestCase(unittest.TestCase):
     def setUp(self):
-        definedBy = definedby.DefinedBy(
+        openType = opentype.OpenType(
             'id',
             [(1, univ.Integer()),
              (2, univ.OctetString())]
@@ -833,47 +833,43 @@ class SequenceDecoderWithIntegerHoleTypesTestCase(unittest.TestCase):
         self.s = univ.Sequence(
             componentType=namedtype.NamedTypes(
                 namedtype.NamedType('id', univ.Integer()),
-                namedtype.NamedType('blob', univ.Any(), definedBy=definedBy)
+                namedtype.NamedType('blob', univ.Any(), openType=openType)
             )
         )
 
-    # def testChoiceOne(self):
-    #     s, r = decoder.decode(
-    #         ints2octs((48, 6, 2, 1, 1, 2, 1, 12)),
-    #         asn1Spec=self.s
-    #     )
-    #     assert not r
-    #     assert s[0] == 1
-    #     assert s[1] == ints2octs((2, 1, 12))
-    #
-    # def testChoiceTwo(self):
-    #     s, r = decoder.decode(
-    #         ints2octs((48, 16, 2, 1, 2, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)),
-    #         asn1Spec=self.s
-    #     )
-    #     assert not r
-    #     assert s[0] == 1
-    #     assert s[1] == ints2octs((4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110))
-
-    def testChoiceOneResolveHoles(self):
+    def testChoiceOneDecodeHoles(self):
         s, r = decoder.decode(
-            ints2octs((48, 6, 2, 1, 1, 2, 1, 12)), asn1Spec=self.s
-# TODO
-#            resolveHoleTypes=True
+            ints2octs((48, 6, 2, 1, 1, 2, 1, 12)), asn1Spec=self.s,
+            decodeOpenTypes=True
         )
         assert not r
         assert s[0] == 1
         assert s[1] == 12
 
-    def testChoiceTwoResolveHoles(self):
+    def testChoiceTwoDecodeHoles(self):
         s, r = decoder.decode(
-            ints2octs((48, 16, 2, 1, 2, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=self.s
-# TODO
-#            resolveHoleTypes = True
+            ints2octs((48, 16, 2, 1, 2, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=self.s,
+            decodeOpenTypes = True
         )
         assert not r
         assert s[0] == 2
         assert s[1] == univ.OctetString('quick brown')
+
+    def testChoiceOneDontDecodeHoles(self):
+        s, r = decoder.decode(
+            ints2octs((48, 6, 2, 1, 1, 2, 1, 12)), asn1Spec=self.s
+        )
+        assert not r
+        assert s[0] == 1
+        assert s[1] == ints2octs((2, 1, 12))
+
+    def testChoiceTwoDontDecodeHoles(self):
+        s, r = decoder.decode(
+            ints2octs((48, 16, 2, 1, 2, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=self.s
+        )
+        assert not r
+        assert s[0] == 2
+        assert s[1] == ints2octs((4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110))
 
 
 class SetDecoderTestCase(unittest.TestCase):

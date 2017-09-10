@@ -511,21 +511,21 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                 seenIndices.add(idx)
                 idx += 1
 
-            if namedTypes:
+            if namedTypes and options.get('decodeOpenTypes', False):
                 if not namedTypes.requiredComponents.issubset(seenIndices):
                     raise error.PyAsn1Error('ASN.1 object %s has uninitialized components' % asn1Object.__class__.__name__)
 
 
                 for idx, namedType in enumerate(namedTypes.namedTypes):
-                    if not namedType.definedBy:
+                    if not namedType.openType:
                         continue
 
                     governingValue = asn1Object.getComponentByName(
-                        namedType.definedBy.name
+                        namedType.openType.name
                     )
 
                     try:
-                        asn1Spec = namedType.definedBy[governingValue]
+                        asn1Spec = namedType.openType[governingValue]
 
                     except KeyError:
                         continue
@@ -638,15 +638,15 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                     raise error.PyAsn1Error('ASN.1 object %s has uninitialized components' % asn1Object.__class__.__name__)
 
                 for idx, namedType in enumerate(namedTypes.namedTypes):
-                    if not namedType.definedBy:
+                    if not namedType.openType:
                         continue
 
                     governingValue = asn1Object.getComponentByName(
-                        namedType.definedBy.name
+                        namedType.openType.name
                     )
 
                     try:
-                        asn1Spec = namedType.definedBy[governingValue]
+                        asn1Spec = namedType.openType[governingValue]
 
                     except KeyError:
                         continue

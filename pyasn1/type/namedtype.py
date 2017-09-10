@@ -30,11 +30,11 @@ class NamedType(object):
     isOptional = False
     isDefaulted = False
 
-    def __init__(self, name, asn1Object, definedBy=None):
+    def __init__(self, name, asn1Object, openType=None):
         self.__name = name
         self.__type = asn1Object
         self.__nameAndType = name, asn1Object
-        self.__definedBy = definedBy
+        self.__openType = openType
 
     def __repr__(self):
         return '%s(%r, %r)' % (self.__class__.__name__, self.__name, self.__type)
@@ -75,8 +75,8 @@ class NamedType(object):
         return self.__type
 
     @property
-    def definedBy(self):
-        return self.__definedBy
+    def openType(self):
+        return self.__openType
 
     # Backward compatibility
 

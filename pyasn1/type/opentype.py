@@ -5,10 +5,10 @@
 # License: http://pyasn1.sf.net/license.html
 #
 
-__all__ = ['DefinedBy']
+__all__ = ['OpenType']
 
 
-class DefinedBy(object):
+class OpenType(object):
     """Create ASN.1 type map indexed by a value
 
     The *DefinedBy* object models the ASN.1 *DEFINED BY* clause which maps
