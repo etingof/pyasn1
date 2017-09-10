@@ -1209,8 +1209,10 @@ class Decoder(object):
                         self, substrateFun,
                         **options
                     )
+
                 if logger:
-                    logger('codec %s yields type %s, value:\n%s\n...remaining substrate is: %s' % (concreteDecoder.__class__.__name__, value.__class__.__name__, value.prettyPrint(), substrate and debug.hexdump(substrate) or '<none>'))
+                    logger('codec %s yields type %s, value:\n%s\n...remaining substrate is: %s' % (concreteDecoder.__class__.__name__, value.__class__.__name__, isinstance(value, base.Asn1Item) and value.prettyPrint() or repr(value), substrate and debug.hexdump(substrate) or '<none>'))
+
                 state = stStop
                 break
             if state is stTryAsExplicitTag:
