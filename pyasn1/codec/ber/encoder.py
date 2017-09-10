@@ -50,12 +50,6 @@ class AbstractItemEncoder(object):
     def encodeValue(self, value, encodeFun, **options):
         raise error.PyAsn1Error('Not implemented')
 
-    def _encodeEndOfOctets(self, encodeFun, defMode):
-        if defMode or not self.supportIndefLenMode:
-            return null
-        else:
-            return encodeFun(eoo.endOfOctets, defMode=defMode)
-
     def encode(self, value, encodeFun, **options):
 
         tagSet = value.tagSet
@@ -94,9 +88,8 @@ class AbstractItemEncoder(object):
             else:
                 substrate = ints2octs(header + substrate)
 
-            eoo =  self._encodeEndOfOctets(encodeFun, defModeOverride)
-            if eoo:
-                substrate += eoo
+            if not defModeOverride:
+                substrate += encodeFun(eoo.endOfOctets, defMode=defModeOverride)
 
         return substrate
 
