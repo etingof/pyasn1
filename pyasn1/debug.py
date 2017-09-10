@@ -17,6 +17,7 @@ flagDecoder = 0x0002
 flagAll = 0xffff
 
 flagMap = {
+    'none': flagNone,
     'encoder': flagEncoder,
     'decoder': flagDecoder,
     'all': flagAll
