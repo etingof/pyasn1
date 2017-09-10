@@ -4,7 +4,7 @@
 # Copyright (c) 2005-2017, Ilya Etingof <etingof@gmail.com>
 # License: http://pyasn1.sf.net/license.html
 #
-from pyasn1.type import base, tag, univ, char, useful
+from pyasn1.type import tag, univ, char, useful
 from pyasn1.codec.ber import eoo
 from pyasn1.compat.octets import int2oct, oct2int, ints2octs, null, str2octs
 from pyasn1.compat.integer import to_bytes
@@ -57,31 +57,44 @@ class AbstractItemEncoder(object):
             return encodeFun(eoo.endOfOctets, defMode=defMode)
 
     def encode(self, value, encodeFun, **options):
-        substrate, isConstructed, isOctets = self.encodeValue(
-            value, encodeFun, **options
-        )
-
-        if options.get('ifNotEmpty', False) and not substrate:
-            return substrate
 
         tagSet = value.tagSet
 
-        # tagged value?
-        if tagSet:
-            defMode = options.get('defMode', True)
+        # untagged item?
+        if not tagSet:
+            substrate, isConstructed, isOctets = self.encodeValue(
+                value, encodeFun, **options
+            )
+            return substrate
 
-            if not isConstructed:  # primitive form implies definite mode
-                defMode = True
+        defMode = options.get('defMode', True)
 
-            header = self.encodeTag(tagSet[-1], isConstructed)
-            header += self.encodeLength(len(substrate), defMode)
+        for idx, singleTag in enumerate(tagSet.superTags):
+
+            defModeOverride = defMode
+
+            # base tag?
+            if not idx:
+                substrate, isConstructed, isOctets = self.encodeValue(
+                    value, encodeFun, **options
+                )
+
+                if options.get('ifNotEmpty', False) and not substrate:
+                    return substrate
+
+                # primitive form implies definite mode
+                if not isConstructed:
+                    defModeOverride = True
+
+            header = self.encodeTag(singleTag, isConstructed)
+            header += self.encodeLength(len(substrate), defModeOverride)
 
             if isOctets:
                 substrate = ints2octs(header) + substrate
             else:
                 substrate = ints2octs(header + substrate)
 
-            eoo =  self._encodeEndOfOctets(encodeFun, defMode)
+            eoo =  self._encodeEndOfOctets(encodeFun, defModeOverride)
             if eoo:
                 substrate += eoo
 
@@ -91,19 +104,6 @@ class AbstractItemEncoder(object):
 class EndOfOctetsEncoder(AbstractItemEncoder):
     def encodeValue(self, value, encodeFun, **options):
         return null, False, True
-
-
-class ExplicitlyTaggedItemEncoder(AbstractItemEncoder):
-    def encodeValue(self, value, encodeFun, **options):
-        if isinstance(value, base.AbstractConstructedAsn1Item):
-            value = value.clone(tagSet=value.tagSet[:-1], cloneValueFlag=True)
-        else:
-            value = value.clone(tagSet=value.tagSet[:-1])
-
-        return encodeFun(value, **options), True, True
-
-
-explicitlyTaggedItemEncoder = ExplicitlyTaggedItemEncoder()
 
 
 class BooleanEncoder(AbstractItemEncoder):
@@ -141,6 +141,11 @@ class BitStringEncoder(AbstractItemEncoder):
             substrate = alignedValue.asOctets()
             return int2oct(len(substrate) * 8 - valueLength) + substrate, False, True
 
+        # strip off explicit tags
+        alignedValue = alignedValue.clone(
+            tagSet=tag.TagSet(value.tagSet.baseTag, value.tagSet.baseTag)
+        )
+
         stop = 0
         substrate = null
         while stop < valueLength:
@@ -156,14 +161,19 @@ class OctetStringEncoder(AbstractItemEncoder):
         maxChunkSize = options.get('maxChunkSize', 0)
         if not maxChunkSize or len(value) <= maxChunkSize:
             return value.asOctets(), False, True
+
         else:
+            # will strip off explicit tags
+            baseTagSet = tag.TagSet(value.tagSet.baseTag, value.tagSet.baseTag)
+
             pos = 0
             substrate = null
             while True:
-                v = value.clone(value[pos:pos + maxChunkSize])
-                if not v:
+                chunk = value.clone(value[pos:pos + maxChunkSize],
+                                    tagSet=baseTagSet)
+                if not chunk:
                     break
-                substrate += encodeFun(v, **options)
+                substrate += encodeFun(chunk, **options)
                 pos += maxChunkSize
 
             return substrate, True, True
@@ -478,21 +488,21 @@ class Encoder(object):
 
         tagSet = value.tagSet
 
-        if len(tagSet) > 1:
-            concreteEncoder = explicitlyTaggedItemEncoder
-        else:
-            try:
-                concreteEncoder = self.__typeMap[value.typeId]
-            except KeyError:
-                # use base type for codec lookup to recover untagged types
-                baseTagSet = tag.TagSet(value.tagSet.baseTag, value.tagSet.baseTag)
-                try:
-                    concreteEncoder = self.__tagMap[baseTagSet]
-                except KeyError:
-                    raise error.PyAsn1Error('No encoder for %s' % (value,))
+        try:
+            concreteEncoder = self.__typeMap[value.typeId]
 
-            if logger:
-                logger('using value codec %s chosen by %s' % (concreteEncoder.__class__.__name__, tagSet))
+        except KeyError:
+            # use base type for codec lookup to recover untagged types
+            baseTagSet = tag.TagSet(value.tagSet.baseTag, value.tagSet.baseTag)
+
+            try:
+                concreteEncoder = self.__tagMap[baseTagSet]
+
+            except KeyError:
+                raise error.PyAsn1Error('No encoder for %s' % (value,))
+
+        if logger:
+            logger('using value codec %s chosen by %s' % (concreteEncoder.__class__.__name__, tagSet))
 
         substrate = concreteEncoder.encode(value, self, **options)
 
