@@ -823,12 +823,12 @@ class SequenceDecoderWithSchemaTestCase(unittest.TestCase):
         ) == (self.s, null)
 
 
-class SequenceDecoderWithIntegerHoleTypesTestCase(unittest.TestCase):
+class SequenceDecoderWithIntegerOpenTypesTestCase(unittest.TestCase):
     def setUp(self):
         openType = opentype.OpenType(
             'id',
-            [(1, univ.Integer()),
-             (2, univ.OctetString())]
+            {1: univ.Integer(),
+             2: univ.OctetString()}
         )
         self.s = univ.Sequence(
             componentType=namedtype.NamedTypes(
@@ -837,7 +837,7 @@ class SequenceDecoderWithIntegerHoleTypesTestCase(unittest.TestCase):
             )
         )
 
-    def testChoiceOneDecodeHoles(self):
+    def testDecodeOpenTypesChoiceOne(self):
         s, r = decoder.decode(
             ints2octs((48, 6, 2, 1, 1, 2, 1, 12)), asn1Spec=self.s,
             decodeOpenTypes=True
@@ -846,7 +846,7 @@ class SequenceDecoderWithIntegerHoleTypesTestCase(unittest.TestCase):
         assert s[0] == 1
         assert s[1] == 12
 
-    def testChoiceTwoDecodeHoles(self):
+    def testDecodeOpenTypesChoiceTwo(self):
         s, r = decoder.decode(
             ints2octs((48, 16, 2, 1, 2, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=self.s,
             decodeOpenTypes = True
@@ -855,7 +855,7 @@ class SequenceDecoderWithIntegerHoleTypesTestCase(unittest.TestCase):
         assert s[0] == 2
         assert s[1] == univ.OctetString('quick brown')
 
-    def testChoiceOneDontDecodeHoles(self):
+    def testDontDecodeOpenTypesChoiceOne(self):
         s, r = decoder.decode(
             ints2octs((48, 6, 2, 1, 1, 2, 1, 12)), asn1Spec=self.s
         )
@@ -863,7 +863,7 @@ class SequenceDecoderWithIntegerHoleTypesTestCase(unittest.TestCase):
         assert s[0] == 1
         assert s[1] == ints2octs((2, 1, 12))
 
-    def testChoiceTwoDontDecodeHoles(self):
+    def testDontDecodeOpenTypesChoiceTwo(self):
         s, r = decoder.decode(
             ints2octs((48, 16, 2, 1, 2, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=self.s
         )

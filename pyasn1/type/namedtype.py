@@ -10,6 +10,12 @@ from pyasn1 import error
 
 __all__ = ['NamedType', 'OptionalNamedType', 'DefaultedNamedType', 'NamedTypes']
 
+try:
+    any
+
+except AttributeError:
+    any = lambda x: bool(filter(bool, x))
+
 
 class NamedType(object):
     """Create named field object for a constructed ASN.1 type.
@@ -120,8 +126,11 @@ class NamedTypes(object):
         self.__ambiguousTypes = 'terminal' not in kwargs and self.__computeAmbiguousTypes() or {}
         self.__uniqueTagMap = self.__computeTagMaps(unique=True)
         self.__nonUniqueTagMap = self.__computeTagMaps(unique=False)
-        self.__hasOptionalOrDefault = bool([True for namedType in self.__namedTypes
-                                            if namedType.isDefaulted or namedType.isOptional])
+        self.__hasOptionalOrDefault = any([True for namedType in self.__namedTypes
+                                           if namedType.isDefaulted or namedType.isOptional])
+        self.__hasOpenTypes = any([True for namedType in self.__namedTypes
+                                   if namedType.openType])
+
         self.__requiredComponents = frozenset(
                 [idx for idx, nt in enumerate(self.__namedTypes) if not nt.isOptional and not nt.isDefaulted]
             )
@@ -508,8 +517,12 @@ class NamedTypes(object):
         return self.__hasOptionalOrDefault
 
     @property
+    def hasOpenTypes(self):
+        return self.__hasOpenTypes
+
+    @property
     def namedTypes(self):
-        return iter(self.__namedTypes)
+        return tuple(self.__namedTypes)
 
     @property
     def requiredComponents(self):

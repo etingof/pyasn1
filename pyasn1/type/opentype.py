@@ -21,13 +21,17 @@ class OpenType(object):
     name: :py:class:`str`
         Field name
 
-    *choices:
-        Sequence of (*value*, *type*) tuples representing the mapping 
+    typeMap: :py:class:`dict`:
+        A map of value->ASN.1 type. It's stored by reference and can be
+        mutated later to register new mappings.
     """
 
-    def __init__(self, name, args, **kwargs):
+    def __init__(self, name, typeMap=None):
         self.__name = name
-        self.__choices = dict(args, **kwargs)
+        if typeMap is None:
+            self.__typeMap = {}
+        else:
+            self.__typeMap = typeMap
 
     @property
     def name(self):
@@ -36,19 +40,19 @@ class OpenType(object):
     # Python dict protocol
 
     def values(self):
-        return self.__choices.values()
+        return self.__typeMap.values()
 
     def keys(self):
-        return self.__choices
+        return self.__typeMap.keys()
 
     def items(self):
-        return self.__choices.items()
+        return self.__typeMap.items()
 
     def __contains__(self, key):
-        return key in self.__choices
+        return key in self.__typeMap
 
     def __getitem__(self, key):
-        return self.__choices[key]
+        return self.__typeMap[key]
 
     def __iter__(self):
-        return iter(self.__choices)
+        return iter(self.__typeMap)

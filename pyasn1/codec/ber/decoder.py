@@ -511,35 +511,45 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                 seenIndices.add(idx)
                 idx += 1
 
-            if namedTypes and options.get('decodeOpenTypes', False):
+            if namedTypes:
                 if not namedTypes.requiredComponents.issubset(seenIndices):
                     raise error.PyAsn1Error('ASN.1 object %s has uninitialized components' % asn1Object.__class__.__name__)
 
+                if  namedTypes.hasOpenTypes:
 
-                for idx, namedType in enumerate(namedTypes.namedTypes):
-                    if not namedType.openType:
-                        continue
+                    openTypes = options.get('openTypes', {})
 
-                    governingValue = asn1Object.getComponentByName(
-                        namedType.openType.name
-                    )
+                    if openTypes or options.get('decodeOpenTypes', False):
 
-                    try:
-                        asn1Spec = namedType.openType[governingValue]
+                        for idx, namedType in enumerate(namedTypes.namedTypes):
+                            if not namedType.openType:
+                                continue
 
-                    except KeyError:
-                        continue
+                            governingValue = asn1Object.getComponentByName(
+                                namedType.openType.name
+                            )
 
-                    component, rest = decodeFun(
-                        asn1Object.getComponentByPosition(idx).asOctets(),
-                        asn1Spec=asn1Spec
-                    )
+                            try:
+                                asn1Spec = openTypes[governingValue]
 
-                    asn1Object.setComponentByPosition(
-                        idx, component,
-                        matchTags=False,
-                        matchConstraints=False
-                    )
+                            except KeyError:
+
+                                try:
+                                    asn1Spec = namedType.openType[governingValue]
+
+                                except KeyError:
+                                    continue
+
+                            component, rest = decodeFun(
+                                asn1Object.getComponentByPosition(idx).asOctets(),
+                                asn1Spec=asn1Spec
+                            )
+
+                            asn1Object.setComponentByPosition(
+                                idx, component,
+                                matchTags=False,
+                                matchConstraints=False
+                            )
 
             else:
                 asn1Object.verifySizeSpec()
@@ -637,31 +647,42 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                 if not namedTypes.requiredComponents.issubset(seenIndices):
                     raise error.PyAsn1Error('ASN.1 object %s has uninitialized components' % asn1Object.__class__.__name__)
 
-                for idx, namedType in enumerate(namedTypes.namedTypes):
-                    if not namedType.openType:
-                        continue
+                if  namedTypes.hasOpenTypes:
 
-                    governingValue = asn1Object.getComponentByName(
-                        namedType.openType.name
-                    )
+                    openTypes = options.get('openTypes', None)
 
-                    try:
-                        asn1Spec = namedType.openType[governingValue]
+                    if openTypes or options.get('decodeOpenTypes', False):
 
-                    except KeyError:
-                        continue
+                        for idx, namedType in enumerate(namedTypes.namedTypes):
+                            if not namedType.openType:
+                                continue
 
-                    component, rest = decodeFun(
-                        asn1Object.getComponentByPosition(idx).asOctets(),
-                        asn1Spec=asn1Spec, allowEoo=True
-                    )
+                            governingValue = asn1Object.getComponentByName(
+                                namedType.openType.name
+                            )
 
-                    if component is not eoo.endOfOctets:
-                        asn1Object.setComponentByPosition(
-                            idx, component,
-                            matchTags=False,
-                            matchConstraints=False
-                        )
+                            try:
+                                asn1Spec = openTypes[governingValue]
+
+                            except KeyError:
+
+                                try:
+                                    asn1Spec = namedType.openType[governingValue]
+
+                                except KeyError:
+                                    continue
+
+                            component, rest = decodeFun(
+                                asn1Object.getComponentByPosition(idx).asOctets(),
+                                asn1Spec=asn1Spec, allowEoo=True
+                            )
+
+                            if component is not eoo.endOfOctets:
+                                asn1Object.setComponentByPosition(
+                                    idx, component,
+                                    matchTags=False,
+                                    matchConstraints=False
+                                )
 
             else:
                 asn1Object.verifySizeSpec()
