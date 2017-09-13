@@ -17,30 +17,27 @@ from pyasn1.error import PyAsn1Error
 
 
 class OctetStringEncoderTestCase(unittest.TestCase):
-    def testShortMode(self):
+    def testDefModeShort(self):
         assert encoder.encode(
             univ.OctetString('Quick brown fox')
         ) == ints2octs((4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120))
 
-    def testIndefMode(self):
-        try:
-            encoder.encode(univ.OctetString('Quick brown'), defMode=False)
-        except PyAsn1Error:
-            pass
-        else:
-            assert 0, 'Indefinite length encoding tolerated'
-
-    def testChunkedMode(self):
+    def testDefModeLong(self):
         assert encoder.encode(
-            univ.OctetString('Quick brown'), maxChunkSize=2
-        ) == ints2octs((4, 11, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110))
+            univ.OctetString('Q' * 10000)
+        ) == ints2octs((4, 130, 39, 16) + (81,) * 10000)
 
 
 class BitStringEncoderTestCase(unittest.TestCase):
-    def testShortMode(self):
+    def testDefModeShort(self):
         assert encoder.encode(
             univ.BitString((1,))
         ) == ints2octs((3, 2, 7, 128))
+
+    def testDefModeLong(self):
+        assert encoder.encode(
+            univ.BitString((1,) * 80000)
+        ) == ints2octs((3, 130, 39, 17, 0) + (255,) * 10000)
 
 
 class SetOfEncoderTestCase(unittest.TestCase):
