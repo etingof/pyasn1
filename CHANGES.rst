@@ -7,7 +7,9 @@ Revision 0.3.5, released XX-09-2017
 - End-of-octets sentinel encoding optimized
 - Refactored ASN.1 codecs properties to silently enforce proper length and
   chunk size encoding modes
-- Fixed DER encoder to always produce primitive encoding
+- The __getitem__/__setitem__ behavior of Set/Sequence and SetOf/SequenceOf
+  objects aligned with the canonical Mapping and Sequence protocols in part
+  of the exceptions types being raised.
 
 Revision 0.3.4, released 07-09-2017
 -----------------------------------

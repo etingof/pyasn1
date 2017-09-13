@@ -1725,6 +1725,20 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
 
     # Python list protocol
 
+    def __getitem__(self, idx):
+        try:
+            return self.getComponentByPosition(idx)
+
+        except error.PyAsn1Error:
+            raise IndexError(sys.exc_info()[1])
+
+    def __setitem__(self, idx, value):
+        try:
+            self.setComponentByPosition(idx, value)
+
+        except error.PyAsn1Error:
+            raise IndexError(sys.exc_info()[1])
+
     def clear(self):
         self._componentValues = []
 
@@ -1741,7 +1755,11 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
     def index(self, value, start=0, stop=None):
         if stop is None:
             stop = len(self)
-        return self._componentValues.index(value, start, stop)
+        try:
+            return self._componentValues.index(value, start, stop)
+
+        except error.PyAsn1Error:
+            raise ValueError(sys.exc_info()[1])
 
     def reverse(self):
         self._componentValues.reverse()
@@ -2057,16 +2075,24 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         self._dynamicNames = self._componentTypeLen or self.DynamicNames()
 
     def __getitem__(self, idx):
-        if octets.isStringType(idx):
-            return self.getComponentByName(idx)
-        else:
-            return base.AbstractConstructedAsn1Item.__getitem__(self, idx)
+        try:
+            if octets.isStringType(idx):
+                return self.getComponentByName(idx)
+            else:
+                return self.getComponentByPosition(idx)
+
+        except error.PyAsn1Error:
+            raise KeyError(sys.exc_info()[1])
 
     def __setitem__(self, idx, value):
-        if octets.isStringType(idx):
-            self.setComponentByName(idx, value)
-        else:
-            base.AbstractConstructedAsn1Item.__setitem__(self, idx, value)
+        try:
+            if octets.isStringType(idx):
+                self.setComponentByName(idx, value)
+            else:
+                self.setComponentByPosition(idx, value)
+
+        except error.PyAsn1Error:
+            raise KeyError(sys.exc_info()[1])
 
     def __contains__(self, key):
         if self._componentTypeLen:
@@ -2254,7 +2280,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             currentValue = noValue
             if componentTypeLen:
                 if componentTypeLen < idx:
-                    raise IndexError('component index out of range')
+                    raise error.PyAsn1Error('component index out of range')
                 self._componentValues = [noValue] * componentTypeLen
 
         if value is noValue:
