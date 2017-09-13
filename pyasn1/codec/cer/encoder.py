@@ -22,22 +22,6 @@ class BooleanEncoder(encoder.IntegerEncoder):
         return substrate, False, False
 
 
-class BitStringEncoder(encoder.BitStringEncoder):
-    def encodeValue(self, value, encodeFun, **options):
-        options.update(maxChunkSize=1000)
-        return encoder.BitStringEncoder.encodeValue(
-            self, value, encodeFun, **options
-        )
-
-
-class OctetStringEncoder(encoder.OctetStringEncoder):
-    def encodeValue(self, value, encodeFun, **options):
-        options.update(maxChunkSize=1000)
-        return encoder.OctetStringEncoder.encodeValue(
-            self, value, encodeFun, **options
-        )
-
-
 class RealEncoder(encoder.RealEncoder):
     def _chooseEncBase(self, value):
         m, b, e = value
@@ -83,7 +67,7 @@ class TimeEncoderMixIn(object):
         )
 
 
-class GeneralizedTimeEncoder(TimeEncoderMixIn, OctetStringEncoder):
+class GeneralizedTimeEncoder(TimeEncoderMixIn, encoder.OctetStringEncoder):
     minLength = 12
     maxLength = 19
 
@@ -181,8 +165,6 @@ class SequenceOfEncoder(encoder.SequenceOfEncoder):
 tagMap = encoder.tagMap.copy()
 tagMap.update({
     univ.Boolean.tagSet: BooleanEncoder(),
-    univ.BitString.tagSet: BitStringEncoder(),
-    univ.OctetString.tagSet: OctetStringEncoder(),
     univ.Real.tagSet: RealEncoder(),
     useful.GeneralizedTime.tagSet: GeneralizedTimeEncoder(),
     useful.UTCTime.tagSet: UTCTimeEncoder(),
@@ -194,8 +176,6 @@ tagMap.update({
 typeMap = encoder.typeMap.copy()
 typeMap.update({
     univ.Boolean.typeId: BooleanEncoder(),
-    univ.BitString.typeId: BitStringEncoder(),
-    univ.OctetString.typeId: OctetStringEncoder(),
     univ.Real.typeId: RealEncoder(),
     useful.GeneralizedTime.typeId: GeneralizedTimeEncoder(),
     useful.UTCTime.typeId: UTCTimeEncoder(),
@@ -208,7 +188,8 @@ typeMap.update({
 
 
 class Encoder(encoder.Encoder):
-    supportIndefLength = True
+    fixedDefLengthMode = False
+    fixedChunkSize = 1000
 
     def __call__(self, value, **options):
         if 'defMode' not in options:
