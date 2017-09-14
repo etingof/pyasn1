@@ -16,6 +16,7 @@ ASN.1 types
    /docs/type/useful/contents
    /docs/type/tag/contents
    /docs/type/namedtype/contents
+   /docs/type/opentype/contents
    /docs/type/namedval/contents
 
 Transformation codecs
