@@ -191,11 +191,6 @@ class Encoder(encoder.Encoder):
     fixedDefLengthMode = False
     fixedChunkSize = 1000
 
-    def __call__(self, value, **options):
-        if 'defMode' not in options:
-            options.update(defMode=False)
-        return encoder.Encoder.__call__(self, value, **options)
-
 #: Turns ASN.1 object into CER octet stream.
 #:
 #: Takes any ASN.1 object (e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative)
