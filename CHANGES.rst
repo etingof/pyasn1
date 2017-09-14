@@ -10,6 +10,9 @@ Revision 0.3.5, released XX-09-2017
 - Codecs signatures unified and pass **options through the call chain
 - Explicit tag encoding optimized to avoid unnecessary copying
 - End-of-octets sentinel encoding optimized
+- Refactored ASN.1 codecs properties to silently enforce proper length and
+  chunk size encoding modes
+- Fixed DER encoder to always produce primitive encoding
 
 Revision 0.3.4, released 07-09-2017
 -----------------------------------

@@ -10,18 +10,6 @@ from pyasn1.codec.cer import encoder
 __all__ = ['encode']
 
 
-class BitStringEncoder(encoder.BitStringEncoder):
-    def encodeValue(self, value, encodeFun, **options):
-        return encoder.BitStringEncoder.encodeValue(
-            self, value, encodeFun, **options
-        )
-
-class OctetStringEncoder(encoder.OctetStringEncoder):
-    def encodeValue(self, value, encodeFun, **options):
-        return encoder.OctetStringEncoder.encodeValue(
-            self, value, encodeFun, **options
-        )
-
 class SetOfEncoder(encoder.SetOfEncoder):
     @staticmethod
     def _sortComponents(components):
@@ -30,16 +18,12 @@ class SetOfEncoder(encoder.SetOfEncoder):
 
 tagMap = encoder.tagMap.copy()
 tagMap.update({
-    univ.BitString.tagSet: BitStringEncoder(),
-    univ.OctetString.tagSet: OctetStringEncoder(),
     # Set & SetOf have same tags
     univ.SetOf.tagSet: SetOfEncoder()
 })
 
 typeMap = encoder.typeMap.copy()
 typeMap.update({
-    univ.BitString.typeId: BitStringEncoder(),
-    univ.OctetString.typeId: OctetStringEncoder(),
     # Set & SetOf have same tags
     univ.Set.typeId: SetOfEncoder(),
     univ.SetOf.typeId: SetOfEncoder()
@@ -47,12 +31,8 @@ typeMap.update({
 
 
 class Encoder(encoder.Encoder):
-    supportIndefLength = False
-
-    def __call__(self, value, **options):
-        if 'defMode' not in options:
-            options.update(defMode=True)
-        return encoder.Encoder.__call__(self, value, **options)
+    fixedDefLengthMode = True
+    fixedChunkSize = 0
 
 #: Turns ASN.1 object into DER octet stream.
 #:

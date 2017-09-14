@@ -470,7 +470,8 @@ typeMap = {
 
 
 class Encoder(object):
-    supportIndefLength = True
+    fixedDefLengthMode = None
+    fixedChunkSize = None
 
     # noinspection PyDefaultArgument
     def __init__(self, tagMap, typeMap={}):
@@ -478,8 +479,6 @@ class Encoder(object):
         self.__typeMap = typeMap
 
     def __call__(self, value, **options):
-        if not options.get('defMode', True) and not self.supportIndefLength:
-            raise error.PyAsn1Error('Indefinite length encoding not supported by this codec')
 
         if debug.logger & debug.flagEncoder:
             logger = debug.logger
@@ -488,6 +487,12 @@ class Encoder(object):
 
         if logger:
             logger('encoder called in %sdef mode, chunk size %s for type %s, value:\n%s' % (not options.get('defMode', True) and 'in' or '', options.get('maxChunkSize', 0), value.prettyPrintType(), value.prettyPrint()))
+
+        if self.fixedDefLengthMode is not None:
+            options.update(defMode=self.fixedDefLengthMode)
+
+        if self.fixedChunkSize is not None:
+            options.update(maxChunkSize=self.fixedChunkSize)
 
         tagSet = value.tagSet
 
