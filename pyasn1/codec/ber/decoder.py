@@ -635,6 +635,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
         return asn1Object, substrate
 
+
 class SequenceOrSequenceOfDecoder(UniversalConstructedTypeDecoder):
     protoRecordComponent = univ.Sequence()
     protoSequenceComponent = univ.SequenceOf()
@@ -737,7 +738,7 @@ class AnyDecoder(AbstractSimpleDecoder):
                      decodeFun=None, substrateFun=None,
                      **options):
         if asn1Spec is None or asn1Spec is not None and tagSet != asn1Spec.tagSet:
-            fullSubstrate=options['fullSubstrate']
+            fullSubstrate = options['fullSubstrate']
 
             # untagged Any container, recover inner header substrate
             length += len(fullSubstrate) - len(substrate)
@@ -759,7 +760,7 @@ class AnyDecoder(AbstractSimpleDecoder):
             # tagged Any type -- consume header substrate
             header = null
         else:
-            fullSubstrate=options['fullSubstrate']
+            fullSubstrate = options['fullSubstrate']
 
             # untagged Any, recover header substrate
             header = fullSubstrate[:-len(substrate)]
