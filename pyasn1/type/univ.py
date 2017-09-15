@@ -2075,24 +2075,38 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         self._dynamicNames = self._componentTypeLen or self.DynamicNames()
 
     def __getitem__(self, idx):
-        try:
-            if octets.isStringType(idx):
+        if octets.isStringType(idx):
+            try:
                 return self.getComponentByName(idx)
-            else:
+
+            except error.PyAsn1Error:
+                # duck-typing dict
+                raise KeyError(sys.exc_info()[1])
+
+        else:
+            try:
                 return self.getComponentByPosition(idx)
 
-        except error.PyAsn1Error:
-            raise KeyError(sys.exc_info()[1])
+            except error.PyAsn1Error:
+                # duck-typing list
+                raise IndexError(sys.exc_info()[1])
 
     def __setitem__(self, idx, value):
-        try:
-            if octets.isStringType(idx):
+        if octets.isStringType(idx):
+            try:
                 self.setComponentByName(idx, value)
-            else:
+
+            except error.PyAsn1Error:
+                # duck-typing dict
+                raise KeyError(sys.exc_info()[1])
+
+        else:
+            try:
                 self.setComponentByPosition(idx, value)
 
-        except error.PyAsn1Error:
-            raise KeyError(sys.exc_info()[1])
+            except error.PyAsn1Error:
+                # duck-typing list
+                raise IndexError(sys.exc_info()[1])
 
     def __contains__(self, key):
         if self._componentTypeLen:

@@ -1102,6 +1102,15 @@ class Sequence(unittest.TestCase):
         else:
             assert False, 'KeyError not raised'
 
+        try:
+            s[100]
+
+        except IndexError:
+            pass
+
+        else:
+            assert False, 'IndexError not raised'
+
     def testSetItem(self):
         s = self.s1.clone()
         s['name'] = 'xxx'
@@ -1115,6 +1124,16 @@ class Sequence(unittest.TestCase):
 
         else:
             assert False, 'KeyError not raised'
+
+        try:
+
+            s[100] = 'xxx'
+
+        except IndexError:
+            pass
+
+        else:
+            assert False, 'IndexError not raised'
 
     def testIter(self):
         assert list(self.s1) == ['name', 'nick', 'age']
