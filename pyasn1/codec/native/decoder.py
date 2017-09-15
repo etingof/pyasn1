@@ -38,7 +38,7 @@ class SequenceOfOrSetOfDecoder(object):
         asn1Value = asn1Spec.clone()
 
         for pyValue in pyObject:
-            asn1Value.append(decodeFun(pyValue, asn1Spec.componentType.asn1Object), **options)
+            asn1Value.append(decodeFun(pyValue, asn1Spec.componentType), **options)
 
         return asn1Value
 

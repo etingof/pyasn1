@@ -8,6 +8,7 @@ Revision 0.3.5, released XX-09-2017
 - Refactored ASN.1 codecs properties to silently enforce proper length and
   chunk size encoding modes
 - Fixed DER encoder to always produce primitive encoding
+- Fixed crash at SequenceOf native decoder
 
 Revision 0.3.4, released 07-09-2017
 -----------------------------------
