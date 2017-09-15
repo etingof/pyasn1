@@ -5,23 +5,28 @@
 # License: http://pyasn1.sf.net/license.html
 #
 import sys
-from pyasn1.type import char, univ, constraint
-from pyasn1.compat.octets import ints2octs
-from pyasn1.error import PyAsn1Error
 
 try:
     import unittest2 as unittest
 except ImportError:
     import unittest
 
+from tests.base import BaseTestCase
 
-class AbstractStringTestCase:
+from pyasn1.type import char, univ, constraint
+from pyasn1.compat.octets import ints2octs
+from pyasn1.error import PyAsn1Error
+
+
+class AbstractStringTestCase(object):
 
     initializer = ()
     encoding = 'us-ascii'
     asn1Type = None
 
     def setUp(self):
+        BaseTestCase.setUp(self)
+
         self.asn1String = self.asn1Type(ints2octs(self.initializer), encoding=self.encoding)
         self.pythonString = ints2octs(self.initializer).decode(self.encoding)
 
@@ -107,28 +112,28 @@ class AbstractStringTestCase:
             assert list(reversed(self.asn1String)) == list(reversed(self.pythonString))
 
 
-class VisibleStringTestCase(AbstractStringTestCase, unittest.TestCase):
+class VisibleStringTestCase(AbstractStringTestCase, BaseTestCase):
 
     initializer = (97, 102)
     encoding = 'us-ascii'
     asn1Type = char.VisibleString
 
 
-class GeneralStringTestCase(AbstractStringTestCase, unittest.TestCase):
+class GeneralStringTestCase(AbstractStringTestCase, BaseTestCase):
 
     initializer = (169, 174)
     encoding = 'iso-8859-1'
     asn1Type = char.GeneralString
 
 
-class UTF8StringTestCase(AbstractStringTestCase, unittest.TestCase):
+class UTF8StringTestCase(AbstractStringTestCase, BaseTestCase):
 
     initializer = (209, 132, 208, 176)
     encoding = 'utf-8'
     asn1Type = char.UTF8String
 
 
-class BMPStringTestCase(AbstractStringTestCase, unittest.TestCase):
+class BMPStringTestCase(AbstractStringTestCase, BaseTestCase):
 
     initializer = (4, 48, 4, 68)
     encoding = 'utf-16-be'
@@ -139,7 +144,7 @@ if sys.version_info[0] > 2:
 
     # Somehow comparison of UTF-32 encoded strings does not work in Py2
 
-    class UniversalStringTestCase(AbstractStringTestCase, unittest.TestCase):
+    class UniversalStringTestCase(AbstractStringTestCase, BaseTestCase):
         initializer = (0, 0, 4, 48, 0, 0, 4, 68)
         encoding = 'utf-32-be'
         asn1Type = char.UniversalString
