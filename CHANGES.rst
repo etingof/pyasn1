@@ -9,6 +9,8 @@ Revision 0.3.5, released XX-09-2017
   chunk size encoding modes
 - Fixed DER encoder to always produce primitive encoding
 - Fixed crash at SequenceOf native decoder
+- Fixed Real.prettyPrint() to fail gracefully on overflow
+- Fixed a couple of crashes when debug mode is enabled
 
 Revision 0.3.4, released 07-09-2017
 -----------------------------------

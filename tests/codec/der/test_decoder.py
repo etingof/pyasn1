@@ -5,17 +5,20 @@
 # License: http://pyasn1.sf.net/license.html
 #
 import sys
+
 try:
     import unittest2 as unittest
 except ImportError:
     import unittest
+
+from tests.base import BaseTestCase
 
 from pyasn1.codec.der import decoder
 from pyasn1.compat.octets import ints2octs, null
 from pyasn1.error import PyAsn1Error
 
 
-class BitStringDecoderTestCase(unittest.TestCase):
+class BitStringDecoderTestCase(BaseTestCase):
     def testShortMode(self):
         assert decoder.decode(
             ints2octs((3, 127, 6) + (170,) * 125 + (128,))
@@ -42,7 +45,7 @@ class BitStringDecoderTestCase(unittest.TestCase):
             assert 0, 'chunked encoding tolerated'
 
 
-class OctetStringDecoderTestCase(unittest.TestCase):
+class OctetStringDecoderTestCase(BaseTestCase):
     def testShortMode(self):
         assert decoder.decode(
             '\004\017Quick brown fox'.encode()

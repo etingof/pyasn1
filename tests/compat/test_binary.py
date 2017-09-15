@@ -5,15 +5,18 @@
 # License: http://pyasn1.sf.net/license.html
 #
 import sys
-from pyasn1.compat import binary
 
 try:
     import unittest2 as unittest
 except ImportError:
     import unittest
 
+from tests.base import BaseTestCase
 
-class BinaryTestCase(unittest.TestCase):
+from pyasn1.compat import binary
+
+
+class BinaryTestCase(BaseTestCase):
 
     def test_bin_zero(self):
         assert '0b0' == binary.bin(0)

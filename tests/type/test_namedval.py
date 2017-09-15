@@ -5,17 +5,21 @@
 # License: http://pyasn1.sf.net/license.html
 #
 import sys
+
 try:
     import unittest2 as unittest
 
 except ImportError:
     import unittest
 
+from tests.base import BaseTestCase
+
 from pyasn1.type import namedval
 
 
-class NamedValuesCaseBase(unittest.TestCase):
+class NamedValuesCaseBase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.e = namedval.NamedValues(('off', 0), ('on', 1))
 
     def testDict(self):
