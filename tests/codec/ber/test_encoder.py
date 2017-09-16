@@ -20,7 +20,7 @@ from pyasn1.compat.octets import ints2octs
 from pyasn1.error import PyAsn1Error
 
 
-class LargeTagEncoderTestCase(unittest.TestCase):
+class LargeTagEncoderTestCase(BaseTestCase):
     def setUp(self):
         BaseTestCase.setUp(self)
 
