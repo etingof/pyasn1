@@ -5,17 +5,20 @@
 # License: http://pyasn1.sf.net/license.html
 #
 import sys
+
 try:
     import unittest2 as unittest
 except ImportError:
     import unittest
+
+from tests.base import BaseTestCase
 
 from pyasn1.codec.cer import decoder
 from pyasn1.compat.octets import ints2octs, str2octs, null
 from pyasn1.error import PyAsn1Error
 
 
-class BooleanDecoderTestCase(unittest.TestCase):
+class BooleanDecoderTestCase(BaseTestCase):
     def testTrue(self):
         assert decoder.decode(ints2octs((1, 1, 255))) == (1, null)
 
@@ -34,7 +37,7 @@ class BooleanDecoderTestCase(unittest.TestCase):
         except PyAsn1Error:
             pass
 
-class BitStringDecoderTestCase(unittest.TestCase):
+class BitStringDecoderTestCase(BaseTestCase):
     def testShortMode(self):
         assert decoder.decode(
             ints2octs((3, 3, 6, 170, 128))
@@ -48,7 +51,7 @@ class BitStringDecoderTestCase(unittest.TestCase):
     # TODO: test failures on short chunked and long unchunked substrate samples
 
 
-class OctetStringDecoderTestCase(unittest.TestCase):
+class OctetStringDecoderTestCase(BaseTestCase):
     def testShortMode(self):
         assert decoder.decode(
             ints2octs((4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120)),

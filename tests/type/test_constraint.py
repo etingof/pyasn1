@@ -5,17 +5,21 @@
 # License: http://pyasn1.sf.net/license.html
 #
 import sys
+
 try:
     import unittest2 as unittest
 
 except ImportError:
     import unittest
 
+from tests.base import BaseTestCase
+
 from pyasn1.type import constraint, error
 
 
-class SingleValueConstraintTestCase(unittest.TestCase):
+class SingleValueConstraintTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.c1 = constraint.SingleValueConstraint(1, 2)
         self.c2 = constraint.SingleValueConstraint(3, 4)
 
@@ -28,6 +32,7 @@ class SingleValueConstraintTestCase(unittest.TestCase):
     def testGoodVal(self):
         try:
             self.c1(1)
+
         except error.ValueConstraintError:
             assert 0, 'constraint check fails'
 
@@ -40,8 +45,9 @@ class SingleValueConstraintTestCase(unittest.TestCase):
             assert 0, 'constraint check fails'
 
 
-class ContainedSubtypeConstraintTestCase(unittest.TestCase):
+class ContainedSubtypeConstraintTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.c1 = constraint.ContainedSubtypeConstraint(
             constraint.SingleValueConstraint(12)
         )
@@ -61,8 +67,9 @@ class ContainedSubtypeConstraintTestCase(unittest.TestCase):
             assert 0, 'constraint check fails'
 
 
-class ValueRangeConstraintTestCase(unittest.TestCase):
+class ValueRangeConstraintTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.c1 = constraint.ValueRangeConstraint(1, 4)
 
     def testGoodVal(self):
@@ -80,8 +87,9 @@ class ValueRangeConstraintTestCase(unittest.TestCase):
             assert 0, 'constraint check fails'
 
 
-class ValueSizeConstraintTestCase(unittest.TestCase):
+class ValueSizeConstraintTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.c1 = constraint.ValueSizeConstraint(1, 2)
 
     def testGoodVal(self):
@@ -119,8 +127,9 @@ class PermittedAlphabetConstraintTestCase(SingleValueConstraintTestCase):
             assert 0, 'constraint check fails'
 
 
-class ConstraintsIntersectionTestCase(unittest.TestCase):
+class ConstraintsIntersectionTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.c1 = constraint.ConstraintsIntersection(
             constraint.SingleValueConstraint(4),
             constraint.ValueRangeConstraint(2, 4)
@@ -161,7 +170,7 @@ class ConstraintsIntersectionTestCase(unittest.TestCase):
             assert 0, 'constraint check fails'
 
 
-class InnerTypeConstraintTestCase(unittest.TestCase):
+class InnerTypeConstraintTestCase(BaseTestCase):
     def testConst1(self):
         c = constraint.InnerTypeConstraint(
             constraint.SingleValueConstraint(4)
@@ -203,8 +212,9 @@ class InnerTypeConstraintTestCase(unittest.TestCase):
         # Constraints compositions
 
 
-class ConstraintsIntersectionRangeTestCase(unittest.TestCase):
+class ConstraintsIntersectionRangeTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.c1 = constraint.ConstraintsIntersection(
             constraint.ValueRangeConstraint(1, 9),
             constraint.ValueRangeConstraint(2, 5)
@@ -225,8 +235,9 @@ class ConstraintsIntersectionRangeTestCase(unittest.TestCase):
             assert 0, 'constraint check fails'
 
 
-class ConstraintsUnionTestCase(unittest.TestCase):
+class ConstraintsUnionTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.c1 = constraint.ConstraintsUnion(
             constraint.SingleValueConstraint(5),
             constraint.ValueRangeConstraint(1, 3)
@@ -248,8 +259,9 @@ class ConstraintsUnionTestCase(unittest.TestCase):
             assert 0, 'constraint check fails'
 
 
-class ConstraintsExclusionTestCase(unittest.TestCase):
+class ConstraintsExclusionTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.c1 = constraint.ConstraintsExclusion(
             constraint.ValueRangeConstraint(2, 4)
         )
@@ -271,9 +283,12 @@ class ConstraintsExclusionTestCase(unittest.TestCase):
 
 # Constraints derivations
 
-class DirectDerivationTestCase(unittest.TestCase):
+class DirectDerivationTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
+
         self.c1 = constraint.SingleValueConstraint(5)
+
         self.c2 = constraint.ConstraintsUnion(
             self.c1, constraint.ValueRangeConstraint(1, 3)
         )
@@ -287,14 +302,18 @@ class DirectDerivationTestCase(unittest.TestCase):
         assert self.c2.isSubTypeOf(self.c1), 'isSubTypeOf failed'
 
 
-class IndirectDerivationTestCase(unittest.TestCase):
+class IndirectDerivationTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
+
         self.c1 = constraint.ConstraintsIntersection(
             constraint.ValueRangeConstraint(1, 30)
         )
+
         self.c2 = constraint.ConstraintsIntersection(
             self.c1, constraint.ValueRangeConstraint(1, 20)
         )
+
         self.c2 = constraint.ConstraintsIntersection(
             self.c2, constraint.ValueRangeConstraint(1, 10)
         )
@@ -307,7 +326,7 @@ class IndirectDerivationTestCase(unittest.TestCase):
         assert not self.c2.isSuperTypeOf(self.c1), 'isSuperTypeOf failed'
         assert self.c2.isSubTypeOf(self.c1), 'isSubTypeOf failed'
 
-# TODO: how to apply size constriants to constructed types?
+# TODO: how to apply size constraints to constructed types?
 
 suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])
 

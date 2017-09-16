@@ -23,9 +23,9 @@ class AbstractItemEncoder(object):
         if isConstructed:
             encodedTag |= tag.tagFormatConstructed
         if tagId < 31:
-            return (encodedTag | tagId,)
+            return encodedTag | tagId,
         else:
-            substrate = (tagId & 0x7f,)
+            substrate = tagId & 0x7f,
             tagId >>= 7
             while tagId:
                 substrate = (0x80 | (tagId & 0x7f),) + substrate
@@ -36,7 +36,7 @@ class AbstractItemEncoder(object):
         if not defMode and self.supportIndefLenMode:
             return (0x80,)
         if length < 0x80:
-            return (length,)
+            return length,
         else:
             substrate = ()
             while length:
@@ -398,7 +398,7 @@ class ChoiceEncoder(AbstractItemEncoder):
 
 class AnyEncoder(OctetStringEncoder):
     def encodeValue(self, value, encodeFun, **options):
-        return value.asOctets(), options.get('defMode', True) == False, True
+        return value.asOctets(), not options.get('defMode', True), True
 
 
 tagMap = {

@@ -1498,7 +1498,11 @@ class Real(base.AbstractSimpleAsn1Item):
         if self.isInf:
             return self.prettyOut(self._value)
         else:
-            return str(float(self))
+            try:
+                return str(float(self))
+
+            except OverflowError:
+                return '<overflow>'
 
     @property
     def isPlusInf(self):

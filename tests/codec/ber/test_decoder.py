@@ -10,13 +10,15 @@ try:
 except ImportError:
     import unittest
 
+from tests.base import BaseTestCase
+
 from pyasn1.type import tag, namedtype, opentype, univ, char
 from pyasn1.codec.ber import decoder, eoo
 from pyasn1.compat.octets import ints2octs, str2octs, null
 from pyasn1.error import PyAsn1Error
 
 
-class LargeTagDecoderTestCase(unittest.TestCase):
+class LargeTagDecoderTestCase(BaseTestCase):
     def testLargeTag(self):
         assert decoder.decode(ints2octs((127, 141, 245, 182, 253, 47, 3, 2, 1, 1))) == (1, null)
 
@@ -29,12 +31,12 @@ class LargeTagDecoderTestCase(unittest.TestCase):
             ints2octs((0x9f, 0x00, 0x02, 0x01, 0x02)), asn1Spec=integer)
 
 
-class DecoderCacheTestCase(unittest.TestCase):
+class DecoderCacheTestCase(BaseTestCase):
     def testCache(self):
         assert decoder.decode(ints2octs((0x1f, 2, 1, 0))) == decoder.decode(ints2octs((0x1f, 2, 1, 0)))
 
 
-class IntegerDecoderTestCase(unittest.TestCase):
+class IntegerDecoderTestCase(BaseTestCase):
     def testPosInt(self):
         assert decoder.decode(ints2octs((2, 1, 12))) == (12, null)
 
@@ -82,7 +84,7 @@ class IntegerDecoderTestCase(unittest.TestCase):
             assert 0, 'wrong tagFormat worked out'
 
 
-class BooleanDecoderTestCase(unittest.TestCase):
+class BooleanDecoderTestCase(BaseTestCase):
     def testTrue(self):
         assert decoder.decode(ints2octs((1, 1, 1))) == (1, null)
 
@@ -104,7 +106,7 @@ class BooleanDecoderTestCase(unittest.TestCase):
             assert 0, 'wrong tagFormat worked out'
 
 
-class BitStringDecoderTestCase(unittest.TestCase):
+class BitStringDecoderTestCase(BaseTestCase):
     def testDefMode(self):
         assert decoder.decode(
             ints2octs((3, 3, 1, 169, 138))
@@ -128,14 +130,14 @@ class BitStringDecoderTestCase(unittest.TestCase):
     def testDefModeChunkedSubst(self):
         assert decoder.decode(
             ints2octs((35, 8, 3, 2, 0, 169, 3, 2, 1, 138)),
-            substrateFun=lambda a, b, c: (b, c)
-        ) == (ints2octs((3, 2, 0, 169, 3, 2, 1, 138)), 8)
+            substrateFun=lambda a, b, c: (b, b[c:])
+        ) == (ints2octs((3, 2, 0, 169, 3, 2, 1, 138)), str2octs(''))
 
     def testIndefModeChunkedSubst(self):
         assert decoder.decode(
             ints2octs((35, 128, 3, 2, 0, 169, 3, 2, 1, 138, 0, 0)),
-            substrateFun=lambda a, b, c: (b, c)
-        ) == (ints2octs((3, 2, 0, 169, 3, 2, 1, 138, 0, 0)), -1)
+            substrateFun=lambda a, b, c: (b, str2octs(''))
+        ) == (ints2octs((3, 2, 0, 169, 3, 2, 1, 138, 0, 0)), str2octs(''))
 
     def testTypeChecking(self):
         try:
@@ -146,7 +148,7 @@ class BitStringDecoderTestCase(unittest.TestCase):
             assert 0, 'accepted mis-encoded bit-string constructed out of an integer'
 
 
-class OctetStringDecoderTestCase(unittest.TestCase):
+class OctetStringDecoderTestCase(BaseTestCase):
     def testDefMode(self):
         assert decoder.decode(
             ints2octs((4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120))
@@ -173,21 +175,21 @@ class OctetStringDecoderTestCase(unittest.TestCase):
         assert decoder.decode(
             ints2octs(
                 (36, 23, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120)),
-            substrateFun=lambda a, b, c: (b, c)
-        ) == (ints2octs((4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120)),
-              23)
+            substrateFun=lambda a, b, c: (b, b[c:])
+        ) == (ints2octs((4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120)), str2octs(''))
 
     def testIndefModeChunkedSubst(self):
         assert decoder.decode(
             ints2octs((36, 128, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111,
                        120, 0, 0)),
-            substrateFun=lambda a, b, c: (b, c)
+            substrateFun=lambda a, b, c: (b, str2octs(''))
         ) == (ints2octs(
-            (4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120, 0, 0)), -1)
+            (4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120, 0, 0)), str2octs(''))
 
 
-class ExpTaggedOctetStringDecoderTestCase(unittest.TestCase):
+class ExpTaggedOctetStringDecoderTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.o = univ.OctetString(
             'Quick brown fox',
             tagSet=univ.OctetString.tagSet.tagExplicitly(
@@ -233,20 +235,20 @@ class ExpTaggedOctetStringDecoderTestCase(unittest.TestCase):
     def testDefModeSubst(self):
         assert decoder.decode(
             ints2octs((101, 17, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120)),
-            substrateFun=lambda a, b, c: (b, c)
-        ) == (ints2octs((4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120)), 17)
+            substrateFun=lambda a, b, c: (b, b[c:])
+        ) == (ints2octs((4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120)), str2octs(''))
 
     def testIndefModeSubst(self):
         assert decoder.decode(
             ints2octs((
                       101, 128, 36, 128, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120, 0,
                       0, 0, 0)),
-            substrateFun=lambda a, b, c: (b, c)
+            substrateFun=lambda a, b, c: (b, str2octs(''))
         ) == (ints2octs(
-            (36, 128, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120, 0, 0, 0, 0)), -1)
+            (36, 128, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120, 0, 0, 0, 0)), str2octs(''))
 
 
-class NullDecoderTestCase(unittest.TestCase):
+class NullDecoderTestCase(BaseTestCase):
     def testNull(self):
         assert decoder.decode(ints2octs((5, 0))) == (null, null)
 
@@ -261,7 +263,7 @@ class NullDecoderTestCase(unittest.TestCase):
 
 # Useful analysis of OID encoding issues could be found here:
 # http://www.viathinksoft.de/~daniel-marschall/asn.1/oid_facts.html
-class ObjectIdentifierDecoderTestCase(unittest.TestCase):
+class ObjectIdentifierDecoderTestCase(BaseTestCase):
     def testOne(self):
         assert decoder.decode(
             ints2octs((6, 6, 43, 6, 0, 191, 255, 126))
@@ -402,7 +404,7 @@ class ObjectIdentifierDecoderTestCase(unittest.TestCase):
         ) == ((2, 999, 18446744073709551535184467440737095), null)
 
 
-class RealDecoderTestCase(unittest.TestCase):
+class RealDecoderTestCase(BaseTestCase):
     def testChar(self):
         assert decoder.decode(
             ints2octs((9, 7, 3, 49, 50, 51, 69, 49, 49))
@@ -478,23 +480,25 @@ class RealDecoderTestCase(unittest.TestCase):
 
 
 if sys.version_info[0:2] > (2, 5):
-    class UniversalStringDecoderTestCase(unittest.TestCase):
+    class UniversalStringDecoderTestCase(BaseTestCase):
         def testDecoder(self):
             assert decoder.decode(ints2octs((28, 12, 0, 0, 0, 97, 0, 0, 0, 98, 0, 0, 0, 99))) == (char.UniversalString(sys.version_info[0] == 3 and 'abc' or unicode('abc')), null)
 
 
-class BMPStringDecoderTestCase(unittest.TestCase):
+class BMPStringDecoderTestCase(BaseTestCase):
     def testDecoder(self):
         assert decoder.decode(ints2octs((30, 6, 0, 97, 0, 98, 0, 99))) == (char.BMPString(sys.version_info[0] == 3 and 'abc' or unicode('abc')), null)
 
 
-class UTF8StringDecoderTestCase(unittest.TestCase):
+class UTF8StringDecoderTestCase(BaseTestCase):
     def testDecoder(self):
         assert decoder.decode(ints2octs((12, 3, 97, 98, 99))) == (char.UTF8String(sys.version_info[0] == 3 and 'abc' or unicode('abc')), null)
 
 
-class SequenceOfDecoderTestCase(unittest.TestCase):
+class SequenceOfDecoderTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
+
         self.s = univ.SequenceOf(componentType=univ.OctetString())
         self.s.setComponentByPosition(0, univ.OctetString('quick brown'))
 
@@ -524,7 +528,7 @@ class SequenceOfDecoderTestCase(unittest.TestCase):
         ) == (self.s, null)
 
 
-class ExpTaggedSequenceOfDecoderTestCase(unittest.TestCase):
+class ExpTaggedSequenceOfDecoderTestCase(BaseTestCase):
 
     def testWithSchema(self):
         s = univ.SequenceOf().subtype(explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatConstructed, 3))
@@ -545,8 +549,9 @@ class ExpTaggedSequenceOfDecoderTestCase(unittest.TestCase):
         assert s.tagSet == s2.tagSet
 
 
-class SequenceOfDecoderWithSchemaTestCase(unittest.TestCase):
+class SequenceOfDecoderWithSchemaTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.s = univ.SequenceOf(componentType=univ.OctetString())
         self.s.setComponentByPosition(0, univ.OctetString('quick brown'))
 
@@ -571,8 +576,9 @@ class SequenceOfDecoderWithSchemaTestCase(unittest.TestCase):
         ) == (self.s, null)
 
 
-class SetOfDecoderTestCase(unittest.TestCase):
+class SetOfDecoderTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.s = univ.SetOf(componentType=univ.OctetString())
         self.s.setComponentByPosition(0, univ.OctetString('quick brown'))
 
@@ -602,8 +608,9 @@ class SetOfDecoderTestCase(unittest.TestCase):
         ) == (self.s, null)
 
 
-class SetOfDecoderWithSchemaTestCase(unittest.TestCase):
+class SetOfDecoderWithSchemaTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.s = univ.SetOf(componentType=univ.OctetString())
         self.s.setComponentByPosition(0, univ.OctetString('quick brown'))
 
@@ -628,8 +635,9 @@ class SetOfDecoderWithSchemaTestCase(unittest.TestCase):
         ) == (self.s, null)
 
 
-class SequenceDecoderTestCase(unittest.TestCase):
+class SequenceDecoderTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.s = univ.Sequence(
             componentType=namedtype.NamedTypes(
                 namedtype.NamedType('place-holder', univ.Null(null)),
@@ -665,16 +673,15 @@ class SequenceDecoderTestCase(unittest.TestCase):
     def testWithOptionalAndDefaultedDefModeSubst(self):
         assert decoder.decode(
             ints2octs((48, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1)),
-            substrateFun=lambda a, b, c: (b, c)
-        ) == (ints2octs((5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1)), 18)
+            substrateFun=lambda a, b, c: (b, b[c:])
+        ) == (ints2octs((5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1)), str2octs(''))
 
     def testWithOptionalAndDefaultedIndefModeSubst(self):
         assert decoder.decode(
-            ints2octs((48, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1,
-                       0, 0)),
-            substrateFun=lambda a, b, c: (b, c)
+            ints2octs((48, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)),
+            substrateFun=lambda a, b, c: (b, str2octs(''))
         ) == (ints2octs(
-            (5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)), -1)
+            (5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)), str2octs(''))
 
     def testTagFormat(self):
         try:
@@ -687,8 +694,9 @@ class SequenceDecoderTestCase(unittest.TestCase):
             assert 0, 'wrong tagFormat worked out'
 
 
-class SequenceDecoderWithSchemaTestCase(unittest.TestCase):
+class SequenceDecoderWithSchemaTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.s = univ.Sequence(
             componentType=namedtype.NamedTypes(
                 namedtype.NamedType('place-holder', univ.Null(null)),
@@ -823,7 +831,7 @@ class SequenceDecoderWithSchemaTestCase(unittest.TestCase):
         ) == (self.s, null)
 
 
-class SequenceDecoderWithIntegerOpenTypesTestCase(unittest.TestCase):
+class SequenceDecoderWithIntegerOpenTypesTestCase(BaseTestCase):
     def setUp(self):
         openType = opentype.OpenType(
             'id',
@@ -872,8 +880,9 @@ class SequenceDecoderWithIntegerOpenTypesTestCase(unittest.TestCase):
         assert s[1] == ints2octs((4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110))
 
 
-class SetDecoderTestCase(unittest.TestCase):
+class SetDecoderTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.s = univ.Set(
             componentType=namedtype.NamedTypes(
                 namedtype.NamedType('place-holder', univ.Null(null)),
@@ -909,15 +918,15 @@ class SetDecoderTestCase(unittest.TestCase):
     def testWithOptionalAndDefaultedDefModeSubst(self):
         assert decoder.decode(
             ints2octs((49, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1)),
-            substrateFun=lambda a, b, c: (b, c)
-        ) == (ints2octs((5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1)), 18)
+            substrateFun=lambda a, b, c: (b, b[c:])
+        ) == (ints2octs((5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1)), str2octs(''))
 
     def testWithOptionalAndDefaultedIndefModeSubst(self):
         assert decoder.decode(
             ints2octs((49, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)),
-            substrateFun=lambda a, b, c: (b, c)
+            substrateFun=lambda a, b, c: (b, str2octs(''))
         ) == (ints2octs(
-            (5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)), -1)
+            (5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)), str2octs(''))
 
     def testTagFormat(self):
         try:
@@ -930,8 +939,9 @@ class SetDecoderTestCase(unittest.TestCase):
             assert 0, 'wrong tagFormat worked out'
 
 
-class SetDecoderWithSchemaTestCase(unittest.TestCase):
+class SetDecoderWithSchemaTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.s = univ.Set(
             componentType=namedtype.NamedTypes(
                 namedtype.NamedType('place-holder', univ.Null(null)),
@@ -1069,8 +1079,9 @@ class SetDecoderWithSchemaTestCase(unittest.TestCase):
         ) == (self.s, null)
 
 
-class SequenceOfWithExpTaggedOctetStringDecoder(unittest.TestCase):
+class SequenceOfWithExpTaggedOctetStringDecoder(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.s = univ.SequenceOf(
             componentType=univ.OctetString().subtype(explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 3))
         )
@@ -1114,8 +1125,9 @@ class SequenceOfWithExpTaggedOctetStringDecoder(unittest.TestCase):
         assert s.tagSet == self.s.tagSet
 
 
-class SequenceWithExpTaggedOctetStringDecoder(unittest.TestCase):
+class SequenceWithExpTaggedOctetStringDecoder(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.s = univ.Sequence(
             componentType=namedtype.NamedTypes(
                 namedtype.NamedType(
@@ -1163,8 +1175,9 @@ class SequenceWithExpTaggedOctetStringDecoder(unittest.TestCase):
         assert s.tagSet == self.s.tagSet
 
 
-class ChoiceDecoderTestCase(unittest.TestCase):
+class ChoiceDecoderTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.s = univ.Choice(
             componentType=namedtype.NamedTypes(
                 namedtype.NamedType('place-holder', univ.Null(null)),
@@ -1202,8 +1215,9 @@ class ChoiceDecoderTestCase(unittest.TestCase):
         assert decoder.decode(ints2octs((164, 128, 5, 0, 0, 0)), asn1Spec=s) == (s, null)
 
 
-class AnyDecoderTestCase(unittest.TestCase):
+class AnyDecoderTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.s = univ.Any()
 
     def testByUntagged(self):
@@ -1236,18 +1250,18 @@ class AnyDecoderTestCase(unittest.TestCase):
         assert decoder.decode(
             ints2octs((4, 3, 102, 111, 120)),
             asn1Spec=self.s,
-            substrateFun=lambda a, b, c: (b, c)
-        ) == (ints2octs((4, 3, 102, 111, 120)), 5)
+            substrateFun=lambda a, b, c: (b, b[c:])
+        ) == (ints2octs((4, 3, 102, 111, 120)), str2octs(''))
 
     def testTaggedExSubst(self):
         assert decoder.decode(
             ints2octs((164, 5, 4, 3, 102, 111, 120)),
             asn1Spec=self.s,
-            substrateFun=lambda a, b, c: (b, c)
-        ) == (ints2octs((164, 5, 4, 3, 102, 111, 120)), 7)
+            substrateFun=lambda a, b, c: (b, b[c:])
+        ) == (ints2octs((164, 5, 4, 3, 102, 111, 120)), str2octs(''))
 
 
-class EndOfOctetsTestCase(unittest.TestCase):
+class EndOfOctetsTestCase(BaseTestCase):
     def testUnexpectedEoo(self):
         try:
             decoder.decode(ints2octs((0, 0)))
@@ -1298,8 +1312,9 @@ class EndOfOctetsTestCase(unittest.TestCase):
             assert 0, 'end-of-contents octets accepted with unexpected data'
 
 
-class NonStringDecoderTestCase(unittest.TestCase):
+class NonStringDecoderTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.s = univ.Sequence(
             componentType=namedtype.NamedTypes(
                 namedtype.NamedType('place-holder', univ.Null(null)),

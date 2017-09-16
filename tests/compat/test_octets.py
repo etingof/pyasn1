@@ -5,15 +5,18 @@
 # License: http://pyasn1.sf.net/license.html
 #
 import sys
-from pyasn1.compat import octets
 
 try:
     import unittest2 as unittest
 except ImportError:
     import unittest
 
+from tests.base import BaseTestCase
 
-class OctetsTestCase(unittest.TestCase):
+from pyasn1.compat import octets
+
+
+class OctetsTestCase(BaseTestCase):
 
     if sys.version_info[0] > 2:
 

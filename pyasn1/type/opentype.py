@@ -25,10 +25,10 @@ class OpenType(object):
     typeMap: :py:class:`dict`:
         A map of value->ASN.1 type. It's stored by reference and can be
         mutated later to register new mappings.
-        
+
     Examples
     --------
-    
+
     .. code-block::
 
         openType = OpenType(
