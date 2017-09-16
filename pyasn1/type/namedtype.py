@@ -11,6 +11,12 @@ from pyasn1 import error
 
 __all__ = ['NamedType', 'OptionalNamedType', 'DefaultedNamedType', 'NamedTypes']
 
+try:
+    any
+
+except AttributeError:
+    any = lambda x: bool(filter(bool, x))
+
 
 class NamedType(object):
     """Create named field object for a constructed ASN.1 type.
@@ -31,10 +37,11 @@ class NamedType(object):
     isOptional = False
     isDefaulted = False
 
-    def __init__(self, name, asn1Object):
+    def __init__(self, name, asn1Object, openType=None):
         self.__name = name
         self.__type = asn1Object
         self.__nameAndType = name, asn1Object
+        self.__openType = openType
 
     def __repr__(self):
         return '%s(%r, %r)' % (self.__class__.__name__, self.__name, self.__type)
@@ -73,6 +80,10 @@ class NamedType(object):
     @property
     def asn1Object(self):
         return self.__type
+
+    @property
+    def openType(self):
+        return self.__openType
 
     # Backward compatibility
 
@@ -135,8 +146,11 @@ class NamedTypes(object):
         self.__ambiguousTypes = 'terminal' not in kwargs and self.__computeAmbiguousTypes() or {}
         self.__uniqueTagMap = self.__computeTagMaps(unique=True)
         self.__nonUniqueTagMap = self.__computeTagMaps(unique=False)
-        self.__hasOptionalOrDefault = bool([True for namedType in self.__namedTypes
-                                            if namedType.isDefaulted or namedType.isOptional])
+        self.__hasOptionalOrDefault = any([True for namedType in self.__namedTypes
+                                           if namedType.isDefaulted or namedType.isOptional])
+        self.__hasOpenTypes = any([True for namedType in self.__namedTypes
+                                   if namedType.openType])
+
         self.__requiredComponents = frozenset(
                 [idx for idx, nt in enumerate(self.__namedTypes) if not nt.isOptional and not nt.isDefaulted]
             )
@@ -523,8 +537,12 @@ class NamedTypes(object):
         return self.__hasOptionalOrDefault
 
     @property
+    def hasOpenTypes(self):
+        return self.__hasOpenTypes
+
+    @property
     def namedTypes(self):
-        return iter(self.__namedTypes)
+        return tuple(self.__namedTypes)
 
     @property
     def requiredComponents(self):

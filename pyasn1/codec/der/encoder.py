@@ -6,22 +6,9 @@
 #
 from pyasn1.type import univ
 from pyasn1.codec.cer import encoder
-from pyasn1 import error
 
 __all__ = ['encode']
 
-
-class BitStringEncoder(encoder.BitStringEncoder):
-    def encodeValue(self, encodeFun, value, defMode, maxChunkSize, ifNotEmpty=False):
-        return encoder.BitStringEncoder.encodeValue(
-            self, encodeFun, value, defMode, 0, ifNotEmpty=ifNotEmpty
-        )
-
-class OctetStringEncoder(encoder.OctetStringEncoder):
-    def encodeValue(self, encodeFun, value, defMode, maxChunkSize, ifNotEmpty=False):
-        return encoder.OctetStringEncoder.encodeValue(
-            self, encodeFun, value, defMode, 0, ifNotEmpty=ifNotEmpty
-        )
 
 class SetOfEncoder(encoder.SetOfEncoder):
     @staticmethod
@@ -31,16 +18,12 @@ class SetOfEncoder(encoder.SetOfEncoder):
 
 tagMap = encoder.tagMap.copy()
 tagMap.update({
-    univ.BitString.tagSet: BitStringEncoder(),
-    univ.OctetString.tagSet: OctetStringEncoder(),
     # Set & SetOf have same tags
     univ.SetOf.tagSet: SetOfEncoder()
 })
 
 typeMap = encoder.typeMap.copy()
 typeMap.update({
-    univ.BitString.typeId: BitStringEncoder(),
-    univ.OctetString.typeId: OctetStringEncoder(),
     # Set & SetOf have same tags
     univ.Set.typeId: SetOfEncoder(),
     univ.SetOf.typeId: SetOfEncoder()
@@ -48,12 +31,8 @@ typeMap.update({
 
 
 class Encoder(encoder.Encoder):
-    supportIndefLength = False
-
-    def __call__(self, value, defMode=True, maxChunkSize=0, ifNotEmpty=False):
-        if not defMode:
-            raise error.PyAsn1Error('DER forbids indefinite length mode')
-        return encoder.Encoder.__call__(self, value, defMode, maxChunkSize, ifNotEmpty=ifNotEmpty)
+    fixedDefLengthMode = True
+    fixedChunkSize = 0
 
 #: Turns ASN.1 object into DER octet stream.
 #:

@@ -5,11 +5,20 @@ Revision 0.4.1, released XX-09-2017
 - Forward-referencing ASN.1 types implemented to handle
   the case of recursive ASN.1 schemas.
 
-Revision 0.3.4, released XX-08-2017
+Revision 0.3.5, released 16-09-2017
 -----------------------------------
 
-- Forward-referencing ASN.1 types implemented to handle
-  the case of recursive ASN.1 schemas.
+- Codecs signatures unified and pass the options kwargs through the
+  call chain
+- Explicit tag encoding optimized to avoid unnecessary copying
+- End-of-octets sentinel encoding optimized
+- Refactored ASN.1 codecs properties to silently enforce proper
+  length and chunk size encoding modes
+- Fixed DER encoder to always produce primitive encoding
+- Fixed crash at SequenceOf native decoder
+- Fixed Real.prettyPrint() to fail gracefully on overflow
+- Fixed a couple of crashes when debug mode is enabled
+>>>>>>> devel-0.4.1
 
 Revision 0.3.4, released 07-09-2017
 -----------------------------------

@@ -106,4 +106,3 @@ else:
 
     def bitLength(number):
         return int(number).bit_length()
-

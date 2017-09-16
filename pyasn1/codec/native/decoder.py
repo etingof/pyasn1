@@ -11,47 +11,47 @@ __all__ = ['decode']
 
 
 class AbstractScalarDecoder(object):
-    def __call__(self, pyObject, asn1Spec, decoderFunc=None):
+    def __call__(self, pyObject, asn1Spec, decodeFun=None, **options):
         return asn1Spec.clone(pyObject)
 
 
 class BitStringDecoder(AbstractScalarDecoder):
-    def __call__(self, pyObject, asn1Spec, decoderFunc=None):
+    def __call__(self, pyObject, asn1Spec, decodeFun=None, **options):
         return asn1Spec.clone(univ.BitString.fromBinaryString(pyObject))
 
 
 class SequenceOrSetDecoder(object):
-    def __call__(self, pyObject, asn1Spec, decoderFunc):
+    def __call__(self, pyObject, asn1Spec, decodeFun=None, **options):
         asn1Value = asn1Spec.clone()
 
         componentsTypes = asn1Spec.componentType
 
         for field in asn1Value:
             if field in pyObject:
-                asn1Value[field] = decoderFunc(pyObject[field], componentsTypes[field].asn1Object)
+                asn1Value[field] = decodeFun(pyObject[field], componentsTypes[field].asn1Object, **options)
 
         return asn1Value
 
 
 class SequenceOfOrSetOfDecoder(object):
-    def __call__(self, pyObject, asn1Spec, decoderFunc):
+    def __call__(self, pyObject, asn1Spec, decodeFun=None, **options):
         asn1Value = asn1Spec.clone()
 
         for pyValue in pyObject:
-            asn1Value.append(decoderFunc(pyValue, asn1Spec.componentType.asn1Object))
+            asn1Value.append(decodeFun(pyValue, asn1Spec.componentType), **options)
 
         return asn1Value
 
 
 class ChoiceDecoder(object):
-    def __call__(self, pyObject, asn1Spec, decoderFunc):
+    def __call__(self, pyObject, asn1Spec, decodeFun=None, **options):
         asn1Value = asn1Spec.clone()
 
         componentsTypes = asn1Spec.componentType
 
         for field in pyObject:
             if field in componentsTypes:
-                asn1Value[field] = decoderFunc(pyObject[field], componentsTypes[field].asn1Object)
+                asn1Value[field] = decodeFun(pyObject[field], componentsTypes[field].asn1Object, **options)
                 break
 
         return asn1Value
@@ -130,7 +130,7 @@ class Decoder(object):
         self.__tagMap = tagMap
         self.__typeMap = typeMap
 
-    def __call__(self, pyObject, asn1Spec):
+    def __call__(self, pyObject, asn1Spec, **options):
         if debug.logger & debug.flagDecoder:
             logger = debug.logger
         else:
@@ -144,9 +144,11 @@ class Decoder(object):
 
         try:
             valueDecoder = self.__typeMap[asn1Spec.typeId]
+
         except KeyError:
             # use base type for codec lookup to recover untagged types
             baseTagSet = tag.TagSet(asn1Spec.tagSet.baseTag, asn1Spec.tagSet.baseTag)
+
             try:
                 valueDecoder = self.__tagMap[baseTagSet]
             except KeyError:
@@ -155,7 +157,7 @@ class Decoder(object):
         if logger:
             logger('calling decoder %s on Python type %s <%s>' % (type(valueDecoder).__name__, type(pyObject).__name__, repr(pyObject)))
 
-        value = valueDecoder(pyObject, asn1Spec, self)
+        value = valueDecoder(pyObject, asn1Spec, self, **options)
 
         if logger:
             logger('decoder %s produced ASN.1 type %s <%s>' % (type(valueDecoder).__name__, type(value).__name__, repr(value)))

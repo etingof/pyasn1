@@ -5,17 +5,22 @@
 # License: http://pyasn1.sf.net/license.html
 #
 import sys
+
 try:
     import unittest2 as unittest
+
 except ImportError:
     import unittest
+
+from tests.base import BaseTestCase
 
 from pyasn1.type import namedtype, univ
 from pyasn1.error import PyAsn1Error
 
 
-class NamedTypeCaseBase(unittest.TestCase):
+class NamedTypeCaseBase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.e = namedtype.NamedType('age', univ.Integer(0))
 
     def testIter(self):
@@ -26,8 +31,10 @@ class NamedTypeCaseBase(unittest.TestCase):
         assert eval(repr(self.e), {'NamedType': namedtype.NamedType, 'Integer': univ.Integer}) == self.e, 'repr() fails'
 
 
-class NamedTypesCaseBase(unittest.TestCase):
+class NamedTypesCaseBase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
+
         self.e = namedtype.NamedTypes(
             namedtype.NamedType('first-name', univ.OctetString('')),
             namedtype.OptionalNamedType('age', univ.Integer(0)),
@@ -35,9 +42,15 @@ class NamedTypesCaseBase(unittest.TestCase):
         )
 
     def testRepr(self):
-        assert eval(repr(self.e), {'NamedTypes': namedtype.NamedTypes, 'NamedType': namedtype.NamedType,
-                                   'OptionalNamedType': namedtype.OptionalNamedType, 'Integer': univ.Integer,
-                                   'OctetString': univ.OctetString}) == self.e, 'repr() fails'
+        assert eval(
+            repr(self.e), {
+                'NamedTypes': namedtype.NamedTypes,
+                'NamedType': namedtype.NamedType,
+                'OptionalNamedType': namedtype.OptionalNamedType,
+                'Integer': univ.Integer,
+                'OctetString': univ.OctetString
+            }
+        ) == self.e, 'repr() fails'
 
     def testContains(self):
         assert 'first-name' in self.e
@@ -104,8 +117,10 @@ class NamedTypesCaseBase(unittest.TestCase):
         assert self.e.getPositionNearType(univ.OctetString.tagSet, 2) == 2
 
 
-class OrderedNamedTypesCaseBase(unittest.TestCase):
+class OrderedNamedTypesCaseBase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
+
         self.e = namedtype.NamedTypes(
             namedtype.NamedType('first-name', univ.OctetString('')),
             namedtype.NamedType('age', univ.Integer(0))
@@ -116,7 +131,7 @@ class OrderedNamedTypesCaseBase(unittest.TestCase):
             'getTypeByPosition() fails'
 
 
-class DuplicateNamedTypesCaseBase(unittest.TestCase):
+class DuplicateNamedTypesCaseBase(BaseTestCase):
     def testDuplicateDefaultTags(self):
         nt = namedtype.NamedTypes(
             namedtype.NamedType('first-name', univ.Any()),
