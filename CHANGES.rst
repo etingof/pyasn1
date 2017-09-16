@@ -1,12 +1,13 @@
 
-Revision 0.3.5, released XX-09-2017
+Revision 0.3.5, released 16-09-2017
 -----------------------------------
 
-- Codecs signatures unified and pass **options through the call chain
+- Codecs signatures unified and pass the options kwargs through the
+  call chain
 - Explicit tag encoding optimized to avoid unnecessary copying
 - End-of-octets sentinel encoding optimized
-- Refactored ASN.1 codecs properties to silently enforce proper length and
-  chunk size encoding modes
+- Refactored ASN.1 codecs properties to silently enforce proper
+  length and chunk size encoding modes
 - Fixed DER encoder to always produce primitive encoding
 - Fixed crash at SequenceOf native decoder
 - Fixed Real.prettyPrint() to fail gracefully on overflow
