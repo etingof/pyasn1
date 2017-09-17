@@ -2,9 +2,12 @@
 Revision 0.4.1, released XX-09-2017
 -----------------------------------
 
-- ANY DEFINED BY clause support implemented
-- Encoders refactored to take either a value (as ASN.1 object)
-  or a Python value plus ASN.1 schema
+- ANY DEFINED BY open ASN.1 type support implemented
+- ASN.1 encoders refactored to take either a ASN.1 object or a
+  built-in Python type plus ASN.1 schema on input
+- ASN.1 decoders modified to accept the `nativeMode` boolean flag
+  to produce either ASN.1 schema instance (the default) or built-in
+  Python types (which is significantly faster)
 
 Revision 0.3.5, released 16-09-2017
 -----------------------------------

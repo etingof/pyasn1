@@ -84,6 +84,32 @@ class IntegerDecoderTestCase(BaseTestCase):
             assert 0, 'wrong tagFormat worked out'
 
 
+class IntegerDecoderNativeModeTestCase(BaseTestCase):
+    def testPosInt(self):
+        value, rest = decoder.decode(
+            ints2octs((2, 1, 12)), nativeMode=True
+        )
+        assert not rest
+        assert value == 12
+        assert isinstance(value, int)
+
+    def testNegInt(self):
+        value, rest = decoder.decode(
+            ints2octs((2, 1, 244)), nativeMode=True
+        )
+        assert not rest
+        assert value == -12
+        assert isinstance(value, int)
+
+    def testZero(self):
+        value, rest = decoder.decode(
+            ints2octs((2, 0)), nativeMode=True
+        )
+        assert not rest
+        assert value == 0
+        assert isinstance(value, int)
+
+
 class BooleanDecoderTestCase(BaseTestCase):
     def testTrue(self):
         assert decoder.decode(ints2octs((1, 1, 1))) == (1, null)
