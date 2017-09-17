@@ -6,27 +6,51 @@
 #
 from pyasn1.type import univ
 from pyasn1.codec.cer import encoder
+from pyasn1 import error
 
 __all__ = ['encode']
 
 
-class SetOfEncoder(encoder.SetOfEncoder):
+class SetEncoder(encoder.SetEncoder):
     @staticmethod
-    def _sortComponents(components):
-        # sort by tags depending on the actual Choice value (dynamic sort)
-        return sorted(components, key=lambda x: isinstance(x, univ.Choice) and x.getComponent().tagSet or x.tagSet)
+    def _componentSortKey(componentAndType):
+        """Sort SET components by tag
+
+        Sort depending on the actual Choice value (dynamic sort)
+        """
+        component, asn1Spec = componentAndType
+
+        if asn1Spec is None:
+            compType = component
+        else:
+            compType = asn1Spec
+
+        if compType.typeId == univ.Choice.typeId:
+            if asn1Spec is None:
+                return component.getComponent().tagSet
+            else:
+                # TODO: move out of sorting key function
+                names = [namedType.name for namedType in asn1Spec.componentType.namedTypes
+                         if namedType.name in component]
+                if len(names) != 1:
+                    raise error.PyAsn1Error(
+                        '%s components for Choice at %r' % (len(names) and 'Multiple ' or 'None ', component))
+
+                return asn1Spec[names[0]].tagSet
+
+        else:
+            return compType.tagSet
 
 tagMap = encoder.tagMap.copy()
 tagMap.update({
     # Set & SetOf have same tags
-    univ.SetOf.tagSet: SetOfEncoder()
+    univ.Set.tagSet: SetEncoder()
 })
 
 typeMap = encoder.typeMap.copy()
 typeMap.update({
     # Set & SetOf have same tags
-    univ.Set.typeId: SetOfEncoder(),
-    univ.SetOf.typeId: SetOfEncoder()
+    univ.Set.typeId: SetEncoder()
 })
 
 

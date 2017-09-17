@@ -47,17 +47,20 @@ class AbstractItemEncoder(object):
                 raise error.PyAsn1Error('Length octets overflow (%d)' % substrateLen)
             return (0x80 | substrateLen,) + substrate
 
-    def encodeValue(self, value, encodeFun, **options):
+    def encodeValue(self, value, asn1Spec, encodeFun, **options):
         raise error.PyAsn1Error('Not implemented')
 
-    def encode(self, value, encodeFun, **options):
+    def encode(self, value, asn1Spec=None, encodeFun=None, **options):
 
-        tagSet = value.tagSet
+        if asn1Spec is None:
+            tagSet = value.tagSet
+        else:
+            tagSet = asn1Spec.tagSet
 
         # untagged item?
         if not tagSet:
             substrate, isConstructed, isOctets = self.encodeValue(
-                value, encodeFun, **options
+                value, asn1Spec, encodeFun, **options
             )
             return substrate
 
@@ -70,7 +73,7 @@ class AbstractItemEncoder(object):
             # base tag?
             if not idx:
                 substrate, isConstructed, isOctets = self.encodeValue(
-                    value, encodeFun, **options
+                    value, asn1Spec, encodeFun, **options
                 )
 
                 if options.get('ifNotEmpty', False) and not substrate:
@@ -95,14 +98,14 @@ class AbstractItemEncoder(object):
 
 
 class EndOfOctetsEncoder(AbstractItemEncoder):
-    def encodeValue(self, value, encodeFun, **options):
+    def encodeValue(self, value, asn1Spec, encodeFun, **options):
         return null, False, True
 
 
 class BooleanEncoder(AbstractItemEncoder):
     supportIndefLenMode = False
 
-    def encodeValue(self, value, encodeFun, **options):
+    def encodeValue(self, value, asn1Spec, encodeFun, **options):
         return value and (1,) or (0,), False, False
 
 
@@ -110,7 +113,7 @@ class IntegerEncoder(AbstractItemEncoder):
     supportIndefLenMode = False
     supportCompactZero = False
 
-    def encodeValue(self, value, encodeFun, **options):
+    def encodeValue(self, value, asn1Spec, encodeFun, **options):
         if value == 0:
             # de-facto way to encode zero
             if self.supportCompactZero:
@@ -122,7 +125,10 @@ class IntegerEncoder(AbstractItemEncoder):
 
 
 class BitStringEncoder(AbstractItemEncoder):
-    def encodeValue(self, value, encodeFun, **options):
+    def encodeValue(self, value, asn1Spec, encodeFun, **options):
+        if asn1Spec is not None:
+            value = asn1Spec.clone(value)
+
         valueLength = len(value)
         if valueLength % 8:
             alignedValue = value << (8 - valueLength % 8)
@@ -134,9 +140,11 @@ class BitStringEncoder(AbstractItemEncoder):
             substrate = alignedValue.asOctets()
             return int2oct(len(substrate) * 8 - valueLength) + substrate, False, True
 
+        tagSet = value.tagSet
+
         # strip off explicit tags
         alignedValue = alignedValue.clone(
-            tagSet=tag.TagSet(value.tagSet.baseTag, value.tagSet.baseTag)
+            tagSet=tag.TagSet(tagSet.baseTag, tagSet.baseTag)
         )
 
         stop = 0
@@ -144,20 +152,25 @@ class BitStringEncoder(AbstractItemEncoder):
         while stop < valueLength:
             start = stop
             stop = min(start + maxChunkSize * 8, valueLength)
-            substrate += encodeFun(alignedValue[start:stop], **options)
+            substrate += encodeFun(alignedValue[start:stop], asn1Spec, **options)
 
         return substrate, True, True
 
 
 class OctetStringEncoder(AbstractItemEncoder):
-    def encodeValue(self, value, encodeFun, **options):
+    def encodeValue(self, value, asn1Spec, encodeFun, **options):
+        if asn1Spec is not None:
+            value = asn1Spec.clone(value)
+
         maxChunkSize = options.get('maxChunkSize', 0)
         if not maxChunkSize or len(value) <= maxChunkSize:
             return value.asOctets(), False, True
 
         else:
+            tagSet = value.tagSet
+
             # will strip off explicit tags
-            baseTagSet = tag.TagSet(value.tagSet.baseTag, value.tagSet.baseTag)
+            baseTagSet = tag.TagSet(tagSet.baseTag, tagSet.baseTag)
 
             pos = 0
             substrate = null
@@ -166,7 +179,8 @@ class OctetStringEncoder(AbstractItemEncoder):
                                     tagSet=baseTagSet)
                 if not chunk:
                     break
-                substrate += encodeFun(chunk, **options)
+
+                substrate += encodeFun(chunk, asn1Spec, **options)
                 pos += maxChunkSize
 
             return substrate, True, True
@@ -175,14 +189,17 @@ class OctetStringEncoder(AbstractItemEncoder):
 class NullEncoder(AbstractItemEncoder):
     supportIndefLenMode = False
 
-    def encodeValue(self, value, encodeFun, **options):
+    def encodeValue(self, value, asn1Spec, encodeFun, **options):
         return null, False, True
 
 
 class ObjectIdentifierEncoder(AbstractItemEncoder):
     supportIndefLenMode = False
 
-    def encodeValue(self, value, encodeFun, **options):
+    def encodeValue(self, value, asn1Spec, encodeFun, **options):
+        if asn1Spec is not None:
+            value = asn1Spec.clone(value)
+
         oid = value.asTuple()
 
         # Build the first pair
@@ -280,7 +297,10 @@ class RealEncoder(AbstractItemEncoder):
                 encbase = encBase[i]
         return sign, m, encbase, e
 
-    def encodeValue(self, value, encodeFun, **options):
+    def encodeValue(self, value, asn1Spec, encodeFun, **options):
+        if asn1Spec is not None:
+            value = asn1Spec.clone(value)
+
         if value.isPlusInf:
             return (0x40,), False, False
         if value.isMinusInf:
@@ -351,53 +371,113 @@ class RealEncoder(AbstractItemEncoder):
 
 
 class SequenceEncoder(AbstractItemEncoder):
-    def encodeValue(self, value, encodeFun, **options):
-        value.verifySizeSpec()
+    omitEmptyOptionals = False
 
-        namedTypes = value.componentType
+    # TODO: handling three flavors of input is too much -- split over codecs
+
+    def encodeValue(self, value, asn1Spec, encodeFun, **options):
+
         substrate = null
 
-        idx = len(value)
-        while idx > 0:
-            idx -= 1
-            if namedTypes:
-                namedType = namedTypes[idx]
-                if namedType.isOptional and not value[idx].isValue:
+        if asn1Spec is None:
+            # instance of ASN.1 schema
+            value.verifySizeSpec()
+
+            namedTypes = value.componentType
+
+            for idx, component in enumerate(value.values()):
+                if namedTypes:
+                    namedType = namedTypes[idx]
+
+                    if namedType.isOptional and not component.isValue:
+                            continue
+
+                    if namedType.isDefaulted and component == namedType.asn1Object:
+                            continue
+
+                    if self.omitEmptyOptionals:
+                        options.update(ifNotEmpty=namedType.isOptional)
+
+                chunk = encodeFun(component, asn1Spec, **options)
+
+                # wrap open type blob if needed
+                if namedTypes and namedType.openType:
+                    wrapType = namedType.asn1Object
+                    if wrapType.tagSet and not wrapType.isSameTypeWith(component):
+                        chunk = encodeFun(chunk, wrapType, **options)
+
+                substrate += chunk
+
+        else:
+            # bare Python value + ASN.1 schema
+            for idx, namedType in enumerate(asn1Spec.componentType.namedTypes):
+
+                try:
+                    component = value[namedType.name]
+
+                except KeyError:
+                    raise error.PyAsn1Error('Component name "%s" not found in %r' % (namedType.name, value))
+
+                if namedType.isOptional and namedType.name not in value:
                     continue
-                if namedType.isDefaulted and value[idx] == namedType.asn1Object:
+
+                if namedType.isDefaulted and component == namedType.asn1Object:
                     continue
 
-            chunk = encodeFun(value[idx], **options)
+                if self.omitEmptyOptionals:
+                    options.update(ifNotEmpty=namedType.isOptional)
 
-            # wrap open type blob if needed
-            if namedTypes and namedType.openType:
-                asn1Spec = namedType.asn1Object
-                if asn1Spec.tagSet and not asn1Spec.isSameTypeWith(value[idx]):
-                    chunk = encodeFun(asn1Spec.clone(chunk), **options)
+                chunk = encodeFun(component, asn1Spec[idx], **options)
 
-            substrate = chunk + substrate
+                # wrap open type blob if needed
+                if namedType.openType:
+                    wrapType = namedType.asn1Object
+                    if wrapType.tagSet and not wrapType.isSameTypeWith(component):
+                        chunk = encodeFun(chunk, wrapType, **options)
+
+                substrate += chunk
 
         return substrate, True, True
 
 
 class SequenceOfEncoder(AbstractItemEncoder):
-    def encodeValue(self, value, encodeFun, **options):
-        value.verifySizeSpec()
+    def encodeValue(self, value, asn1Spec, encodeFun, **options):
+        if asn1Spec is None:
+            value.verifySizeSpec()
+        else:
+            asn1Spec = asn1Spec.componentType
+
         substrate = null
-        idx = len(value)
-        while idx > 0:
-            idx -= 1
-            substrate = encodeFun(value[idx], **options) + substrate
+
+        for idx, component in enumerate(value):
+            substrate += encodeFun(value[idx], asn1Spec, **options)
+
         return substrate, True, True
 
 
 class ChoiceEncoder(AbstractItemEncoder):
-    def encodeValue(self, value, encodeFun, **options):
-        return encodeFun(value.getComponent(), **options), True, True
+    def encodeValue(self, value, asn1Spec, encodeFun, **options):
+        if asn1Spec is None:
+            component = value.getComponent()
+        else:
+            names = [namedType.name for namedType in asn1Spec.componentType.namedTypes
+                     if namedType.name in value]
+            if len(names) != 1:
+                raise error.PyAsn1Error('%s components for Choice at %r' % (len(names) and 'Multiple ' or 'None ', value))
+
+            name = names[0]
+
+            component = value[name]
+            asn1Spec = asn1Spec[name]
+
+        return encodeFun(component, asn1Spec, **options), True, True
 
 
 class AnyEncoder(OctetStringEncoder):
-    def encodeValue(self, value, encodeFun, **options):
+    def encodeValue(self, value, asn1Spec, encodeFun, **options):
+        if asn1Spec is not None:
+            value = asn1Spec.clone(value)
+
         return value.asOctets(), not options.get('defMode', True), True
 
 
@@ -478,7 +558,16 @@ class Encoder(object):
         self.__tagMap = tagMap
         self.__typeMap = typeMap
 
-    def __call__(self, value, **options):
+    def __call__(self, value, asn1Spec=None, **options):
+        try:
+            if asn1Spec is None:
+                typeId = value.typeId
+            else:
+                typeId = asn1Spec.typeId
+
+        except AttributeError:
+            raise error.PyAsn1Error('Value %r is not ASN.1 type instance '
+                                    'and "asn1Spec" not given' % (value,))
 
         if debug.logger & debug.flagEncoder:
             logger = debug.logger
@@ -486,7 +575,8 @@ class Encoder(object):
             logger = None
 
         if logger:
-            logger('encoder called in %sdef mode, chunk size %s for type %s, value:\n%s' % (not options.get('defMode', True) and 'in' or '', options.get('maxChunkSize', 0), value.prettyPrintType(), value.prettyPrint()))
+            logger('encoder called in %sdef mode, chunk size %s for '
+                   'type %s, value:\n%s' % (not options.get('defMode', True) and 'in' or '', options.get('maxChunkSize', 0), asn1Spec is None and value.prettyPrintType() or asn1Spec.prettyPrintType(), value))
 
         if self.fixedDefLengthMode is not None:
             options.update(defMode=self.fixedDefLengthMode)
@@ -494,28 +584,36 @@ class Encoder(object):
         if self.fixedChunkSize is not None:
             options.update(maxChunkSize=self.fixedChunkSize)
 
-        tagSet = value.tagSet
 
         try:
-            concreteEncoder = self.__typeMap[value.typeId]
+            concreteEncoder = self.__typeMap[typeId]
+
+            if logger:
+                logger('using value codec %s chosen by type ID %s' % (concreteEncoder.__class__.__name__, typeId))
 
         except KeyError:
+            if asn1Spec is None:
+                tagSet = value.tagSet
+            else:
+                tagSet = asn1Spec.tagSet
+
             # use base type for codec lookup to recover untagged types
-            baseTagSet = tag.TagSet(value.tagSet.baseTag, value.tagSet.baseTag)
+            baseTagSet = tag.TagSet(tagSet.baseTag, tagSet.baseTag)
 
             try:
                 concreteEncoder = self.__tagMap[baseTagSet]
 
             except KeyError:
-                raise error.PyAsn1Error('No encoder for %s' % (value,))
+                raise error.PyAsn1Error('No encoder for %r (%s)' % (value, tagSet))
 
-        if logger:
-            logger('using value codec %s chosen by %s' % (concreteEncoder.__class__.__name__, tagSet))
+            if logger:
+                logger('using value codec %s chosen by tagSet %s' % (concreteEncoder.__class__.__name__, tagSet))
 
-        substrate = concreteEncoder.encode(value, self, **options)
+        substrate = concreteEncoder.encode(value, asn1Spec, self, **options)
 
         if logger:
             logger('codec %s built %s octets of substrate: %s\nencoder completed' % (concreteEncoder, len(substrate), debug.hexdump(substrate)))
+
         return substrate
 
 #: Turns ASN.1 object into BER octet stream.

@@ -3,6 +3,8 @@ Revision 0.4.1, released XX-09-2017
 -----------------------------------
 
 - ANY DEFINED BY clause support implemented
+- Encoders refactored to take either a value (as ASN.1 object)
+  or a Python value plus ASN.1 schema
 
 Revision 0.3.5, released 16-09-2017
 -----------------------------------

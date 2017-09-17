@@ -1498,11 +1498,7 @@ class Real(base.AbstractSimpleAsn1Item):
         if self.isInf:
             return self.prettyOut(self._value)
         else:
-            try:
-                return str(float(self))
-
-            except OverflowError:
-                return '<overflow>'
+            return str(float(self))
 
     @property
     def isPlusInf(self):
@@ -1534,7 +1530,11 @@ class Real(base.AbstractSimpleAsn1Item):
         return self._value in self._inf
 
     def __str__(self):
-        return str(float(self))
+        try:
+            return str(float(self))
+
+        except OverflowError:
+            return '<overflow>'
 
     def __add__(self, value):
         return self.clone(float(self) + value)
@@ -2709,13 +2709,6 @@ class Choice(Set):
         if oldIdx is not None and oldIdx != idx:
             self._componentValues[oldIdx] = None
         return self
-
-    @property
-    def minTagSet(self):
-        if self.tagSet:
-            return self.tagSet
-        else:
-            return self.componentType.minTagSet
 
     @property
     def effectiveTagSet(self):
