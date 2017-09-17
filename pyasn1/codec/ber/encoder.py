@@ -6,7 +6,7 @@
 #
 from pyasn1.type import tag, univ, char, useful
 from pyasn1.codec.ber import eoo
-from pyasn1.compat.octets import int2oct, oct2int, ints2octs, null, str2octs
+from pyasn1.compat.octets import int2oct, oct2int, ints2octs, null, str2octs, isOctetsType
 from pyasn1.compat.integer import to_bytes
 from pyasn1 import debug, error
 
@@ -127,6 +127,7 @@ class IntegerEncoder(AbstractItemEncoder):
 class BitStringEncoder(AbstractItemEncoder):
     def encodeValue(self, value, asn1Spec, encodeFun, **options):
         if asn1Spec is not None:
+            # TODO: try to avoid ASN.1 schema instantiation
             value = asn1Spec.clone(value)
 
         valueLength = len(value)
@@ -159,24 +160,29 @@ class BitStringEncoder(AbstractItemEncoder):
 
 class OctetStringEncoder(AbstractItemEncoder):
     def encodeValue(self, value, asn1Spec, encodeFun, **options):
-        if asn1Spec is not None:
-            value = asn1Spec.clone(value)
+        if asn1Spec is None:
+            # will strip off explicit tags
+            tagSet = value.tagSet
+            asn1Spec = value.clone(tagSet=tag.TagSet(tagSet.baseTag, tagSet.baseTag))
+
+            value = value.asOctets()
+
+        elif not isOctetsType(value):
+            # will strip off explicit tags
+            tagSet = asn1Spec.tagSet
+            asn1Spec = asn1Spec.clone(tagSet=tag.TagSet(tagSet.baseTag, tagSet.baseTag))
+
+            value = asn1Spec.clone(value).asOctets()
 
         maxChunkSize = options.get('maxChunkSize', 0)
         if not maxChunkSize or len(value) <= maxChunkSize:
-            return value.asOctets(), False, True
+            return value, False, True
 
         else:
-            tagSet = value.tagSet
-
-            # will strip off explicit tags
-            baseTagSet = tag.TagSet(tagSet.baseTag, tagSet.baseTag)
-
             pos = 0
             substrate = null
             while True:
-                chunk = value.clone(value[pos:pos + maxChunkSize],
-                                    tagSet=baseTagSet)
+                chunk = value[pos:pos + maxChunkSize]
                 if not chunk:
                     break
 
@@ -475,10 +481,12 @@ class ChoiceEncoder(AbstractItemEncoder):
 
 class AnyEncoder(OctetStringEncoder):
     def encodeValue(self, value, asn1Spec, encodeFun, **options):
-        if asn1Spec is not None:
-            value = asn1Spec.clone(value)
+        if asn1Spec is None:
+            value = value.asOctets()
+        elif not isOctetsType(value):
+            value = asn1Spec.clone(value).asOctets()
 
-        return value.asOctets(), not options.get('defMode', True), True
+        return value, not options.get('defMode', True), True
 
 
 tagMap = {
