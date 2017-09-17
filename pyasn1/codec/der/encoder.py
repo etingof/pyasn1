@@ -65,8 +65,12 @@ class Encoder(encoder.Encoder):
 #:
 #: Parameters
 #: ----------
-#  value: any pyasn1 object (e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative)
-#:     A pyasn1 object to encode
+#: value: either a Python or pyasn1 object (e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative)
+#:     A Python or pyasn1 object to encode. If Python object is given, `asnSpec`
+#:     parameter is required to guide the encoding process.
+#:
+#: asn1Spec:
+#:     Optional ASN.1 schema or value object e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
 #:
 #: defMode: :py:class:`bool`
 #:     If `False`, produces indefinite length encoding
