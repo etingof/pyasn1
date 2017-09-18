@@ -1,4 +1,10 @@
 
+Revision 0.3.6, released XX-09-2017
+-----------------------------------
+
+- The __getitem__/__setitem__ behavior of Set/Sequence and SetOf/SequenceOf
+  objects aligned with the canonical Mapping and Sequence protocols in part
+
 Revision 0.3.5, released 16-09-2017
 -----------------------------------
 

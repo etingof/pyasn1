@@ -896,6 +896,37 @@ class SequenceOf(BaseTestCase):
         assert self.s1.clone().setComponents('abc', 'def') == \
                self.s1.setComponentByPosition(0, 'abc').setComponentByPosition(1, 'def')
 
+    def testGetItem(self):
+        s = self.s1.clone()
+        s.append('xxx')
+        assert s[0]
+
+        try:
+            s[2]
+
+        except IndexError:
+            pass
+
+        else:
+            assert False, 'IndexError not raised'
+
+        # this is a deviation from standart sequence protocol
+        assert not s[1]
+
+    def testSetItem(self):
+        s = self.s1.clone()
+        s.append('xxx')
+
+        try:
+
+            s[2] = 'xxx'
+
+        except IndexError:
+            pass
+
+        else:
+            assert False, 'IndexError not raised'
+
     def testAppend(self):
         self.s1.clear()
         self.s1.setComponentByPosition(0, univ.OctetString('abc'))
@@ -1071,6 +1102,54 @@ class Sequence(BaseTestCase):
         assert s[0] == univ.OctetString('')
         assert s[2] == univ.Integer(34)
 
+    def testGetItem(self):
+        s = self.s1.clone()
+        s['name'] = 'xxx'
+        assert s['name']
+        assert s[0]
+
+        try:
+            s['xxx']
+
+        except KeyError:
+            pass
+
+        else:
+            assert False, 'KeyError not raised'
+
+        try:
+            s[100]
+
+        except IndexError:
+            pass
+
+        else:
+            assert False, 'IndexError not raised'
+
+    def testSetItem(self):
+        s = self.s1.clone()
+        s['name'] = 'xxx'
+
+        try:
+
+            s['xxx'] = 'xxx'
+
+        except KeyError:
+            pass
+
+        else:
+            assert False, 'KeyError not raised'
+
+        try:
+
+            s[100] = 'xxx'
+
+        except IndexError:
+            pass
+
+        else:
+            assert False, 'IndexError not raised'
+
     def testIter(self):
         assert list(self.s1) == ['name', 'nick', 'age']
 
@@ -1118,6 +1197,37 @@ class Sequence(BaseTestCase):
 
 class SequenceWithoutSchema(BaseTestCase):
 
+    def testGetItem(self):
+        s = univ.Sequence()
+        s.setComponentByPosition(0, univ.OctetString('abc'))
+        s[0] = 'abc'
+        assert s['field-0']
+        assert s[0]
+
+        try:
+            s['field-1']
+
+        except KeyError:
+            pass
+
+        else:
+            assert False, 'KeyError not raised'
+
+    def testSetItem(self):
+        s = univ.Sequence()
+        s.setComponentByPosition(0, univ.OctetString('abc'))
+        s['field-0'] = 'xxx'
+
+        try:
+
+            s['field-1'] = 'xxx'
+
+        except KeyError:
+            pass
+
+        else:
+            assert False, 'KeyError not raised'
+
     def testIter(self):
         s = univ.Sequence()
         s.setComponentByPosition(0, univ.OctetString('abc'))
@@ -1157,7 +1267,7 @@ class SequenceWithoutSchema(BaseTestCase):
         assert list(s.values()) == [str2octs('def'), str2octs('ghi')]
         try:
             s['field-2'] = univ.OctetString('xxx')
-        except error.PyAsn1Error:
+        except KeyError:
             pass
         else:
             assert False, 'unknown field at schema-less object tolerated'
