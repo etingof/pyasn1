@@ -5,18 +5,20 @@
 # License: http://pyasn1.sf.net/license.html
 #
 import sys
+
 try:
     import unittest2 as unittest
 except ImportError:
     import unittest
 
+from tests.base import BaseTestCase
+
 from pyasn1.type import namedtype, univ
 from pyasn1.codec.der import encoder
 from pyasn1.compat.octets import ints2octs
-from pyasn1.error import PyAsn1Error
 
 
-class OctetStringEncoderTestCase(unittest.TestCase):
+class OctetStringEncoderTestCase(BaseTestCase):
     def testDefModeShort(self):
         assert encoder.encode(
             univ.OctetString('Quick brown fox')
@@ -28,7 +30,7 @@ class OctetStringEncoderTestCase(unittest.TestCase):
         ) == ints2octs((4, 130, 39, 16) + (81,) * 10000)
 
 
-class BitStringEncoderTestCase(unittest.TestCase):
+class BitStringEncoderTestCase(BaseTestCase):
     def testDefModeShort(self):
         assert encoder.encode(
             univ.BitString((1,))
@@ -40,8 +42,10 @@ class BitStringEncoderTestCase(unittest.TestCase):
         ) == ints2octs((3, 130, 39, 17, 0) + (255,) * 10000)
 
 
-class SetOfEncoderTestCase(unittest.TestCase):
+class SetOfEncoderTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
+
         self.s = univ.SetOf(componentType=univ.OctetString())
 
     def testDefMode1(self):
@@ -72,12 +76,15 @@ class SetOfEncoderTestCase(unittest.TestCase):
 
         assert encoder.encode(self.s) == ints2octs((49, 6, 4, 1, 97, 4, 1, 98))
 
-class SetWithChoiceEncoderTestCase(unittest.TestCase):
+class SetWithChoiceEncoderTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
+
         c = univ.Choice(componentType=namedtype.NamedTypes(
             namedtype.NamedType('name', univ.OctetString()),
             namedtype.NamedType('amount', univ.Boolean()))
         )
+
         self.s = univ.Set(componentType=namedtype.NamedTypes(
             namedtype.NamedType('value', univ.Integer(5)),
             namedtype.NamedType('status', c))
@@ -94,8 +101,10 @@ class SetWithChoiceEncoderTestCase(unittest.TestCase):
         assert encoder.encode(self.s) == ints2octs((49, 6, 1, 1, 255, 2, 1, 5))
 
 
-class NestedOptionalSequenceEncoderTestCase(unittest.TestCase):
+class NestedOptionalSequenceEncoderTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
+
         inner = univ.Sequence(
             componentType=namedtype.NamedTypes(
                 namedtype.OptionalNamedType('first-name', univ.OctetString()),
@@ -183,8 +192,10 @@ class NestedOptionalSequenceEncoderTestCase(unittest.TestCase):
         assert encoder.encode(s) == ints2octs((48, 5, 48, 3, 2, 1, 123))
 
 
-class NestedOptionalChoiceEncoderTestCase(unittest.TestCase):
+class NestedOptionalChoiceEncoderTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
+
         layer3 = univ.Sequence(
             componentType=namedtype.NamedTypes(
                 namedtype.OptionalNamedType('first-name', univ.OctetString()),
@@ -244,8 +255,10 @@ class NestedOptionalChoiceEncoderTestCase(unittest.TestCase):
         assert encoder.encode(s) == ints2octs((48, 0))
 
 
-class NestedOptionalSequenceOfEncoderTestCase(unittest.TestCase):
+class NestedOptionalSequenceOfEncoderTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
+
         layer2 = univ.SequenceOf(
             componentType=univ.OctetString()
         )

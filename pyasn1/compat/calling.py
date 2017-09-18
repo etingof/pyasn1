@@ -12,7 +12,8 @@ __all__ = ['callable']
 if (2, 7) < version_info[:2] < (3, 2):
     import collections
 
-    callable = lambda x: isinstance(x, collections.Callable)
+    def callable(x):
+        return isinstance(x, collections.Callable)
 
 else:
 

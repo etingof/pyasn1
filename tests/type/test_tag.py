@@ -5,17 +5,21 @@
 # License: http://pyasn1.sf.net/license.html
 #
 import sys
+
 try:
     import unittest2 as unittest
 
 except ImportError:
     import unittest
 
+from tests.base import BaseTestCase
+
 from pyasn1.type import tag
 
 
-class TagTestCaseBase(unittest.TestCase):
+class TagTestCaseBase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.t1 = tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 3)
         self.t2 = tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 3)
 
@@ -38,11 +42,14 @@ class TagCmpTestCase(TagTestCaseBase):
                self.t1[2] == self.t2[2], 'tag sequence protocol fails'
 
 
-class TagSetTestCaseBase(unittest.TestCase):
+class TagSetTestCaseBase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
+
         self.ts1 = tag.initTagSet(
             tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 12)
         )
+
         self.ts2 = tag.initTagSet(
             tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 12)
         )

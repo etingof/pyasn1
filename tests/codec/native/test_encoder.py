@@ -5,28 +5,33 @@
 # License: http://pyasn1.sf.net/license.html
 #
 import sys
+
 try:
     import unittest2 as unittest
 except ImportError:
     import unittest
 
-from pyasn1.type import tag, namedtype, univ
+from tests.base import BaseTestCase
+
+from pyasn1.type import namedtype, univ
 from pyasn1.codec.native import encoder
 from pyasn1.compat.octets import str2octs
 from pyasn1.error import PyAsn1Error
 
 
-class BadAsn1SpecTestCase(unittest.TestCase):
+class BadAsn1SpecTestCase(BaseTestCase):
     def testBadValueType(self):
         try:
             encoder.encode('not an Asn1Item')
+
         except PyAsn1Error:
             pass
+
         else:
             assert 0, 'Invalid value type accepted'
 
 
-class IntegerEncoderTestCase(unittest.TestCase):
+class IntegerEncoderTestCase(BaseTestCase):
     def testPosInt(self):
         assert encoder.encode(univ.Integer(12)) == 12
 
@@ -34,7 +39,7 @@ class IntegerEncoderTestCase(unittest.TestCase):
         assert encoder.encode(univ.Integer(-12)) == -12
 
 
-class BooleanEncoderTestCase(unittest.TestCase):
+class BooleanEncoderTestCase(BaseTestCase):
     def testTrue(self):
         assert encoder.encode(univ.Boolean(1)) is True
 
@@ -42,33 +47,35 @@ class BooleanEncoderTestCase(unittest.TestCase):
         assert encoder.encode(univ.Boolean(0)) is False
 
 
-class BitStringEncoderTestCase(unittest.TestCase):
+class BitStringEncoderTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.b = univ.BitString((1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1))
 
     def testValue(self):
         assert encoder.encode(self.b) == '101010011000101'
 
 
-class OctetStringEncoderTestCase(unittest.TestCase):
+class OctetStringEncoderTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.o = univ.OctetString('Quick brown fox')
 
     def testValue(self):
         assert encoder.encode(self.o) == str2octs('Quick brown fox')
 
 
-class NullEncoderTestCase(unittest.TestCase):
+class NullEncoderTestCase(BaseTestCase):
     def testNull(self):
         assert encoder.encode(univ.Null('')) is None
 
 
-class ObjectIdentifierEncoderTestCase(unittest.TestCase):
+class ObjectIdentifierEncoderTestCase(BaseTestCase):
     def testOne(self):
         assert encoder.encode(univ.ObjectIdentifier((1, 3, 6, 0, 12345))) == '1.3.6.0.12345'
 
 
-class RealEncoderTestCase(unittest.TestCase):
+class RealEncoderTestCase(BaseTestCase):
     def testChar(self):
         assert encoder.encode(univ.Real((123, 10, 11))) == 1.23e+13
 
@@ -79,8 +86,10 @@ class RealEncoderTestCase(unittest.TestCase):
         assert encoder.encode(univ.Real('-inf')) == float('-inf')
 
 
-class SequenceEncoderTestCase(unittest.TestCase):
+class SequenceEncoderTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
+
         self.s = univ.Sequence(componentType=namedtype.NamedTypes(
             namedtype.NamedType('place-holder', univ.Null('')),
             namedtype.OptionalNamedType('first-name', univ.OctetString('')),
@@ -95,13 +104,17 @@ class SequenceEncoderTestCase(unittest.TestCase):
         assert encoder.encode(s) == {'place-holder': None, 'first-name': str2octs('abc'), 'age': 123}
 
 
-class ChoiceEncoderTestCase(unittest.TestCase):
+class ChoiceEncoderTestCase(BaseTestCase):
     def setUp(self):
-        self.s = univ.Choice(componentType=namedtype.NamedTypes(
-            namedtype.NamedType('place-holder', univ.Null('')),
-            namedtype.NamedType('number', univ.Integer(0)),
-            namedtype.NamedType('string', univ.OctetString())
-        ))
+        BaseTestCase.setUp(self)
+
+        self.s = univ.Choice(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType('place-holder', univ.Null('')),
+                namedtype.NamedType('number', univ.Integer(0)),
+                namedtype.NamedType('string', univ.OctetString())
+           )
+        )
 
     def testEmpty(self):
         try:
@@ -116,8 +129,9 @@ class ChoiceEncoderTestCase(unittest.TestCase):
         assert encoder.encode(self.s) == {'place-holder': None}
 
 
-class AnyEncoderTestCase(unittest.TestCase):
+class AnyEncoderTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.s = univ.Any(encoder.encode(univ.OctetString('fox')))
 
     def testSimple(self):

@@ -1,15 +1,23 @@
 
-Revision 0.3.5, released XX-09-2017
+Revision 0.3.6, released XX-09-2017
 -----------------------------------
 
-- Codecs signatures unified and pass **options through the call chain
-- Explicit tag encoding optimized to avoid unnecessary copying
-- End-of-octets sentinel encoding optimized
-- Refactored ASN.1 codecs properties to silently enforce proper length and
-  chunk size encoding modes
 - The __getitem__/__setitem__ behavior of Set/Sequence and SetOf/SequenceOf
   objects aligned with the canonical Mapping and Sequence protocols in part
-  of the exceptions types being raised.
+
+Revision 0.3.5, released 16-09-2017
+-----------------------------------
+
+- Codecs signatures unified and pass the options kwargs through the
+  call chain
+- Explicit tag encoding optimized to avoid unnecessary copying
+- End-of-octets sentinel encoding optimized
+- Refactored ASN.1 codecs properties to silently enforce proper
+  length and chunk size encoding modes
+- Fixed DER encoder to always produce primitive encoding
+- Fixed crash at SequenceOf native decoder
+- Fixed Real.prettyPrint() to fail gracefully on overflow
+- Fixed a couple of crashes when debug mode is enabled
 
 Revision 0.3.4, released 07-09-2017
 -----------------------------------

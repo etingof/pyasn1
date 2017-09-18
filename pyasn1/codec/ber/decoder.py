@@ -635,6 +635,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
         return asn1Object, substrate
 
+
 class SequenceOrSequenceOfDecoder(UniversalConstructedTypeDecoder):
     protoRecordComponent = univ.Sequence()
     protoSequenceComponent = univ.SequenceOf()
@@ -737,7 +738,7 @@ class AnyDecoder(AbstractSimpleDecoder):
                      decodeFun=None, substrateFun=None,
                      **options):
         if asn1Spec is None or asn1Spec is not None and tagSet != asn1Spec.tagSet:
-            fullSubstrate=options['fullSubstrate']
+            fullSubstrate = options['fullSubstrate']
 
             # untagged Any container, recover inner header substrate
             length += len(fullSubstrate) - len(substrate)
@@ -759,7 +760,7 @@ class AnyDecoder(AbstractSimpleDecoder):
             # tagged Any type -- consume header substrate
             header = null
         else:
-            fullSubstrate=options['fullSubstrate']
+            fullSubstrate = options['fullSubstrate']
 
             # untagged Any, recover header substrate
             header = fullSubstrate[:-len(substrate)]
@@ -1159,7 +1160,7 @@ class Decoder(object):
                         **options
                     )
                 if logger:
-                    logger('codec %s yields type %s, value:\n%s\n...remaining substrate is: %s' % (concreteDecoder.__class__.__name__, value.__class__.__name__, value.prettyPrint(), substrate and debug.hexdump(substrate) or '<none>'))
+                    logger('codec %s yields type %s, value:\n%s\n...remaining substrate is: %s' % (concreteDecoder.__class__.__name__, value.__class__.__name__, isinstance(value, base.Asn1Item) and value.prettyPrint() or value, substrate and debug.hexdump(substrate) or '<none>'))
                 state = stStop
                 break
             if state is stTryAsExplicitTag:

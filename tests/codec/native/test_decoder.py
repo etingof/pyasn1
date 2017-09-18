@@ -5,17 +5,20 @@
 # License: http://pyasn1.sf.net/license.html
 #
 import sys
+
 try:
     import unittest2 as unittest
 except ImportError:
     import unittest
 
-from pyasn1.type import tag, namedtype, univ, char
+from tests.base import BaseTestCase
+
+from pyasn1.type import namedtype, univ
 from pyasn1.codec.native import decoder
 from pyasn1.error import PyAsn1Error
 
 
-class BadAsn1SpecTestCase(unittest.TestCase):
+class BadAsn1SpecTestCase(BaseTestCase):
     def testBadSpec(self):
         try:
             decoder.decode('', asn1Spec='not an Asn1Item')
@@ -25,7 +28,7 @@ class BadAsn1SpecTestCase(unittest.TestCase):
             assert 0, 'Invalid asn1Spec accepted'
 
 
-class IntegerDecoderTestCase(unittest.TestCase):
+class IntegerDecoderTestCase(BaseTestCase):
     def testPosInt(self):
         assert decoder.decode(12, asn1Spec=univ.Integer()) == univ.Integer(12)
 
@@ -33,7 +36,7 @@ class IntegerDecoderTestCase(unittest.TestCase):
         assert decoder.decode(-12, asn1Spec=univ.Integer()) == univ.Integer(-12)
 
 
-class BooleanDecoderTestCase(unittest.TestCase):
+class BooleanDecoderTestCase(BaseTestCase):
     def testTrue(self):
         assert decoder.decode(True, asn1Spec=univ.Boolean()) == univ.Boolean(True)
 
@@ -41,33 +44,35 @@ class BooleanDecoderTestCase(unittest.TestCase):
         assert decoder.decode(False, asn1Spec=univ.Boolean()) == univ.Boolean(False)
 
 
-class BitStringDecoderTestCase(unittest.TestCase):
+class BitStringDecoderTestCase(BaseTestCase):
     def testSimple(self):
         assert decoder.decode('11111111', asn1Spec=univ.BitString()) == univ.BitString(hexValue='ff')
 
 
-class OctetStringDecoderTestCase(unittest.TestCase):
+class OctetStringDecoderTestCase(BaseTestCase):
     def testSimple(self):
         assert decoder.decode('Quick brown fox', asn1Spec=univ.OctetString()) == univ.OctetString('Quick brown fox')
 
 
-class NullDecoderTestCase(unittest.TestCase):
+class NullDecoderTestCase(BaseTestCase):
     def testNull(self):
         assert decoder.decode(None, asn1Spec=univ.Null()) == univ.Null()
 
 
-class ObjectIdentifierDecoderTestCase(unittest.TestCase):
+class ObjectIdentifierDecoderTestCase(BaseTestCase):
     def testOne(self):
         assert decoder.decode('1.3.6.11', asn1Spec=univ.ObjectIdentifier()) == univ.ObjectIdentifier('1.3.6.11')
 
 
-class RealDecoderTestCase(unittest.TestCase):
+class RealDecoderTestCase(BaseTestCase):
     def testSimple(self):
         assert decoder.decode(1.33, asn1Spec=univ.Real()) == univ.Real(1.33)
 
 
-class SequenceDecoderTestCase(unittest.TestCase):
+class SequenceDecoderTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
+
         self.s = univ.Sequence(
             componentType=namedtype.NamedTypes(
                 namedtype.NamedType('place-holder', univ.Null()),
@@ -84,8 +89,10 @@ class SequenceDecoderTestCase(unittest.TestCase):
         assert decoder.decode({'place-holder': None, 'first-name': 'xx', 'age': 33}, asn1Spec=self.s) == s
 
 
-class ChoiceDecoderTestCase(unittest.TestCase):
+class ChoiceDecoderTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
+
         self.s = univ.Choice(
             componentType=namedtype.NamedTypes(
                 namedtype.NamedType('place-holder', univ.Null()),
@@ -100,8 +107,10 @@ class ChoiceDecoderTestCase(unittest.TestCase):
         assert decoder.decode({'first-name': 'xx'}, asn1Spec=self.s) == s
 
 
-class AnyDecoderTestCase(unittest.TestCase):
+class AnyDecoderTestCase(BaseTestCase):
     def setUp(self):
+        BaseTestCase.setUp(self)
+
         self.s = univ.Any()
 
     def testSimple(self):
