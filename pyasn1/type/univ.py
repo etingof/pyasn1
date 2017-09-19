@@ -402,6 +402,10 @@ class BitString(base.AbstractSimpleAsn1Item):
     class SizedInteger(SizedIntegerBase):
         bitLength = leadingZeroBits = None
 
+        @classmethod
+        def fromOctetString(cls, value, padding=0):
+            return cls(integer.from_bytes(value) >> padding).setBitLength(len(value) * 8 - padding)
+
         def setBitLength(self, bitLength):
             self.bitLength = bitLength
             self.leadingZeroBits = max(bitLength - integer.bitLength(self), 0)
@@ -412,6 +416,13 @@ class BitString(base.AbstractSimpleAsn1Item):
                 self.setBitLength(integer.bitLength(self))
 
             return self.bitLength
+
+        def __str__(self):
+            binString = binary.bin(self)[2:]
+            return '0' * (len(self) - len(binString)) + binString
+
+        def __lshift__(self, other):
+            return self
 
     def __init__(self, value=noValue, **kwargs):
         if value is noValue or value is None:
@@ -633,8 +644,7 @@ class BitString(base.AbstractSimpleAsn1Item):
     def asBinary(self):
         """Get |ASN.1| value as a text string of bits.
         """
-        binString = binary.bin(self._value)[2:]
-        return '0' * (len(self._value) - len(binString)) + binString
+        return str(self._value)
 
     @classmethod
     def fromHexString(cls, value):
@@ -675,7 +685,7 @@ class BitString(base.AbstractSimpleAsn1Item):
         value: :class:`str` (Py2) or :class:`bytes` (Py3)
             Text string like '\\\\x01\\\\xff' (Py2) or b'\\\\x01\\\\xff' (Py3)
         """
-        return cls(cls.SizedInteger(integer.from_bytes(value) >> padding).setBitLength(len(value) * 8 - padding))
+        return cls(cls.SizedInteger.fromOctetString(value, padding))
 
     def prettyIn(self, value):
         if octets.isStringType(value):
@@ -734,7 +744,7 @@ class BitString(base.AbstractSimpleAsn1Item):
             )
 
     def prettyOut(self, value):
-        return '\'%s\'' % str(self)
+        return "'%s'" % self
 
 
 try:

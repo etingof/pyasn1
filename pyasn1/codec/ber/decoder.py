@@ -38,12 +38,15 @@ class AbstractSimpleDecoder(AbstractDecoder):
 
     def _createComponent(self, asn1Spec, tagSet, value=noValue,
                          nativeMode=False, **options):
-        if nativeMode:
+        if nativeMode and value is not noValue:
             return value
-        if asn1Spec is None:
+
+        elif asn1Spec is None:
             return self.protoComponent.clone(value, tagSet=tagSet)
+
         elif value is noValue:
             return asn1Spec
+
         else:
             return asn1Spec.clone(value)
 
@@ -119,61 +122,103 @@ class BooleanDecoder(IntegerDecoder):
         if nativeMode:
             return value and True or False
 
-        return IntegerDecoder._createComponent(self, asn1Spec, tagSet, value and 1 or 0, **options)
+        return IntegerDecoder._createComponent(self, asn1Spec, tagSet,
+                                               value and 1 or 0, nativeMode, **options)
 
 
 class BitStringDecoder(AbstractSimpleDecoder):
     protoComponent = univ.BitString(())
     supportConstructedForm = True
 
+    def _createComponent(self, asn1Spec, tagSet, value=noValue,
+                         nativeMode=False, **options):
+        if nativeMode and value is not noValue:
+            return str(value)
+
+        return AbstractSimpleDecoder._createComponent(self, asn1Spec, tagSet, value,
+                                                      nativeMode, **options)
+
     def valueDecoder(self, substrate, asn1Spec,
                      tagSet=None, length=None, state=None,
                      decodeFun=None, substrateFun=None,
                      **options):
         head, tail = substrate[:length], substrate[length:]
+
+        if substrateFun:
+            asn1Object = self._createComponent(asn1Spec, tagSet, **options)
+            return substrateFun(asn1Object, substrate, length)
+
         if tagSet[0].tagFormat == tag.tagFormatSimple:  # XXX what tag to check?
             if not head:
                 raise error.PyAsn1Error('Empty substrate')
+
             trailingBits = oct2int(head[0])
             if trailingBits > 7:
                 raise error.PyAsn1Error(
                     'Trailing bits overflow %s' % trailingBits
                 )
+
             head = head[1:]
-            value = self.protoComponent.fromOctetString(head, trailingBits)
+            value = univ.BitString.SizedInteger.fromOctetString(head, trailingBits)
+
             return self._createComponent(asn1Spec, tagSet, value, **options), tail
 
         if not self.supportConstructedForm:
             raise error.PyAsn1Error('Constructed encoding form prohibited at %s' % self.__class__.__name__)
 
-        bitString = self._createComponent(asn1Spec, tagSet, **options)
+        # All inner fragments are of the same type, treat them as octet string
+        # TODO: nested constructed encoding won't work
+        substrateFun = self.substrateCollector
 
-        if substrateFun:
-            return substrateFun(bitString, substrate, length)
+        bitString = univ.BitString.SizedInteger()
 
         while head:
-            component, head = decodeFun(head, self.protoComponent, **options)
-            bitString += component
+            chunk, head = decodeFun(head, self.protoComponent,
+                                        substrateFun=substrateFun,
+                                        **options)
+            trailingBits = oct2int(chunk[0])
+            if trailingBits > 7:
+                raise error.PyAsn1Error(
+                    'Trailing bits overflow %s' % trailingBits
+                )
 
-        return bitString, tail
+            value = univ.BitString.SizedInteger.fromOctetString(chunk[1:], trailingBits)
+
+            bitString = (bitString << value.bitLength) | value
+
+        return self._createComponent(asn1Spec, tagSet, bitString, **options), tail
 
     def indefLenValueDecoder(self, substrate, asn1Spec,
                              tagSet=None, length=None, state=None,
                              decodeFun=None, substrateFun=None,
                              **options):
 
-        bitString = self._createComponent(asn1Spec, tagSet, **options)
-
         if substrateFun:
-            return substrateFun(bitString, substrate, length)
+            asn1Object = self._createComponent(asn1Spec, tagSet, **options)
+            return substrateFun(asn1Object, substrate, length)
+
+        # All inner fragments are of the same type, treat them as octet string
+        substrateFun = self.substrateCollector
+
+        bitString = univ.BitString.SizedInteger()
 
         while substrate:
-            component, substrate = decodeFun(substrate, self.protoComponent,
-                                             allowEoo=True, **options)
-            if component is eoo.endOfOctets:
+            chunk, substrate = decodeFun(substrate, self.protoComponent,
+                                         substrateFun=substrateFun,
+                                         allowEoo=True, **options)
+
+            if chunk is eoo.endOfOctets:
                 break
 
-            bitString += component
+            trailingBits = oct2int(chunk[0])
+            if trailingBits > 7:
+                raise error.PyAsn1Error(
+                    'Trailing bits overflow %s' % trailingBits
+                )
+
+            value = univ.BitString.SizedInteger.fromOctetString(chunk[1:], trailingBits)
+
+            bitString = (bitString << value.bitLength) | value
 
         else:
             raise error.SubstrateUnderrunError('No EOO seen before substrate ends')
@@ -192,8 +237,8 @@ class OctetStringDecoder(AbstractSimpleDecoder):
         head, tail = substrate[:length], substrate[length:]
 
         if substrateFun:
-            return substrateFun(self._createComponent(asn1Spec, tagSet, **options),
-                                substrate, length)
+            asn1Object = self._createComponent(asn1Spec, tagSet, **options)
+            return substrateFun(asn1Object, substrate, length)
 
         if tagSet[0].tagFormat == tag.tagFormatSimple:  # XXX what tag to check?
             return self._createComponent(asn1Spec, tagSet, head, **options), tail
@@ -256,7 +301,7 @@ class NullDecoder(AbstractSimpleDecoder):
 
         head, tail = substrate[:length], substrate[length:]
 
-        component = self._createComponent(asn1Spec, tagSet, **options)
+        component = self._createComponent(asn1Spec, tagSet, None, **options)
 
         if head:
             raise error.PyAsn1Error('Unexpected %d-octet substrate for Null' % length)

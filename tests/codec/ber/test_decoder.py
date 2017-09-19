@@ -14,7 +14,7 @@ from tests.base import BaseTestCase
 
 from pyasn1.type import tag, namedtype, opentype, univ, char
 from pyasn1.codec.ber import decoder, eoo
-from pyasn1.compat.octets import ints2octs, str2octs, null
+from pyasn1.compat.octets import ints2octs, str2octs, null, isOctetsType
 from pyasn1.error import PyAsn1Error
 
 
@@ -132,6 +132,24 @@ class BooleanDecoderTestCase(BaseTestCase):
             assert 0, 'wrong tagFormat worked out'
 
 
+class BooleanDecoderNatoveModeTestCase(BaseTestCase):
+    def testTrue(self):
+        value, rest = decoder.decode(
+            ints2octs((1, 1, 1)), nativeMode=True
+        )
+        assert not rest
+        assert value is True
+        assert isinstance(value, bool)
+
+    def testFalse(self):
+        value, rest = decoder.decode(
+            ints2octs((1, 1, 0)), nativeMode=True
+        )
+        assert not rest
+        assert value is False
+        assert isinstance(value, bool)
+
+
 class BitStringDecoderTestCase(BaseTestCase):
     def testDefMode(self):
         assert decoder.decode(
@@ -174,6 +192,40 @@ class BitStringDecoderTestCase(BaseTestCase):
             assert 0, 'accepted mis-encoded bit-string constructed out of an integer'
 
 
+class BitStringDecoderNativeModeTestCase(BaseTestCase):
+    def testDefMode(self):
+        value, rest = decoder.decode(
+            ints2octs((3, 3, 1, 169, 138)), nativeMode=True
+        )
+        assert not rest
+        assert value == '101010011000101'
+        assert isinstance(value, str)
+
+    def testIndefMode(self):
+        value, rest = decoder.decode(
+            ints2octs((3, 3, 1, 169, 138)), nativeMode=True
+        )
+        assert not rest
+        assert value == '101010011000101'
+        assert isinstance(value, str)
+
+    def testDefModeChunked(self):
+        value, rest = decoder.decode(
+            ints2octs((35, 8, 3, 2, 0, 169, 3, 2, 1, 138)), nativeMode=True
+        )
+        assert not rest
+        assert value == '101010011000101'
+        assert isinstance(value, str)
+
+    def testIndefModeChunked(self):
+        value, rest = decoder.decode(
+            ints2octs((35, 128, 3, 2, 0, 169, 3, 2, 1, 138, 0, 0)), nativeMode=True
+        )
+        assert not rest
+        assert value == '101010011000101'
+        assert isinstance(value, str)
+
+
 class OctetStringDecoderTestCase(BaseTestCase):
     def testDefMode(self):
         assert decoder.decode(
@@ -211,6 +263,41 @@ class OctetStringDecoderTestCase(BaseTestCase):
             substrateFun=lambda a, b, c: (b, str2octs(''))
         ) == (ints2octs(
             (4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120, 0, 0)), str2octs(''))
+
+
+class OctetStringDecoderNativeModeTestCase(BaseTestCase):
+    def testDefMode(self):
+        value, rest = decoder.decode(
+            ints2octs((4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120)), nativeMode=True
+        )
+        assert not rest
+        assert value == str2octs('Quick brown fox')
+        assert isOctetsType(value)
+
+    def testIndefMode(self):
+        value, rest = decoder.decode(
+            ints2octs((36, 128, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120, 0, 0)), nativeMode=True
+        )
+        assert not rest
+        assert value == str2octs('Quick brown fox')
+        assert isOctetsType(value)
+
+    def testDefModeChunked(self):
+        value, rest = decoder.decode(
+            ints2octs(
+                (36, 23, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120)), nativeMode=True
+        )
+        assert not rest
+        assert value == str2octs('Quick brown fox')
+        assert isOctetsType(value)
+
+    def testIndefModeChunked(self):
+        value, rest = decoder.decode(
+            ints2octs((36, 128, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120, 0, 0)), nativeMode=True
+        )
+        assert not rest
+        assert value == str2octs('Quick brown fox')
+        assert isOctetsType(value)
 
 
 class ExpTaggedOctetStringDecoderTestCase(BaseTestCase):
@@ -285,6 +372,15 @@ class NullDecoderTestCase(BaseTestCase):
             pass
         else:
             assert 0, 'wrong tagFormat worked out'
+
+
+class NullDecoderNativeModeTestCase(BaseTestCase):
+    def testNull(self):
+        value, rest = decoder.decode(
+            ints2octs((5, 0)), nativeMode=True
+        )
+        assert not rest
+        assert value is None
 
 
 # Useful analysis of OID encoding issues could be found here:

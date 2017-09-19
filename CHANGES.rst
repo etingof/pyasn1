@@ -8,6 +8,8 @@ Revision 0.4.1, released XX-09-2017
 - ASN.1 decoders modified to accept the `nativeMode` boolean flag
   to produce either ASN.1 schema instance (the default) or built-in
   Python types (which is significantly faster)
+- BitString ASN.1 decoder performance improved when processing
+  chunked-encoded input
 
 Revision 0.3.5, released 16-09-2017
 -----------------------------------
