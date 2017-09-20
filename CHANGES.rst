@@ -6,7 +6,7 @@ Revision 0.4.1, released XX-09-2017
 - Encoders refactored to take either a value (as ASN.1 object)
   or a Python value plus ASN.1 schema
 
-Revision 0.3.6, released XX-09-2017
+Revision 0.3.6, released 21-09-2017
 -----------------------------------
 
 - End-of-octets encoding optimized at ASN.1 encoders
