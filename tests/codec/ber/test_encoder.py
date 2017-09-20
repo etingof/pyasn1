@@ -863,6 +863,26 @@ class ExpTaggedSequenceEncoderTestCase(BaseTestCase):
         ) == ints2octs((101, 128, 48, 128, 2, 1, 12, 0, 0, 0, 0))
 
 
+class ExpTaggedSequenceComponentEncoderTestCase(BaseTestCase):
+    def setUp(self):
+        BaseTestCase.setUp(self)
+        self.s = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType('number', univ.Boolean().subtype(explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 0))),
+            )
+        )
+
+        self.s[0] = True
+
+    def testDefMode(self):
+        assert encoder.encode(self.s) == ints2octs((48, 5, 160, 3, 1, 1, 1))
+
+    def testIndefMode(self):
+        assert encoder.encode(
+            self.s, defMode=False
+        ) == ints2octs((48, 128, 160, 3, 1, 1, 1, 0, 0, 0, 0))
+
+
 class SetEncoderTestCase(BaseTestCase):
     def setUp(self):
         BaseTestCase.setUp(self)

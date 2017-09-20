@@ -16,6 +16,10 @@ __all__ = ['encode']
 class AbstractItemEncoder(object):
     supportIndefLenMode = 1
 
+    # An outcome of otherwise legit call `encodeFun(eoo.endOfOctets)`
+    eooIntegerSubstrate = (0, 0)
+    eooOctetsSubstrate = ints2octs(eooIntegerSubstrate)
+
     # noinspection PyMethodMayBeStatic
     def encodeTag(self, singleTag, isConstructed):
         tagClass, tagFormat, tagId = singleTag
@@ -88,11 +92,18 @@ class AbstractItemEncoder(object):
 
             if isOctets:
                 substrate = ints2octs(header) + substrate
-            else:
-                substrate = ints2octs(header + substrate)
 
-            if not defModeOverride:
-                substrate += encodeFun(eoo.endOfOctets, defMode=defModeOverride)
+                if not defModeOverride:
+                    substrate += self.eooOctetsSubstrate
+
+            else:
+                substrate = header + substrate
+
+                if not defModeOverride:
+                    substrate += self.eooIntegerSubstrate
+
+        if not isOctets:
+            substrate = ints2octs(substrate)
 
         return substrate
 
