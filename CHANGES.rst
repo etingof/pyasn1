@@ -2,8 +2,11 @@
 Revision 0.3.6, released XX-09-2017
 -----------------------------------
 
+- End-of-octets encoding optimized at ASN.1 encoders
 - The __getitem__/__setitem__ behavior of Set/Sequence and SetOf/SequenceOf
   objects aligned with the canonical Mapping and Sequence protocols in part
+- Fixed crash in ASN.1 encoder when encoding an explicitly tagged
+  component of a Sequence
 
 Revision 0.3.5, released 16-09-2017
 -----------------------------------
