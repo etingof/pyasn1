@@ -37,7 +37,9 @@ class TimeMixIn(object):
     class FixedOffset(datetime.tzinfo):
         """Fixed offset in minutes east from UTC."""
 
-        def __init__(self, offset, name):
+        # defaulted arguments required
+        # https: // docs.python.org / 2.3 / lib / datetime - tzinfo.html
+        def __init__(self, offset=0, name='UTC'):
             self.__offset = datetime.timedelta(minutes=offset)
             self.__name = name
 
@@ -50,7 +52,7 @@ class TimeMixIn(object):
         def dst(self, dt):
             return datetime.timedelta(0)
 
-    UTC = FixedOffset(0, 'UTC')
+    UTC = FixedOffset()
 
     @property
     def asDateTime(self):
