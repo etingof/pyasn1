@@ -6,6 +6,7 @@
 #
 import sys
 import datetime
+from copy import deepcopy
 
 try:
     import unittest2 as unittest
@@ -71,6 +72,10 @@ class GeneralizedTimeTestCase(BaseTestCase):
 
     def testToDateTime8(self):
         assert datetime.datetime(2017, 7, 11, 0) == useful.GeneralizedTime('2017071100').asDateTime
+
+    def testCopy(self):
+        dt = useful.GeneralizedTime("20170916234254+0130").asDateTime
+        assert dt == deepcopy(dt)
 
 
 class UTCTimeTestCase(BaseTestCase):
