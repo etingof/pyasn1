@@ -1,5 +1,5 @@
 
-Revision 0.4.1, released XX-09-2017
+Revision 0.4.1, released XX-10-2017
 -----------------------------------
 
 - ANY DEFINED BY clause support implemented
@@ -8,7 +8,7 @@ Revision 0.4.1, released XX-09-2017
 - BitString decoder optimised for better performance when running on
   constructed encoding
 
-Revision 0.3.7, released XX-09-2017
+Revision 0.3.7, released 04-10-2017
 -----------------------------------
 
 - Fixed ASN.1 time types pickling/deepcopy'ing
