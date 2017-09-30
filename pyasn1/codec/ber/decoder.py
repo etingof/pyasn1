@@ -37,7 +37,9 @@ class AbstractSimpleDecoder(AbstractDecoder):
         return substrate[:length], substrate[length:]
 
     def _createComponent(self, asn1Spec, tagSet, value, **options):
-        if asn1Spec is None:
+        if options.get('native'):
+            return value
+        elif asn1Spec is None:
             return self.protoComponent.clone(value, tagSet=tagSet)
         elif value is noValue:
             return asn1Spec
