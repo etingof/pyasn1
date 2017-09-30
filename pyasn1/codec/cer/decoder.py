@@ -32,7 +32,7 @@ class BooleanDecoder(decoder.AbstractSimpleDecoder):
             value = 0
         else:
             raise error.PyAsn1Error('Unexpected Boolean payload: %s' % byte)
-        return self._createComponent(asn1Spec, tagSet, value), tail
+        return self._createComponent(asn1Spec, tagSet, value, **options), tail
 
 # TODO: prohibit non-canonical encoding
 BitStringDecoder = decoder.BitStringDecoder
