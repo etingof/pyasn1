@@ -417,23 +417,23 @@ class BitString(base.AbstractSimpleAsn1Item):
         if value is noValue or value is None:
             if kwargs:
                 try:
-                    value = self.fromBinaryString(kwargs.pop('binValue'))
+                    value = self.fromBinaryString(kwargs.pop('binValue'), internalFormat=True)
 
                 except KeyError:
                     pass
 
                 try:
-                    value = self.fromHexString(kwargs.pop('hexValue'))
+                    value = self.fromHexString(kwargs.pop('hexValue'), internalFormat=True)
 
                 except KeyError:
                     pass
 
         if value is noValue or value is None:
             if self.defaultBinValue is not noValue:
-                value = self.fromBinaryString(self.defaultBinValue)
+                value = self.fromBinaryString(self.defaultBinValue, internalFormat=True)
 
             elif self.defaultHexValue is not noValue:
-                value = self.fromHexString(self.defaultHexValue)
+                value = self.fromHexString(self.defaultHexValue, internalFormat=True)
 
         if 'namedValues' not in kwargs:
             kwargs['namedValues'] = self.namedValues
@@ -637,7 +637,7 @@ class BitString(base.AbstractSimpleAsn1Item):
         return '0' * (len(self._value) - len(binString)) + binString
 
     @classmethod
-    def fromHexString(cls, value):
+    def fromHexString(cls, value, internalFormat=False, prepend=None):
         """Create a |ASN.1| object initialized from the hex string.
         
         Parameters
@@ -646,13 +646,23 @@ class BitString(base.AbstractSimpleAsn1Item):
             Text string like 'DEADBEEF'
         """
         try:
-            return cls.SizedInteger(value, 16).setBitLength(len(value) * 4)
+            value = cls.SizedInteger(value, 16).setBitLength(len(value) * 4)
 
         except ValueError:
             raise error.PyAsn1Error('%s.fromHexString() error: %s' % (cls.__name__, sys.exc_info()[1]))
 
+        if prepend is not None:
+            value = cls.SizedInteger(
+                (cls.SizedInteger(prepend) << len(value)) | value
+            ).setBitLength(len(prepend) + len(value))
+
+        if not internalFormat:
+            value = cls(value)
+
+        return value
+
     @classmethod
-    def fromBinaryString(cls, value):
+    def fromBinaryString(cls, value, internalFormat=False, prepend=None):
         """Create a |ASN.1| object initialized from a string of '0' and '1'.
 
         Parameters
@@ -661,13 +671,23 @@ class BitString(base.AbstractSimpleAsn1Item):
             Text string like '1010111'
         """
         try:
-            return cls.SizedInteger(value or '0', 2).setBitLength(len(value))
+            value = cls.SizedInteger(value or '0', 2).setBitLength(len(value))
 
         except ValueError:
             raise error.PyAsn1Error('%s.fromBinaryString() error: %s' % (cls.__name__, sys.exc_info()[1]))
 
+        if prepend is not None:
+            value = cls.SizedInteger(
+                (cls.SizedInteger(prepend) << len(value)) | value
+            ).setBitLength(len(prepend) + len(value))
+
+        if not internalFormat:
+            value = cls(value)
+
+        return value
+
     @classmethod
-    def fromOctetString(cls, value, padding=0):
+    def fromOctetString(cls, value, internalFormat=False, prepend=None, padding=0):
         """Create a |ASN.1| object initialized from a string.
 
         Parameters
@@ -675,18 +695,30 @@ class BitString(base.AbstractSimpleAsn1Item):
         value: :class:`str` (Py2) or :class:`bytes` (Py3)
             Text string like '\\\\x01\\\\xff' (Py2) or b'\\\\x01\\\\xff' (Py3)
         """
-        return cls(cls.SizedInteger(integer.from_bytes(value) >> padding).setBitLength(len(value) * 8 - padding))
+        value = cls.SizedInteger(integer.from_bytes(value) >> padding).setBitLength(len(value) * 8 - padding)
+
+        if prepend is not None:
+            value = cls.SizedInteger(
+                (cls.SizedInteger(prepend) << len(value)) | value
+            ).setBitLength(len(prepend) + len(value))
+
+        if not internalFormat:
+            value = cls(value)
+
+        return value
 
     def prettyIn(self, value):
-        if octets.isStringType(value):
+        if isinstance(value, self.SizedInteger):
+            return value
+        elif octets.isStringType(value):
             if not value:
                 return self.SizedInteger(0).setBitLength(0)
 
             elif value[0] == '\'':  # "'1011'B" -- ASN.1 schema representation (deprecated)
                 if value[-2:] == '\'B':
-                    return self.fromBinaryString(value[1:-2])
+                    return self.fromBinaryString(value[1:-2], internalFormat=True)
                 elif value[-2:] == '\'H':
-                    return self.fromHexString(value[1:-2])
+                    return self.fromHexString(value[1:-2], internalFormat=True)
                 else:
                     raise error.PyAsn1Error(
                         'Bad BIT STRING value notation %s' % (value,)
@@ -711,18 +743,18 @@ class BitString(base.AbstractSimpleAsn1Item):
                 return self.SizedInteger(number).setBitLength(rightmostPosition + 1)
 
             elif value.startswith('0x'):
-                return self.fromHexString(value[2:])
+                return self.fromHexString(value[2:], internalFormat=True)
 
             elif value.startswith('0b'):
-                return self.fromBinaryString(value[2:])
+                return self.fromBinaryString(value[2:], internalFormat=True)
 
             else:  # assume plain binary string like '1011'
-                return self.fromBinaryString(value)
+                return self.fromBinaryString(value, internalFormat=True)
 
         elif isinstance(value, (tuple, list)):
-            return self.fromBinaryString(''.join([b and '1' or '0' for b in value]))
+            return self.fromBinaryString(''.join([b and '1' or '0' for b in value]), internalFormat=True)
 
-        elif isinstance(value, (self.SizedInteger, BitString)):
+        elif isinstance(value, BitString):
             return self.SizedInteger(value).setBitLength(len(value))
 
         elif isinstance(value, intTypes):
@@ -1450,12 +1482,12 @@ class Real(base.AbstractSimpleAsn1Item):
 
     def prettyIn(self, value):
         if isinstance(value, tuple) and len(value) == 3:
-            if not isinstance(value[0], numericTypes) or \
-                    not isinstance(value[1], intTypes) or \
-                    not isinstance(value[2], intTypes):
+            if (not isinstance(value[0], numericTypes) or
+                    not isinstance(value[1], intTypes) or
+                    not isinstance(value[2], intTypes)):
                 raise error.PyAsn1Error('Lame Real value syntax: %s' % (value,))
-            if isinstance(value[0], float) and \
-                    self._inf and value[0] in self._inf:
+            if (isinstance(value[0], float) and
+                    self._inf and value[0] in self._inf):
                 return value[0]
             if value[1] not in (2, 10):
                 raise error.PyAsn1Error(
@@ -1490,7 +1522,7 @@ class Real(base.AbstractSimpleAsn1Item):
 
     def prettyOut(self, value):
         if value in self._inf:
-            return '\'%s\'' % value
+            return "'%s'" % value
         else:
             return str(value)
 
