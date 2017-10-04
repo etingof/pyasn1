@@ -29,7 +29,7 @@ class OpenType(object):
     Examples
     --------
 
-    .. code-block::
+    .. code-block:: python
 
         openType = OpenType(
             'id',

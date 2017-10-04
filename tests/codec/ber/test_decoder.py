@@ -167,8 +167,7 @@ class OctetStringDecoderTestCase(BaseTestCase):
 
     def testIndefModeChunked(self):
         assert decoder.decode(
-            ints2octs((36, 128, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111,
-                       120, 0, 0))
+            ints2octs((36, 128, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120, 0, 0))
         ) == (str2octs('Quick brown fox'), null)
 
     def testDefModeChunkedSubst(self):
@@ -381,7 +380,7 @@ class ObjectIdentifierDecoderTestCase(BaseTestCase):
         except PyAsn1Error:
             pass
         else:
-            assert 0, 'indefinite length tolarated'
+            assert 0, 'indefinite length tolerated'
 
     def testReservedLength(self):
         try:
@@ -393,14 +392,12 @@ class ObjectIdentifierDecoderTestCase(BaseTestCase):
 
     def testLarge1(self):
         assert decoder.decode(
-            ints2octs((0x06, 0x11, 0x83, 0xC6, 0xDF, 0xD4, 0xCC, 0xB3, 0xFF, 0xFF, 0xFE, 0xF0, 0xB8, 0xD6, 0xB8, 0xCB,
-                       0xE2, 0xB7, 0x17))
+            ints2octs((0x06, 0x11, 0x83, 0xC6, 0xDF, 0xD4, 0xCC, 0xB3, 0xFF, 0xFF, 0xFE, 0xF0, 0xB8, 0xD6, 0xB8, 0xCB, 0xE2, 0xB7, 0x17))
         ) == ((2, 18446744073709551535184467440737095), null)
 
     def testLarge2(self):
         assert decoder.decode(
-            ints2octs((0x06, 0x13, 0x88, 0x37, 0x83, 0xC6, 0xDF, 0xD4, 0xCC, 0xB3, 0xFF, 0xFF, 0xFE, 0xF0, 0xB8, 0xD6,
-                       0xB8, 0xCB, 0xE2, 0xB6, 0x47))
+            ints2octs((0x06, 0x13, 0x88, 0x37, 0x83, 0xC6, 0xDF, 0xD4, 0xCC, 0xB3, 0xFF, 0xFF, 0xFE, 0xF0, 0xB8, 0xD6, 0xB8, 0xCB, 0xE2, 0xB6, 0x47))
         ) == ((2, 999, 18446744073709551535184467440737095), null)
 
 
