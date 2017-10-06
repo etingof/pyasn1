@@ -2684,6 +2684,29 @@ class Choice(Set):
         if self._currentIdx is None:
             raise error.PyAsn1Error('Component not chosen')
 
+    def clone(self, value=None, **kwargs):
+        """Clone this instance.
+
+        If *value* is specified, use its tag as the component type selector,
+        and itself as the component value.
+
+        :param value: (Optional) the component value.
+        :type value: :py:obj:`Asn1ItemBase`
+        :return: the cloned instance.
+        :rtype: :py:obj:`Choice`
+        :raise :py:obj:`error.PyAsn1Error`:
+            if the type of *value* is not allowed for this choice instance.
+        """
+        cloned = Set.clone(self)
+        if value is not None:
+            try:
+                tagSet = value.tagSet
+            except AttributeError:
+                raise error.PyAsn1Error('component value %r has no tag set'
+                                        % (value,))
+            cloned.setComponentByType(tagSet, value)
+        return cloned
+
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         try:
             component = self.getComponent()
