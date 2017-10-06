@@ -2687,8 +2687,8 @@ class Choice(Set):
     def clone(self, value=None, **kwargs):
         """Clone this instance.
 
-        If value is specified, use it as the clone's component value to it,
-        using its tag set as the component type selector.
+        If *value* is specified, use its tag as the component type selector,
+        and itself as the component value.
 
         :param value: (Optional) the component value.
         :type value: :py:obj:`Asn1ItemBase`
