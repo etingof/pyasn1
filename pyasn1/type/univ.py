@@ -2697,7 +2697,7 @@ class Choice(Set):
         :raise :py:obj:`error.PyAsn1Error`:
             if the type of *value* is not allowed for this choice instance.
         """
-        cloned = univ.Choice.clone(self)
+        cloned = Set.clone(self)
         if value is not None:
             try:
                 tagSet = value.tagSet
