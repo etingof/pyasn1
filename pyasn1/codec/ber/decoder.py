@@ -561,6 +561,9 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                             if not namedType.openType:
                                 continue
 
+                            if namedType.isOptional and not asn1Object.getComponentByPosition(idx).isValue:
+                                continue
+
                             governingValue = asn1Object.getComponentByName(
                                 namedType.openType.name
                             )
@@ -695,6 +698,9 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
                         for idx, namedType in enumerate(namedTypes.namedTypes):
                             if not namedType.openType:
+                                continue
+
+                            if namedType.isOptional and not asn1Object.getComponentByPosition(idx).isValue:
                                 continue
 
                             governingValue = asn1Object.getComponentByName(
