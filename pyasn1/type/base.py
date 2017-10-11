@@ -416,24 +416,6 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
 #   of types for Sequence/Set/Choice.
 #
 
-# TODO: remove
-
-def setupComponent():
-    """Returns a sentinel value.
-
-     Indicates to a constructed type to set up its inner component so that it
-     can be referred to. This is useful in situation when you want to populate
-     descendants of a constructed type what requires being able to refer to
-     their parent types along the way.
-
-     Example
-     -------
-
-     >>> constructed['record'] = setupComponent()
-     >>> constructed['record']['scalar'] = 42
-    """
-    return noValue
-
 
 class AbstractConstructedAsn1Item(Asn1ItemBase):
 
