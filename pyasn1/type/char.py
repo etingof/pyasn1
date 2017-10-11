@@ -18,7 +18,7 @@ noValue = univ.noValue
 
 
 class AbstractCharacterString(univ.OctetString):
-    """Creates |ASN.1| type or object.
+    """Creates |ASN.1| schema or value object.
 
     |ASN.1| objects are immutable and duck-type Python 2 :class:`unicode` or Python 3 :class:`str`.
     When used in octet-stream context, |ASN.1| type assumes "|encoding|" encoding.
@@ -126,7 +126,7 @@ class AbstractCharacterString(univ.OctetString):
         return reversed(self._value)
 
     def clone(self, value=noValue, **kwargs):
-        """Creates a copy of a |ASN.1| type or object.
+        """Creates a copy of a |ASN.1| schema or value object.
 
         Any parameters to the *clone()* method will replace corresponding
         properties of the |ASN.1| object.
@@ -158,7 +158,7 @@ class AbstractCharacterString(univ.OctetString):
         return univ.OctetString.clone(self, value, **kwargs)
 
     def subtype(self, value=noValue, **kwargs):
-        """Creates a copy of a |ASN.1| type or object.
+        """Creates a copy of a |ASN.1| schema or value object.
 
         Any parameters to the *subtype()* method will be added to the corresponding
         properties of the |ASN.1| object.

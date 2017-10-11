@@ -75,7 +75,7 @@ class Asn1ItemBase(Asn1Item):
         (:py:mod:`~pyasn1.type.constraint`) are examined when carrying
         out ASN.1 types comparison.
 
-        No Python inheritance relationship between PyASN1 objects is considered.
+        Python class inheritance relationship is NOT considered.
 
         Parameters
         ----------
@@ -99,8 +99,7 @@ class Asn1ItemBase(Asn1Item):
         (:py:mod:`~pyasn1.type.constraint`) are examined when carrying
         out ASN.1 types comparison.
 
-        No Python inheritance relationship between PyASN1 objects is considered.
-
+        Python class inheritance relationship is NOT considered.
 
         Parameters
         ----------
@@ -145,11 +144,16 @@ class Asn1ItemBase(Asn1Item):
 class NoValue(object):
     """Create a singleton instance of NoValue class.
 
-    NoValue object can be used as an initializer on PyASN1 type class
-    instantiation to represent ASN.1 type rather than ASN.1 data value.
+    The *NoValue* sentinel object represents an instance of ASN.1 schema
+    object as opposed to ASN.1 value object.
 
-    No operations other than type comparison can be performed on
-    a PyASN1 type object.
+    Only ASN.1 schema-related operations can be performed on ASN.1
+    schema objects.
+    
+    Warning
+    -------
+    Any operation attempted on the *noValue* object will raise the
+    *PyAsn1Error* exception.
     """
     skipMethods = ('__getattribute__', '__getattr__', '__setattr__', '__delattr__',
                    '__class__', '__init__', '__del__', '__new__', '__repr__', 
@@ -161,7 +165,7 @@ class NoValue(object):
         if cls._instance is None:
             def getPlug(name):
                 def plug(self, *args, **kw):
-                    raise error.PyAsn1Error('Uninitialized ASN.1 value ("%s" attribute looked up)' % name)
+                    raise error.PyAsn1Error('Attempted "%s" operation on ASN.1 schema object' % name)
                 return plug
 
             op_names = [name
@@ -253,31 +257,35 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
 
     @property
     def isValue(self):
-        """Indicate if |ASN.1| object represents ASN.1 type or ASN.1 value.
+        """Indicate that |ASN.1| object represents ASN.1 value.
 
-        In other words, if *isValue* is `True`, then the ASN.1 object is
-        initialized.
+        If *isValue* is `False` then this object represents just ASN.1 schema.
+        
+        If *isValue* is `True` then, in addition to its ASN.1 schema features,
+        this object can also be used like a Python built-in object (e.g. `int`,
+        `str`, `dict` etc.).
 
         Returns
         -------
         : :class:`bool`
-            :class:`True` if object represents ASN.1 value and type,
-            :class:`False` if object represents just ASN.1 type.
+            :class:`False` if object represents just ASN.1 schema.
+            :class:`True` if object represents ASN.1 schema and can be used as a normal value.
 
         Note
         ----
-        There is an important distinction between PyASN1 type and value objects.
-        The PyASN1 type objects can only participate in ASN.1 type
-        operations (subtyping, comparison etc) and serve as a
-        blueprint for serialization codecs to resolve ambiguous types.
+        There is an important distinction between PyASN1 schema and value objects.
+        The PyASN1 schema objects can only participate in ASN.1 schema-related
+        operations (e.g. defining or testing the structure of the data). Most
+        obvious uses of ASN.1 schema is to guide serialization codecs whilst
+        encoding/decoding serialised ASN.1 contents.
 
-        The PyASN1 value objects can additionally participate in most
-        of built-in Python operations.
+        The PyASN1 value objects can **additionally** participate in many operations
+        involving regular Python objects (e.g. arithmetic, comprehension etc).
         """
         return self._value is not noValue
 
     def clone(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| type or object.
+        """Create a copy of a |ASN.1| schema or value object.
 
           Any parameters to the *clone()* method will replace corresponding
           properties of the |ASN.1| object.
@@ -311,7 +319,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         return self.__class__(value, **initilaizers)
 
     def subtype(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| type or object.
+        """Create a copy of a |ASN.1| schema or value object.
 
          Any parameters to the *subtype()* method will be added to the corresponding
          properties of the |ASN.1| object.
@@ -369,7 +377,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         return str(value)
 
     def prettyPrint(self, scope=0):
-        """Provide human-friendly printable object representation.
+        """Return human-friendly object representation as a text.
 
         Returns
         -------
@@ -407,6 +415,8 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
 # * Component type is a scalar type for SequenceOf/SetOf types and a list
 #   of types for Sequence/Set/Choice.
 #
+
+# TODO: remove
 
 def setupComponent():
     """Returns a sentinel value.
@@ -490,7 +500,7 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         pass
 
     def clone(self, **kwargs):
-        """Create a copy of a |ASN.1| type or object.
+        """Create a copy of a |ASN.1| schema or value object.
 
         Any parameters to the *clone()* method will replace corresponding
         properties of the |ASN.1| object.
@@ -525,7 +535,7 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         return clone
 
     def subtype(self, **kwargs):
-        """Create a copy of a |ASN.1| type or object.
+        """Create a copy of a |ASN.1| schema or value object.
 
         Any parameters to the *subtype()* method will be added to the corresponding
         properties of the |ASN.1| object.
