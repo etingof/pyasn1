@@ -7,6 +7,7 @@ Revision 0.4.1, released XX-10-2017
   or a Python value plus ASN.1 schema
 - BitString decoder optimised for better performance when running on
   constructed encoding
+- Sphinx documentation reaaranged, simplified and reworded
 
 Revision 0.3.7, released 04-10-2017
 -----------------------------------

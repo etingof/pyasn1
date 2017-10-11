@@ -245,7 +245,7 @@ class Integer(base.AbstractSimpleAsn1Item):
             return str(value)
 
     def clone(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| type or object.
+        """Create a copy of a |ASN.1| schema or value object.
 
         Any parameters to the *clone()* method will replace corresponding
         properties of the |ASN.1| object.
@@ -273,7 +273,7 @@ class Integer(base.AbstractSimpleAsn1Item):
         return base.AbstractSimpleAsn1Item.clone(self, value, **kwargs)
 
     def subtype(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| type or object.
+        """Create a copy of a |ASN.1| schema or value object.
 
         Any parameters to the *subtype()* method will be added to the corresponding
         properties of the |ASN.1| object.
@@ -340,7 +340,7 @@ class Boolean(Integer):
 
 
 class BitString(base.AbstractSimpleAsn1Item):
-    """Create |ASN.1| type or object.
+    """Create |ASN.1| schema or value object.
 
     |ASN.1| objects are immutable and duck-type both Python :class:`tuple` (as a tuple
     of bits) and :class:`int` objects.
@@ -441,7 +441,7 @@ class BitString(base.AbstractSimpleAsn1Item):
         base.AbstractSimpleAsn1Item.__init__(self, value, **kwargs)
 
     def clone(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| type or object.
+        """Create a copy of a |ASN.1| schema or value object.
 
         Any parameters to the *clone()* method will replace corresponding
         properties of the |ASN.1| object.
@@ -477,7 +477,7 @@ class BitString(base.AbstractSimpleAsn1Item):
         return base.AbstractSimpleAsn1Item.clone(self, value, **kwargs)
 
     def subtype(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| type or object.
+        """Create a copy of a |ASN.1| schema or value object.
 
         Any parameters to the *subtype()* method will be added to the corresponding
         properties of the |ASN.1| object.
@@ -783,7 +783,7 @@ except NameError:  # Python 2.4
 
 
 class OctetString(base.AbstractSimpleAsn1Item):
-    """Create |ASN.1| type or object.
+    """Create |ASN.1| schema or value object.
 
     |ASN.1| objects are immutable and duck-type Python 2 :class:`str` or Python 3 :class:`bytes`.
     When used in Unicode context, |ASN.1| type assumes "|encoding|" serialization.
@@ -865,7 +865,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
         base.AbstractSimpleAsn1Item.__init__(self, value, **kwargs)
 
     def clone(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| type or object.
+        """Create a copy of a |ASN.1| schema or value object.
 
         Any parameters to the *clone()* method will replace corresponding
         properties of the |ASN.1| object.
@@ -901,7 +901,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
         return base.AbstractSimpleAsn1Item.clone(self, value, **kwargs)
 
     def subtype(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| type or object.
+        """Create a copy of a |ASN.1| schema or value object.
 
         Any parameters to the *subtype()* method will be added to the corresponding
         properties of the |ASN.1| object.
@@ -1151,7 +1151,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
 
 class Null(OctetString):
-    """Create |ASN.1| type or object.
+    """Create |ASN.1| schema or value object.
 
     |ASN.1| objects are immutable and duck-type Python :class:`str` objects (always empty).
 
@@ -1182,7 +1182,7 @@ class Null(OctetString):
     typeId = OctetString.getTypeId()
 
     def clone(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| type or object.
+        """Create a copy of a |ASN.1| schema or value object.
 
         Any parameters to the *clone()* method will replace corresponding
         properties of the |ASN.1| object.
@@ -1204,7 +1204,7 @@ class Null(OctetString):
         return OctetString.clone(self, value, **kwargs)
 
     def subtype(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| type or object.
+        """Create a copy of a |ASN.1| schema or value object.
 
         Any parameters to the *subtype()* method will be added to the corresponding
         properties of the |ASN.1| object.
@@ -1242,7 +1242,7 @@ numericTypes = intTypes + (float,)
 
 
 class ObjectIdentifier(base.AbstractSimpleAsn1Item):
-    """Create |ASN.1| type or object.
+    """Create |ASN.1| schema or value object.
 
     |ASN.1| objects are immutable and duck-type Python :class:`tuple` objects (tuple of non-negative integers).
 
@@ -1365,7 +1365,7 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
 
 
 class Real(base.AbstractSimpleAsn1Item):
-    """Create |ASN.1| type or object.
+    """Create |ASN.1| schema or value object.
 
     |ASN.1| objects are immutable and duck-type Python :class:`float` objects.
     Additionally, |ASN.1| objects behave like a :class:`tuple` in which case its
@@ -1416,7 +1416,7 @@ class Real(base.AbstractSimpleAsn1Item):
     typeId = base.AbstractSimpleAsn1Item.getTypeId()
 
     def clone(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| type or object.
+        """Create a copy of a |ASN.1| schema or value object.
 
         Any parameters to the *clone()* method will replace corresponding
         properties of the |ASN.1| object.
@@ -1441,7 +1441,7 @@ class Real(base.AbstractSimpleAsn1Item):
         return base.AbstractSimpleAsn1Item.clone(self, value, **kwargs)
 
     def subtype(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| type or object.
+        """Create a copy of a |ASN.1| schema or value object.
 
         Any parameters to the *subtype()* method will be added to the corresponding
         properties of the |ASN.1| object.
@@ -1955,29 +1955,30 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
 
     @property
     def isValue(self):
-        """Indicate if |ASN.1| object represents ASN.1 type or ASN.1 value.
+        """Indicate that |ASN.1| object represents ASN.1 value.
 
-        In other words, if *isValue* is `True`, then the ASN.1 object is
-        initialized.
-
-        For the purpose of this check, empty |ASN.1| object is considered
-        as initialized.
+        If *isValue* is `False` then this object represents just ASN.1 schema.
+        
+        If *isValue* is `True` then, in addition to its ASN.1 schema features,
+        this object can also be used like a Python built-in object (e.g. `int`,
+        `str`, `dict` etc.).
 
         Returns
         -------
         : :class:`bool`
-            :class:`True` if object represents ASN.1 value and type,
-            :class:`False` if object represents just ASN.1 type.
+            :class:`False` if object represents just ASN.1 schema.
+            :class:`True` if object represents ASN.1 schema and can be used as a normal value.
 
         Note
         ----
-        There is an important distinction between PyASN1 type and value objects.
-        The PyASN1 type objects can only participate in ASN.1 type
-        operations (subtyping, comparison etc) and serve as a
-        blueprint for serialization codecs to resolve ambiguous types.
+        There is an important distinction between PyASN1 schema and value objects.
+        The PyASN1 schema objects can only participate in ASN.1 schema-related
+        operations (e.g. defining or testing the structure of the data). Most
+        obvious uses of ASN.1 schema is to guide serialization codecs whilst
+        encoding/decoding serialised ASN.1 contents.
 
-        The PyASN1 value objects can additionally participate in most
-        of built-in Python operations.
+        The PyASN1 value objects can **additionally** participate in many operations
+        involving regular Python objects (e.g. arithmetic, comprehension etc).
         """
         for componentValue in self._componentValues:
             if not componentValue.isValue:
@@ -2267,7 +2268,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         ----------
         idx : :class:`int`
             Component index (zero-based). Must either refer to an existing
-            component or (if *componentType* is set) new ASN.1 type object gets
+            component or (if *componentType* is set) new ASN.1 schema object gets
             instantiated.
 
         Returns
@@ -2379,29 +2380,30 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
     @property
     def isValue(self):
-        """Indicate if |ASN.1| object represents ASN.1 type or ASN.1 value.
+        """Indicate that |ASN.1| object represents ASN.1 value.
 
-        In other words, if *isValue* is `True`, then the ASN.1 object is
-        initialized.
-
-        For the purpose of check, the *OPTIONAL* and *DEFAULT* fields are
-        unconditionally considered as initialized.
+        If *isValue* is `False` then this object represents just ASN.1 schema.
+        
+        If *isValue* is `True` then, in addition to its ASN.1 schema features,
+        this object can also be used like a Python built-in object (e.g. `int`,
+        `str`, `dict` etc.).
 
         Returns
         -------
         : :class:`bool`
-            :class:`True` if object represents ASN.1 value and type,
-            :class:`False` if object represents just ASN.1 type.
+            :class:`False` if object represents just ASN.1 schema.
+            :class:`True` if object represents ASN.1 schema and can be used as a normal value.
 
         Note
         ----
-        There is an important distinction between PyASN1 type and value objects.
-        The PyASN1 type objects can only participate in ASN.1 type
-        operations (subtyping, comparison etc) and serve as a
-        blueprint for serialization codecs to resolve ambiguous types.
+        There is an important distinction between PyASN1 schema and value objects.
+        The PyASN1 schema objects can only participate in ASN.1 schema-related
+        operations (e.g. defining or testing the structure of the data). Most
+        obvious uses of ASN.1 schema is to guide serialization codecs whilst
+        encoding/decoding serialised ASN.1 contents.
 
-        The PyASN1 value objects can additionally participate in most
-        of built-in Python operations.
+        The PyASN1 value objects can **additionally** participate in many operations
+        involving regular Python objects (e.g. arithmetic, comprehension etc).
         """
         componentType = self.componentType
 
@@ -2837,20 +2839,30 @@ class Choice(Set):
 
     @property
     def isValue(self):
-        """Indicate if |ASN.1| component is set and represents ASN.1 type or ASN.1 value.
+        """Indicate that |ASN.1| object represents ASN.1 value.
 
-        The PyASN1 type objects can only participate in types comparison
-        and serve as a blueprint for serialization codecs to resolve
-        ambiguous types.
-
-        The PyASN1 value objects can additionally participate in most
-        of built-in Python operations.
+        If *isValue* is `False` then this object represents just ASN.1 schema.
+        
+        If *isValue* is `True` then, in addition to its ASN.1 schema features,
+        this object can also be used like a Python built-in object (e.g. `int`,
+        `str`, `dict` etc.).
 
         Returns
         -------
         : :class:`bool`
-            :class:`True` if |ASN.1| component is set and represent value and type,
-            :class:`False` if |ASN.1| component is not set or it represents just ASN.1 type.
+            :class:`False` if object represents just ASN.1 schema.
+            :class:`True` if object represents ASN.1 schema and can be used as a normal value.
+
+        Note
+        ----
+        There is an important distinction between PyASN1 schema and value objects.
+        The PyASN1 schema objects can only participate in ASN.1 schema-related
+        operations (e.g. defining or testing the structure of the data). Most
+        obvious uses of ASN.1 schema is to guide serialization codecs whilst
+        encoding/decoding serialised ASN.1 contents.
+
+        The PyASN1 value objects can **additionally** participate in many operations
+        involving regular Python objects (e.g. arithmetic, comprehension etc).
         """
         if self._currentIdx is None:
             return False
