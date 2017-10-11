@@ -260,12 +260,6 @@ class Encoder(encoder.Encoder):
 #: asn1Spec:
 #:     Optional ASN.1 schema or value object e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
 #:
-#: defMode: :py:class:`bool`
-#:     If `False`, produces indefinite length encoding
-#:
-#: maxChunkSize: :py:class:`int`
-#:     Maximum chunk size in chunked encoding mode (0 denotes unlimited chunk size)
-#:
 #: Returns
 #: -------
 #: : :py:class:`bytes` (Python 3) or :py:class:`str` (Python 2)
