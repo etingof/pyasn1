@@ -546,11 +546,30 @@ class OctetStringTestCase(BaseTestCase):
 
 
 class Null(BaseTestCase):
+    def testInit(self):
+        assert not univ.Null().isValue
+        assert univ.Null(0) == str2octs('')
+        assert univ.Null(False) == str2octs('')
+        assert univ.Null('') == str2octs('')
+        assert univ.Null(None) == str2octs('')
+
+        try:
+            assert univ.Null(True)
+
+        except PyAsn1Error:
+            pass
+
+        try:
+            assert univ.Null('xxx')
+
+        except PyAsn1Error:
+            pass
+
     def testStr(self):
         assert str(univ.Null('')) == '', 'str() fails'
 
     def testRepr(self):
-        assert eval(repr(univ.Null()), {'Null': univ.Null}) == univ.Null(), 'repr() fails'
+        assert eval(repr(univ.Null('')), {'Null': univ.Null}) == univ.Null(''), 'repr() fails'
 
     def testTag(self):
         assert univ.Null().tagSet == tag.TagSet(
@@ -571,7 +590,7 @@ class Null(BaseTestCase):
         class Null(univ.Null):
             pass
 
-        assert not Null()
+        assert not Null('')
 
 
 class RealTestCase(BaseTestCase):

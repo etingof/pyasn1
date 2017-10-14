@@ -1,4 +1,11 @@
 
+Revision 0.3.8, released XX-10-2017
+-----------------------------------
+
+- Fixed Null object not to have default value (what always turns
+  it from schema object to value object)
+- Fixed DER encoder to not to omit Null values
+
 Revision 0.3.7, released 04-10-2017
 -----------------------------------
 
