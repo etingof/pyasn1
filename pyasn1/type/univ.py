@@ -1125,8 +1125,8 @@ class Null(OctetString):
 
     Parameters
     ----------
-    value : :class:`str` or :py:class:`~pyasn1.type.univ.Null` object
-        Python empty string literal or *Null* class instance.
+    value : :class:`str` object
+        Python empty string literal.
 
     tagSet: :py:class:`~pyasn1.type.tag.TagSet`
         Object representing non-default ASN.1 tag(s)
@@ -1136,7 +1136,6 @@ class Null(OctetString):
     : :py:class:`pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
     """
-    defaultValue = ''.encode()  # This is tightly constrained
 
     #: Set (on class, not on instance) or return a
     #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
@@ -1148,6 +1147,15 @@ class Null(OctetString):
 
     # Optimization for faster codec lookup
     typeId = OctetString.getTypeId()
+
+    def __init__(self, value=noValue, **kwargs):
+        # TODO: ditch None initializer support everywhere
+        if value is None:
+            value = ''
+        if value is not noValue and not value:
+            value = octets.str2octs('')
+
+        OctetString.__init__(self, value, **kwargs)
 
     def clone(self, value=noValue, **kwargs):
         """Create a copy of a |ASN.1| type or object.
@@ -1169,6 +1177,8 @@ class Null(OctetString):
         : :py:class:`~pyasn1.type.univ.Null`
             new instance of NULL type/value
         """
+        if value is None:
+            value = ''
         return OctetString.clone(self, value, **kwargs)
 
     def subtype(self, value=noValue, **kwargs):
@@ -1198,8 +1208,9 @@ class Null(OctetString):
         : :py:class:`~pyasn1.type.univ.Null`
             new instance of NULL type/value
         """
+        if value is None:
+            value = ''
         return OctetString.subtype(self, value, **kwargs)
-
 
 if sys.version_info[0] <= 2:
     intTypes = (int, long)

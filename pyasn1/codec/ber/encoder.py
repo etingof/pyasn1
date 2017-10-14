@@ -77,7 +77,7 @@ class AbstractItemEncoder(object):
                     value, encodeFun, **options
                 )
 
-                if options.get('ifNotEmpty', False) and not substrate:
+                if isConstructed and not substrate and options.get('ifNotEmpty', False):
                     return substrate
 
                 # primitive form implies definite mode
