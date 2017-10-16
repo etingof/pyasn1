@@ -119,7 +119,7 @@ class Asn1ItemBase(Asn1Item):
     @staticmethod
     def isNoValue(*values):
         for value in values:
-            if value is not None and value is not noValue:
+            if value is not noValue:
                 return False
         return True
 
@@ -201,7 +201,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
 
     def __init__(self, value=noValue, **kwargs):
         Asn1ItemBase.__init__(self, **kwargs)
-        if value is noValue or value is None:
+        if value is noValue:
             value = self.defaultValue
         else:
             value = self.prettyIn(value)
@@ -307,7 +307,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
           :
               new instance of |ASN.1| type/value
         """
-        if value is noValue or value is None:
+        if value is noValue:
             if not kwargs:
                 return self
 
@@ -349,7 +349,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
          :
              new instance of |ASN.1| type/value
         """
-        if value is noValue or value is None:
+        if value is noValue:
             if not kwargs:
                 return self
 
@@ -448,7 +448,7 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         representation = '%s(%s)' % (self.__class__.__name__, ', '.join(representation))
         if self._componentValues:
             for idx, component in enumerate(self._componentValues):
-                if component is None or component is noValue:
+                if component is noValue:
                     continue
                 representation += '.setComponentByPosition(%d, %s)' % (idx, repr(component))
         return representation

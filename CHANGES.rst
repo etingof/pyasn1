@@ -7,7 +7,10 @@ Revision 0.4.1, released XX-10-2017
   or a Python value plus ASN.1 schema
 - BitString decoder optimised for better performance when running on
   constructed encoding
-- Sphinx documentation reaaranged, simplified and reworded
+- Sphinx documentation rearranged, simplified and reworded
+- The `isValue` singleton is now the only way to indicate ASN.1 schema
+  as opposed to ASN.1 schema instance. The legacy `None` initializer
+  support has been removed.
 
 Revision 0.3.7, released 04-10-2017
 -----------------------------------

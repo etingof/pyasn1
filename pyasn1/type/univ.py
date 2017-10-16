@@ -414,7 +414,7 @@ class BitString(base.AbstractSimpleAsn1Item):
             return self.bitLength
 
     def __init__(self, value=noValue, **kwargs):
-        if value is noValue or value is None:
+        if value is noValue:
             if kwargs:
                 try:
                     value = self.fromBinaryString(kwargs.pop('binValue'), internalFormat=True)
@@ -428,7 +428,7 @@ class BitString(base.AbstractSimpleAsn1Item):
                 except KeyError:
                     pass
 
-        if value is noValue or value is None:
+        if value is noValue:
             if self.defaultBinValue is not noValue:
                 value = self.fromBinaryString(self.defaultBinValue, internalFormat=True)
 
@@ -839,7 +839,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
     def __init__(self, value=noValue, **kwargs):
         if kwargs:
-            if value is noValue or value is None:
+            if value is noValue:
                 try:
                     value = self.fromBinaryString(kwargs.pop('binValue'))
 
@@ -852,7 +852,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
                 except KeyError:
                     pass
 
-        if value is noValue or value is None:
+        if value is noValue:
             if self.defaultBinValue is not noValue:
                 value = self.fromBinaryString(self.defaultBinValue)
 
@@ -1879,9 +1879,6 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         IndexError:
             When idx > len(self)
         """
-        if value is None:  # backward compatibility
-            value = noValue
-
         componentType = self.componentType
 
         try:
@@ -2319,9 +2316,6 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         -------
         self
         """
-        if value is None:  # backward compatibility
-            value = noValue
-
         componentType = self.componentType
         componentTypeLen = self._componentTypeLen
 
