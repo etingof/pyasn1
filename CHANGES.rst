@@ -11,6 +11,9 @@ Revision 0.4.1, released XX-10-2017
 - The `isValue` singleton is now the only way to indicate ASN.1 schema
   as opposed to ASN.1 schema instance. The legacy `None` initializer
   support has been removed.
+- Changed `Null` object initialization behaviour: previous default
+  value (`''`) is not set anymore. Thus `Null()` call produces a
+  ASN.1 schema object, while `Null('')` - value object.
 
 Revision 0.3.7, released 04-10-2017
 -----------------------------------

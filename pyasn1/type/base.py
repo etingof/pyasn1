@@ -185,8 +185,9 @@ class NoValue(object):
 
     def __getattr__(self, attr):
         if attr in self.skipMethods:
-            raise AttributeError('attribute %s not present' % attr)
-        raise error.PyAsn1Error('No value for "%s"' % attr)
+            raise AttributeError('Attribute %s not present' % attr)
+
+        raise error.PyAsn1Error('Attempted "%s" operation on ASN.1 schema object' % attr)
 
     def __repr__(self):
         return '%s()' % self.__class__.__name__

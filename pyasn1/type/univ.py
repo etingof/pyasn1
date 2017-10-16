@@ -1158,7 +1158,7 @@ class Null(OctetString):
     Parameters
     ----------
     value : :class:`str` or :py:class:`~pyasn1.type.univ.Null` object
-        Python empty string literal or *Null* class instance.
+        Python empty string literal or any object that evaluates to `False`
 
     tagSet: :py:class:`~pyasn1.type.tag.TagSet`
         Object representing non-default ASN.1 tag(s)
@@ -1168,7 +1168,6 @@ class Null(OctetString):
     : :py:class:`pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
     """
-    defaultValue = ''.encode()  # This is tightly constrained
 
     #: Set (on class, not on instance) or return a
     #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
@@ -1232,6 +1231,11 @@ class Null(OctetString):
         """
         return OctetString.subtype(self, value, **kwargs)
 
+    def prettyIn(self, value):
+        if value:
+            return value
+
+        return octets.str2octs('')
 
 if sys.version_info[0] <= 2:
     intTypes = (int, long)
