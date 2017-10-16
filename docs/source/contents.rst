@@ -3,7 +3,7 @@ ASN.1 library for Python
 ========================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
 Abstract Syntax Notation One (`ASN.1
 <http://en.wikipedia.org/wiki/Abstract_Syntax_Notation_1x>`_) is a
@@ -82,8 +82,8 @@ and oftentimes fell victim to its edge cases.
 On the bright side, ASN.1 has been around for a long time, it is well understood
 and security reviewed.
 
-Library capabilities
---------------------
+Library documentation
+---------------------
 
 As of this moment, pyasn1 library implements all ASN.1 data
 types as Python objects in accordance with X.208 standard. Later,
@@ -103,20 +103,16 @@ Both `pyasn1 <https://github.com/etingof/pyasn1>`_ and
 can be used out-of-the-box with Python versions 2.4 through 3.6.
 No external dependencies required.
 
-Documentation
--------------
-
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
-   /docs/tutorial
-   /docs/api-reference
+   /pyasn1/contents
 
 Use case
 --------
 
    .. toctree::
-      :maxdepth: 2
+      :maxdepth: 3
 
       /example-use-case
 

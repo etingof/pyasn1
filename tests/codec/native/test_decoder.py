@@ -56,7 +56,7 @@ class OctetStringDecoderTestCase(BaseTestCase):
 
 class NullDecoderTestCase(BaseTestCase):
     def testNull(self):
-        assert decoder.decode(None, asn1Spec=univ.Null()) == univ.Null()
+        assert decoder.decode(None, asn1Spec=univ.Null()) == univ.Null('')
 
 
 class ObjectIdentifierDecoderTestCase(BaseTestCase):
@@ -83,7 +83,7 @@ class SequenceDecoderTestCase(BaseTestCase):
 
     def testSimple(self):
         s = self.s.clone()
-        s[0] = univ.Null()
+        s[0] = univ.Null('')
         s[1] = univ.OctetString('xx')
         s[2] = univ.Integer(33)
         assert decoder.decode({'place-holder': None, 'first-name': 'xx', 'age': 33}, asn1Spec=self.s) == s

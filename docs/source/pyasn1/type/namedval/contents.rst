@@ -10,4 +10,4 @@ with human-friendly labels.
 .. toctree::
    :maxdepth: 2
 
-   /docs/type/namedval/namedval
+   /pyasn1/type/namedval/namedval

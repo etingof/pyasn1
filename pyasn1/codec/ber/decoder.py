@@ -284,7 +284,7 @@ class NullDecoder(AbstractSimpleDecoder):
 
         head, tail = substrate[:length], substrate[length:]
 
-        component = self._createComponent(asn1Spec, tagSet, None, **options)
+        component = self._createComponent(asn1Spec, tagSet, noValue, **options)
 
         if head:
             raise error.PyAsn1Error('Unexpected %d-octet substrate for Null' % length)
