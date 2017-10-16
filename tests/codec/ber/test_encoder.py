@@ -746,11 +746,11 @@ class SequenceEncoderWithComponentsSchemaTestCase(BaseTestCase):
 
     def __init(self):
         self.s.clear()
-        self.s.setComponentByPosition(0)
+        self.s.setComponentByPosition(0, '')
 
     def __initWithOptional(self):
         self.s.clear()
-        self.s.setComponentByPosition(0)
+        self.s.setComponentByPosition(0, '')
         self.s.setComponentByPosition(1, 'quick brown')
 
     def __initWithDefaulted(self):
@@ -991,11 +991,11 @@ class SetEncoderWithComponentsSchemaTestCase(BaseTestCase):
 
     def __init(self):
         self.s.clear()
-        self.s.setComponentByPosition(0)
+        self.s.setComponentByPosition(0, '')
 
     def __initWithOptional(self):
         self.s.clear()
-        self.s.setComponentByPosition(0)
+        self.s.setComponentByPosition(0, '')
         self.s.setComponentByPosition(1, 'quick brown')
 
     def __initWithDefaulted(self):

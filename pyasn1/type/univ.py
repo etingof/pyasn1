@@ -414,7 +414,7 @@ class BitString(base.AbstractSimpleAsn1Item):
             return self.bitLength
 
     def __init__(self, value=noValue, **kwargs):
-        if value is noValue or value is None:
+        if value is noValue:
             if kwargs:
                 try:
                     value = self.fromBinaryString(kwargs.pop('binValue'), internalFormat=True)
@@ -428,7 +428,7 @@ class BitString(base.AbstractSimpleAsn1Item):
                 except KeyError:
                     pass
 
-        if value is noValue or value is None:
+        if value is noValue:
             if self.defaultBinValue is not noValue:
                 value = self.fromBinaryString(self.defaultBinValue, internalFormat=True)
 
@@ -839,7 +839,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
     def __init__(self, value=noValue, **kwargs):
         if kwargs:
-            if value is noValue or value is None:
+            if value is noValue:
                 try:
                     value = self.fromBinaryString(kwargs.pop('binValue'))
 
@@ -852,7 +852,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
                 except KeyError:
                     pass
 
-        if value is noValue or value is None:
+        if value is noValue:
             if self.defaultBinValue is not noValue:
                 value = self.fromBinaryString(self.defaultBinValue)
 
@@ -1158,7 +1158,7 @@ class Null(OctetString):
     Parameters
     ----------
     value : :class:`str` or :py:class:`~pyasn1.type.univ.Null` object
-        Python empty string literal or *Null* class instance.
+        Python empty string literal or any object that evaluates to `False`
 
     tagSet: :py:class:`~pyasn1.type.tag.TagSet`
         Object representing non-default ASN.1 tag(s)
@@ -1168,7 +1168,6 @@ class Null(OctetString):
     : :py:class:`pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
     """
-    defaultValue = ''.encode()  # This is tightly constrained
 
     #: Set (on class, not on instance) or return a
     #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
@@ -1232,6 +1231,11 @@ class Null(OctetString):
         """
         return OctetString.subtype(self, value, **kwargs)
 
+    def prettyIn(self, value):
+        if value:
+            return value
+
+        return octets.str2octs('')
 
 if sys.version_info[0] <= 2:
     intTypes = (int, long)
@@ -1879,9 +1883,6 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         IndexError:
             When idx > len(self)
         """
-        if value is None:  # backward compatibility
-            value = noValue
-
         componentType = self.componentType
 
         try:
@@ -2319,9 +2320,6 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         -------
         self
         """
-        if value is None:  # backward compatibility
-            value = noValue
-
         componentType = self.componentType
         componentTypeLen = self._componentTypeLen
 
