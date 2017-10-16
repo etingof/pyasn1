@@ -289,6 +289,73 @@ class NestedOptionalSequenceOfEncoderTestCase(BaseTestCase):
         assert encoder.encode(s) == ints2octs((48, 0))
 
 
+class EmptyInnerFieldOfSequenceEncoderTestCase(BaseTestCase):
+
+    def testInitializedOptionalNullIsEncoded(self):
+        self.s = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.OptionalNamedType('null', univ.Null())
+            )
+        )
+
+        self.s.clear()
+        self.s[0] = ''
+        assert encoder.encode(self.s) == ints2octs((48, 2, 5, 0))
+
+    def testUninitializedOptionalNullIsNotEncoded(self):
+        self.s = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.OptionalNamedType('null', univ.Null())
+            )
+        )
+
+        self.s.clear()
+        assert encoder.encode(self.s) == ints2octs((48, 0))
+
+    def testInitializedDefaultNullIsNotEncoded(self):
+        self.s = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.DefaultedNamedType('null', univ.Null(''))
+            )
+        )
+
+        self.s.clear()
+        self.s[0] = ''
+        assert encoder.encode(self.s) == ints2octs((48, 0))
+
+    def testInitializedOptionalOctetStringIsEncoded(self):
+        self.s = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.OptionalNamedType('str', univ.OctetString())
+            )
+        )
+
+        self.s.clear()
+        self.s[0] = ''
+        assert encoder.encode(self.s) == ints2octs((48, 2, 4, 0))
+
+    def testUninitializedOptionalOctetStringIsNotEncoded(self):
+        self.s = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.OptionalNamedType('str', univ.OctetString())
+            )
+        )
+
+        self.s.clear()
+        assert encoder.encode(self.s) == ints2octs((48, 0))
+
+    def testInitializedDefaultOctetStringIsNotEncoded(self):
+        self.s = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.DefaultedNamedType('str', univ.OctetString(''))
+            )
+        )
+
+        self.s.clear()
+        self.s[0] = ''
+        assert encoder.encode(self.s) == ints2octs((48, 0))
+
+
 suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])
 
 if __name__ == '__main__':

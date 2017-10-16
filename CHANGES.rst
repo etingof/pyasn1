@@ -14,6 +14,9 @@ Revision 0.4.1, released XX-10-2017
 - Changed `Null` object initialization behaviour: previous default
   value (`''`) is not set anymore. Thus `Null()` call produces a
   ASN.1 schema object, while `Null('')` - value object.
+- Fixed ASN.1 encoder not to omit empty substrate produced for inner
+  component if the inner component belongs to the simple class (as
+  opposed to constructed class).
 
 Revision 0.3.7, released 04-10-2017
 -----------------------------------
