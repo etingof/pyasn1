@@ -17,6 +17,8 @@ Revision 0.4.1, released XX-10-2017
 - Fixed ASN.1 encoder not to omit empty substrate produced for inner
   component if the inner component belongs to the simple class (as
   opposed to constructed class).
+- Fixed CER/DER encoders to respect tagged CHOICE when ordering
+  SET components
 
 Revision 0.3.7, released 04-10-2017
 -----------------------------------

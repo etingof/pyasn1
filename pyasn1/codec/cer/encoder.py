@@ -92,7 +92,7 @@ class SetEncoder(encoder.SequenceEncoder):
         if asn1Spec is None:
             asn1Spec = component
 
-        if asn1Spec.typeId == univ.Choice.typeId:
+        if asn1Spec.typeId == univ.Choice.typeId and not asn1Spec.tagSet:
             if asn1Spec.tagSet:
                 return asn1Spec.tagSet
             else:
