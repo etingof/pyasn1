@@ -25,7 +25,7 @@ class SetEncoder(encoder.SetEncoder):
         else:
             compType = asn1Spec
 
-        if compType.typeId == univ.Choice.typeId:
+        if compType.typeId == univ.Choice.typeId and not compType.tagSet:
             if asn1Spec is None:
                 return component.getComponent().tagSet
             else:
@@ -36,6 +36,7 @@ class SetEncoder(encoder.SetEncoder):
                     raise error.PyAsn1Error(
                         '%s components for Choice at %r' % (len(names) and 'Multiple ' or 'None ', component))
 
+                # TODO: support nested CHOICE ordering
                 return asn1Spec[names[0]].tagSet
 
         else:
