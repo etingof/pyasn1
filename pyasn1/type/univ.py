@@ -1820,7 +1820,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
                 else:
                     myClone.setComponentByPosition(idx, componentValue.clone())
 
-    def getComponentByPosition(self, idx):
+    def getComponentByPosition(self, idx, instantiate=True):
         """Return |ASN.1| type component value by position.
 
         Equivalent to Python sequence subscription operation (e.g. `[]`).
@@ -1833,15 +1833,25 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
             case a new component type gets instantiated and appended to the |ASN.1|
             sequence.
 
+        instantiate: :class:`bool`
+            If `True` (default), inner component will be automatically instantiated.
+            If 'False' either existing component or the `noValue` object will be
+            returned.
+
         Returns
         -------
         : :py:class:`~pyasn1.type.base.PyAsn1Item`
-            a pyasn1 object
+            Instantiate |ASN.1| component type or return existing component value
         """
         try:
             return self._componentValues[idx]
+
         except IndexError:
+            if not instantiate:
+                return noValue
+
             self.setComponentByPosition(idx)
+
             return self._componentValues[idx]
 
     def setComponentByPosition(self, idx, value=noValue,
@@ -2203,6 +2213,8 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
         instantiate: :class:`bool`
             If `True` (default), inner component will be automatically instantiated.
+            If 'False' either existing component or the `noValue` object will be
+            returned.
 
         Returns
         -------
@@ -2277,7 +2289,9 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
         instantiate: :class:`bool`
             If `True` (default), inner component will be automatically instantiated.
-
+            If 'False' either existing component or the `noValue` object will be
+            returned.
+            
         Returns
         -------
         : :py:class:`~pyasn1.type.base.PyAsn1Item`
@@ -2558,6 +2572,8 @@ class Set(SequenceAndSetBase):
 
         instantiate: :class:`bool`
             If `True` (default), inner component will be automatically instantiated.
+            If 'False' either existing component or the `noValue` object will be
+            returned.
 
         Returns
         -------

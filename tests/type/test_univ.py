@@ -1012,6 +1012,21 @@ class SequenceOf(BaseTestCase):
 
         assert n == o
 
+
+    def testGetComponentNoInstantiation(self):
+
+        class SequenceOf(univ.SequenceOf):
+            componentType = univ.OctetString()
+
+        s = SequenceOf()
+        assert s.getComponentByPosition(0, instantiate=False) is univ.noValue
+        s[0] = 'test'
+        assert s.getComponentByPosition(0, instantiate=False) is not univ.noValue
+        assert s.getComponentByPosition(0, instantiate=False) == str2octs('test')
+        s.clear()
+        assert s.getComponentByPosition(0, instantiate=False) is univ.noValue
+
+
 class Sequence(BaseTestCase):
     def setUp(self):
         BaseTestCase.setUp(self)
