@@ -1842,6 +1842,35 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         -------
         : :py:class:`~pyasn1.type.base.PyAsn1Item`
             Instantiate |ASN.1| component type or return existing component value
+            
+        Examples
+        --------
+        
+        .. code-block:: python
+
+            # can also be SetOf
+            class MySequenceOf(SequenceOf):
+                componentType = OctetString()
+    
+            s = MySequenceOf()
+            
+            # returns noValue
+            s.getComponentByPosition(0, instantiate=False)
+
+            # sets component #0 to OctetString() ASN.1 schema
+            # object and returns it
+            s.getComponentByPosition(0, instantiate=True)
+            
+            # sets component #0 to ASN.1 value object
+            s.setComponentByPosition(0, 'ABCD')
+
+            # returns OctetString('ABCD') value object
+            s.getComponentByPosition(0, instantiate=False)
+            
+            s.clear()
+            
+            # returns noValue
+            s.getComponentByPosition(0, instantiate=False)
         """
         try:
             return self._componentValues[idx]
@@ -2291,11 +2320,42 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             If `True` (default), inner component will be automatically instantiated.
             If 'False' either existing component or the `noValue` object will be
             returned.
-            
+
         Returns
         -------
         : :py:class:`~pyasn1.type.base.PyAsn1Item`
             a PyASN1 object
+
+        Examples
+        --------
+        
+        .. code-block:: python
+
+            # can also be Set
+            class MySequence(Sequence):
+                componentType = NamedTypes(
+                    NamedType('id', OctetString())
+                )
+    
+            s = MySequence()
+            
+            # returns noValue
+            s.getComponentByPosition(0, instantiate=False)
+
+            # sets component #0 to OctetString() ASN.1 schema
+            # object and returns it
+            s.getComponentByPosition(0, instantiate=True)
+            
+            # sets component #0 to ASN.1 value object
+            s.setComponentByPosition(0, 'ABCD')
+
+            # returns OctetString('ABCD') value object
+            s.getComponentByPosition(0, instantiate=False)
+            
+            s.clear()
+            
+            # returns noValue
+            s.getComponentByPosition(0, instantiate=False)
         """
         try:
             componentValue = self._componentValues[idx]
