@@ -390,10 +390,6 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         else:
             return '<no value>'
 
-    # XXX Compatibility stub
-    def prettyPrinter(self, scope=0):
-        return self.prettyPrint(scope)
-
     # noinspection PyUnusedLocal
     def prettyPrintType(self, scope=0):
         return '%s -> %s' % (self.tagSet, self.__class__.__name__)
