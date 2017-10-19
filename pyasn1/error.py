@@ -7,12 +7,23 @@
 
 
 class PyAsn1Error(Exception):
-    pass
+    """Create pyasn1 exception object
+
+    The `PyAsn1Error` exception represents generic, usually fatal, error.
+    """
 
 
 class ValueConstraintError(PyAsn1Error):
-    pass
+    """Create pyasn1 exception object
+    
+    The `ValueConstraintError` exception indicates an ASN.1 value 
+    constraint violation.
+    """
 
 
 class SubstrateUnderrunError(PyAsn1Error):
-    pass
+    """Create pyasn1 exception object
+
+    The `SubstrateUnderrunError` exception indicates insufficient serialised
+    data on input of a deserialisation routine.
+    """

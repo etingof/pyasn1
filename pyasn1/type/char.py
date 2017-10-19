@@ -43,7 +43,7 @@ class AbstractCharacterString(univ.OctetString):
 
     Raises
     ------
-    : :py:class:`pyasn1.error.PyAsn1Error`
+    :py:class:`~pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
     """
 
@@ -125,76 +125,6 @@ class AbstractCharacterString(univ.OctetString):
     def __reversed__(self):
         return reversed(self._value)
 
-    def clone(self, value=noValue, **kwargs):
-        """Creates a copy of a |ASN.1| schema or value object.
-
-        Any parameters to the *clone()* method will replace corresponding
-        properties of the |ASN.1| object.
-
-        Parameters
-        ----------
-        value: :class:`unicode`, :class:`str`, :class:`bytes` or |ASN.1| object
-            unicode object (Python 2) or string (Python 3), alternatively string
-            (Python 2) or bytes (Python 3) representing octet-stream of serialized
-            unicode string (note `encoding` parameter) or |ASN.1| class instance.
-
-        tagSet: :py:class:`~pyasn1.type.tag.TagSet`
-            Object representing non-default ASN.1 tag(s)
-
-        subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-            Object representing non-default ASN.1 subtype constraint(s)
-
-        encoding: :py:class:`str`
-            Unicode codec ID to encode/decode :py:class:`unicode` (Python 2) or
-            :py:class:`str` (Python 3) the payload when |ASN.1| object is used
-            in octet-stream context.
-
-        Returns
-        -------
-        :
-            new instance of |ASN.1| type/value
-
-        """
-        return univ.OctetString.clone(self, value, **kwargs)
-
-    def subtype(self, value=noValue, **kwargs):
-        """Creates a copy of a |ASN.1| schema or value object.
-
-        Any parameters to the *subtype()* method will be added to the corresponding
-        properties of the |ASN.1| object.
-
-        Parameters
-        ----------
-        value: :class:`unicode`, :class:`str`, :class:`bytes` or |ASN.1| object
-            unicode object (Python 2) or string (Python 3), alternatively string
-            (Python 2) or bytes (Python 3) representing octet-stream of serialized
-            unicode string (note `encoding` parameter) or |ASN.1| class instance.
-
-        implicitTag: :py:class:`~pyasn1.type.tag.Tag`
-            Implicitly apply given ASN.1 tag object to caller's
-            :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
-            new object's ASN.1 tag(s).
-
-        explicitTag: :py:class:`~pyasn1.type.tag.Tag`
-            Explicitly apply given ASN.1 tag object to caller's
-            :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
-            new object's ASN.1 tag(s).
-
-        subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-            Object representing non-default ASN.1 subtype constraint(s)
-
-        encoding: :py:class:`str`
-            Unicode codec ID to encode/decode :py:class:`unicode` (Python 2) or
-            :py:class:`str` (Python 3) the payload when |ASN.1| object is used
-            in octet-stream context.
-
-        Returns
-        -------
-        :
-            new instance of |ASN.1| type/value
-
-        """
-        return univ.OctetString.subtype(self, value, **kwargs)
 
 class NumericString(AbstractCharacterString):
     __doc__ = AbstractCharacterString.__doc__
