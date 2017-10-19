@@ -1484,7 +1484,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
                 else:
                     myClone.setComponentByPosition(idx, componentValue.clone())
 
-    def getComponentByPosition(self, idx):
+    def getComponentByPosition(self, idx, instantiate=True):
         """Return |ASN.1| type component value by position.
 
         Equivalent to Python sequence subscription operation (e.g. `[]`).
@@ -1497,15 +1497,54 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
             case a new component type gets instantiated and appended to the |ASN.1|
             sequence.
 
+        instantiate: :class:`bool`
+            If `True` (default), inner component will be automatically instantiated.
+            If 'False' either existing component or the `noValue` object will be
+            returned.
+
         Returns
         -------
         : :py:class:`~pyasn1.type.base.PyAsn1Item`
-            a pyasn1 object
+            Instantiate |ASN.1| component type or return existing component value
+            
+        Examples
+        --------
+        
+        .. code-block:: python
+
+            # can also be SetOf
+            class MySequenceOf(SequenceOf):
+                componentType = OctetString()
+    
+            s = MySequenceOf()
+            
+            # returns noValue
+            s.getComponentByPosition(0, instantiate=False)
+
+            # sets component #0 to OctetString() ASN.1 schema
+            # object and returns it
+            s.getComponentByPosition(0, instantiate=True)
+            
+            # sets component #0 to ASN.1 value object
+            s.setComponentByPosition(0, 'ABCD')
+
+            # returns OctetString('ABCD') value object
+            s.getComponentByPosition(0, instantiate=False)
+            
+            s.clear()
+            
+            # returns noValue
+            s.getComponentByPosition(0, instantiate=False)
         """
         try:
             return self._componentValues[idx]
+
         except IndexError:
+            if not instantiate:
+                return noValue
+
             self.setComponentByPosition(idx)
+
             return self._componentValues[idx]
 
     def setComponentByPosition(self, idx, value=noValue,
@@ -1855,15 +1894,20 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                 else:
                     myClone.setComponentByPosition(idx, componentValue.clone())
 
-    def getComponentByName(self, name):
+    def getComponentByName(self, name, instantiate=True):
         """Returns |ASN.1| type component by name.
 
         Equivalent to Python :class:`dict` subscription operation (e.g. `[]`).
 
         Parameters
         ----------
-        name : :class:`str`
+        name: :class:`str`
             |ASN.1| type component name
+
+        instantiate: :class:`bool`
+            If `True` (default), inner component will be automatically instantiated.
+            If 'False' either existing component or the `noValue` object will be
+            returned.
 
         Returns
         -------
@@ -1879,7 +1923,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             except KeyError:
                 raise error.PyAsn1Error('Name %s not found' % (name,))
 
-        return self.getComponentByPosition(idx)
+        return self.getComponentByPosition(idx, instantiate)
 
     def setComponentByName(self, name, value=noValue,
                            verifyConstraints=True,
@@ -1924,7 +1968,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             idx, value, verifyConstraints, matchTags, matchConstraints
         )
 
-    def getComponentByPosition(self, idx):
+    def getComponentByPosition(self, idx, instantiate=True):
         """Returns |ASN.1| type component by index.
 
         Equivalent to Python sequence subscription operation (e.g. `[]`).
@@ -1936,15 +1980,54 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             component or (if *componentType* is set) new ASN.1 schema object gets
             instantiated.
 
+        instantiate: :class:`bool`
+            If `True` (default), inner component will be automatically instantiated.
+            If 'False' either existing component or the `noValue` object will be
+            returned.
+
         Returns
         -------
         : :py:class:`~pyasn1.type.base.PyAsn1Item`
             a PyASN1 object
+
+        Examples
+        --------
+        
+        .. code-block:: python
+
+            # can also be Set
+            class MySequence(Sequence):
+                componentType = NamedTypes(
+                    NamedType('id', OctetString())
+                )
+    
+            s = MySequence()
+            
+            # returns noValue
+            s.getComponentByPosition(0, instantiate=False)
+
+            # sets component #0 to OctetString() ASN.1 schema
+            # object and returns it
+            s.getComponentByPosition(0, instantiate=True)
+            
+            # sets component #0 to ASN.1 value object
+            s.setComponentByPosition(0, 'ABCD')
+
+            # returns OctetString('ABCD') value object
+            s.getComponentByPosition(0, instantiate=False)
+            
+            s.clear()
+            
+            # returns noValue
+            s.getComponentByPosition(0, instantiate=False)
         """
         try:
             componentValue = self._componentValues[idx]
         except IndexError:
             componentValue = noValue
+
+        if not instantiate:
+            return componentValue
 
         if componentValue is noValue:
             self.setComponentByPosition(idx)
@@ -2202,7 +2285,7 @@ class Set(SequenceAndSetBase):
     def getComponent(self, innerFlag=False):
         return self
 
-    def getComponentByType(self, tagSet, innerFlag=False):
+    def getComponentByType(self, tagSet, instantiate=True, innerFlag=False):
         """Returns |ASN.1| type component by ASN.1 tag.
 
         Parameters
@@ -2211,13 +2294,18 @@ class Set(SequenceAndSetBase):
             Object representing ASN.1 tags to identify one of
             |ASN.1| object component
 
+        instantiate: :class:`bool`
+            If `True` (default), inner component will be automatically instantiated.
+            If 'False' either existing component or the `noValue` object will be
+            returned.
+
         Returns
         -------
         : :py:class:`~pyasn1.type.base.PyAsn1Item`
             a pyasn1 object
         """
         component = self.getComponentByPosition(
-            self.componentType.getPositionByType(tagSet)
+            self.componentType.getPositionByType(tagSet), instantiate
         )
         if innerFlag and isinstance(component, Set):
             # get inner component by inner tagSet
@@ -2397,11 +2485,11 @@ class Choice(Set):
             else:
                 myClone.setComponentByType(tagSet, component.clone())
 
-    def getComponentByPosition(self, idx):
+    def getComponentByPosition(self, idx, instantiate=True):
         __doc__ = Set.__doc__
 
         if self._currentIdx is None or self._currentIdx != idx:
-            return Set.getComponentByPosition(self, idx)
+            return Set.getComponentByPosition(self, idx, instantiate)
 
         return self._componentValues[idx]
 
@@ -2465,7 +2553,7 @@ class Choice(Set):
         else:
             return self.componentType.tagMapUnique
 
-    def getComponent(self, innerFlag=0):
+    def getComponent(self, innerFlag=False):
         """Return currently assigned component of the |ASN.1| object.
 
         Returns
@@ -2530,6 +2618,10 @@ class Choice(Set):
             return False
 
         return self._componentValues[self._currentIdx].isValue
+
+    def clear(self):
+        self._currentIdx = None
+        Set.clear(self)
 
     # compatibility stubs
 

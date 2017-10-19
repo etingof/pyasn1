@@ -7,6 +7,9 @@ Revision 0.4.1, released XX-10-2017
   or a Python value plus ASN.1 schema
 - BitString decoder optimised for better performance when running on
   constructed encoding
+- Constructed types' .getComponentBy*() methods accept the `instantiate`
+  parameter to disable automatic inner component instantiation
+- Fixed Choice.clear() to fully reset internal state of the object
 - Sphinx documentation rearranged, simplified and reworded
 - The `isValue` singleton is now the only way to indicate ASN.1 schema
   as opposed to ASN.1 schema instance. The legacy `None` initializer

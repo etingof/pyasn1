@@ -1012,6 +1012,21 @@ class SequenceOf(BaseTestCase):
 
         assert n == o
 
+
+    def testGetComponentNoInstantiation(self):
+
+        class SequenceOf(univ.SequenceOf):
+            componentType = univ.OctetString()
+
+        s = SequenceOf()
+        assert s.getComponentByPosition(0, instantiate=False) is univ.noValue
+        s[0] = 'test'
+        assert s.getComponentByPosition(0, instantiate=False) is not univ.noValue
+        assert s.getComponentByPosition(0, instantiate=False) == str2octs('test')
+        s.clear()
+        assert s.getComponentByPosition(0, instantiate=False) is univ.noValue
+
+
 class Sequence(BaseTestCase):
     def setUp(self):
         BaseTestCase.setUp(self)
@@ -1214,6 +1229,24 @@ class Sequence(BaseTestCase):
         s['name'] = 'abc'
         assert s['name'] == str2octs('abc')
 
+    def testGetComponentNoInstantiation(self):
+
+        class Sequence(univ.Sequence):
+            componentType = namedtype.NamedTypes(
+                namedtype.NamedType('name', univ.OctetString('')),
+                namedtype.OptionalNamedType('nick', univ.OctetString()),
+            )
+
+        s = Sequence()
+        assert s[0] == str2octs('')
+        assert s.getComponentByPosition(1, instantiate=False) is univ.noValue
+        assert s.getComponentByName('nick', instantiate=False) is univ.noValue
+        s[1] = 'test'
+        assert s.getComponentByPosition(1, instantiate=False) is not univ.noValue
+        assert s.getComponentByPosition(1, instantiate=False) == str2octs('test')
+        s.clear()
+        assert s.getComponentByPosition(1, instantiate=False) is univ.noValue
+
 
 class SequenceWithoutSchema(BaseTestCase):
 
@@ -1390,6 +1423,25 @@ class Set(BaseTestCase):
         s['name'] = 'abc'
         assert s['name'] == str2octs('abc')
 
+    def testGetComponentNoInstantiation(self):
+
+        class Set(univ.Set):
+            componentType = namedtype.NamedTypes(
+                namedtype.NamedType('id', univ.Integer(123)),
+                namedtype.OptionalNamedType('nick', univ.OctetString()),
+            )
+
+        s = Set()
+        assert s[0] == 123
+        assert s.getComponentByPosition(1, instantiate=False) is univ.noValue
+        assert s.getComponentByName('nick', instantiate=False) is univ.noValue
+        assert s.getComponentByType(univ.OctetString.tagSet, instantiate=False) is univ.noValue
+        s[1] = 'test'
+        assert s.getComponentByPosition(1, instantiate=False) is not univ.noValue
+        assert s.getComponentByPosition(1, instantiate=False) == str2octs('test')
+        s.clear()
+        assert s.getComponentByPosition(1, instantiate=False) is univ.noValue
+
 
 class Choice(BaseTestCase):
     def setUp(self):
@@ -1515,6 +1567,27 @@ class Choice(BaseTestCase):
 
         c.setComponentByType(univ.OctetString.tagSet, 'abc')
         assert c.getName() == 'name'
+
+    def testGetComponentNoInstantiation(self):
+
+        s = univ.Choice(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType('name', univ.OctetString()),
+                namedtype.NamedType('id', univ.Integer())
+            )
+        )
+
+        assert s.getComponentByPosition(0, instantiate=False) is univ.noValue
+        assert s.getComponentByPosition(1, instantiate=False) is univ.noValue
+        assert s.getComponentByName('name', instantiate=False) is univ.noValue
+        assert s.getComponentByName('id', instantiate=False) is univ.noValue
+        assert s.getComponentByType(univ.OctetString.tagSet, instantiate=False) is univ.noValue
+        assert s.getComponentByType(univ.Integer.tagSet, instantiate=False) is univ.noValue
+        s[1] = 123
+        assert s.getComponentByPosition(1, instantiate=False) is not univ.noValue
+        assert s.getComponentByPosition(1, instantiate=False) == 123
+        s.clear()
+        assert s.getComponentByPosition(1, instantiate=False) is univ.noValue
 
 
 suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])
