@@ -85,6 +85,6 @@ class Decoder(decoder.Decoder):
 #:
 #: Raises
 #: ------
-#: : :py:class:`pyasn1.error.PyAsn1Error`
+#: :py:class:`~pyasn1.error.PyAsn1Error`
 #:     On decoding errors
 decode = Decoder(tagMap, decoder.typeMap)

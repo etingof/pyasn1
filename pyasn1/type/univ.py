@@ -43,7 +43,7 @@ class Integer(base.AbstractSimpleAsn1Item):
 
     Raises
     ------
-    : :py:class:`pyasn1.error.PyAsn1Error`
+    :py:class:`~pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
     """
     #: Set (on class, not on instance) or return a
@@ -244,72 +244,6 @@ class Integer(base.AbstractSimpleAsn1Item):
         except KeyError:
             return str(value)
 
-    def clone(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| schema or value object.
-
-        Any parameters to the *clone()* method will replace corresponding
-        properties of the |ASN.1| object.
-
-        Parameters
-        ----------
-        value: :class:`int`, :class:`str` or |ASN.1| object
-            Initialization value to pass to new ASN.1 object instead of
-            inheriting one from the caller.
-
-        tagSet: :py:class:`~pyasn1.type.tag.TagSet`
-            Object representing ASN.1 tag(s) to use in new object instead of inheriting from the caller
-
-        subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-            Object representing ASN.1 subtype constraint(s) to use in new object instead of inheriting from the caller
-
-        namedValues: :py:class:`~pyasn1.type.namedval.NamedValues`
-            Object representing symbolic aliases for numbers to use instead of inheriting from caller
-
-        Returns
-        -------
-        :
-            new instance of |ASN.1| type/value
-        """
-        return base.AbstractSimpleAsn1Item.clone(self, value, **kwargs)
-
-    def subtype(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| schema or value object.
-
-        Any parameters to the *subtype()* method will be added to the corresponding
-        properties of the |ASN.1| object.
-
-        Parameters
-        ----------
-        value: :class:`int`, :class:`str` or |ASN.1| object
-            Initialization value to pass to new ASN.1 object instead of 
-            inheriting one from the caller.
-
-        implicitTag: :py:class:`~pyasn1.type.tag.Tag`
-            Implicitly apply given ASN.1 tag object to caller's 
-            :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
-            new object's ASN.1 tag(s).
-
-        explicitTag: :py:class:`~pyasn1.type.tag.Tag`
-            Explicitly apply given ASN.1 tag object to caller's 
-            :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
-            new object's ASN.1 tag(s).
-
-        subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-            Add ASN.1 constraints object to one of the caller, then
-            use the result as new object's ASN.1 constraints.
-
-        namedValues: :py:class:`~pyasn1.type.namedval.NamedValues`
-            Add given object representing symbolic aliases for numbers
-            to one of the caller, then use the result as new object's
-            named numbers.
-
-        Returns
-        -------
-        :
-            new instance of |ASN.1| type/value
-        """
-        return base.AbstractSimpleAsn1Item.subtype(self, value, **kwargs)
-
     # backward compatibility
 
     def getNamedValues(self):
@@ -370,7 +304,7 @@ class BitString(base.AbstractSimpleAsn1Item):
 
     Raises
     ------
-    : :py:class:`pyasn1.error.PyAsn1Error`
+    :py:class:`~pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
     """
     #: Set (on class, not on instance) or return a
@@ -439,88 +373,6 @@ class BitString(base.AbstractSimpleAsn1Item):
             kwargs['namedValues'] = self.namedValues
 
         base.AbstractSimpleAsn1Item.__init__(self, value, **kwargs)
-
-    def clone(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| schema or value object.
-
-        Any parameters to the *clone()* method will replace corresponding
-        properties of the |ASN.1| object.
-
-        Parameters
-        ----------
-        value : :class:`int`, :class:`str` or |ASN.1| object
-            Initialization value to pass to new ASN.1 object instead of
-            inheriting one from the caller.
-
-        tagSet: :py:class:`~pyasn1.type.tag.TagSet`
-            Object representing ASN.1 tag(s) to use in new object instead of inheriting from the caller
-
-        subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-            Object representing ASN.1 subtype constraint(s) to use in new object instead of inheriting from the caller
-
-        namedValues: :py:class:`~pyasn1.type.namedval.NamedValues`
-            Class instance representing BitString type enumerations
-
-        binValue: :py:class:`str`
-            Binary string initializer to use instead of the *value*.
-            Example: '10110011'.
-
-        hexValue: :py:class:`str`
-            Hexadecimal string initializer to use instead of the *value*.
-            Example: 'DEADBEEF'.
-
-        Returns
-        -------
-        :
-            new instance of |ASN.1| type/value
-        """
-        return base.AbstractSimpleAsn1Item.clone(self, value, **kwargs)
-
-    def subtype(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| schema or value object.
-
-        Any parameters to the *subtype()* method will be added to the corresponding
-        properties of the |ASN.1| object.
-
-        Parameters
-        ----------
-        value: :class:`int`, :class:`str` or |ASN.1| object
-            Initialization value to pass to new ASN.1 object instead of
-            inheriting one from the caller.
-
-        implicitTag: :py:class:`~pyasn1.type.tag.Tag`
-            Implicitly apply given ASN.1 tag object to caller's 
-            :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
-            new object's ASN.1 tag(s).
-
-        explicitTag: :py:class:`~pyasn1.type.tag.Tag`
-            Explicitly apply given ASN.1 tag object to caller's 
-            :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
-            new object's ASN.1 tag(s).
-
-        subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-            Add ASN.1 constraints object to one of the caller, then
-            use the result as new object's ASN.1 constraints.
-
-        namedValues: :py:class:`~pyasn1.type.namedval.NamedValues`
-            Add given object representing symbolic aliases for numbers
-            to one of the caller, then use the result as new object's
-            named numbers.
-
-        binValue: :py:class:`str`
-            Binary string initializer to use instead of the *value*.
-            Example: '10110011'.
-
-        hexValue: :py:class:`str`
-            Hexadecimal string initializer to use instead of the *value*.
-            Example: 'DEADBEEF'.
-
-        Returns
-        -------
-        :
-            new instance of |ASN.1| type/value
-        """
-        return base.AbstractSimpleAsn1Item.subtype(self, value, **kwargs)
 
     def __str__(self):
         return self.asBinary()
@@ -816,7 +668,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
     Raises
     ------
-    : :py:class:`pyasn1.error.PyAsn1Error`
+    :py:class:`~pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
     """
     #: Set (on class, not on instance) or return a
@@ -863,86 +715,6 @@ class OctetString(base.AbstractSimpleAsn1Item):
             kwargs['encoding'] = self.encoding
 
         base.AbstractSimpleAsn1Item.__init__(self, value, **kwargs)
-
-    def clone(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| schema or value object.
-
-        Any parameters to the *clone()* method will replace corresponding
-        properties of the |ASN.1| object.
-
-        Parameters
-        ----------
-        value : :class:`str`, :class:`bytes` or |ASN.1| object
-            Initialization value to pass to new ASN.1 object instead of
-            inheriting one from the caller.
-
-        tagSet: :py:class:`~pyasn1.type.tag.TagSet`
-            Object representing ASN.1 tag(s) to use in new object instead of inheriting from the caller
-
-        subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-            Object representing ASN.1 subtype constraint(s) to use in new object instead of inheriting from the caller
-
-        encoding: :py:class:`str`
-            Unicode codec ID to encode/decode :class:`unicode` (Python 2)
-            or :class:`str` (Python 3) the payload when |ASN.1|
-            object is used in string context.
-
-        binValue: :py:class:`str`
-            Binary string initializer. Example: '10110011'.
-        
-        hexValue: :py:class:`str`
-            Hexadecimal string initializer. Example: 'DEADBEEF'.
-
-        Returns
-        -------
-        :
-            new instance of |ASN.1| type/value
-        """
-        return base.AbstractSimpleAsn1Item.clone(self, value, **kwargs)
-
-    def subtype(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| schema or value object.
-
-        Any parameters to the *subtype()* method will be added to the corresponding
-        properties of the |ASN.1| object.
-
-        Parameters
-        ----------
-        value : :class:`str`, :class:`bytes` or |ASN.1| object
-            Initialization value to pass to new ASN.1 object instead of
-            inheriting one from the caller.
-
-        implicitTag: :py:class:`~pyasn1.type.tag.Tag`
-            Implicitly apply given ASN.1 tag object to |ASN.1| object tag set
-            :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
-            new object's ASN.1 tag(s).
-
-        explicitTag: :py:class:`~pyasn1.type.tag.Tag`
-            Explicitly apply given ASN.1 tag object to |ASN.1| object tag set
-            :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
-            new object's ASN.1 tag(s).
-
-        subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-            Add ASN.1 constraints object to one of the caller, then
-            use the result as new object's ASN.1 constraints.
-
-        encoding: :py:class:`str`
-            Unicode codec ID to encode/decode :class:`unicode` (Python 2)
-            or :class:`str` (Python 3) the payload when *OctetString*
-            object is used in string context.
-
-        binValue: :py:class:`str`
-            Binary string initializer. Example: '10110011'.
-        
-        hexValue: :py:class:`str`
-            Hexadecimal string initializer. Example: 'DEADBEEF'.
-
-        Returns
-        -------
-        :
-             new instance of |ASN.1| type/value
-        """
-        return base.AbstractSimpleAsn1Item.subtype(self, value, **kwargs)
 
     if sys.version_info[0] <= 2:
         def prettyIn(self, value):
@@ -1165,7 +937,7 @@ class Null(OctetString):
 
     Raises
     ------
-    : :py:class:`pyasn1.error.PyAsn1Error`
+    :py:class:`~pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
     """
 
@@ -1179,57 +951,6 @@ class Null(OctetString):
 
     # Optimization for faster codec lookup
     typeId = OctetString.getTypeId()
-
-    def clone(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| schema or value object.
-
-        Any parameters to the *clone()* method will replace corresponding
-        properties of the |ASN.1| object.
-
-        Parameters
-        ----------
-        value: :class:`str` or |ASN.1| object
-            Initialization value to pass to new ASN.1 object instead of 
-            inheriting one from the caller.
-
-        tagSet: :py:class:`~pyasn1.type.tag.TagSet`
-            Object representing ASN.1 tag(s) to use in new object instead of inheriting from the caller
-
-        Returns
-        -------
-        : :py:class:`~pyasn1.type.univ.Null`
-            new instance of NULL type/value
-        """
-        return OctetString.clone(self, value, **kwargs)
-
-    def subtype(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| schema or value object.
-
-        Any parameters to the *subtype()* method will be added to the corresponding
-        properties of the |ASN.1| object.
-
-        Parameters
-        ----------
-        value: :class:`int`, :class:`str` or |ASN.1| object
-            Initialization value to pass to new ASN.1 object instead of
-            inheriting one from the caller.
-
-        implicitTag: :py:class:`~pyasn1.type.tag.Tag`
-            Implicitly apply given ASN.1 tag object to caller's 
-            :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
-            new object's ASN.1 tag(s).
-
-        explicitTag: :py:class:`~pyasn1.type.tag.Tag`
-            Explicitly apply given ASN.1 tag object to caller's 
-            :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
-            new object's ASN.1 tag(s).
-
-        Returns
-        -------
-        : :py:class:`~pyasn1.type.univ.Null`
-            new instance of NULL type/value
-        """
-        return OctetString.subtype(self, value, **kwargs)
 
     def prettyIn(self, value):
         if value:
@@ -1263,7 +984,7 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
 
     Raises
     ------
-    : :py:class:`pyasn1.error.PyAsn1Error`
+    :py:class:`~pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
     """
     #: Set (on class, not on instance) or return a
@@ -1389,7 +1110,7 @@ class Real(base.AbstractSimpleAsn1Item):
 
     Raises
     ------
-    : :py:class:`pyasn1.error.PyAsn1Error`
+    :py:class:`~pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
 
     """
@@ -1418,63 +1139,6 @@ class Real(base.AbstractSimpleAsn1Item):
 
     # Optimization for faster codec lookup
     typeId = base.AbstractSimpleAsn1Item.getTypeId()
-
-    def clone(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| schema or value object.
-
-        Any parameters to the *clone()* method will replace corresponding
-        properties of the |ASN.1| object.
-
-        Parameters
-        ----------
-        value: :class:`tuple`, :class:`float` or |ASN.1| object
-            Initialization value to pass to new ASN.1 object instead of
-            inheriting one from the caller.
-
-        tagSet: :py:class:`~pyasn1.type.tag.TagSet`
-            Object representing ASN.1 tag(s) to use in new object instead of inheriting from the caller
-
-        subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-            Object representing ASN.1 subtype constraint(s) to use in new object instead of inheriting from the caller
-
-        Returns
-        -------
-        :
-            new instance of |ASN.1| type/value
-        """
-        return base.AbstractSimpleAsn1Item.clone(self, value, **kwargs)
-
-    def subtype(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| schema or value object.
-
-        Any parameters to the *subtype()* method will be added to the corresponding
-        properties of the |ASN.1| object.
-
-        Parameters
-        ----------
-        value: :class:`tuple`, :class:`float` or |ASN.1| object
-            Initialization value to pass to new ASN.1 object instead of
-            inheriting one from the caller.
-
-        implicitTag: :py:class:`~pyasn1.type.tag.Tag`
-            Implicitly apply given ASN.1 tag object to caller's 
-            :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
-            new object's ASN.1 tag(s).
-
-        explicitTag: :py:class:`~pyasn1.type.tag.Tag`
-            Explicitly apply given ASN.1 tag object to caller's 
-            :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
-            new object's ASN.1 tag(s).
-
-        subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-             Object representing ASN.1 subtype constraint(s) to use in new object instead of inheriting from the caller
-
-        Returns
-        -------
-        :
-            new instance of |ASN.1| type/value
-        """
-        return base.AbstractSimpleAsn1Item.subtype(self, value, **kwargs)
 
     @staticmethod
     def __normalizeBase10(value):
