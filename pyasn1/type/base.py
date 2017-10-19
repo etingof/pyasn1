@@ -286,27 +286,20 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         return self._value is not noValue
 
     def clone(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| schema or value object.
+        """Create a modified version of |ASN.1| schema or value object.
 
-          Any parameters to the *clone()* method will replace corresponding
-          properties of the |ASN.1| object.
+        The `clone()` method accepts the same set arguments as |ASN.1|
+        class takes on instantiation except that all arguments
+        of the `clone()` method are optional.
 
-          Parameters
-          ----------
-          value: :class:`tuple`, :class:`str` or |ASN.1| object
-              Initialization value to pass to new ASN.1 object instead of
-              inheriting one from the caller.
+        Whatever arguments are supplied, they are used to create a copy
+        of `self` taking precedence over the ones used to instantiate `self`.
 
-          tagSet: :py:class:`~pyasn1.type.tag.TagSet`
-              Object representing ASN.1 tag(s) to use in new object instead of inheriting from the caller
-
-          subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-              Object representing ASN.1 subtype constraint(s) to use in new object instead of inheriting from the caller
-
-          Returns
-          -------
-          :
-              new instance of |ASN.1| type/value
+        Note
+        ----
+        Due to the immutable nature of the |ASN.1| object, if no arguments
+        are supplied, no new |ASN.1| object will be created and `self` will
+        be returned instead.
         """
         if value is noValue:
             if not kwargs:
@@ -320,35 +313,51 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         return self.__class__(value, **initilaizers)
 
     def subtype(self, value=noValue, **kwargs):
-        """Create a copy of a |ASN.1| schema or value object.
+        """Create a specialization of |ASN.1| schema or value object.
 
-         Any parameters to the *subtype()* method will be added to the corresponding
-         properties of the |ASN.1| object.
+        The subtype relationship between ASN.1 types has no correlation with
+        subtype relationship between Python types. ASN.1 type is mainly identified
+        by its tag(s) (:py:class:`~pyasn1.type.tag.TagSet`) and value range
+        constraints (:py:class:`~pyasn1.type.constraint.ConstraintsIntersection`).
+        These ASN.1 type properties are implemented as |ASN.1| attributes.  
 
-         Parameters
-         ----------
-         value: :class:`tuple`, :class:`str` or |ASN.1| object
-             Initialization value to pass to new ASN.1 object instead of
-             inheriting one from the caller.
+        The `subtype()` method accepts the same set arguments as |ASN.1|
+        class takes on instantiation except that all parameters
+        of the `subtype()` method are optional.
 
-         implicitTag: :py:class:`~pyasn1.type.tag.Tag`
-             Implicitly apply given ASN.1 tag object to caller's
-             :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
-             new object's ASN.1 tag(s).
+        With the exception of the arguments described below, the rest of
+        supplied arguments they are used to create a copy of `self` taking
+        precedence over the ones used to instantiate `self`.
 
-         explicitTag: :py:class:`~pyasn1.type.tag.Tag`
-             Explicitly apply given ASN.1 tag object to caller's
-             :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
-             new object's ASN.1 tag(s).
+        The following arguments to `subtype()` create a ASN.1 subtype out of
+        |ASN.1| type:
 
-         subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-             Add ASN.1 constraints object to one of the caller, then
-             use the result as new object's ASN.1 constraints.
+        Parameters
+        ----------
+        implicitTag: :py:class:`~pyasn1.type.tag.Tag`
+            Implicitly apply given ASN.1 tag object to `self`'s
+            :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
+            new object's ASN.1 tag(s).
 
-         Returns
-         -------
-         :
-             new instance of |ASN.1| type/value
+        explicitTag: :py:class:`~pyasn1.type.tag.Tag`
+            Explicitly apply given ASN.1 tag object to `self`'s
+            :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
+            new object's ASN.1 tag(s).
+
+        subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
+            Add ASN.1 constraints object to one of the `self`'s, then
+            use the result as new object's ASN.1 constraints.
+
+        Returns
+        -------
+        :
+            new instance of |ASN.1| schema or value object 
+
+        Note
+        ----
+        Due to the immutable nature of the |ASN.1| object, if no arguments
+        are supplied, no new |ASN.1| object will be created and `self` will
+        be returned instead.
         """
         if value is noValue:
             if not kwargs:
@@ -479,27 +488,28 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         pass
 
     def clone(self, **kwargs):
-        """Create a copy of a |ASN.1| schema or value object.
+        """Create a modified version of |ASN.1| schema object.
 
-        Any parameters to the *clone()* method will replace corresponding
-        properties of the |ASN.1| object.
+        The `clone()` method accepts the same set arguments as |ASN.1|
+        class takes on instantiation except that all arguments
+        of the `clone()` method are optional.
 
-        Parameters
-        ----------
-        tagSet: :py:class:`~pyasn1.type.tag.TagSet`
-            Object representing non-default ASN.1 tag(s)
+        Whatever arguments are supplied, they are used to create a copy
+        of `self` taking precedence over the ones used to instantiate `self`.
 
-        subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-            Object representing non-default ASN.1 subtype constraint(s)
-
-        sizeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-            Object representing non-default ASN.1 size constraint(s)
+        Possible values of `self` are never copied over thus `clone()` can
+        only create a new schema object.
 
         Returns
         -------
         :
             new instance of |ASN.1| type/value
 
+        Note
+        ----
+        Due to the mutable nature of the |ASN.1| object, even if no arguments
+        are supplied, new |ASN.1| object will always be created as a shallow
+        copy of `self`.
         """
         cloneValueFlag = kwargs.pop('cloneValueFlag', False)
 
@@ -514,27 +524,46 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         return clone
 
     def subtype(self, **kwargs):
-        """Create a copy of a |ASN.1| schema or value object.
+        """Create a specialization of |ASN.1| schema object.
 
-        Any parameters to the *subtype()* method will be added to the corresponding
-        properties of the |ASN.1| object.
+        The `subtype()` method accepts the same set arguments as |ASN.1|
+        class takes on instantiation except that all parameters
+        of the `subtype()` method are optional.
+
+        With the exception of the arguments described below, the rest of
+        supplied arguments they are used to create a copy of `self` taking
+        precedence over the ones used to instantiate `self`.
+
+        The following arguments to `subtype()` create a ASN.1 subtype out of
+        |ASN.1| type.
 
         Parameters
         ----------
-        tagSet: :py:class:`~pyasn1.type.tag.TagSet`
-            Object representing non-default ASN.1 tag(s)
+        implicitTag: :py:class:`~pyasn1.type.tag.Tag`
+            Implicitly apply given ASN.1 tag object to `self`'s
+            :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
+            new object's ASN.1 tag(s).
+
+        explicitTag: :py:class:`~pyasn1.type.tag.Tag`
+            Explicitly apply given ASN.1 tag object to `self`'s
+            :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
+            new object's ASN.1 tag(s).
 
         subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-            Object representing non-default ASN.1 subtype constraint(s)
+            Add ASN.1 constraints object to one of the `self`'s, then
+            use the result as new object's ASN.1 constraints.
 
-        sizeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
-            Object representing non-default ASN.1 size constraint(s)
-
+        
         Returns
         -------
         :
             new instance of |ASN.1| type/value
 
+        Note
+        ----
+        Due to the immutable nature of the |ASN.1| object, if no arguments
+        are supplied, no new |ASN.1| object will be created and `self` will
+        be returned instead.
         """
 
         initializers = self.readOnly.copy()

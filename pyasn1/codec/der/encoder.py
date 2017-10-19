@@ -80,6 +80,6 @@ class Encoder(encoder.Encoder):
 #:
 #: Raises
 #: ------
-#: : :py:class:`pyasn1.error.PyAsn1Error`
+#: :py:class:`~pyasn1.error.PyAsn1Error`
 #:     On encoding errors
 encode = Encoder(tagMap, typeMap)
