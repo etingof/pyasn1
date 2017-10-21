@@ -1,4 +1,6 @@
 
+.. _namedtype.DefaultedNamedType:
+
 .. |NamedType| replace:: DefaultedNamedType
 
 |NamedType|

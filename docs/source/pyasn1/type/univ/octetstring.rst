@@ -1,4 +1,6 @@
 
+.. _univ.OctetString:
+
 .. |ASN.1| replace:: OctetString
 
 .. |encoding| replace:: iso-8859-1

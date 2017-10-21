@@ -1,4 +1,6 @@
 
+.. _univ.BitString:
+
 .. |ASN.1| replace:: BitString
 
 |ASN.1| type

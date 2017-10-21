@@ -1,4 +1,6 @@
 
+.. _univ.Null:
+
 .. |ASN.1| replace:: Null
 
 |ASN.1| type

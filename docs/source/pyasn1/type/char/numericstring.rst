@@ -1,4 +1,6 @@
 
+.. _char.NumericString:
+
 .. |ASN.1| replace:: NumericString
 
 .. |encoding| replace:: us-ascii

@@ -1,4 +1,6 @@
 
+.. _useful.ObjectDescriptor:
+
 .. |ASN.1| replace:: ObjectDescriptor
 
 .. |encoding| replace:: iso-8859-1

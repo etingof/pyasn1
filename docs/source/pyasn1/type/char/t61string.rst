@@ -1,4 +1,6 @@
 
+.. _char.T61String:
+
 .. |ASN.1| replace:: T61String
 
 .. |encoding| replace:: iso-8859-1

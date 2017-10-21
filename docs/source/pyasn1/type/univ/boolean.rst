@@ -1,4 +1,6 @@
 
+.. _univ.Boolean:
+
 .. |ASN.1| replace:: Boolean
 
 |ASN.1| type

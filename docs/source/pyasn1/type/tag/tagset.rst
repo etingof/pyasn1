@@ -1,6 +1,8 @@
 
-Composition of tags
--------------------
+.. _tag.tagset:
+
+Tag set
+-------
 
 .. autoclass:: pyasn1.type.tag.TagSet
    :members:

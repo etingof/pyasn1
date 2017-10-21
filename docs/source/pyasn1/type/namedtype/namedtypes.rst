@@ -1,4 +1,6 @@
 
+.. _namedtype.NamedTypes:
+
 NamedTypes
 ----------
 

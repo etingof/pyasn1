@@ -1,4 +1,6 @@
 
+.. _char.UTF8String:
+
 .. |ASN.1| replace:: UTF8String
 
 .. |encoding| replace:: utf-8

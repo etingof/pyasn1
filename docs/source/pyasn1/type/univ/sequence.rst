@@ -1,4 +1,6 @@
 
+.. _univ.Sequence:
+
 .. |ASN.1| replace:: Sequence
 
 |ASN.1| type

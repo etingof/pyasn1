@@ -1,4 +1,6 @@
 
+.. _char.GraphicString:
+
 .. |ASN.1| replace:: GraphicString
 
 .. |encoding| replace:: iso-8859-1

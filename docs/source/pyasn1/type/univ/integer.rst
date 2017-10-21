@@ -1,4 +1,6 @@
 
+.. _univ.Integer:
+
 .. |ASN.1| replace:: Integer
 
 |ASN.1| type

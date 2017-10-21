@@ -1,4 +1,6 @@
 
+.. _char.VisibleString:
+
 .. |ASN.1| replace:: VisibleString
 
 .. |encoding| replace:: us-ascii

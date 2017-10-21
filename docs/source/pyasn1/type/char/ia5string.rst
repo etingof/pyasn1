@@ -1,4 +1,6 @@
 
+.. _char.IA5String:
+
 .. |ASN.1| replace:: IA5String
 
 .. |encoding| replace:: us-ascii

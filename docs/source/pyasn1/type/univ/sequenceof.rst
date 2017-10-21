@@ -1,4 +1,6 @@
 
+.. _univ.SequenceOf:
+
 .. |ASN.1| replace:: SequenceOf
 
 |ASN.1| type

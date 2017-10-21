@@ -1,4 +1,6 @@
 
+.. _char.GeneralString:
+
 .. |ASN.1| replace:: GeneralString
 
 .. |encoding| replace:: iso-8859-1

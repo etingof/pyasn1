@@ -1,4 +1,6 @@
 
+.. _tag.tagmap:
+
 Tag->type map
 -------------
 
