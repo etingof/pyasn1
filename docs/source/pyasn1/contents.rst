@@ -6,12 +6,13 @@ ASN.1 types
 
 The ASN.1 data description
 `language <https://www.itu.int/rec/dologin_pub.asp?lang=e&id=T-REC-X.208-198811-W!!PDF-E&type=items>`_
-defines a handful of built-in data types. ASN.1 types exhibit different semantics
-(e.g. number vs string) and can be distinguished from each other by
+defines a handful of built-in data types. ASN.1 types exhibit different
+semantics (e.g. number vs string) and can be distinguished from each other by
 :ref:`tags <type.tag>`.
 
 Subtypes can be created on top of base ASN.1 types by adding/overriding the
-tags and/or imposing additional *constraints* on accepted values.
+:ref:`tags <type.tag>` and/or imposing additional
+:ref:`constraints <type.constraint>` on accepted values.
 
 ASN.1 types in pyasn1 are Python objects. One or more ASN.1 types
 comprise a *schema* describing data structures of unbounded complexity.
@@ -95,7 +96,8 @@ New ASN.1 types can be created on top of existing ASN.1 types with
 the *subtype()* method. Desired properties of the new type get
 merged with the corresponding properties of the old type. Main use-case
 for *.subtype()* is to assemble new ASN.1 types by :ref:`tagging <type.tag>`
-or applying additional constraints to accepted type's values.
+or applying additional :ref:`constraints <type.constraint>` to accepted
+type's values.
 
 .. code-block:: python
 
@@ -116,7 +118,20 @@ or applying additional constraints to accepted type's values.
    /pyasn1/type/univ/contents
    /pyasn1/type/char/contents
    /pyasn1/type/useful/contents
+
+ASN.1 type harness
+++++++++++++++++++
+
+The identification and behaviour of ASN.1 types is determined by
+:ref:`tags <type.tag>` and :ref:`constraints <type.constraint>`.
+The inner structure of *constructed* ASN.1 types is defined by
+its :ref:`fields <type.namedtype>` specification.
+
+.. toctree::
+   :maxdepth: 2
+
    /pyasn1/type/tag/contents
+   /pyasn1/type/constraint/contents
    /pyasn1/type/namedtype/contents
    /pyasn1/type/opentype/contents
    /pyasn1/type/namedval/contents
