@@ -70,13 +70,15 @@ class Encoder(encoder.Encoder):
 #:     A Python or pyasn1 object to encode. If Python object is given, `asnSpec`
 #:     parameter is required to guide the encoding process.
 #:
+#: Keyword Args
+#: ------------
 #: asn1Spec:
 #:     Optional ASN.1 schema or value object e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
 #:
 #: Returns
 #: -------
 #: : :py:class:`bytes` (Python 3) or :py:class:`str` (Python 2)
-#:     Given ASN.1 object encoded into BER octetstream
+#:     Given ASN.1 object encoded into BER octet-stream
 #:
 #: Raises
 #: ------

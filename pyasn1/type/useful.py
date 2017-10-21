@@ -127,7 +127,7 @@ class TimeMixIn(object):
 
         Parameters
         ----------
-        dt : :py:class:`datetime.datetime` object
+        dt: :py:class:`datetime.datetime` object
             The `datetime.datetime` object to initialize the |ASN.1| object from
             
         

@@ -646,6 +646,8 @@ class Encoder(object):
 #:     A Python or pyasn1 object to encode. If Python object is given, `asnSpec`
 #:     parameter is required to guide the encoding process.
 #:
+#: Keyword Args
+#: ------------
 #: asn1Spec:
 #:     Optional ASN.1 schema or value object e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
 #:
