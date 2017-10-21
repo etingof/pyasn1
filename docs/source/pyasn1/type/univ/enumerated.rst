@@ -1,4 +1,6 @@
 
+.. _univ.Enumerated:
+
 .. |ASN.1| replace:: Enumerated
 
 |ASN.1| type

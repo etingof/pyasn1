@@ -1,4 +1,6 @@
 
+.. _char.BMPString:
+
 .. |ASN.1| replace:: BMPString
 
 .. |encoding| replace:: utf-16-be

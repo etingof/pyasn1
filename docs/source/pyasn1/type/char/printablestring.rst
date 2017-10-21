@@ -1,4 +1,6 @@
 
+.. _char.PrintableString:
+
 .. |ASN.1| replace:: PrintableString
 
 .. |encoding| replace:: us-ascii

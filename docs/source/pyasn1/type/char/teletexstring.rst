@@ -1,4 +1,6 @@
 
+.. _char.TeletexString:
+
 .. |ASN.1| replace:: TeletexString
 
 .. |encoding| replace:: iso-8859-1

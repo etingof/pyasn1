@@ -1,4 +1,6 @@
 
+.. _univ.Real:
+
 .. |ASN.1| replace:: Real
 
 |ASN.1| type

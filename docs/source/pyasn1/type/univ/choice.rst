@@ -1,4 +1,6 @@
 
+.. _univ.Choice:
+
 .. |ASN.1| replace:: Choice
 
 |ASN.1| type

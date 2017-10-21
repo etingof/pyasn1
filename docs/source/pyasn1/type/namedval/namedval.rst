@@ -1,4 +1,6 @@
 
+.. _namedval.NamedValues:
+
 .. |NamedValues| replace:: NamedValues
 
 |NamedValues|

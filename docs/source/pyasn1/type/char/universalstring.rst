@@ -1,4 +1,6 @@
 
+.. _char.UniversalString:
+
 .. |ASN.1| replace:: UniversalString
 
 .. |encoding| replace:: utf-32-be

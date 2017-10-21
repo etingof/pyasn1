@@ -1,4 +1,6 @@
 
+.. _char.ISO646String:
+
 .. |ASN.1| replace:: ISO646String
 
 .. |encoding| replace:: us-ascii

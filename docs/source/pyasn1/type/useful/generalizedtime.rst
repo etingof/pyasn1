@@ -1,4 +1,6 @@
 
+.. _useful.GeneralizedTime:
+
 .. |ASN.1| replace:: GeneralizedTime
 
 .. |encoding| replace:: iso-8859-1

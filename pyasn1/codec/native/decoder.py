@@ -177,6 +177,8 @@ class Decoder(object):
 #: pyObject: :py:class:`object`
 #:     A scalar or nested Python objects
 #:
+#: Keyword Args
+#: ------------
 #: asn1Spec: any pyasn1 type object e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
 #:     A pyasn1 type object to act as a template guiding the decoder. It is required
 #:     for successful interpretation of Python objects mapping into their ASN.1

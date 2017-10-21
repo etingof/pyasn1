@@ -43,15 +43,17 @@ class Decoder(decoder.Decoder):
 
 #: Turns DER octet stream into an ASN.1 object.
 #:
-#: Takes DER octetstream and decode it into an ASN.1 object
+#: Takes DER octet-stream and decode it into an ASN.1 object
 #: (e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative) which
 #: may be a scalar or an arbitrary nested structure.
 #:
 #: Parameters
 #: ----------
 #: substrate: :py:class:`bytes` (Python 3) or :py:class:`str` (Python 2)
-#:     DER octetstream
+#:     DER octet-stream
 #:
+#: Keyword Args
+#: ------------
 #: asn1Spec: any pyasn1 type object e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
 #:     A pyasn1 type object to act as a template guiding the decoder. Depending on the ASN.1 structure
 #:     being decoded, *asn1Spec* may or may not be required. Most common reason for

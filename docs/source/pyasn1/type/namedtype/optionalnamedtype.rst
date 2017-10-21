@@ -1,4 +1,6 @@
 
+.. _namedtype.OptionalNamedType:
+
 .. |NamedType| replace:: OptionalNamedType
 
 |NamedType|

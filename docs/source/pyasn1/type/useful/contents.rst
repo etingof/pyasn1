@@ -1,6 +1,11 @@
 
+.. _type.useful:
+
 Useful types
 ------------
+
+Some assorted utility ASN.1 types belong to the *useful* group.
+These types are all scalar.
 
 .. toctree::
    :maxdepth: 2

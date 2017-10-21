@@ -1,4 +1,6 @@
 
+.. _univ.Any:
+
 .. |ASN.1| replace:: Any
 
 .. |encoding| replace:: iso-8859-1

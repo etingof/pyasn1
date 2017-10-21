@@ -1,4 +1,6 @@
 
+.. _char.VideotexString:
+
 .. |ASN.1| replace:: VideotexString
 
 .. |encoding| replace:: iso-8859-1

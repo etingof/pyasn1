@@ -23,8 +23,8 @@ class AbstractCharacterString(univ.OctetString):
     |ASN.1| objects are immutable and duck-type Python 2 :class:`unicode` or Python 3 :class:`str`.
     When used in octet-stream context, |ASN.1| type assumes "|encoding|" encoding.
 
-    Parameters
-    ----------
+    Keyword Args
+    ------------
     value: :class:`unicode`, :class:`str`, :class:`bytes` or |ASN.1| object
         unicode object (Python 2) or string (Python 3), alternatively string
         (Python 2) or bytes (Python 3) representing octet-stream of serialized

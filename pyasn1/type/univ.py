@@ -27,9 +27,9 @@ class Integer(base.AbstractSimpleAsn1Item):
 
     |ASN.1| objects are immutable and duck-type Python :class:`int` objects.
 
-    Parameters
-    ----------
-    value : :class:`int`, :class:`str` or |ASN.1| object
+    Keyword Args
+    ------------
+    value: :class:`int`, :class:`str` or |ASN.1| object
         Python integer or string literal or |ASN.1| class instance.
 
     tagSet: :py:class:`~pyasn1.type.tag.TagSet`
@@ -279,9 +279,9 @@ class BitString(base.AbstractSimpleAsn1Item):
     |ASN.1| objects are immutable and duck-type both Python :class:`tuple` (as a tuple
     of bits) and :class:`int` objects.
 
-    Parameters
-    ----------
-    value : :class:`int`, :class:`str` or |ASN.1| object
+    Keyword Args
+    ------------
+    value: :class:`int`, :class:`str` or |ASN.1| object
         Python integer or string literal representing binary or hexadecimal
         number or sequence of integer bits or |ASN.1| object.
 
@@ -640,9 +640,9 @@ class OctetString(base.AbstractSimpleAsn1Item):
     |ASN.1| objects are immutable and duck-type Python 2 :class:`str` or Python 3 :class:`bytes`.
     When used in Unicode context, |ASN.1| type assumes "|encoding|" serialization.
 
-    Parameters
-    ----------
-    value : :class:`str`, :class:`bytes` or |ASN.1| object
+    Keyword Args
+    ------------
+    value: :class:`str`, :class:`bytes` or |ASN.1| object
         string (Python 2) or bytes (Python 3), alternatively unicode object
         (Python 2) or string (Python 3) representing character string to be
         serialized into octets (note `encoding` parameter) or |ASN.1| object.
@@ -927,9 +927,9 @@ class Null(OctetString):
 
     |ASN.1| objects are immutable and duck-type Python :class:`str` objects (always empty).
 
-    Parameters
-    ----------
-    value : :class:`str` or :py:class:`~pyasn1.type.univ.Null` object
+    Keyword Args
+    ------------
+    value: :class:`str` or :py:class:`~pyasn1.type.univ.Null` object
         Python empty string literal or any object that evaluates to `False`
 
     tagSet: :py:class:`~pyasn1.type.tag.TagSet`
@@ -971,8 +971,8 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
 
     |ASN.1| objects are immutable and duck-type Python :class:`tuple` objects (tuple of non-negative integers).
 
-    Parameters
-    ----------
+    Keyword Args
+    ------------
     value: :class:`tuple`, :class:`str` or |ASN.1| object
         Python sequence of :class:`int` or string literal or |ASN.1| object.
 
@@ -1096,8 +1096,8 @@ class Real(base.AbstractSimpleAsn1Item):
     Additionally, |ASN.1| objects behave like a :class:`tuple` in which case its
     elements are mantissa, base and exponent.
 
-    Parameters
-    ----------
+    Keyword Args
+    ------------
     value: :class:`tuple`, :class:`float` or |ASN.1| object
         Python sequence of :class:`int` (representing mantissa, base and
         exponent) or float instance or *Real* class instance.
@@ -1401,8 +1401,8 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
 
     |ASN.1| objects are mutable and duck-type Python :class:`list` objects.
 
-    Parameters
-    ----------
+    Keyword Args
+    ------------
     componentType : :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
         A pyasn1 object representing ASN.1 type allowed within |ASN.1| type
 
@@ -1497,6 +1497,8 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
             case a new component type gets instantiated and appended to the |ASN.1|
             sequence.
 
+        Keyword Args
+        ------------
         instantiate: :class:`bool`
             If `True` (default), inner component will be automatically instantiated.
             If 'False' either existing component or the `noValue` object will be
@@ -1564,6 +1566,8 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
             type gets instantiated (if *componentType* is set, or given ASN.1
             object is taken otherwise) and appended to the |ASN.1| sequence.
 
+        Keyword Args
+        ------------
         value: :class:`object` or :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
             A Python value to initialize |ASN.1| component with (if *componentType* is set)
             or ASN.1 value object to assign to |ASN.1| component.
@@ -1750,8 +1754,8 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
     |ASN.1| objects are mutable and duck-type Python :class:`dict` objects.
 
-    Parameters
-    ----------
+    Keyword Args
+    ------------
     componentType: :py:class:`~pyasn1.type.namedtype.NamedType`
         Object holding named ASN.1 types allowed within this collection
 
@@ -1904,6 +1908,8 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         name: :class:`str`
             |ASN.1| type component name
 
+        Keyword Args
+        ------------
         instantiate: :class:`bool`
             If `True` (default), inner component will be automatically instantiated.
             If 'False' either existing component or the `noValue` object will be
@@ -1938,7 +1944,9 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         name: :class:`str`
             |ASN.1| type component name
 
-        value : :class:`object` or :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
+        Keyword Args
+        ------------
+        value: :class:`object` or :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
             A Python value to initialize |ASN.1| component with (if *componentType* is set)
             or ASN.1 value object to assign to |ASN.1| component.
 
@@ -1980,6 +1988,8 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             component or (if *componentType* is set) new ASN.1 schema object gets
             instantiated.
 
+        Keyword Args
+        ------------
         instantiate: :class:`bool`
             If `True` (default), inner component will be automatically instantiated.
             If 'False' either existing component or the `noValue` object will be
@@ -2050,7 +2060,9 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             otherwise. In the latter case a new component of given ASN.1
             type gets instantiated and appended to |ASN.1| sequence.
 
-        value : :class:`object` or :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
+        Keyword Args
+        ------------
+        value: :class:`object` or :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
             A Python value to initialize |ASN.1| component with (if *componentType* is set)
             or ASN.1 value object to assign to |ASN.1| component.
 
@@ -2294,6 +2306,8 @@ class Set(SequenceAndSetBase):
             Object representing ASN.1 tags to identify one of
             |ASN.1| object component
 
+        Keyword Args
+        ------------
         instantiate: :class:`bool`
             If `True` (default), inner component will be automatically instantiated.
             If 'False' either existing component or the `noValue` object will be
@@ -2327,7 +2341,9 @@ class Set(SequenceAndSetBase):
             Object representing ASN.1 tags to identify one of
             |ASN.1| object component
 
-        value : :class:`object` or :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
+        Keyword Args
+        ------------
+        value: :class:`object` or :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
             A Python value to initialize |ASN.1| component with (if *componentType* is set)
             or ASN.1 value object to assign to |ASN.1| component.
 
@@ -2509,6 +2525,8 @@ class Choice(Set):
             type gets instantiated (if *componentType* is set, or given ASN.1
             object is taken otherwise) and appended to the |ASN.1| sequence.
 
+        Keyword Args
+        ------------
         value: :class:`object` or :py:class:`~pyasn1.type.base.PyAsn1Item` derivative
             A Python value to initialize |ASN.1| component with (if *componentType* is set)
             or ASN.1 value object to assign to |ASN.1| component. Once a new value is

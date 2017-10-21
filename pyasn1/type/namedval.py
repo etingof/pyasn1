@@ -23,26 +23,34 @@ class NamedValues(object):
 
     Parameters
     ----------
-
     \*args: variable number of two-element :py:class:`tuple` 
-    \*\*kwargs: keyword parameters of:
-        
+
         name: :py:class:`str`
-            Value name
-    
+            Value label
+
         value: :py:class:`int`
-                A numerical value
+            Numeric value
+
+    Keyword Args
+    ------------
+    name: :py:class:`str`
+        Value label
+
+    value: :py:class:`int`
+        Numeric value
 
     Examples
     --------
 
-    >>> nv = namedval.NamedValues('a', 'b', ('c', 0), d=1)
-    >>> nv
-    >>> {'c': 0, 'd': 1, 'a': 2, 'b': 3}
-    >>> nv[0]
-    'c'
-    >>> nv['a']
-    2
+    .. code-block:: pycon
+
+        >>> nv = NamedValues('a', 'b', ('c', 0), d=1)
+        >>> nv
+        >>> {'c': 0, 'd': 1, 'a': 2, 'b': 3}
+        >>> nv[0]
+        'c'
+        >>> nv['a']
+        2
     """
     def __init__(self, *args, **kwargs):
         self.__names = {}

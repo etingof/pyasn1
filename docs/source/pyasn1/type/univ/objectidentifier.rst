@@ -1,4 +1,6 @@
 
+.. _univ.ObjectIdentifier:
+
 .. |ASN.1| replace:: ObjectIdentifier
 
 |ASN.1| type

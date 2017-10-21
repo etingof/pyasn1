@@ -1,4 +1,6 @@
 
+.. _namedtype.NamedType:
+
 .. |NamedType| replace:: NamedType
 
 |NamedType|
