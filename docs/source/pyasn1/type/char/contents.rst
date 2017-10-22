@@ -9,8 +9,8 @@ of text types. Most of these types come from the past trying to capture
 the fragments of long-forgotten technologies.
 
 These *character* types are all scalars. They are similar to
-:ref:`univ.OctetString` except that they all operate on text,
-not bytes.
+:ref:`OctetString <univ.OctetString>` except that they all operate on
+text, not bytes.
 
 .. toctree::
    :maxdepth: 2
