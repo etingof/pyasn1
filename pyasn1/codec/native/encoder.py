@@ -209,4 +209,16 @@ class Encoder(object):
 #: ------
 #: :py:class:`~pyasn1.error.PyAsn1Error`
 #:     On encoding errors
+#:
+#: Examples
+#: --------
+#: Encode ASN.1 value object into native Python types
+#:
+#: .. code-block:: pycon
+#:
+#:    >>> seq = SequenceOf(componentType=Integer())
+#:    >>> seq.extend([1, 2, 3])
+#:    >>> encode(seq)
+#:    [1, 2, 3]
+#:
 encode = Encoder(tagMap, typeMap)

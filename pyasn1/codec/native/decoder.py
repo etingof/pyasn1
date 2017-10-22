@@ -193,4 +193,17 @@ class Decoder(object):
 #: ------
 #: :py:class:`~pyasn1.error.PyAsn1Error`
 #:     On decoding errors
+#:
+#: Examples
+#: --------
+#: Decode native Python object into ASN.1 objects with ASN.1 schema
+#:
+#: .. code-block:: pycon
+#:
+#:    >>> seq = SequenceOf(componentType=Integer())
+#:    >>> s, _ = decode([1, 2, 3], asn1Spec=seq)
+#:    >>> print(s.prettyPrint())
+#:    SequenceOf:
+#:     1 2 3
+#:
 decode = Decoder(tagMap, typeMap)

@@ -45,6 +45,28 @@ class Integer(base.AbstractSimpleAsn1Item):
     ------
     :py:class:`~pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
+
+    Examples
+    --------
+
+    .. code-block:: python
+
+        class ErrorCode(Integer):
+            '''
+            ASN.1 specification:
+
+            ErrorCode ::=
+                INTEGER { disk-full(1), no-disk(-1),
+                          disk-not-formatted(2) }
+
+            error ErrorCode ::= disk-full
+            '''
+            namedValues = NamedValues(
+                ('disk-full', 1), ('no-disk', -1),
+                ('disk-not-formatted', 2)
+            )
+
+        error = ErrorCode('disk-full')
     """
     #: Set (on class, not on instance) or return a
     #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
@@ -251,8 +273,45 @@ class Integer(base.AbstractSimpleAsn1Item):
 
 
 class Boolean(Integer):
-    __doc__ = Integer.__doc__
+    """Create |ASN.1| type or object.
 
+    |ASN.1| objects are immutable and duck-type Python :class:`int` objects.
+
+    Keyword Args
+    ------------
+    value: :class:`int`, :class:`str` or |ASN.1| object
+        Python integer or boolean or string literal or |ASN.1| class instance.
+
+    tagSet: :py:class:`~pyasn1.type.tag.TagSet`
+        Object representing non-default ASN.1 tag(s)
+
+    subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
+        Object representing non-default ASN.1 subtype constraint(s)
+
+    namedValues: :py:class:`~pyasn1.type.namedval.NamedValues`
+        Object representing non-default symbolic aliases for numbers
+
+    Raises
+    ------
+    :py:class:`~pyasn1.error.PyAsn1Error`
+        On constraint violation or bad initializer.
+
+    Examples
+    --------
+    .. code-block:: python
+
+        class RoundResult(Boolean):
+            '''
+            ASN.1 specification:
+
+            RoundResult ::= BOOLEAN
+
+            ok RoundResult ::= TRUE
+            ko RoundResult ::= FALSE
+            '''
+        ok = RoundResult(True)
+        ko = RoundResult(False)
+    """
     #: Set (on class, not on instance) or return a
     #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
     #: associated with |ASN.1| type.
@@ -306,6 +365,32 @@ class BitString(base.AbstractSimpleAsn1Item):
     ------
     :py:class:`~pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
+
+    Examples
+    --------
+    .. code-block:: python
+
+        class Rights(BitString):
+            '''
+            ASN.1 specification:
+
+            Rights ::= BIT STRING { user-read(0), user-write(1),
+                                    group-read(2), group-write(3),
+                                    other-read(4), other-write(5) }
+
+            group1 Rights ::= { group-read, group-write }
+            group2 Rights ::= '0011'B
+            group3 Rights ::= '3'H
+            '''
+            namedValues = NamedValues(
+                ('user-read', 0), ('user-write', 1),
+                ('group-read', 2), ('group-write', 3),
+                ('other-read', 4), ('other-write', 5)
+            )
+
+        group1 = Rights(('group-read', 'group-write'))
+        group2 = Rights('0011')
+        group3 = Rights(0x3)
     """
     #: Set (on class, not on instance) or return a
     #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
@@ -491,7 +576,7 @@ class BitString(base.AbstractSimpleAsn1Item):
     @classmethod
     def fromHexString(cls, value, internalFormat=False, prepend=None):
         """Create a |ASN.1| object initialized from the hex string.
-        
+
         Parameters
         ----------
         value: :class:`str`
@@ -661,7 +746,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
     binValue: :py:class:`str`
         Binary string initializer to use instead of the *value*.
         Example: '10110011'.
-        
+
     hexValue: :py:class:`str`
         Hexadecimal string initializer to use instead of the *value*.
         Example: 'DEADBEEF'.
@@ -670,6 +755,22 @@ class OctetString(base.AbstractSimpleAsn1Item):
     ------
     :py:class:`~pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
+
+    Examples
+    --------
+    .. code-block:: python
+
+        class Icon(OctetString):
+            '''
+            ASN.1 specification:
+
+            Icon ::= OCTET STRING
+
+            icon1 Icon ::= '001100010011001000110011'B
+            icon2 Icon ::= '313233'H
+            '''
+        icon1 = Icon.fromBinaryString('001100010011001000110011')
+        icon2 = Icon.fromHexString('313233')
     """
     #: Set (on class, not on instance) or return a
     #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
@@ -939,6 +1040,18 @@ class Null(OctetString):
     ------
     :py:class:`~pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
+
+    Examples
+    --------
+    .. code-block:: python
+
+        class Ack(Null):
+            '''
+            ASN.1 specification:
+
+            Ack ::= NULL
+            '''
+        ack = Ack('')
     """
 
     #: Set (on class, not on instance) or return a
@@ -986,6 +1099,22 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
     ------
     :py:class:`~pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
+
+    Examples
+    --------
+    .. code-block:: python
+
+        class ID(ObjectIdentifier):
+            '''
+            ASN.1 specification:
+
+            ID ::= OBJECT IDENTIFIER
+
+            id-edims ID ::= { joint-iso-itu-t mhs-motif(6) edims(7) }
+            id-bp ID ::= { id-edims 11 }
+            '''
+        id_edims = ID('2.6.7')
+        id_bp = id_edims + (11,)
     """
     #: Set (on class, not on instance) or return a
     #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
@@ -1113,6 +1242,20 @@ class Real(base.AbstractSimpleAsn1Item):
     :py:class:`~pyasn1.error.PyAsn1Error`
         On constraint violation or bad initializer.
 
+    Examples
+    --------
+    .. code-block:: python
+
+        class Pi(Real):
+            '''
+            ASN.1 specification:
+
+            Pi ::= REAL
+
+            pi Pi ::= { mantissa 314159, base 10, exponent -5 }
+
+            '''
+        pi = Pi((314159, 10, -5))
     """
     binEncBase = None  # binEncBase = 16 is recommended for large numbers
 
@@ -1372,8 +1515,50 @@ class Real(base.AbstractSimpleAsn1Item):
 
 
 class Enumerated(Integer):
-    __doc__ = Integer.__doc__
+    """Create |ASN.1| type or object.
 
+    |ASN.1| objects are immutable and duck-type Python :class:`int` objects.
+
+    Keyword Args
+    ------------
+    value: :class:`int`, :class:`str` or |ASN.1| object
+        Python integer or string literal or |ASN.1| class instance.
+
+    tagSet: :py:class:`~pyasn1.type.tag.TagSet`
+        Object representing non-default ASN.1 tag(s)
+
+    subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
+        Object representing non-default ASN.1 subtype constraint(s)
+
+    namedValues: :py:class:`~pyasn1.type.namedval.NamedValues`
+        Object representing non-default symbolic aliases for numbers
+
+    Raises
+    ------
+    :py:class:`~pyasn1.error.PyAsn1Error`
+        On constraint violation or bad initializer.
+
+    Examples
+    --------
+
+    .. code-block:: python
+
+        class RadioButton(Enumerated):
+            '''
+            ASN.1 specification:
+
+            RadioButton ::= ENUMERATED { button1(0), button2(1),
+                                         button3(2) }
+
+            selected-by-default RadioButton ::= button1
+            '''
+            namedValues = NamedValues(
+                ('button1', 0), ('button2', 1),
+                ('button3', 2)
+            )
+
+        selected_by_default = RadioButton('button1')
+    """
     #: Set (on class, not on instance) or return a
     #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
     #: associated with |ASN.1| type.
@@ -1414,8 +1599,23 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
 
     sizeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
         Object representing collection size constraint
-     """
 
+    Examples
+    --------
+
+    .. code-block:: python
+
+        class LotteryDraw(SequenceOf):  #  SetOf is similar
+            '''
+            ASN.1 specification:
+
+            LotteryDraw ::= SEQUENCE OF INTEGER
+            '''
+            componentType = Integer()
+
+        lotteryDraw = LotteryDraw()
+        lotteryDraw.extend([123, 456, 789])
+    """
     def __init__(self, *args, **kwargs):
         # support positional params for backward compatibility
         if args:
@@ -1508,33 +1708,33 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         -------
         : :py:class:`~pyasn1.type.base.PyAsn1Item`
             Instantiate |ASN.1| component type or return existing component value
-            
+
         Examples
         --------
-        
+
         .. code-block:: python
 
             # can also be SetOf
             class MySequenceOf(SequenceOf):
                 componentType = OctetString()
-    
+
             s = MySequenceOf()
-            
+
             # returns noValue
             s.getComponentByPosition(0, instantiate=False)
 
             # sets component #0 to OctetString() ASN.1 schema
             # object and returns it
             s.getComponentByPosition(0, instantiate=True)
-            
+
             # sets component #0 to ASN.1 value object
             s.setComponentByPosition(0, 'ABCD')
 
             # returns OctetString('ABCD') value object
             s.getComponentByPosition(0, instantiate=False)
-            
+
             s.clear()
-            
+
             # returns noValue
             s.getComponentByPosition(0, instantiate=False)
         """
@@ -1666,7 +1866,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         """Indicate that |ASN.1| object represents ASN.1 value.
 
         If *isValue* is `False` then this object represents just ASN.1 schema.
-        
+
         If *isValue* is `True` then, in addition to its ASN.1 schema features,
         this object can also be used like a Python built-in object (e.g. `int`,
         `str`, `dict` etc.).
@@ -1767,6 +1967,31 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
     sizeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
         Object representing collection size constraint
+
+    Examples
+    --------
+
+    .. code-block:: python
+
+        class Description(Sequence):  #  Set is similar
+            '''
+            ASN.1 specification:
+
+            Description ::= SEQUENCE {
+                surname    IA5String,
+                first-name IA5String OPTIONAL,
+                age        INTEGER DEFAULT 40
+            }
+            '''
+            componentType = NamedTypes(
+                NamedType('surname', IA5String()),
+                OptionalNamedType('first-name', IA5String()),
+                DefaultedNamedType('age', Integer(40))
+            )
+
+        descr = Description()
+        descr['surname'] = 'Smith'
+        descr['first-name'] = 'John'
     """
     #: Default :py:class:`~pyasn1.type.namedtype.NamedTypes`
     #: object representing named ASN.1 types allowed within |ASN.1| type
@@ -2002,7 +2227,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
         Examples
         --------
-        
+
         .. code-block:: python
 
             # can also be Set
@@ -2010,24 +2235,24 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                 componentType = NamedTypes(
                     NamedType('id', OctetString())
                 )
-    
+
             s = MySequence()
-            
+
             # returns noValue
             s.getComponentByPosition(0, instantiate=False)
 
             # sets component #0 to OctetString() ASN.1 schema
             # object and returns it
             s.getComponentByPosition(0, instantiate=True)
-            
+
             # sets component #0 to ASN.1 value object
             s.setComponentByPosition(0, 'ABCD')
 
             # returns OctetString('ABCD') value object
             s.getComponentByPosition(0, instantiate=False)
-            
+
             s.clear()
-            
+
             # returns noValue
             s.getComponentByPosition(0, instantiate=False)
         """
@@ -2140,7 +2365,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         """Indicate that |ASN.1| object represents ASN.1 value.
 
         If *isValue* is `False` then this object represents just ASN.1 schema.
-        
+
         If *isValue* is `True` then, in addition to its ASN.1 schema features,
         this object can also be used like a Python built-in object (e.g. `int`,
         `str`, `dict` etc.).
@@ -2389,8 +2614,50 @@ class Set(SequenceAndSetBase):
 
 
 class Choice(Set):
-    __doc__ = Set.__doc__
+    """Create |ASN.1| type.
 
+    |ASN.1| objects are mutable and duck-type Python :class:`dict` objects.
+
+    Keyword Args
+    ------------
+    componentType: :py:class:`~pyasn1.type.namedtype.NamedType`
+        Object holding named ASN.1 types allowed within this collection
+
+    tagSet: :py:class:`~pyasn1.type.tag.TagSet`
+        Object representing non-default ASN.1 tag(s)
+
+    subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
+        Object representing non-default ASN.1 subtype constraint(s)
+
+    sizeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
+        Object representing collection size constraint
+
+    Examples
+    --------
+
+    .. code-block:: python
+
+        class Afters(Choice):
+            '''
+            ASN.1 specification:
+
+            Afters ::= CHOICE {
+                cheese  [0] IA5String,
+                dessert [1] IA5String
+            }
+            '''
+            componentType = NamedTypes(
+                NamedType('cheese', IA5String().subtype(
+                    implicitTag=Tag(tagClassContext, tagFormatSimple, 0)
+                ),
+                NamedType('dessert', IA5String().subtype(
+                    implicitTag=Tag(tagClassContext, tagFormatSimple, 1)
+                )
+            )
+
+        afters = Afters()
+        afters['cheese'] = 'Mascarpone'
+    """
     #: Set (on class, not on instance) or return a
     #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
     #: associated with |ASN.1| type.
@@ -2610,7 +2877,7 @@ class Choice(Set):
         """Indicate that |ASN.1| object represents ASN.1 value.
 
         If *isValue* is `False` then this object represents just ASN.1 schema.
-        
+
         If *isValue* is `True` then, in addition to its ASN.1 schema features,
         this object can also be used like a Python built-in object (e.g. `int`,
         `str`, `dict` etc.).
@@ -2648,8 +2915,67 @@ class Choice(Set):
 
 
 class Any(OctetString):
-    __doc__ = OctetString.__doc__
+    """Create |ASN.1| schema or value object.
 
+    |ASN.1| objects are immutable and duck-type Python 2 :class:`str` or Python 3
+    :class:`bytes`. When used in Unicode context, |ASN.1| type assumes "|encoding|"
+    serialization.
+
+    Keyword Args
+    ------------
+    value: :class:`str`, :class:`bytes` or |ASN.1| object
+        string (Python 2) or bytes (Python 3), alternatively unicode object
+        (Python 2) or string (Python 3) representing character string to be
+        serialized into octets (note `encoding` parameter) or |ASN.1| object.
+
+    tagSet: :py:class:`~pyasn1.type.tag.TagSet`
+        Object representing non-default ASN.1 tag(s)
+
+    subtypeSpec: :py:class:`~pyasn1.type.constraint.ConstraintsIntersection`
+        Object representing non-default ASN.1 subtype constraint(s)
+
+    encoding: :py:class:`str`
+        Unicode codec ID to encode/decode :class:`unicode` (Python 2) or
+        :class:`str` (Python 3) the payload when |ASN.1| object is used
+        in text string context.
+
+    binValue: :py:class:`str`
+        Binary string initializer to use instead of the *value*.
+        Example: '10110011'.
+
+    hexValue: :py:class:`str`
+        Hexadecimal string initializer to use instead of the *value*.
+        Example: 'DEADBEEF'.
+
+    Raises
+    ------
+    :py:class:`~pyasn1.error.PyAsn1Error`
+        On constraint violation or bad initializer.
+
+    Examples
+    --------
+    .. code-block:: python
+
+        class Error(Sequence):
+            '''
+            ASN.1 specification:
+
+            Error ::= SEQUENCE {
+                code      INTEGER,
+                parameter ANY DEFINED BY code  -- Either INTEGER or REAL
+            }
+            '''
+            componentType=NamedTypes(
+                NamedType('code', Integer()),
+                NamedType('parameter', Any(),
+                          openType=OpenType('code', {1: Integer(),
+                                                     2: Real()}))
+            )
+
+        error = Error()
+        error['code'] = 1
+        error['parameter'] = Integer(1234)
+    """
     #: Set (on class, not on instance) or return a
     #: :py:class:`~pyasn1.type.tag.TagSet` object representing ASN.1 tag(s)
     #: associated with |ASN.1| type.

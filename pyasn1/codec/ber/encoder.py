@@ -666,4 +666,24 @@ class Encoder(object):
 #: ------
 #: :py:class:`~pyasn1.error.PyAsn1Error`
 #:     On encoding errors
+#:
+#: Examples
+#: --------
+#: Encode Python value into BER with ASN.1 schema
+#:
+#: .. code-block:: pycon
+#:
+#:    >>> seq = SequenceOf(componentType=Integer())
+#:    >>> encode([1, 2, 3], asn1Spec=seq)
+#:    b'0\t\x02\x01\x01\x02\x01\x02\x02\x01\x03'
+#:
+#: Encode ASN.1 value object into BER
+#:
+#: .. code-block:: pycon
+#:
+#:    >>> seq = SequenceOf(componentType=Integer())
+#:    >>> seq.extend([1, 2, 3])
+#:    >>> encode(seq)
+#:    b'0\t\x02\x01\x01\x02\x01\x02\x02\x01\x03'
+#:
 encode = Encoder(tagMap, typeMap)

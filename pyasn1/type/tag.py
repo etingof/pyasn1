@@ -168,6 +168,23 @@ class TagSet(object):
 
     *superTags: :class:`~pyasn1.type.tag.Tag`
         Additional *Tag* objects taking part in subtyping.
+
+    Examples
+    --------
+    .. code-block:: python
+
+        class OrderNumber(NumericString):
+            '''
+            ASN.1 specification
+
+            Order-number ::=
+                [APPLICATION 5] IMPLICIT NumericString
+            '''
+            tagSet = NumericString.tagSet.tagImplicitly(
+                Tag(tagClassApplication, tagFormatSimple, 5)
+            )
+
+        orderNumber = OrderNumber('1234')
     """
     def __init__(self, baseTag=(), *superTags):
         self.__baseTag = baseTag

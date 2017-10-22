@@ -1355,6 +1355,28 @@ class Decoder(object):
 #: ------
 #: :py:class:`~pyasn1.error.PyAsn1Error`
 #:     On decoding errors
+#:
+#: Examples
+#: --------
+#: Decode BER serialisation without ASN.1 schema
+#:
+#: .. code-block:: pycon
+#:
+#:    >>> s, _ = decode(b'0\t\x02\x01\x01\x02\x01\x02\x02\x01\x03')
+#:    >>> print(s.prettyPrint())
+#:    SequenceOf:
+#:     1 2 3
+#:
+#: Decode BER serialisation with ASN.1 schema
+#:
+#: .. code-block:: pycon
+#:
+#:    >>> seq = SequenceOf(componentType=Integer())
+#:    >>> s, _ = decode(b'0\t\x02\x01\x01\x02\x01\x02\x02\x01\x03', asn1Spec=seq)
+#:    >>> print(s.prettyPrint())
+#:    SequenceOf:
+#:     1 2 3
+#:
 decode = Decoder(tagMap, typeMap)
 
 # XXX
