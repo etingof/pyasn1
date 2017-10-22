@@ -50,7 +50,7 @@ source_suffix = '.rst'
 master_doc = 'contents'
 
 # General information about the project.
-project = u'ASN.1 Library for Python'
+project = u'PyASN1'
 # noinspection PyShadowingBuiltins
 copyright = u'2005-2017, Ilya Etingof <etingof@gmail.com>'
 author = u'Ilya Etingof <etingof@gmail.com>'
@@ -117,7 +117,13 @@ html_theme = 'alabaster'
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-# html_theme_options = {}
+html_theme_options = {
+    'description': 'ASN.1 types and codecs',
+    'show_powered_by': False,
+    'github_user': 'etingof',
+    'github_repo': 'pyasn1',
+    'fixed_sidebar': True,
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
@@ -142,12 +148,12 @@ html_title = "PyASN1"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-if 'PYASN1DEV' in os.environ:
-    html_static_path = ['.static']
-
-# Custom CSS theme
-if 'PYASN1DEV' in os.environ:
-    html_style = 'css/rtdimproved.css'
+# if 'PYASN1DEV' in os.environ:
+#     html_static_path = ['.static']
+#
+# # Custom CSS theme
+# if 'PYASN1DEV' in os.environ:
+#     html_style = 'css/rtdimproved.css'
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
@@ -212,9 +218,9 @@ html_show_sphinx = False
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'pyasn1doc'
 
-html_context = {
-    'include_analytics': 'PYASN1DEV' in os.environ
-}
+# html_context = {
+#     'include_analytics': 'PYASN1DEV' in os.environ
+# }
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -318,3 +324,5 @@ napoleon_use_admonition_for_references = False
 napoleon_use_ivar = False
 napoleon_use_param = False
 napoleon_use_rtype = False
+
+# Alabaster theme
