@@ -3,7 +3,7 @@ ASN.1 library for Python
 ========================
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
 
 Abstract Syntax Notation One (`ASN.1
 <http://en.wikipedia.org/wiki/Abstract_Syntax_Notation_1x>`_) is a
@@ -82,68 +82,29 @@ and oftentimes fell victim to its edge cases.
 On the bright side, ASN.1 has been around for a long time, it is well understood
 and security reviewed.
 
-Library documentation
----------------------
-
-As of this moment, pyasn1 library implements all ASN.1 data
-types as Python objects in accordance with X.208 standard. Later,
-post-1995, revision (X.680) introduced some changes to the schema
-language which may not be fully supported by pyasn1. Aside from data
-types a collection of data transformation codecs comes with pyasn1 package.
-
-As for ASN.1 schema language, pyasn1 package does
-not ship any compiler for it. However, there's a tool called
-`asn1late <https://github.com/kimgr/asn1ate>`_ which is an ASN.1
-grammar parser paired to code generator capable of generating pyasn1
-code. So this is an alternative (or at least a good start) to manual
-implementation of pyasn1 classes from ASN.1 specification.
-
-Both `pyasn1 <https://github.com/etingof/pyasn1>`_ and
-`pyasn1-modules <https://github.com/etingof/pyasn1-modules>`_ libraries
-can be used out-of-the-box with Python versions 2.4 through 3.6.
-No external dependencies required.
+Documentation
+-------------
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
 
    /pyasn1/contents
 
 Use case
 --------
 
-   .. toctree::
-      :maxdepth: 3
+.. toctree::
+   :maxdepth: 2
 
-      /example-use-case
+   /example-use-case
 
 Download & Install
 ------------------
 
-The PyASN1 software is provided under terms and conditions of BSD-style
-:ref:`license`, and can be freely downloaded from `Github <https://github.com/etingof/pyasn1>`_
-or `PyPI <http://pypi.python.org/pypi/pyasn1/>`_.
+.. toctree::
+   :maxdepth: 2
 
-It is pure-Python and has no dependencies. Considering how much industrial or finance
-software can be stuck with an old platform (think RHEL 5), we struggle to maintain its
-compatibility back to the very pre-historic Python (which is 2.4!).
-
-The best way to obtain PyASN1 is by running `pip`:
-
-.. code-block:: bash
-
-   $ pip install pyasn1
-
-or
-
-.. code-block:: bash
-
-   $ easy_install pyasn1
-
-You may also want to use `pyasn1-modules`:
-
-.. code-block:: bash
-
-   $ pip install pyasn1-modules
+   /download
 
 Changes
 -------
@@ -152,10 +113,20 @@ All changes and release history is maintained in changelog.  There you
 could also download the latest unreleased pyasn1 tarball containing
 the latest fixes and improvements.
 
-   .. toctree::
-      :maxdepth: 1
+.. toctree::
+   :maxdepth: 1
 
-      /changelog
+   /changelog
+
+License
+-------
+
+The PyASN1 software is distributed under 2-clause BSD License.
+
+.. toctree::
+   :maxdepth: 2
+
+   /license
 
 Getting help
 ------------
