@@ -114,7 +114,7 @@ html_theme = 'alabaster'
 # documentation.
 html_theme_options = {
     'logo': 'logo.svg',
-    'description': '<p align=center><i>Brought by SNMP Labs</i></p>',
+    'description': '<p align=center><i>Brewing free software</i></p>',
     'show_powered_by': False,
     'github_user': 'etingof',
     'github_repo': 'pyasn1',
