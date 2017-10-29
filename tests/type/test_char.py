@@ -5,6 +5,7 @@
 # License: http://pyasn1.sf.net/license.html
 #
 import sys
+import pickle
 
 try:
     import unittest2 as unittest
@@ -110,6 +111,21 @@ class AbstractStringTestCase(object):
     if sys.version_info[:2] > (2, 4):
         def testReverse(self):
             assert list(reversed(self.asn1String)) == list(reversed(self.pythonString))
+
+    def testSchemaPickling(self):
+        old_asn1 = self.asn1Type()
+        serialized = pickle.dumps(old_asn1)
+        assert serialized
+        new_asn1 = pickle.loads(serialized)
+        assert type(new_asn1) == self.asn1Type
+        assert old_asn1.isSameTypeWith(new_asn1)
+
+    def testValuePickling(self):
+        old_asn1 = self.asn1String
+        serialized = pickle.dumps(old_asn1)
+        assert serialized
+        new_asn1 = pickle.loads(serialized)
+        assert new_asn1 == self.asn1String
 
 
 class VisibleStringTestCase(AbstractStringTestCase, BaseTestCase):
