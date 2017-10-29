@@ -156,8 +156,9 @@ class NoValue(object):
     *PyAsn1Error* exception.
     """
     skipMethods = set(
-        # attributes
-        ('__getattribute__',
+        ('__slots__',
+         # attributes
+         '__getattribute__',
          '__getattr__',
          '__setattr__',
          '__delattr__',
