@@ -2549,7 +2549,7 @@ class Choice(Set):
         Set.setComponentByPosition(self, idx, value, verifyConstraints, matchTags, matchConstraints)
         self._currentIdx = idx
         if oldIdx is not None and oldIdx != idx:
-            self._componentValues[oldIdx] = None
+            self._componentValues[oldIdx] = noValue
         return self
 
     @property
