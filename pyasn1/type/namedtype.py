@@ -13,7 +13,7 @@ __all__ = ['NamedType', 'OptionalNamedType', 'DefaultedNamedType', 'NamedTypes']
 try:
     any
 
-except AttributeError:
+except NameError:
     any = lambda x: bool(filter(bool, x))
 
 
