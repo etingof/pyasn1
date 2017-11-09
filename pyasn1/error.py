@@ -15,8 +15,8 @@ class PyAsn1Error(Exception):
 
 class ValueConstraintError(PyAsn1Error):
     """Create pyasn1 exception object
-    
-    The `ValueConstraintError` exception indicates an ASN.1 value 
+
+    The `ValueConstraintError` exception indicates an ASN.1 value
     constraint violation.
     """
 

@@ -61,7 +61,7 @@ class TimeMixIn(object):
         Returns
         -------
         :
-            new instance of :py:class:`datetime.datetime` object            
+            new instance of :py:class:`datetime.datetime` object
         """
         text = str(self)
         if text.endswith('Z'):
@@ -128,9 +128,9 @@ class TimeMixIn(object):
         Parameters
         ----------
         dt: :py:class:`datetime.datetime` object
-            The `datetime.datetime` object to initialize the |ASN.1| object from
-            
-        
+            The `datetime.datetime` object to initialize the |ASN.1| object
+            from
+
         Returns
         -------
         :
