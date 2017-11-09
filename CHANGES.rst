@@ -22,6 +22,7 @@ Revision 0.4.1, released XX-10-2017
   opposed to constructed class).
 - Fixed CER/DER encoders to respect tagged CHOICE when ordering
   SET components
+- Fixed ASN.1 types not to interfere with the Pickle protocol
 
 Revision 0.3.7, released 04-10-2017
 -----------------------------------

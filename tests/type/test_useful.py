@@ -7,6 +7,7 @@
 import sys
 import datetime
 from copy import deepcopy
+import pickle
 
 try:
     import unittest2 as unittest
@@ -78,6 +79,24 @@ class GeneralizedTimeTestCase(BaseTestCase):
         assert dt == deepcopy(dt)
 
 
+class GeneralizedTimePicklingTestCase(unittest.TestCase):
+
+    def testSchemaPickling(self):
+        old_asn1 = useful.GeneralizedTime()
+        serialized = pickle.dumps(old_asn1)
+        assert serialized
+        new_asn1 = pickle.loads(serialized)
+        assert type(new_asn1) == useful.GeneralizedTime
+        assert old_asn1.isSameTypeWith(new_asn1)
+
+    def testValuePickling(self):
+        old_asn1 = useful.GeneralizedTime("20170916234254+0130")
+        serialized = pickle.dumps(old_asn1)
+        assert serialized
+        new_asn1 = pickle.loads(serialized)
+        assert new_asn1 == old_asn1
+
+
 class UTCTimeTestCase(BaseTestCase):
 
     def testFromDateTime(self):
@@ -97,6 +116,25 @@ class UTCTimeTestCase(BaseTestCase):
 
     def testToDateTime4(self):
         assert datetime.datetime(2017, 7, 11, 0, 1) == useful.UTCTime('1707110001').asDateTime
+
+
+class UTCTimePicklingTestCase(unittest.TestCase):
+
+    def testSchemaPickling(self):
+        old_asn1 = useful.UTCTime()
+        serialized = pickle.dumps(old_asn1)
+        assert serialized
+        new_asn1 = pickle.loads(serialized)
+        assert type(new_asn1) == useful.UTCTime
+        assert old_asn1.isSameTypeWith(new_asn1)
+
+    def testValuePickling(self):
+        old_asn1 = useful.UTCTime("170711000102")
+        serialized = pickle.dumps(old_asn1)
+        assert serialized
+        new_asn1 = pickle.loads(serialized)
+        assert new_asn1 == old_asn1
+
 
 suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])
 

@@ -1,6 +1,30 @@
 
 .. _pyasn1:
 
+Library documentation
+=====================
+
+As of this moment, pyasn1 library implements all ASN.1 data
+types as Python objects in accordance with X.208 standard. Later,
+post-1995, revision (X.680) introduced some changes to the schema
+language which may not be fully supported by pyasn1. Aside from data
+types a collection of data transformation codecs comes with the
+pyasn1 package.
+
+As for ASN.1 schema language, pyasn1 package does
+not ship any compiler for it. However, there's a tool called
+`asn1late <https://github.com/kimgr/asn1ate>`_ which is an ASN.1
+grammar parser paired to code generator capable of generating pyasn1
+code. So this is an alternative (or at least a good start) to manual
+implementation of pyasn1 classes from ASN.1 specification.
+
+Both `pyasn1 <https://github.com/etingof/pyasn1>`_ and
+`pyasn1-modules <https://github.com/etingof/pyasn1-modules>`_ libraries
+can be used out-of-the-box with Python versions 2.4 through 3.6.
+No external dependencies required.
+
+.. _pyasn1-types:
+
 ASN.1 types
 -----------
 
@@ -135,6 +159,8 @@ its :ref:`fields <type.namedtype>` specification.
    /pyasn1/type/namedtype/contents
    /pyasn1/type/opentype/contents
    /pyasn1/type/namedval/contents
+
+.. _pyasn1-codecs:
 
 Serialisation codecs
 --------------------
