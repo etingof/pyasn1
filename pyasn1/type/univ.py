@@ -492,7 +492,7 @@ class BitString(base.AbstractSimpleAsn1Item):
     @classmethod
     def fromHexString(cls, value, internalFormat=False, prepend=None):
         """Create a |ASN.1| object initialized from the hex string.
-        
+
         Parameters
         ----------
         value: :class:`str`
@@ -662,7 +662,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
     binValue: :py:class:`str`
         Binary string initializer to use instead of the *value*.
         Example: '10110011'.
-        
+
     hexValue: :py:class:`str`
         Hexadecimal string initializer to use instead of the *value*.
         Example: 'DEADBEEF'.
@@ -1509,33 +1509,33 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         -------
         : :py:class:`~pyasn1.type.base.PyAsn1Item`
             Instantiate |ASN.1| component type or return existing component value
-            
+
         Examples
         --------
-        
+
         .. code-block:: python
 
             # can also be SetOf
             class MySequenceOf(SequenceOf):
                 componentType = OctetString()
-    
+
             s = MySequenceOf()
-            
+
             # returns noValue
             s.getComponentByPosition(0, instantiate=False)
 
             # sets component #0 to OctetString() ASN.1 schema
             # object and returns it
             s.getComponentByPosition(0, instantiate=True)
-            
+
             # sets component #0 to ASN.1 value object
             s.setComponentByPosition(0, 'ABCD')
 
             # returns OctetString('ABCD') value object
             s.getComponentByPosition(0, instantiate=False)
-            
+
             s.clear()
-            
+
             # returns noValue
             s.getComponentByPosition(0, instantiate=False)
         """
@@ -1667,7 +1667,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         """Indicate that |ASN.1| object represents ASN.1 value.
 
         If *isValue* is `False` then this object represents just ASN.1 schema.
-        
+
         If *isValue* is `True` then, in addition to its ASN.1 schema features,
         this object can also be used like a Python built-in object (e.g. `int`,
         `str`, `dict` etc.).
@@ -2003,7 +2003,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
         Examples
         --------
-        
+
         .. code-block:: python
 
             # can also be Set
@@ -2011,24 +2011,24 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                 componentType = NamedTypes(
                     NamedType('id', OctetString())
                 )
-    
+
             s = MySequence()
-            
+
             # returns noValue
             s.getComponentByPosition(0, instantiate=False)
 
             # sets component #0 to OctetString() ASN.1 schema
             # object and returns it
             s.getComponentByPosition(0, instantiate=True)
-            
+
             # sets component #0 to ASN.1 value object
             s.setComponentByPosition(0, 'ABCD')
 
             # returns OctetString('ABCD') value object
             s.getComponentByPosition(0, instantiate=False)
-            
+
             s.clear()
-            
+
             # returns noValue
             s.getComponentByPosition(0, instantiate=False)
         """
@@ -2141,7 +2141,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         """Indicate that |ASN.1| object represents ASN.1 value.
 
         If *isValue* is `False` then this object represents just ASN.1 schema.
-        
+
         If *isValue* is `True` then, in addition to its ASN.1 schema features,
         this object can also be used like a Python built-in object (e.g. `int`,
         `str`, `dict` etc.).
@@ -2550,7 +2550,7 @@ class Choice(Set):
         Set.setComponentByPosition(self, idx, value, verifyConstraints, matchTags, matchConstraints)
         self._currentIdx = idx
         if oldIdx is not None and oldIdx != idx:
-            self._componentValues[oldIdx] = None
+            self._componentValues[oldIdx] = noValue
         return self
 
     @property
@@ -2611,7 +2611,7 @@ class Choice(Set):
         """Indicate that |ASN.1| object represents ASN.1 value.
 
         If *isValue* is `False` then this object represents just ASN.1 schema.
-        
+
         If *isValue* is `True` then, in addition to its ASN.1 schema features,
         this object can also be used like a Python built-in object (e.g. `int`,
         `str`, `dict` etc.).

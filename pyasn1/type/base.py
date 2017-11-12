@@ -94,7 +94,7 @@ class Asn1ItemBase(Asn1Item):
 
     def isSuperTypeOf(self, other, matchTags=True, matchConstraints=True):
         """Examine |ASN.1| type for subtype relationship with other ASN.1 type.
-        
+
         ASN.1 tags (:py:mod:`~pyasn1.type.tag`) and constraints
         (:py:mod:`~pyasn1.type.constraint`) are examined when carrying
         out ASN.1 types comparison.
@@ -104,7 +104,7 @@ class Asn1ItemBase(Asn1Item):
         Parameters
         ----------
             other: a pyasn1 type object
-                Class instance representing ASN.1 type. 
+                Class instance representing ASN.1 type.
 
         Returns
         -------
@@ -149,7 +149,7 @@ class NoValue(object):
 
     Only ASN.1 schema-related operations can be performed on ASN.1
     schema objects.
-    
+
     Warning
     -------
     Any operation attempted on the *noValue* object will raise the
@@ -283,7 +283,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         """Indicate that |ASN.1| object represents ASN.1 value.
 
         If *isValue* is `False` then this object represents just ASN.1 schema.
-        
+
         If *isValue* is `True` then, in addition to its ASN.1 schema features,
         this object can also be used like a Python built-in object (e.g. `int`,
         `str`, `dict` etc.).
@@ -373,7 +373,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         Returns
         -------
         :
-            new instance of |ASN.1| schema or value object 
+            new instance of |ASN.1| schema or value object
 
         Note
         ----
@@ -575,7 +575,7 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
             Add ASN.1 constraints object to one of the `self`'s, then
             use the result as new object's ASN.1 constraints.
 
-        
+
         Returns
         -------
         :
