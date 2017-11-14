@@ -13,7 +13,7 @@
    .. note::
 
         The |ASN.1| type models a collection of named ASN.1 components.
-        Ordering of the components **is** preserved upon de/serialization.
+        Ordering of the components **is** preserved upon de/serialisation.
 
    .. automethod:: pyasn1.type.univ.Sequence.clone(componentType=None, tagSet=tagSet(), subtypeSpec=ConstraintsIntersection())
    .. automethod:: pyasn1.type.univ.Sequence.subtype(componentType=None, implicitTag=Tag(), explicitTag=Tag(),subtypeSpec=ConstraintsIntersection())

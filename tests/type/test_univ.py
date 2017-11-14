@@ -301,17 +301,17 @@ class IntegerPicklingTestCase(unittest.TestCase):
 
     def testSchemaPickling(self):
         old_asn1 = univ.Integer()
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert type(new_asn1) == univ.Integer
         assert old_asn1.isSameTypeWith(new_asn1)
 
     def testValuePickling(self):
         old_asn1 = univ.Integer(-123)
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert new_asn1 == -123
 
 
@@ -351,17 +351,17 @@ class BooleanPicklingTestCase(unittest.TestCase):
 
     def testSchemaPickling(self):
         old_asn1 = univ.Boolean()
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert type(new_asn1) == univ.Boolean
         assert old_asn1.isSameTypeWith(new_asn1)
 
     def testValuePickling(self):
         old_asn1 = univ.Boolean(True)
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert new_asn1 == True
 
 
@@ -448,17 +448,17 @@ class BitStringPicklingTestCase(unittest.TestCase):
 
     def testSchemaPickling(self):
         old_asn1 = univ.BitString()
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert type(new_asn1) == univ.BitString
         assert old_asn1.isSameTypeWith(new_asn1)
 
     def testValuePickling(self):
         old_asn1 = univ.BitString((1, 0, 1, 0))
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert new_asn1 == (1, 0, 1, 0)
 
 
@@ -479,7 +479,7 @@ class OctetStringWithUnicodeMixIn(object):
             assert univ.OctetString(univ.OctetString(self.encodedPythonString)) == self.encodedPythonString
             assert univ.OctetString(univ.Integer(123)) == univ.OctetString('123')
 
-    def testSerialized(self):
+    def testSerialised(self):
         if sys.version_info[0] < 3:
             assert str(univ.OctetString(self.encodedPythonString, encoding=self.encoding)) == self.encodedPythonString, '__str__() fails'
         else:
@@ -604,17 +604,17 @@ class OctetStringPicklingTestCase(unittest.TestCase):
 
     def testSchemaPickling(self):
         old_asn1 = univ.BitString()
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert type(new_asn1) == univ.BitString
         assert old_asn1.isSameTypeWith(new_asn1)
 
     def testValuePickling(self):
         old_asn1 = univ.BitString((1, 0, 1, 0))
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert new_asn1 == (1, 0, 1, 0)
 
 
@@ -671,17 +671,17 @@ class NullPicklingTestCase(unittest.TestCase):
 
     def testSchemaPickling(self):
         old_asn1 = univ.Null()
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert type(new_asn1) == univ.Null
         assert old_asn1.isSameTypeWith(new_asn1)
 
     def testValuePickling(self):
         old_asn1 = univ.Null('')
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert not new_asn1
 
 
@@ -822,17 +822,17 @@ class RealPicklingTestCase(unittest.TestCase):
 
     def testSchemaPickling(self):
         old_asn1 = univ.Real()
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert type(new_asn1) == univ.Real
         assert old_asn1.isSameTypeWith(new_asn1)
 
     def testValuePickling(self):
         old_asn1 = univ.Real((1, 10, 3))
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert new_asn1 == 1000
 
 
@@ -900,17 +900,17 @@ class ObjectIdentifierPicklingTestCase(unittest.TestCase):
 
     def testSchemaPickling(self):
         old_asn1 = univ.ObjectIdentifier()
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert type(new_asn1) == univ.ObjectIdentifier
         assert old_asn1.isSameTypeWith(new_asn1)
 
     def testValuePickling(self):
         old_asn1 = univ.ObjectIdentifier('2.3.1.1.2')
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert new_asn1 == (2, 3, 1, 1, 2)
 
 
@@ -1158,18 +1158,18 @@ class SequenceOfPicklingTestCase(unittest.TestCase):
 
     def testSchemaPickling(self):
         old_asn1 = univ.SequenceOf(componentType=univ.OctetString())
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert type(new_asn1) == univ.SequenceOf
         assert old_asn1.isSameTypeWith(new_asn1)
 
     def testValuePickling(self):
         old_asn1 = univ.SequenceOf(componentType=univ.OctetString())
         old_asn1[0] = 'test'
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert new_asn1
         assert new_asn1 == [str2octs('test')]
 
@@ -1484,9 +1484,9 @@ class SequencePicklingTestCase(unittest.TestCase):
                 namedtype.NamedType('name', univ.OctetString())
             )
         )
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert type(new_asn1) == univ.Sequence
         assert old_asn1.isSameTypeWith(new_asn1)
 
@@ -1497,9 +1497,9 @@ class SequencePicklingTestCase(unittest.TestCase):
             )
         )
         old_asn1['name'] = 'test'
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert new_asn1
         assert new_asn1['name'] == str2octs('test')
 
@@ -1537,18 +1537,18 @@ class SetOfPicklingTestCase(unittest.TestCase):
 
     def testSchemaPickling(self):
         old_asn1 = univ.SetOf(componentType=univ.OctetString())
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert type(new_asn1) == univ.SetOf
         assert old_asn1.isSameTypeWith(new_asn1)
 
     def testValuePickling(self):
         old_asn1 = univ.SetOf(componentType=univ.OctetString())
         old_asn1[0] = 'test'
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert new_asn1
         assert new_asn1 == [str2octs('test')]
 
@@ -1647,9 +1647,9 @@ class SetPicklingTestCase(unittest.TestCase):
                 namedtype.NamedType('name', univ.OctetString())
             )
         )
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert type(new_asn1) == univ.Set
         assert old_asn1.isSameTypeWith(new_asn1)
 
@@ -1660,9 +1660,9 @@ class SetPicklingTestCase(unittest.TestCase):
             )
         )
         old_asn1['name'] = 'test'
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert new_asn1
         assert new_asn1['name'] == str2octs('test')
 
@@ -1823,9 +1823,9 @@ class ChoicePicklingTestCase(unittest.TestCase):
                 namedtype.NamedType('id', univ.Integer())
             )
         )
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert type(new_asn1) == univ.Choice
         assert old_asn1.isSameTypeWith(new_asn1)
 
@@ -1837,9 +1837,9 @@ class ChoicePicklingTestCase(unittest.TestCase):
             )
         )
         old_asn1['name'] = 'test'
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert new_asn1
         assert new_asn1['name'] == str2octs('test')
 

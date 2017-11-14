@@ -83,17 +83,17 @@ class GeneralizedTimePicklingTestCase(unittest.TestCase):
 
     def testSchemaPickling(self):
         old_asn1 = useful.GeneralizedTime()
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert type(new_asn1) == useful.GeneralizedTime
         assert old_asn1.isSameTypeWith(new_asn1)
 
     def testValuePickling(self):
         old_asn1 = useful.GeneralizedTime("20170916234254+0130")
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert new_asn1 == old_asn1
 
 
@@ -122,17 +122,17 @@ class UTCTimePicklingTestCase(unittest.TestCase):
 
     def testSchemaPickling(self):
         old_asn1 = useful.UTCTime()
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert type(new_asn1) == useful.UTCTime
         assert old_asn1.isSameTypeWith(new_asn1)
 
     def testValuePickling(self):
         old_asn1 = useful.UTCTime("170711000102")
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert new_asn1 == old_asn1
 
 

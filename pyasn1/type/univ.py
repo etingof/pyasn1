@@ -724,14 +724,14 @@ class OctetString(base.AbstractSimpleAsn1Item):
     """Create |ASN.1| schema or value object.
 
     |ASN.1| objects are immutable and duck-type Python 2 :class:`str` or Python 3 :class:`bytes`.
-    When used in Unicode context, |ASN.1| type assumes "|encoding|" serialization.
+    When used in Unicode context, |ASN.1| type assumes "|encoding|" serialisation.
 
     Keyword Args
     ------------
     value: :class:`str`, :class:`bytes` or |ASN.1| object
         string (Python 2) or bytes (Python 3), alternatively unicode object
         (Python 2) or string (Python 3) representing character string to be
-        serialized into octets (note `encoding` parameter) or |ASN.1| object.
+        serialised into octets (note `encoding` parameter) or |ASN.1| object.
 
     tagSet: :py:class:`~pyasn1.type.tag.TagSet`
         Object representing non-default ASN.1 tag(s)
@@ -1883,7 +1883,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         There is an important distinction between PyASN1 schema and value objects.
         The PyASN1 schema objects can only participate in ASN.1 schema-related
         operations (e.g. defining or testing the structure of the data). Most
-        obvious uses of ASN.1 schema is to guide serialization codecs whilst
+        obvious uses of ASN.1 schema is to guide serialisation codecs whilst
         encoding/decoding serialised ASN.1 contents.
 
         The PyASN1 value objects can **additionally** participate in many operations
@@ -2382,7 +2382,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         There is an important distinction between PyASN1 schema and value objects.
         The PyASN1 schema objects can only participate in ASN.1 schema-related
         operations (e.g. defining or testing the structure of the data). Most
-        obvious uses of ASN.1 schema is to guide serialization codecs whilst
+        obvious uses of ASN.1 schema is to guide serialisation codecs whilst
         encoding/decoding serialised ASN.1 contents.
 
         The PyASN1 value objects can **additionally** participate in many operations
@@ -2894,7 +2894,7 @@ class Choice(Set):
         There is an important distinction between PyASN1 schema and value objects.
         The PyASN1 schema objects can only participate in ASN.1 schema-related
         operations (e.g. defining or testing the structure of the data). Most
-        obvious uses of ASN.1 schema is to guide serialization codecs whilst
+        obvious uses of ASN.1 schema is to guide serialisation codecs whilst
         encoding/decoding serialised ASN.1 contents.
 
         The PyASN1 value objects can **additionally** participate in many operations
@@ -2920,14 +2920,14 @@ class Any(OctetString):
 
     |ASN.1| objects are immutable and duck-type Python 2 :class:`str` or Python 3
     :class:`bytes`. When used in Unicode context, |ASN.1| type assumes "|encoding|"
-    serialization.
+    serialisation.
 
     Keyword Args
     ------------
     value: :class:`str`, :class:`bytes` or |ASN.1| object
         string (Python 2) or bytes (Python 3), alternatively unicode object
         (Python 2) or string (Python 3) representing character string to be
-        serialized into octets (note `encoding` parameter) or |ASN.1| object.
+        serialised into octets (note `encoding` parameter) or |ASN.1| object.
 
     tagSet: :py:class:`~pyasn1.type.tag.TagSet`
         Object representing non-default ASN.1 tag(s)

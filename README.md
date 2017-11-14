@@ -26,10 +26,10 @@ Features
 Why using pyasn1
 ----------------
 
-ASN.1 solves the data serialization problem. This solution was
+ASN.1 solves the data serialisation problem. This solution was
 designed long ago by the wise Ancients. Back then, they did not
 have the luxury of wasting bits. That is why ASN.1 is designed
-to serialize data structures of unbounded complexity into
+to serialise data structures of unbounded complexity into
 something compact and efficient when it comes to processing
 the data.
 
@@ -97,8 +97,8 @@ Record:
 >>>
 ```
 
-Part of the power of ASN.1 comes from its serialization features. You
-can serialize your data structure and send it over the network.
+Part of the power of ASN.1 comes from its serialisation features. You
+can serialise your data structure and send it over the network.
 
 ```python
 >>> from pyasn1.codec.der.encoder import encode
@@ -107,7 +107,7 @@ can serialize your data structure and send it over the network.
 00000: 30 07 02 01 7B 80 02 01 41
 ```
 
-Conversely, you can turn serialized ASN.1 content, as received from
+Conversely, you can turn serialised ASN.1 content, as received from
 network or read from a file, into a Python object which you can
 introspect, modify, encode and send back.
 
@@ -153,9 +153,9 @@ Record:
 >>>
 ```
 
-With ASN.1 design, serialization codecs are decoupled from data objects,
+With ASN.1 design, serialisation codecs are decoupled from data objects,
 so you could turn every single ASN.1 object into many different 
-serialized forms. As of this moment, pyasn1 supports BER, DER, CER and
+serialised forms. As of this moment, pyasn1 supports BER, DER, CER and
 Python built-ins codecs. The extremely compact PER encoding is expected
 to be introduced in the upcoming pyasn1 release.
 

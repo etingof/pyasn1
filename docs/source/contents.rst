@@ -18,10 +18,10 @@ What is ASN.1
 -------------
 
 ASN.1 is a large, arguably over-engineered and extremely old data modelling and
-serialization tool. It is probably among the first serialization protocols in
+serialisation tool. It is probably among the first serialisation protocols in
 the history of computer science and technology.
 
-ASN.1 started its life over 30 years ago as a serialization mechanism for the first
+ASN.1 started its life over 30 years ago as a serialisation mechanism for the first
 electronic mail (known as X.400). Later on if was split off the e-mail application
 and become a stand-alone tech still being actively supported by its designers
 and widely used in industry and technology.
@@ -30,7 +30,7 @@ Since then ASN.1 is sort of haunted by its relations with the OSI model -- the
 first, unsuccessful, version of the Internet. You can read many interesting
 `discussions <https://news.ycombinator.com/item?id=8871453>`_ on that topic.
 
-In the following years, generations of software engineers tackled the serialization
+In the following years, generations of software engineers tackled the serialisation
 problem many times. We can see that in Google's `ProtoBuffers <https://developers.google.com/protocol-buffers/>`_
 or `FlatBuffers <https://google.github.io/flatbuffers/>`_, for example.
 Interestingly, many new takes on binary protocol design do not depart
@@ -44,7 +44,7 @@ Looking at what ASN.1 has to offer, it has three loosely coupled parts:
   (integers, bits, strings, arrays and records) that can be used for describing
   arbitrarily complex, nested data structures.
 
-* Serialization protocols: the above data structures could be converted into a
+* Serialisation protocols: the above data structures could be converted into a
   series of octets for storage or transmission over the wire as well as
   recovered back into their structured form. The system is fully agnostic
   to hardware architectures differences.

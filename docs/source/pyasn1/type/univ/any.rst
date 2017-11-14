@@ -16,7 +16,7 @@
        The |ASN.1| type models an arbitrary value of an arbitrary type. Typically,
        a selection of types are defined in form of an
        `open type </pyasn1/type/opentype/contents>`_ . Technically, the ANY
-       value is a serialized representation of some other ASN.1 object.
+       value is a serialised representation of some other ASN.1 object.
 
    .. automethod:: pyasn1.type.univ.Any.clone(value=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), encoding='iso-8859-1')
    .. automethod:: pyasn1.type.univ.Any.subtype(value=NoValue(), implicitTag=Tag(), explicitTag=Tag(),subtypeSpec=ConstraintsIntersection(),encoding='iso-8859-1')

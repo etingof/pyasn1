@@ -52,7 +52,7 @@ class AbstractStringTestCase(object):
         except PyAsn1Error:
             assert False, 'Size constraint failed'
 
-    def testSerialized(self):
+    def testSerialised(self):
         if sys.version_info[0] < 3:
             assert str(self.asn1String) == self.pythonString.encode(self.encoding), '__str__() fails'
         else:
@@ -114,17 +114,17 @@ class AbstractStringTestCase(object):
 
     def testSchemaPickling(self):
         old_asn1 = self.asn1Type()
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert type(new_asn1) == self.asn1Type
         assert old_asn1.isSameTypeWith(new_asn1)
 
     def testValuePickling(self):
         old_asn1 = self.asn1String
-        serialized = pickle.dumps(old_asn1)
-        assert serialized
-        new_asn1 = pickle.loads(serialized)
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
         assert new_asn1 == self.asn1String
 
 

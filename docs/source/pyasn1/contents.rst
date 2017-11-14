@@ -167,7 +167,7 @@ Serialisation codecs
 
 Common use-case for pyasn1 is to instantiate ASN.1 schema with
 user-supplied values and pass instantiated schema to the encoder.
-The encoder will then turn the data structure into serialized form
+The encoder will then turn the data structure into serialised form
 (stream of bytes) suitable for storing into a file or sending over
 the network.
 
@@ -176,7 +176,7 @@ the network.
     value = 1
     instantiated_schema = Integer(value)
 
-    serialized = encode(instantiated_schema)
+    serialised = encode(instantiated_schema)
 
 Alternatively, value and schema can be passed separately:
 
@@ -185,24 +185,24 @@ Alternatively, value and schema can be passed separately:
     value = 1
     schema = Integer()
 
-    serialized = encode(value, asn1Spec=schema)
+    serialised = encode(value, asn1Spec=schema)
 
 At the receiving end, a decoder would be invoked and given the
-serialized data as received from the network along with the ASN.1
+serialised data as received from the network along with the ASN.1
 schema describing the layout of the data structures. The outcome
 would be an instance of ASN.1 schema filled with values as supplied
 by the sender.
 
 .. code-block:: python
 
-    serialized = b'\x01\x01\x01'
+    serialised = b'\x01\x01\x01'
     schema = Integer()
 
-    value, _ = decode(serialized, asn1Spec=schema)
+    value, _ = decode(serialised, asn1Spec=schema)
 
     assert value == 1
 
-Many distinct serialization protocols exist for ASN.1, some are
+Many distinct serialisation protocols exist for ASN.1, some are
 implemented in pyasn1.
 
 .. toctree::

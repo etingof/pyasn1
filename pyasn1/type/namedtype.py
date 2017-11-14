@@ -370,7 +370,7 @@ class NamedTypes(object):
     def getTagMapNearPosition(self, idx):
         """Return ASN.1 types that are allowed at or past given field position.
 
-        Some ASN.1 serialization allow for skipping optional and defaulted fields.
+        Some ASN.1 serialisation allow for skipping optional and defaulted fields.
         Some constructed ASN.1 types allow reordering of the fields. When recovering
         such objects it may be important to know which types can possibly be
         present at any given position in the field sets.
@@ -399,7 +399,7 @@ class NamedTypes(object):
     def getPositionNearType(self, tagSet, idx):
         """Return the closest field position where given ASN.1 type is allowed.
 
-        Some ASN.1 serialization allow for skipping optional and defaulted fields.
+        Some ASN.1 serialisation allow for skipping optional and defaulted fields.
         Some constructed ASN.1 types allow reordering of the fields. When recovering
         such objects it may be important to know at which field position, in field set,
         given *tagSet* is allowed at or past *idx* position.
@@ -449,7 +449,7 @@ class NamedTypes(object):
     def minTagSet(self):
         """Return the minimal TagSet among ASN.1 type in callee *NamedTypes*.
 
-        Some ASN.1 types/serialization protocols require ASN.1 types to be
+        Some ASN.1 types/serialisation protocols require ASN.1 types to be
         arranged based on their numerical tag value. The *minTagSet* property
         returns that.
 

@@ -178,7 +178,7 @@ class SetOfEncoder(encoder.SequenceOfEncoder):
         components = [encodeFun(x, asn1Spec, **options)
                       for x in value]
 
-        # sort by serialized and padded components
+        # sort by serialised and padded components
         if len(components) > 1:
             zero = str2octs('\x00')
             maxLen = max(map(len, components))

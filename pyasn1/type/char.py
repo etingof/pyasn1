@@ -27,7 +27,7 @@ class AbstractCharacterString(univ.OctetString):
     ------------
     value: :class:`unicode`, :class:`str`, :class:`bytes` or |ASN.1| object
         unicode object (Python 2) or string (Python 3), alternatively string
-        (Python 2) or bytes (Python 3) representing octet-stream of serialized
+        (Python 2) or bytes (Python 3) representing octet-stream of serialised
         unicode string (note `encoding` parameter) or |ASN.1| class instance.
 
     tagSet: :py:class:`~pyasn1.type.tag.TagSet`

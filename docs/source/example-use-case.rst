@@ -98,13 +98,13 @@ set on the key file):
 
     # Read SSH key from file (assuming no passphrase)
     with open open('.ssh/id_rsa') as key_file:
-        b64_serialization = ''.join(key_file.readlines()[1:-1])
+        b64_serialisation = ''.join(key_file.readlines()[1:-1])
 
-    # Undo BASE64 serialization
-    der_serialization = b64decode(b64_serialization)
+    # Undo BASE64 serialisation
+    der_serialisation = b64decode(b64_serialisation)
 
-    # Undo DER serialization, reconstruct SSH key structure
-    private_key, rest_of_input = der_decoder(der_serialization, asn1Spec=RSAPrivateKey())
+    # Undo DER serialisation, reconstruct SSH key structure
+    private_key, rest_of_input = der_decoder(der_serialisation, asn1Spec=RSAPrivateKey())
 
 Once we have Python ASN.1 structures initialized, we could inspect them:
 
@@ -173,21 +173,21 @@ Write it back
 -------------
 
 Possibly not that applicable to the SSH key example, but you can of course modify
-any part of the ASN.1 data structure and serialize it back into the same or other
+any part of the ASN.1 data structure and serialise it back into the same or other
 wire representation:
 
 .. code-block:: python
 
     from pyasn1.codec.der.encoder import encode as der_encoder
 
-    # Serialize SSH key data structure into DER stream
-    der_serialization = der_encoder(private_key)
+    # Serialise SSH key data structure into DER stream
+    der_serialisation = der_encoder(private_key)
 
-    # Serialize DER stream into BASE64 stream
-    b64_serialization = '-----BEGIN RSA PRIVATE KEY-----\n'
-    b64_serialization += b64encode(der_serialization)
-    b64_serialization += '-----END RSA PRIVATE KEY-----\n'
+    # Serialise DER stream into BASE64 stream
+    b64_serialisation = '-----BEGIN RSA PRIVATE KEY-----\n'
+    b64_serialisation += b64encode(der_serialisation)
+    b64_serialisation += '-----END RSA PRIVATE KEY-----\n'
 
     with open('.ssh/id_rsa.new', 'w') as key_file:
-        key_file.write(b64_serialization)
+        key_file.write(b64_serialisation)
 

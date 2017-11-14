@@ -299,7 +299,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         There is an important distinction between PyASN1 schema and value objects.
         The PyASN1 schema objects can only participate in ASN.1 schema-related
         operations (e.g. defining or testing the structure of the data). Most
-        obvious uses of ASN.1 schema is to guide serialization codecs whilst
+        obvious uses of ASN.1 schema is to guide serialisation codecs whilst
         encoding/decoding serialised ASN.1 contents.
 
         The PyASN1 value objects can **additionally** participate in many operations
