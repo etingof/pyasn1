@@ -720,7 +720,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
                             component, rest = decodeFun(
                                 asn1Object.getComponentByPosition(idx).asOctets(),
-                                asn1Spec=asn1Spec, allowEoo=True
+                                asn1Spec=openType, allowEoo=True
                             )
 
                             if component is not eoo.endOfOctets:
