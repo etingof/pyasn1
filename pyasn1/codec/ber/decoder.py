@@ -451,10 +451,9 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
         # Now we have to guess is it SEQUENCE/SET or SEQUENCE OF/SET OF
         # The heuristics is:
-        # * 0-1 component -> likely SEQUENCE OF/SET OF
-        # * 1+ components of the same type -> likely SEQUENCE OF/SET OF
-        # * otherwise -> likely SEQUENCE/SET
-        if len(components) > 1 or len(componentTypes) > 1:
+        # * 1+ components of different types -> likely SEQUENCE/SET
+        # * otherwise -> likely SEQUENCE OF/SET OF
+        if len(componentTypes) > 1:
             protoComponent = self.protoRecordComponent
         else:
             protoComponent = self.protoSequenceComponent
