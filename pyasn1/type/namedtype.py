@@ -116,6 +116,31 @@ class NamedTypes(object):
     Parameters
     ----------
     *namedTypes: :class:`~pyasn1.type.namedtype.NamedType`
+
+    Examples
+    --------
+
+    .. code-block:: python
+
+        class Description(Sequence):
+            '''
+            ASN.1 specification:
+
+            Description ::= SEQUENCE {
+                surname    IA5String,
+                first-name IA5String OPTIONAL,
+                age        INTEGER DEFAULT 40
+            }
+            '''
+            componentType = NamedTypes(
+                NamedType('surname', IA5String()),
+                OptionalNamedType('first-name', IA5String()),
+                DefaultedNamedType('age', Integer(40))
+            )
+
+        descr = Description()
+        descr['surname'] = 'Smith'
+        descr['first-name'] = 'John'
     """
     def __init__(self, *namedTypes, **kwargs):
         self.__namedTypes = namedTypes
@@ -466,7 +491,6 @@ class NamedTypes(object):
 
         Example
         -------
-
         .. code-block:: python
 
            OuterType ::= CHOICE {
@@ -491,7 +515,6 @@ class NamedTypes(object):
 
         Example
         -------
-
         .. code-block:: python
 
            OuterType ::= CHOICE {

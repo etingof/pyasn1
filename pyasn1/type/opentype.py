@@ -22,13 +22,12 @@ class OpenType(object):
     name: :py:class:`str`
         Field name
 
-    typeMap: :py:class:`dict`:
+    typeMap: :py:class:`dict`
         A map of value->ASN.1 type. It's stored by reference and can be
         mutated later to register new mappings.
 
     Examples
     --------
-
     .. code-block:: python
 
         openType = OpenType(

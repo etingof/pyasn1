@@ -271,6 +271,26 @@ class Encoder(encoder.Encoder):
 #: ------
 #: :py:class:`~pyasn1.error.PyAsn1Error`
 #:     On encoding errors
+#:
+#: Examples
+#: --------
+#: Encode Python value into CER with ASN.1 schema
+#:
+#: .. code-block:: pycon
+#:
+#:    >>> seq = SequenceOf(componentType=Integer())
+#:    >>> encode([1, 2, 3], asn1Spec=seq)
+#:    b'0\x80\x02\x01\x01\x02\x01\x02\x02\x01\x03\x00\x00'
+#:
+#: Encode ASN.1 value object into CER
+#:
+#: .. code-block:: pycon
+#:
+#:    >>> seq = SequenceOf(componentType=Integer())
+#:    >>> seq.extend([1, 2, 3])
+#:    >>> encode(seq)
+#:    b'0\x80\x02\x01\x01\x02\x01\x02\x02\x01\x03\x00\x00'
+#:
 encode = Encoder(tagMap, typeMap)
 
 # EncoderFactory queries class instance and builds a map of tags -> encoders

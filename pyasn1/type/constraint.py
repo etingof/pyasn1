@@ -105,8 +105,8 @@ class SingleValueConstraint(AbstractConstraint):
     \*values: :class:`int`
         Full set of values permitted by this constraint object.
 
-    Example
-    -------
+    Examples
+    --------
     .. code-block:: python
 
         class DivisorOfSix(Integer):
@@ -148,8 +148,8 @@ class ContainedSubtypeConstraint(AbstractConstraint):
         Full set of values and constraint objects permitted
         by this constraint object.
 
-    Example
-    -------
+    Examples
+    --------
     .. code-block:: python
 
         class DivisorOfEighteen(Integer):
@@ -194,8 +194,8 @@ class ValueRangeConstraint(AbstractConstraint):
     end: :class:`int`
         Maximum permitted value in the range (inclusive)
 
-    Example
-    -------
+    Examples
+    --------
     .. code-block:: python
 
         class TeenAgeYears(Integer):
@@ -254,8 +254,8 @@ class ValueSizeConstraint(ValueRangeConstraint):
     maximum: :class:`int`
         Maximum permitted size of the value (inclusive)
 
-    Example
-    -------
+    Examples
+    --------
     .. code-block:: python
 
         class BaseballTeamRoster(SetOf):
@@ -308,8 +308,8 @@ class PermittedAlphabetConstraint(SingleValueConstraint):
     \*alphabet: :class:`str`
         Full set of characters permitted by this constraint object.
 
-    Example
-    -------
+    Examples
+    --------
     .. code-block:: python
 
         class BooleanValue(IA5String):
@@ -378,8 +378,8 @@ class ConstraintsExclusion(AbstractConstraint):
     constraint:
         Constraint or logic operator object.
 
-    Example
-    -------
+    Examples
+    --------
     .. code-block:: python
 
         class Lipogramme(IA5STRING):
@@ -465,8 +465,8 @@ class ConstraintsIntersection(AbstractConstraintSet):
     \*constraints:
         Constraint or logic operator objects.
 
-    Example
-    -------
+    Examples
+    --------
     .. code-block:: python
 
         class CapitalAndSmall(IA5String):
@@ -509,8 +509,8 @@ class ConstraintsUnion(AbstractConstraintSet):
     \*constraints:
         Constraint or logic operator objects.
 
-    Example
-    -------
+    Examples
+    --------
     .. code-block:: python
 
         class CapitalOrSmall(IA5String):

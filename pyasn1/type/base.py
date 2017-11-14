@@ -354,8 +354,8 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         The following arguments to `subtype()` create a ASN.1 subtype out of
         |ASN.1| type:
 
-        Parameters
-        ----------
+        Other Parameters
+        ----------------
         implicitTag: :py:class:`~pyasn1.type.tag.Tag`
             Implicitly apply given ASN.1 tag object to `self`'s
             :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
@@ -559,8 +559,8 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         The following arguments to `subtype()` create a ASN.1 subtype out of
         |ASN.1| type.
 
-        Parameters
-        ----------
+        Other Parameters
+        ----------------
         implicitTag: :py:class:`~pyasn1.type.tag.Tag`
             Implicitly apply given ASN.1 tag object to `self`'s
             :py:class:`~pyasn1.type.tag.TagSet`, then use the result as
