@@ -7,6 +7,8 @@ Revision 0.4.1, released XX-10-2017
   or a Python value plus ASN.1 schema
 - BitString decoder optimised for better performance when running on
   constructed encoding
+- Constructed types' .getComponentBy*() methods accept the `default`
+  parameter to return instead if schema object is to be returned
 - Constructed types' .getComponentBy*() methods accept the `instantiate`
   parameter to disable automatic inner component instantiation
 - Fixed Choice.clear() to fully reset internal state of the object

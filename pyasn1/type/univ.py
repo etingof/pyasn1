@@ -1685,7 +1685,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
                 else:
                     myClone.setComponentByPosition(idx, componentValue.clone())
 
-    def getComponentByPosition(self, idx, instantiate=True):
+    def getComponentByPosition(self, idx, default=noValue, instantiate=True):
         """Return |ASN.1| type component value by position.
 
         Equivalent to Python sequence subscription operation (e.g. `[]`).
@@ -1700,6 +1700,10 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
 
         Keyword Args
         ------------
+        default: :class:`object`
+            If set and requested component is a schema object, return the `default`
+            object instead of the requested component.
+
         instantiate: :class:`bool`
             If `True` (default), inner component will be automatically instantiated.
             If 'False' either existing component or the `noValue` object will be
@@ -1721,6 +1725,14 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
 
             s = MySequenceOf()
 
+            # returns component #0 with `.isValue` property False
+            s.getComponentByPosition(0)
+
+            # returns None
+            s.getComponentByPosition(0, default=None)
+
+            s.clear()
+
             # returns noValue
             s.getComponentByPosition(0, instantiate=False)
 
@@ -1740,15 +1752,20 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
             s.getComponentByPosition(0, instantiate=False)
         """
         try:
-            return self._componentValues[idx]
+            componentValue = self._componentValues[idx]
 
         except IndexError:
             if not instantiate:
-                return noValue
+                return default
 
             self.setComponentByPosition(idx)
 
-            return self._componentValues[idx]
+            componentValue = self._componentValues[idx]
+
+        if default is noValue or componentValue.isValue:
+            return componentValue
+        else:
+            return default
 
     def setComponentByPosition(self, idx, value=noValue,
                                verifyConstraints=True,
@@ -2124,7 +2141,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                 else:
                     myClone.setComponentByPosition(idx, componentValue.clone())
 
-    def getComponentByName(self, name, instantiate=True):
+    def getComponentByName(self, name, default=noValue, instantiate=True):
         """Returns |ASN.1| type component by name.
 
         Equivalent to Python :class:`dict` subscription operation (e.g. `[]`).
@@ -2136,6 +2153,10 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
         Keyword Args
         ------------
+        default: :class:`object`
+            If set and requested component is a schema object, return the `default`
+            object instead of the requested component.
+
         instantiate: :class:`bool`
             If `True` (default), inner component will be automatically instantiated.
             If 'False' either existing component or the `noValue` object will be
@@ -2155,7 +2176,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             except KeyError:
                 raise error.PyAsn1Error('Name %s not found' % (name,))
 
-        return self.getComponentByPosition(idx, instantiate)
+        return self.getComponentByPosition(idx, default=default, instantiate=instantiate)
 
     def setComponentByName(self, name, value=noValue,
                            verifyConstraints=True,
@@ -2202,20 +2223,24 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             idx, value, verifyConstraints, matchTags, matchConstraints
         )
 
-    def getComponentByPosition(self, idx, instantiate=True):
+    def getComponentByPosition(self, idx, default=noValue, instantiate=True):
         """Returns |ASN.1| type component by index.
 
         Equivalent to Python sequence subscription operation (e.g. `[]`).
 
         Parameters
         ----------
-        idx : :class:`int`
+        idx: :class:`int`
             Component index (zero-based). Must either refer to an existing
             component or (if *componentType* is set) new ASN.1 schema object gets
             instantiated.
 
         Keyword Args
         ------------
+        default: :class:`object`
+            If set and requested component is a schema object, return the `default`
+            object instead of the requested component.
+
         instantiate: :class:`bool`
             If `True` (default), inner component will be automatically instantiated.
             If 'False' either existing component or the `noValue` object will be
@@ -2239,6 +2264,14 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
             s = MySequence()
 
+            # returns component #0 with `.isValue` property False
+            s.getComponentByPosition(0)
+
+            # returns None
+            s.getComponentByPosition(0, default=None)
+
+            s.clear()
+
             # returns noValue
             s.getComponentByPosition(0, instantiate=False)
 
@@ -2259,16 +2292,25 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         """
         try:
             componentValue = self._componentValues[idx]
+
         except IndexError:
             componentValue = noValue
 
         if not instantiate:
-            return componentValue
+            if componentValue is noValue or not componentValue.isValue:
+                return default
+            else:
+                return componentValue
 
         if componentValue is noValue:
             self.setComponentByPosition(idx)
 
-        return self._componentValues[idx]
+        componentValue = self._componentValues[idx]
+
+        if default is noValue or componentValue.isValue:
+            return componentValue
+        else:
+            return default
 
     def setComponentByPosition(self, idx, value=noValue,
                                verifyConstraints=True,
@@ -2523,7 +2565,8 @@ class Set(SequenceAndSetBase):
     def getComponent(self, innerFlag=False):
         return self
 
-    def getComponentByType(self, tagSet, instantiate=True, innerFlag=False):
+    def getComponentByType(self, tagSet, default=noValue,
+                           instantiate=True, innerFlag=False):
         """Returns |ASN.1| type component by ASN.1 tag.
 
         Parameters
@@ -2534,6 +2577,10 @@ class Set(SequenceAndSetBase):
 
         Keyword Args
         ------------
+        default: :class:`object`
+            If set and requested component is a schema object, return the `default`
+            object instead of the requested component.
+
         instantiate: :class:`bool`
             If `True` (default), inner component will be automatically instantiated.
             If 'False' either existing component or the `noValue` object will be
@@ -2544,15 +2591,16 @@ class Set(SequenceAndSetBase):
         : :py:class:`~pyasn1.type.base.PyAsn1Item`
             a pyasn1 object
         """
-        component = self.getComponentByPosition(
-            self.componentType.getPositionByType(tagSet), instantiate
+        componentValue = self.getComponentByPosition(
+            self.componentType.getPositionByType(tagSet),
+            default=default, instantiate=instantiate
         )
-        if innerFlag and isinstance(component, Set):
+        if innerFlag and isinstance(componentValue, Set):
             # get inner component by inner tagSet
-            return component.getComponent(innerFlag=True)
+            return componentValue.getComponent(innerFlag=True)
         else:
             # get outer component by inner tagSet
-            return component
+            return componentValue
 
     def setComponentByType(self, tagSet, value=noValue,
                            verifyConstraints=True,
@@ -2769,11 +2817,12 @@ class Choice(Set):
             else:
                 myClone.setComponentByType(tagSet, component.clone())
 
-    def getComponentByPosition(self, idx, instantiate=True):
+    def getComponentByPosition(self, idx, default=noValue, instantiate=True):
         __doc__ = Set.__doc__
 
         if self._currentIdx is None or self._currentIdx != idx:
-            return Set.getComponentByPosition(self, idx, instantiate)
+            return Set.getComponentByPosition(self, idx, default=default,
+                                              instantiate=instantiate)
 
         return self._componentValues[idx]
 
