@@ -93,12 +93,6 @@ class Integer(base.AbstractSimpleAsn1Item):
 
         base.AbstractSimpleAsn1Item.__init__(self, value, **kwargs)
 
-    def __repr__(self):
-        if self.namedValues is not self.__class__.namedValues:
-            return '%s, %r)' % (base.AbstractSimpleAsn1Item.__repr__(self)[:-1], self.namedValues)
-        else:
-            return base.AbstractSimpleAsn1Item.__repr__(self)
-
     def __and__(self, value):
         return self.clone(self._value & value)
 
@@ -261,7 +255,7 @@ class Integer(base.AbstractSimpleAsn1Item):
 
     def prettyOut(self, value):
         try:
-            return repr(self.namedValues[value])
+            return str(self.namedValues[value])
 
         except KeyError:
             return str(value)
@@ -703,9 +697,6 @@ class BitString(base.AbstractSimpleAsn1Item):
                 'Bad BitString initializer type \'%s\'' % (value,)
             )
 
-    def prettyOut(self, value):
-        return '\'%s\'' % str(self)
-
 
 try:
     # noinspection PyStatementEffect
@@ -965,26 +956,6 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
         return octets.ints2octs(r)
 
-    def __repr__(self):
-        r = []
-        doHex = False
-        if self._value is not self.defaultValue:
-            for x in self.asNumbers():
-                if x < 32 or x > 126:
-                    doHex = True
-                    break
-            if not doHex:
-                r.append('%r' % (self._value,))
-        if self.tagSet is not self.__class__.tagSet:
-            r.append('tagSet=%r' % (self.tagSet,))
-        if self.subtypeSpec is not self.__class__.subtypeSpec:
-            r.append('subtypeSpec=%r' % (self.subtypeSpec,))
-        if self.encoding is not self.__class__.encoding:
-            r.append('encoding=%r' % (self.encoding,))
-        if doHex:
-            r.append('hexValue=%r' % ''.join(['%.2x' % x for x in self.asNumbers()]))
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(r))
-
     # Immutable sequence object protocol
 
     def __len__(self):
@@ -1161,9 +1132,6 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
     def __str__(self):
         return self.prettyPrint()
 
-    def __repr__(self):
-        return '%s(%r)' % (self.__class__.__name__, self.prettyPrint())
-
     def index(self, suboid):
         return self._value.index(suboid)
 
@@ -1263,7 +1231,8 @@ class Real(base.AbstractSimpleAsn1Item):
     try:
         _plusInf = float('inf')
         _minusInf = float('-inf')
-        _inf = (_plusInf, _minusInf)
+        _inf = _plusInf, _minusInf
+
     except ValueError:
         # Infinity support is platform and Python dependent
         _plusInf = _minusInf = None
@@ -1332,17 +1301,8 @@ class Real(base.AbstractSimpleAsn1Item):
             'Bad real value syntax: %s' % (value,)
         )
 
-    def prettyOut(self, value):
-        if value in self._inf:
-            return "'%s'" % value
-        else:
-            return str(value)
-
     def prettyPrint(self, scope=0):
-        if self.isInf:
-            return self.prettyOut(self._value)
-        else:
-            return str(float(self))
+        return self.prettyOut(float(self))
 
     @property
     def isPlusInf(self):
@@ -1907,7 +1867,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         involving regular Python objects (e.g. arithmetic, comprehension etc).
         """
         for componentValue in self._componentValues:
-            if not componentValue.isValue:
+            if componentValue is noValue or not componentValue.isValue:
                 return False
 
         return True
@@ -2436,13 +2396,17 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             for idx, subComponentType in enumerate(componentType.namedTypes):
                 if subComponentType.isDefaulted or subComponentType.isOptional:
                     continue
-                if (not self._componentValues or
-                        not self._componentValues[idx].isValue):
+
+                if not self._componentValues:
+                    return False
+
+                componentValue = self._componentValues[idx]
+                if componentValue is noValue or not componentValue.isValue:
                     return False
 
         else:
             for componentValue in self._componentValues:
-                if not componentValue.isValue:
+                if componentValue is noValue or not componentValue.isValue:
                     return False
 
         return True
@@ -2952,7 +2916,9 @@ class Choice(Set):
         if self._currentIdx is None:
             return False
 
-        return self._componentValues[self._currentIdx].isValue
+        componentValue = self._componentValues[self._currentIdx]
+
+        return componentValue is not noValue and componentValue.isValue
 
     def clear(self):
         self._currentIdx = None

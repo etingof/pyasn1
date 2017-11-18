@@ -28,7 +28,7 @@ class NamedTypeCaseBase(BaseTestCase):
         assert n == 'age' or t == univ.Integer(), 'unpack fails'
 
     def testRepr(self):
-        assert eval(repr(self.e), {'NamedType': namedtype.NamedType, 'Integer': univ.Integer}) == self.e, 'repr() fails'
+        assert 'age' in repr(self.e)
 
 
 class NamedTypesCaseBase(BaseTestCase):
@@ -42,15 +42,7 @@ class NamedTypesCaseBase(BaseTestCase):
         )
 
     def testRepr(self):
-        assert eval(
-            repr(self.e), {
-                'NamedTypes': namedtype.NamedTypes,
-                'NamedType': namedtype.NamedType,
-                'OptionalNamedType': namedtype.OptionalNamedType,
-                'Integer': univ.Integer,
-                'OctetString': univ.OctetString
-            }
-        ) == self.e, 'repr() fails'
+        assert 'first-name' in repr(self.e)
 
     def testContains(self):
         assert 'first-name' in self.e

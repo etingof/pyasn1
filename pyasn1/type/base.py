@@ -211,8 +211,6 @@ class NoValue(object):
 
         raise error.PyAsn1Error('Attempted "%s" operation on ASN.1 schema object' % attr)
 
-    def __repr__(self):
-        return '%s()' % self.__class__.__name__
 
 noValue = NoValue()
 
@@ -238,14 +236,21 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         self._value = value
 
     def __repr__(self):
-        representation = []
-        if self._value is not self.defaultValue:
-            representation.append(self.prettyOut(self._value))
-        if self.tagSet is not self.__class__.tagSet:
-            representation.append('tagSet=%r' % (self.tagSet,))
-        if self.subtypeSpec is not self.__class__.subtypeSpec:
-            representation.append('subtypeSpec=%r' % (self.subtypeSpec,))
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(representation))
+        representation = '%s %s object at 0x%x' % (
+            self.__class__.__name__, self.isValue and 'value' or 'schema', id(self)
+        )
+
+        for attr, value in self.readOnly.items():
+            if value:
+                representation += ' %s %s' % (attr, value)
+
+        if self.isValue:
+            value = self.prettyPrint()
+            if len(value) > 32:
+                value = value[:16] + '...' + value[-16:]
+            representation += ' payload [%s]' % value
+
+        return '<%s>' % representation
 
     def __str__(self):
         return str(self._value)
@@ -466,20 +471,18 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         self._componentValues = []
 
     def __repr__(self):
-        representation = []
-        if self.componentType is not self.__class__.componentType:
-            representation.append('componentType=%r' % (self.componentType,))
-        if self.tagSet is not self.__class__.tagSet:
-            representation.append('tagSet=%r' % (self.tagSet,))
-        if self.subtypeSpec is not self.__class__.subtypeSpec:
-            representation.append('subtypeSpec=%r' % (self.subtypeSpec,))
-        representation = '%s(%s)' % (self.__class__.__name__, ', '.join(representation))
-        if self._componentValues:
-            for idx, component in enumerate(self._componentValues):
-                if component is noValue:
-                    continue
-                representation += '.setComponentByPosition(%d, %s)' % (idx, repr(component))
-        return representation
+        representation = '%s %s object at 0x%x' % (
+            self.__class__.__name__, self.isValue and 'value' or 'schema', id(self)
+        )
+
+        for attr, value in self.readOnly.items():
+            if value is not noValue:
+                representation += ' %s=%r' % (attr, value)
+
+        if self.isValue and self._componentValues:
+            representation += ' payload [%s]' % ', '.join([repr(x) for x in self._componentValues])
+
+        return '<%s>' % representation
 
     def __eq__(self, other):
         return self is other and True or self._componentValues == other

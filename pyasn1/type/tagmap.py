@@ -56,24 +56,18 @@ class TagMap(object):
         return iter(self.__presentTypes)
 
     def __repr__(self):
-        s = self.__class__.__name__ + '('
-        if self.__presentTypes:
-            s += 'presentTypes=%r, ' % (self.__presentTypes,)
-        if self.__skipTypes:
-            s += 'skipTypes=%r, ' % (self.__skipTypes,)
-        if self.__defaultType is not None:
-            s += 'defaultType=%r' % (self.__defaultType,)
-        return s + ')'
+        representation = '%s object at 0x%x' % (self.__class__.__name__, id(self))
 
-    def __str__(self):
-        s = self.__class__.__name__ + ': '
         if self.__presentTypes:
-            s += 'presentTypes: %s, ' % ', '.join([x.prettyPrintType() for x in self.__presentTypes.values()])
+            representation += ' present %s' % repr(self.__presentTypes)
+
         if self.__skipTypes:
-            s += 'skipTypes: %s, ' % ', '.join([x.prettyPrintType() for x in self.__skipTypes.values()])
+            representation += ' skip %s' % repr(self.__skipTypes)
+
         if self.__defaultType is not None:
-            s += 'defaultType: %s, ' % self.__defaultType.prettyPrintType()
-        return s
+            representation += ' default %s' % repr(self.__defaultType)
+
+        return '<%s>' % representation
 
     @property
     def presentTypes(self):

@@ -154,7 +154,7 @@ class IntegerTestCase(BaseTestCase):
         assert str(univ.Integer(1)) in ('1', '1L'), 'str() fails'
 
     def testRepr(self):
-        assert eval(repr(univ.Integer(123)), {'Integer': univ.Integer}) == univ.Integer(123), 'repr() fails'
+        assert '123' in repr(univ.Integer(123))
 
     def testAnd(self):
         assert univ.Integer(1) & 0 == 0, '__and__() fails'
@@ -326,7 +326,7 @@ class BooleanTestCase(BaseTestCase):
         assert str(univ.Boolean(1)) in ('1', '1L'), 'str() fails'
 
     def testRepr(self):
-        assert eval(repr(univ.Boolean(1)), {'Boolean': univ.Boolean}) == univ.Boolean(1), 'repr() fails'
+        assert 'Boolean' in repr(univ.Boolean(1))
 
     def testTag(self):
         assert univ.Boolean().tagSet == tag.TagSet(
@@ -402,8 +402,7 @@ class BitStringTestCase(BaseTestCase):
         assert str(self.b.clone('Urgent')) == '01'
 
     def testRepr(self):
-        assert eval(repr(self.b.clone('Urgent,Active')), {'BitString': univ.BitString}) == self.b.clone(
-            'Urgent,Active'), 'repr() fails'
+        assert 'BitString' in repr(self.b.clone('Urgent,Active'))
 
     def testTag(self):
         assert univ.BitString().tagSet == tag.TagSet(
@@ -496,7 +495,7 @@ class OctetStringWithUnicodeMixIn(object):
         assert univ.OctetString(self.encodedPythonString)[0] == self.encodedPythonString[0], '__getitem__() fails'
 
     def testRepr(self):
-        assert eval(repr(univ.OctetString('abc')), {'OctetString': univ.OctetString}) == univ.OctetString('abc'), 'repr() fails'
+        assert 'abc' in repr(univ.OctetString('abc'))
 
     def testAsOctets(self):
         assert univ.OctetString(self.encodedPythonString).asOctets() == self.encodedPythonString, 'testAsOctets() fails'
@@ -576,7 +575,7 @@ class OctetStringTestCase(BaseTestCase):
         assert univ.OctetString((1, 2, 3, 4, 5)) == ints2octs((1, 2, 3, 4, 5)), 'tuple init failed'
 
     def testRepr(self):
-        assert eval(repr(univ.OctetString('abc')), {'OctetString': univ.OctetString}) == univ.OctetString('abc'), 'repr() fails'
+        assert 'abc' in repr(univ.OctetString('abc'))
 
     def testEmpty(self):
         try:
@@ -643,7 +642,7 @@ class Null(BaseTestCase):
         assert str(univ.Null('')) == '', 'str() fails'
 
     def testRepr(self):
-        assert eval(repr(univ.Null('')), {'Null': univ.Null}) == univ.Null(''), 'repr() fails'
+        assert 'Null' in repr(univ.Null(''))
 
     def testTag(self):
         assert univ.Null().tagSet == tag.TagSet(
@@ -693,10 +692,10 @@ class RealTestCase(BaseTestCase):
         assert str(univ.Real(1.0)) == '1.0', 'str() fails'
 
     def testRepr(self):
-        assert eval(repr(univ.Real(-4.1)), {'Real': univ.Real}) == univ.Real(-4.1), 'repr() fails'
-        assert repr(univ.Real(-4.1)) == 'Real((-41, 10, -1))', 'repr() fails'
-        assert eval(repr(univ.Real('inf')), {'Real': univ.Real}) == univ.Real('inf'), 'repr() fails'
-        assert repr(univ.Real('inf')) == 'Real(\'inf\')', 'repr() fails'
+        assert 'Real' in repr(univ.Real(-4.1))
+        assert 'Real' in repr(univ.Real(-4.1))
+        assert 'inf' in repr(univ.Real('inf'))
+        assert '-inf' in repr(univ.Real('-inf'))
 
     def testAdd(self):
         assert univ.Real(-4.1) + 1.4 == -2.7, '__add__() fails'
@@ -841,8 +840,7 @@ class ObjectIdentifier(BaseTestCase):
         assert str(univ.ObjectIdentifier((1, 3, 6))) == '1.3.6', 'str() fails'
 
     def testRepr(self):
-        assert eval(repr(univ.ObjectIdentifier('1.3.6')),
-                    {'ObjectIdentifier': univ.ObjectIdentifier}) == univ.ObjectIdentifier('1.3.6'), 'repr() fails'
+        assert '1.3.6' in repr(univ.ObjectIdentifier('1.3.6'))
 
     def testEq(self):
         assert univ.ObjectIdentifier((1, 3, 6)) == (1, 3, 6), '__cmp__() fails'
@@ -923,10 +921,7 @@ class SequenceOf(BaseTestCase):
         self.s2 = self.s1.clone()
 
     def testRepr(self):
-        assert eval(repr(self.s1.clone().setComponents('a', 'b')),
-                    {'SequenceOf': univ.SequenceOf,
-                     'OctetString': univ.OctetString}) == self.s1.clone().setComponents(
-            'a', 'b'), 'repr() fails'
+        assert 'a' in repr(self.s1.clone().setComponents('a', 'b'))
 
     def testTag(self):
         assert self.s1.tagSet == tag.TagSet(
@@ -1199,16 +1194,7 @@ class Sequence(BaseTestCase):
         )
 
     def testRepr(self):
-        assert eval(
-            repr(self.s1.clone().setComponents('a', 'b')),
-            {'Sequence': univ.Sequence,
-             'OctetString': univ.OctetString,
-             'Integer': univ.Integer,
-             'NamedTypes': namedtype.NamedTypes,
-             'NamedType': namedtype.NamedType,
-             'OptionalNamedType': namedtype.OptionalNamedType,
-             'DefaultedNamedType': namedtype.DefaultedNamedType}
-        ) == self.s1.clone().setComponents('a', 'b'), 'repr() fails'
+        assert 'name' in repr(self.s1.clone().setComponents('a', 'b'))
 
     def testTag(self):
         assert self.s1.tagSet == tag.TagSet(
@@ -1738,18 +1724,11 @@ class Choice(BaseTestCase):
         assert self.s1.tagSet == tag.TagSet(), 'wrong tagSet'
 
     def testRepr(self):
-        assert eval(repr(self.s1.clone().setComponents('a')),
-                    {'Choice': univ.Choice, 'OctetString': univ.OctetString, 'Integer': univ.Integer,
-                     'Boolean': univ.Boolean, 'NamedTypes': namedtype.NamedTypes,
-                     'NamedType': namedtype.NamedType}) == self.s1.clone().setComponents('a'), 'repr() fails'
-        assert eval(repr(self.s1.clone().setComponents(
-            sex=self.s1.setComponentByPosition(1).getComponentByPosition(1).clone().setComponents(
-                count=univ.Integer(123)))),
-                    {'Choice': univ.Choice, 'OctetString': univ.OctetString, 'Integer': univ.Integer,
-                     'Boolean': univ.Boolean, 'NamedTypes': namedtype.NamedTypes,
-                     'NamedType': namedtype.NamedType}) == self.s1.clone().setComponents(
-            sex=self.s1.setComponentByPosition(1).getComponentByPosition(1).clone().setComponents(
-                count=univ.Integer(123))), 'repr() fails'
+        assert 'Choice' in repr(self.s1.clone().setComponents('a'))
+        s = self.s1.clone().setComponents(
+                sex=self.s1.setComponentByPosition(1).getComponentByPosition(1).clone().setComponents(count=univ.Integer(123))
+        )
+        assert 'Choice' in repr(s)
 
     def testContains(self):
         self.s1.setComponentByType(univ.OctetString.tagSet, 'abc')

@@ -63,13 +63,9 @@ class Tag(object):
         self.__tagClassId = tagClass, tagId
         self.__hash = hash(self.__tagClassId)
 
-    def __str__(self):
-        return '[%s:%s:%s]' % (self.__tagClass, self.__tagFormat, self.__tagId)
-
     def __repr__(self):
-        return '%s(tagClass=%s, tagFormat=%s, tagId=%s)' % (
-            (self.__class__.__name__, self.__tagClass, self.__tagFormat, self.__tagId)
-        )
+        representation = '[%s:%s:%s]' % (self.__tagClass, self.__tagFormat, self.__tagId)
+        return '<%s object at 0x%x tag %s>' % (self.__class__.__name__, id(self), representation)
 
     def __eq__(self, other):
         return self.__tagClassId == other
@@ -195,13 +191,15 @@ class TagSet(object):
         self.__lenOfSuperTags = len(superTags)
         self.__hash = hash(self.__superTagsClassId)
 
-    def __str__(self):
-        return self.__superTags and '+'.join([str(x) for x in self.__superTags]) or '[untagged]'
-
     def __repr__(self):
-        return '%s(%s)' % (
-            self.__class__.__name__, '(), ' + ', '.join([repr(x) for x in self.__superTags])
-        )
+        representation = '-'.join(['%s:%s:%s' % (x.tagClass, x.tagFormat, x.tagId)
+                                   for x in self.__superTags])
+        if representation:
+            representation = 'tags ' + representation
+        else:
+            representation = 'untagged'
+
+        return '<%s object at 0x%x %s>' % (self.__class__.__name__, id(self), representation)
 
     def __add__(self, superTag):
         return self.__class__(self.__baseTag, *self.__superTags + (superTag,))
