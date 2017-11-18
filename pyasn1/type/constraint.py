@@ -34,10 +34,12 @@ class AbstractConstraint(object):
             )
 
     def __repr__(self):
-        return '%s(%s)' % (
-            self.__class__.__name__,
-            ', '.join([repr(x) for x in self._values])
-        )
+        representation = '%s object at 0x%x' % (self.__class__.__name__, id(self))
+
+        if self._values:
+            representation += ' consts %s' % ', '.join([repr(x) for x in self._values])
+
+        return '<%s>' % representation
 
     def __eq__(self, other):
         return self is other and True or self._values == other

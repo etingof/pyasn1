@@ -11,6 +11,8 @@ Revision 0.4.1, released XX-10-2017
   parameter to return instead if schema object is to be returned
 - Constructed types' .getComponentBy*() methods accept the `instantiate`
   parameter to disable automatic inner component instantiation
+- The ASN.1 types `__repr__` implementation reworked for better readability
+  at the cost of not being `eval`-compliant
 - Fixed Choice.clear() to fully reset internal state of the object
 - Sphinx documentation rearranged, simplified and reworded
 - The `isValue` singleton is now the only way to indicate ASN.1 schema

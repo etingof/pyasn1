@@ -104,10 +104,12 @@ class NamedValues(object):
                 number += 1
 
     def __repr__(self):
-        return '%s(%r)' % (self.__class__.__name__, tuple(self.items()))
+        representation = ', '.join(['%s=%d' % x for x in self.items()])
 
-    def __str__(self):
-        return str(self.items())
+        if len(representation) > 64:
+            representation = representation[:32] + '...' + representation[-32:]
+
+        return '<%s object 0x%x enums %s>' % (self.__class__.__name__, id(self), representation)
 
     def __eq__(self, other):
         return dict(self) == other
