@@ -2,9 +2,10 @@
 # This file is part of pyasn1 software.
 #
 # Copyright (c) 2005-2017, Ilya Etingof <etingof@gmail.com>
-# License: http://pyasn1.sf.net/license.html
+# License: http://snmplabs.com/pyasn1/license.html
 #
 import sys
+import pickle
 
 try:
     import unittest2 as unittest
@@ -51,7 +52,7 @@ class AbstractStringTestCase(object):
         except PyAsn1Error:
             assert False, 'Size constraint failed'
 
-    def testSerialized(self):
+    def testSerialised(self):
         if sys.version_info[0] < 3:
             assert str(self.asn1String) == self.pythonString.encode(self.encoding), '__str__() fails'
         else:
@@ -110,6 +111,21 @@ class AbstractStringTestCase(object):
     if sys.version_info[:2] > (2, 4):
         def testReverse(self):
             assert list(reversed(self.asn1String)) == list(reversed(self.pythonString))
+
+    def testSchemaPickling(self):
+        old_asn1 = self.asn1Type()
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
+        assert type(new_asn1) == self.asn1Type
+        assert old_asn1.isSameTypeWith(new_asn1)
+
+    def testValuePickling(self):
+        old_asn1 = self.asn1String
+        serialised = pickle.dumps(old_asn1)
+        assert serialised
+        new_asn1 = pickle.loads(serialised)
+        assert new_asn1 == self.asn1String
 
 
 class VisibleStringTestCase(AbstractStringTestCase, BaseTestCase):

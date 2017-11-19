@@ -2,7 +2,7 @@
 # This file is part of pyasn1 software.
 #
 # Copyright (c) 2005-2017, Ilya Etingof <etingof@gmail.com>
-# License: http://pyasn1.sf.net/license.html
+# License: http://snmplabs.com/pyasn1/license.html
 #
 import logging
 from pyasn1.compat.octets import octs2ints
@@ -17,6 +17,7 @@ flagDecoder = 0x0002
 flagAll = 0xffff
 
 flagMap = {
+    'none': flagNone,
     'encoder': flagEncoder,
     'decoder': flagDecoder,
     'all': flagAll
