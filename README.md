@@ -90,7 +90,7 @@ can use it along the lines of similar Python type (e.g. ASN.1
 >>> record = Record()
 >>> record['id'] = 123
 >>> record['room'] = 321
->>> print(record.prettyPrint())
+>>> str(record)
 Record:
  id=123
  room=321
@@ -146,7 +146,7 @@ Python objects:
 ```python
 >>> from pyasn1.codec.native.decoder import decode
 >>> record = decode({'id': 123, 'room': 321, 'house': 0}, asn1Spec=Record())
->>> print(record.prettyPrint())
+>>> str(record)
 Record:
  id=123
  room=321

@@ -50,7 +50,9 @@ class AbstractCharacterString(univ.OctetString):
     if sys.version_info[0] <= 2:
         def __str__(self):
             try:
+                # `str` is Py2 text representation
                 return self._value.encode(self.encoding)
+
             except UnicodeEncodeError:
                 raise error.PyAsn1Error(
                     "Can't encode string '%s' with codec %s" % (self._value, self.encoding)
@@ -85,6 +87,7 @@ class AbstractCharacterString(univ.OctetString):
 
     else:
         def __str__(self):
+            # `unicode` is Py3 text representation
             return str(self._value)
 
         def __bytes__(self):
@@ -119,8 +122,8 @@ class AbstractCharacterString(univ.OctetString):
         def asNumbers(self, padding=True):
             return tuple(bytes(self))
 
-    def prettyOut(self, value):
-        return value
+    def prettyPrint(self, scope=0):
+        return AbstractCharacterString.__str__(self)
 
     def __reversed__(self):
         return reversed(self._value)

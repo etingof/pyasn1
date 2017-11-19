@@ -97,7 +97,7 @@ class Decoder(decoder.Decoder):
 #: .. code-block:: pycon
 #:
 #:    >>> s, _ = decode(b'0\x80\x02\x01\x01\x02\x01\x02\x02\x01\x03\x00\x00')
-#:    >>> print(s.prettyPrint())
+#:    >>> str(s)
 #:    SequenceOf:
 #:     1 2 3
 #:
@@ -107,7 +107,7 @@ class Decoder(decoder.Decoder):
 #:
 #:    >>> seq = SequenceOf(componentType=Integer())
 #:    >>> s, _ = decode(b'0\x80\x02\x01\x01\x02\x01\x02\x02\x01\x03\x00\x00', asn1Spec=seq)
-#:    >>> print(s.prettyPrint())
+#:    >>> str(s)
 #:    SequenceOf:
 #:     1 2 3
 #:

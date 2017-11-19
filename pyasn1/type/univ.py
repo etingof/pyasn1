@@ -825,7 +825,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
                     return ''.join([chr(x) for x in value])
                 except ValueError:
                     raise error.PyAsn1Error(
-                        'Bad %s initializer \'%s\'' % (self.__class__.__name__, value)
+                        "Bad %s initializer '%s'" % (self.__class__.__name__, value)
                     )
             else:
                 return str(value)
@@ -857,7 +857,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
                     return value.encode(self.encoding)
                 except UnicodeEncodeError:
                     raise error.PyAsn1Error(
-                        'Can\'t encode string \'%s\' with \'%s\' codec' % (value, self.encoding)
+                        "Can't encode string '%s' with '%s' codec" % (value, self.encoding)
                     )
             elif isinstance(value, OctetString):  # a shortcut, bytes() would work the same way
                 return value.asOctets()
@@ -874,7 +874,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
             except UnicodeDecodeError:
                 raise error.PyAsn1Error(
-                    'Can\'t decode string \'%s\' with \'%s\' codec at \'%s\'' % (self._value, self.encoding, self.__class__.__name__)
+                    "Can't decode string '%s' with '%s' codec at '%s'" % (self._value, self.encoding, self.__class__.__name__)
                 )
 
         def __bytes__(self):
@@ -886,22 +886,29 @@ class OctetString(base.AbstractSimpleAsn1Item):
         def asNumbers(self):
             return tuple(self._value)
 
-    def prettyOut(self, value):
-        if sys.version_info[0] <= 2:
-            numbers = tuple((ord(x) for x in value))
-        else:
-            numbers = tuple(value)
+    #
+    # Normally, `.prettyPrint()` is called from `__str__()`. Historically,
+    # OctetString.prettyPrint() used to return hexified payload
+    # representation in cases when non-printable content is present. At the
+    # same time `str()` used to produce either octet-stream (Py2) or
+    # text (Py3) representations. Therefore `OctetString.__str__()` is
+    # decoupled from `.prettyPrint` to preserve the original behaviour.
+    #
+    # Eventually we should make `__str__` reporting hexified representation
+    # while both text and octet-stream representation should only be requested
+    # via the `.asOctets()` method.
+    #
+    # Note: ASN.1 OCTET STRING is never mean to contain text!
+    #
+
+    def prettyPrint(self, scope=0):
+        numbers = self.asNumbers()
+
         for x in numbers:
             if x < 32 or x > 126:
                 return '0x' + ''.join(('%.2x' % x for x in numbers))
         else:
-            try:
-                return value.decode(self.encoding)
-
-            except UnicodeDecodeError:
-                raise error.PyAsn1Error(
-                    "Can't decode string '%s' with '%s' codec at '%s'" % (value, self.encoding, self.__class__.__name__)
-                )
+            return OctetString.__str__(self)
 
     @staticmethod
     def fromBinaryString(value):
@@ -1129,9 +1136,6 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
     def __contains__(self, value):
         return value in self._value
 
-    def __str__(self):
-        return self.prettyPrint()
-
     def index(self, suboid):
         return self._value.index(suboid)
 
@@ -1302,7 +1306,11 @@ class Real(base.AbstractSimpleAsn1Item):
         )
 
     def prettyPrint(self, scope=0):
-        return self.prettyOut(float(self))
+        try:
+            return self.prettyOut(float(self))
+
+        except OverflowError:
+            return '<overflow>'
 
     @property
     def isPlusInf(self):
@@ -1332,13 +1340,6 @@ class Real(base.AbstractSimpleAsn1Item):
     @property
     def isInf(self):
         return self._value in self._inf
-
-    def __str__(self):
-        try:
-            return str(float(self))
-
-        except OverflowError:
-            return '<overflow>'
 
     def __add__(self, value):
         return self.clone(float(self) + value)

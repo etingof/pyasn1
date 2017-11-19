@@ -282,7 +282,8 @@ class IntegerTestCase(BaseTestCase):
             namedValues = univ.Integer.namedValues.clone(('asn1', 1))
 
         assert Integer('asn1') == 1, 'named val fails'
-        assert str(Integer('asn1')) != 'asn1', 'named val __str__() fails'
+        assert int(Integer('asn1')) == 1, 'named val fails'
+        assert str(Integer('asn1')) == 'asn1', 'named val __str__() fails'
 
     def testSubtype(self):
         assert univ.Integer().subtype(
@@ -323,7 +324,10 @@ class BooleanTestCase(BaseTestCase):
         assert not univ.Boolean(False) and not univ.Boolean(0), 'False initializer fails'
 
     def testStr(self):
-        assert str(univ.Boolean(1)) in ('1', '1L'), 'str() fails'
+        assert str(univ.Boolean(1)) == 'True', 'str() fails'
+
+    def testInt(self):
+        assert int(univ.Boolean(1)) == 1, 'int() fails'
 
     def testRepr(self):
         assert 'Boolean' in repr(univ.Boolean(1))

@@ -43,7 +43,7 @@ class OctetStringEncoder(AbstractItemEncoder):
 
 class TextStringEncoder(AbstractItemEncoder):
     def encode(self, value, encodeFun, **options):
-        return value.prettyPrint()
+        return str(value)
 
 
 class NullEncoder(AbstractItemEncoder):
