@@ -1,5 +1,5 @@
 
-Revision 0.4.1, released XX-10-2017
+Revision 0.4.1, released XX-11-2017
 -----------------------------------
 
 - ANY DEFINED BY clause support implemented
@@ -11,8 +11,14 @@ Revision 0.4.1, released XX-10-2017
   parameter to return instead if schema object is to be returned
 - Constructed types' .getComponentBy*() methods accept the `instantiate`
   parameter to disable automatic inner component instantiation
-- The ASN.1 types `__repr__` implementation reworked for better readability
+- The ASN.1 types' `__repr__` implementation reworked for better readability
   at the cost of not being `eval`-compliant
+- Most ASN.1 types' `__str__` magic methods (except for OctetString and
+  character types) reworked to call `.prettyPrint()` rather than `.prettyPrint`
+  calling `__str__` as it was before. The intention is to mostly deprecate
+  `.prettyPrint()` in favor of `str()`.
+  The other related change is that `str()` of enumerations and boolean types
+  will return string label instead of number.
 - Fixed Choice.clear() to fully reset internal state of the object
 - Sphinx documentation rearranged, simplified and reworded
 - The `isValue` singleton is now the only way to indicate ASN.1 schema

@@ -52,6 +52,9 @@ class Asn1ItemBase(Asn1Item):
 
         self.__dict__[name] = value
 
+    def __str__(self):
+        return self.prettyPrint()
+
     @property
     def readOnly(self):
         return self._readOnly
@@ -122,6 +125,9 @@ class Asn1ItemBase(Asn1Item):
             if value is not noValue:
                 return False
         return True
+
+    def prettyPrint(self, scope=0):
+        raise NotImplementedError()
 
     # backward compatibility
 
@@ -211,6 +217,9 @@ class NoValue(object):
 
         raise error.PyAsn1Error('Attempted "%s" operation on ASN.1 schema object' % attr)
 
+    def __repr__(self):
+        return '<no value>'
+
 
 noValue = NoValue()
 
@@ -251,9 +260,6 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
             representation += ' payload [%s]' % value
 
         return '<%s>' % representation
-
-    def __str__(self):
-        return str(self._value)
 
     def __eq__(self, other):
         return self is other and True or self._value == other
@@ -414,17 +420,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         return str(value)
 
     def prettyPrint(self, scope=0):
-        """Return human-friendly object representation as a text.
-
-        Returns
-        -------
-        : :class:`str`
-            human-friendly type and/or value representation.
-        """
-        if self.isValue:
-            return self.prettyOut(self._value)
-        else:
-            return '<no value>'
+        return self.prettyOut(self._value)
 
     # noinspection PyUnusedLocal
     def prettyPrintType(self, scope=0):
@@ -508,6 +504,9 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
     else:
         def __bool__(self):
             return self._componentValues and True or False
+
+    def __len__(self):
+        return len(self._componentValues)
 
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         pass
@@ -628,9 +627,6 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         for k in kwargs:
             self[k] = kwargs[k]
         return self
-
-    def __len__(self):
-        return len(self._componentValues)
 
     def clear(self):
         self._componentValues = []
