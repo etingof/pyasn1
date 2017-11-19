@@ -202,7 +202,7 @@ class Decoder(object):
 #:
 #:    >>> seq = SequenceOf(componentType=Integer())
 #:    >>> s, _ = decode([1, 2, 3], asn1Spec=seq)
-#:    >>> print(s.prettyPrint())
+#:    >>> str(s)
 #:    SequenceOf:
 #:     1 2 3
 #:

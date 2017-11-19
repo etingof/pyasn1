@@ -110,7 +110,7 @@ Once we have Python ASN.1 structures initialized, we could inspect them:
 
 .. code-block:: pycon
 
-    >>> print(private_key.prettyPrint())
+    >>> print('%s' % private_key)
     RSAPrivateKey:
      version=0
      modulus=280789907761334970323210643584308373...
