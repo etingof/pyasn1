@@ -15,7 +15,7 @@ Revision 0.4.1, released XX-11-2017
   at the cost of not being `eval`-compliant
 - Most ASN.1 types' `__str__` magic methods (except for OctetString and
   character types) reworked to call `.prettyPrint()` rather than `.prettyPrint`
-  calling `__str__` as it was before. The intention is to mostly deprecate
+  calling `__str__` as it was before. The intention is to eventually deprecate
   `.prettyPrint()` in favor of `str()`.
   The other related change is that `str()` of enumerations and boolean types
   will return string label instead of number.
