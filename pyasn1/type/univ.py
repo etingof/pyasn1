@@ -2313,38 +2313,46 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
         try:
             currentValue = self._componentValues[idx]
+
         except IndexError:
             currentValue = noValue
             if componentTypeLen:
                 if componentTypeLen < idx:
                     raise error.PyAsn1Error('component index out of range')
+
                 self._componentValues = [noValue] * componentTypeLen
 
         if value is noValue:
             if componentTypeLen:
                 value = componentType.getTypeByPosition(idx).clone()
+
             elif currentValue is noValue:
                 raise error.PyAsn1Error('Component type not defined')
+
         elif not isinstance(value, base.Asn1Item):
             if componentTypeLen:
                 subComponentType = componentType.getTypeByPosition(idx)
                 if isinstance(subComponentType, base.AbstractSimpleAsn1Item):
                     value = subComponentType.clone(value=value)
+
                 else:
                     raise error.PyAsn1Error('%s can cast only scalar values' % componentType.__class__.__name__)
+
             elif currentValue is not noValue and isinstance(currentValue, base.AbstractSimpleAsn1Item):
                 value = currentValue.clone(value=value)
+
             else:
                 raise error.PyAsn1Error('%s undefined component type' % componentType.__class__.__name__)
+
         elif (matchTags or matchConstraints) and componentTypeLen:
             subComponentType = componentType.getTypeByPosition(idx)
             if subComponentType is not noValue:
-                if self.strictConstraints:
-                    if not subComponentType.isSameTypeWith(value, matchTags, matchConstraints):
-                        raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
-                else:
-                    if not subComponentType.isSuperTypeOf(value, matchTags, matchConstraints):
-                        raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
+                subtypeChecker = (self.strictConstraints and
+                                  subComponentType.isSameTypeWith or
+                                  subComponentType.isSuperTypeOf)
+
+                if not subtypeChecker(value, matchTags, matchConstraints):
+                    raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
 
         if verifyConstraints and value.isValue:
             try:
@@ -2356,9 +2364,11 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
         if componentTypeLen or idx in self._dynamicNames:
             self._componentValues[idx] = value
+
         elif len(self._componentValues) == idx:
             self._componentValues.append(value)
             self._dynamicNames.addField(idx)
+
         else:
             raise error.PyAsn1Error('Component index out of range')
 
