@@ -12,6 +12,7 @@ except ImportError:
 
 suite = unittest.TestLoader().loadTestsFromNames(
     ['tests.type.test_constraint.suite',
+     'tests.type.test_opentype.suite',
      'tests.type.test_namedtype.suite',
      'tests.type.test_namedval.suite',
      'tests.type.test_tag.suite',

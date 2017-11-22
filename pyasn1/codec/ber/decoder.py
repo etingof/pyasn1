@@ -583,11 +583,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                                 asn1Spec=openType
                             )
 
-                            asn1Object.setComponentByPosition(
-                                idx, component,
-                                matchTags=False,
-                                matchConstraints=False
-                            )
+                            asn1Object.setComponentByPosition(idx, component)
 
             else:
                 asn1Object.verifySizeSpec()
@@ -723,11 +719,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                             )
 
                             if component is not eoo.endOfOctets:
-                                asn1Object.setComponentByPosition(
-                                    idx, component,
-                                    matchTags=False,
-                                    matchConstraints=False
-                                )
+                                asn1Object.setComponentByPosition(idx, component)
 
                 else:
                     asn1Object.verifySizeSpec()

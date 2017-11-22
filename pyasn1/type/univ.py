@@ -2352,7 +2352,8 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                                   subComponentType.isSuperTypeOf)
 
                 if not subtypeChecker(value, matchTags, matchConstraints):
-                    raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
+                    if not componentType[idx].openType:
+                        raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
 
         if verifyConstraints and value.isValue:
             try:
