@@ -14,7 +14,8 @@ except ImportError:
 
 from tests.base import BaseTestCase
 
-from pyasn1.type import constraint, error
+from pyasn1.type import constraint
+from pyasn1.type import error
 
 
 class SingleValueConstraintTestCase(BaseTestCase):

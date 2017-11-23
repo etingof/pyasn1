@@ -4,9 +4,10 @@
 # Copyright (c) 2005-2017, Ilya Etingof <etingof@gmail.com>
 # License: http://snmplabs.com/pyasn1/license.html
 #
-import sys
+
 try:
     import unittest2 as unittest
+
 except ImportError:
     import unittest
 

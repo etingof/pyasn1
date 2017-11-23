@@ -4,17 +4,22 @@
 # Copyright (c) 2005-2017, Ilya Etingof <etingof@gmail.com>
 # License: http://snmplabs.com/pyasn1/license.html
 #
-from pyasn1.type import tag, univ, char, useful
+from pyasn1 import debug
+from pyasn1 import error
 from pyasn1.codec.ber import eoo
-from pyasn1.compat.octets import int2oct, oct2int, ints2octs, null, str2octs, isOctetsType
 from pyasn1.compat.integer import to_bytes
-from pyasn1 import debug, error
+from pyasn1.compat.octets import (int2oct, oct2int, ints2octs, null,
+                                  str2octs, isOctetsType)
+from pyasn1.type import char
+from pyasn1.type import tag
+from pyasn1.type import univ
+from pyasn1.type import useful
 
 __all__ = ['encode']
 
 
 class AbstractItemEncoder(object):
-    supportIndefLenMode = 1
+    supportIndefLenMode = True
 
     # An outcome of otherwise legit call `encodeFun(eoo.endOfOctets)`
     eooIntegerSubstrate = (0, 0)

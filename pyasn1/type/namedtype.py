@@ -5,10 +5,13 @@
 # License: http://snmplabs.com/pyasn1/license.html
 #
 import sys
-from pyasn1.type import tag, tagmap
-from pyasn1 import error
 
-__all__ = ['NamedType', 'OptionalNamedType', 'DefaultedNamedType', 'NamedTypes']
+from pyasn1 import error
+from pyasn1.type import tag
+from pyasn1.type import tagmap
+
+__all__ = ['NamedType', 'OptionalNamedType', 'DefaultedNamedType',
+           'NamedTypes']
 
 try:
     any

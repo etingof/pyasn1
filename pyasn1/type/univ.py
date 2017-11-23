@@ -4,19 +4,28 @@
 # Copyright (c) 2005-2017, Ilya Etingof <etingof@gmail.com>
 # License: http://snmplabs.com/pyasn1/license.html
 #
-import sys
 import math
-from pyasn1.type import base, tag, constraint, namedtype, namedval, tagmap
-from pyasn1.codec.ber import eoo
-from pyasn1.compat import octets, integer, binary
+import sys
+
 from pyasn1 import error
+from pyasn1.codec.ber import eoo
+from pyasn1.compat import binary
+from pyasn1.compat import integer
+from pyasn1.compat import octets
+from pyasn1.type import base
+from pyasn1.type import constraint
+from pyasn1.type import namedtype
+from pyasn1.type import namedval
+from pyasn1.type import tag
+from pyasn1.type import tagmap
 
 NoValue = base.NoValue
 noValue = NoValue()
 
 __all__ = ['Integer', 'Boolean', 'BitString', 'OctetString', 'Null',
-           'ObjectIdentifier', 'Real', 'Enumerated', 'SequenceOfAndSetOfBase', 'SequenceOf',
-           'SetOf', 'SequenceAndSetBase', 'Sequence', 'Set', 'Choice', 'Any',
+           'ObjectIdentifier', 'Real', 'Enumerated',
+           'SequenceOfAndSetOfBase', 'SequenceOf', 'SetOf',
+           'SequenceAndSetBase', 'Sequence', 'Set', 'Choice', 'Any',
            'NoValue', 'noValue']
 
 # "Simple" ASN.1 types (yet incomplete)

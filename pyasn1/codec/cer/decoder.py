@@ -4,10 +4,10 @@
 # Copyright (c) 2005-2017, Ilya Etingof <etingof@gmail.com>
 # License: http://snmplabs.com/pyasn1/license.html
 #
-from pyasn1.type import univ
+from pyasn1 import error
 from pyasn1.codec.ber import decoder
 from pyasn1.compat.octets import oct2int
-from pyasn1 import error
+from pyasn1.type import univ
 
 __all__ = ['decode']
 

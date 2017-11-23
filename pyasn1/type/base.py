@@ -5,9 +5,12 @@
 # License: http://snmplabs.com/pyasn1/license.html
 #
 import sys
-from pyasn1.type import constraint, tagmap, tag
-from pyasn1.compat import calling
+
 from pyasn1 import error
+from pyasn1.compat import calling
+from pyasn1.type import constraint
+from pyasn1.type import tag
+from pyasn1.type import tagmap
 
 __all__ = ['Asn1Item', 'Asn1ItemBase', 'AbstractSimpleAsn1Item', 'AbstractConstructedAsn1Item']
 

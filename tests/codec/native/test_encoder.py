@@ -8,12 +8,14 @@ import sys
 
 try:
     import unittest2 as unittest
+
 except ImportError:
     import unittest
 
 from tests.base import BaseTestCase
 
-from pyasn1.type import namedtype, univ
+from pyasn1.type import namedtype
+from pyasn1.type import univ
 from pyasn1.codec.native import encoder
 from pyasn1.compat.octets import str2octs
 from pyasn1.error import PyAsn1Error

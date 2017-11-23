@@ -1,5 +1,5 @@
 
-Revision 0.4.1, released XX-11-2017
+Revision 0.4.1, released 23-11-2017
 -----------------------------------
 
 - ANY DEFINED BY clause support implemented
@@ -14,11 +14,11 @@ Revision 0.4.1, released XX-11-2017
 - The ASN.1 types' `__repr__` implementation reworked for better readability
   at the cost of not being `eval`-compliant
 - Most ASN.1 types' `__str__` magic methods (except for OctetString and
-  character types) reworked to call `.prettyPrint()` rather than `.prettyPrint`
-  calling `__str__` as it was before. The intention is to eventually deprecate
-  `.prettyPrint()` in favor of `str()`.
-  The other related change is that `str()` of enumerations and boolean types
-  will return string label instead of number.
+  character types) reworked to call `.prettyPrint()` rather than
+  `.prettyPrint` calling `__str__` as it was before. The intention is
+  to eventually deprecate `.prettyPrint()` in favor of `str()`.
+  The other related change is that `str()` of enumerations and boolean
+  types will return string label instead of number.
 - Fixed Choice.clear() to fully reset internal state of the object
 - Sphinx documentation rearranged, simplified and reworded
 - The `isValue` singleton is now the only way to indicate ASN.1 schema
@@ -28,6 +28,7 @@ Revision 0.4.1, released XX-11-2017
   value (`''`) is not set anymore. Thus `Null()` call produces a
   ASN.1 schema object, while `Null('')` - value object.
 - Migrated all docs and references from SourceForge
+- Imports PEP8'ed
 - Fixed ASN.1 encoder not to omit empty substrate produced for inner
   component if the inner component belongs to the simple class (as
   opposed to constructed class)

@@ -4,17 +4,20 @@
 # Copyright (c) 2005-2017, Ilya Etingof <etingof@gmail.com>
 # License: http://snmplabs.com/pyasn1/license.html
 #
-import sys
 import pickle
+import sys
 
 try:
     import unittest2 as unittest
+
 except ImportError:
     import unittest
 
 from tests.base import BaseTestCase
 
-from pyasn1.type import char, univ, constraint
+from pyasn1.type import char
+from pyasn1.type import univ
+from pyasn1.type import constraint
 from pyasn1.compat.octets import ints2octs
 from pyasn1.error import PyAsn1Error
 

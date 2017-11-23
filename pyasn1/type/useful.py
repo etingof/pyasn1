@@ -5,9 +5,13 @@
 # License: http://snmplabs.com/pyasn1/license.html
 #
 import datetime
-from pyasn1.type import univ, char, tag
-from pyasn1.compat import string, dateandtime
+
 from pyasn1 import error
+from pyasn1.compat import dateandtime
+from pyasn1.compat import string
+from pyasn1.type import char
+from pyasn1.type import tag
+from pyasn1.type import univ
 
 __all__ = ['ObjectDescriptor', 'GeneralizedTime', 'UTCTime']
 

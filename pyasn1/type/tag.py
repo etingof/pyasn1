@@ -8,8 +8,8 @@ from pyasn1 import error
 
 __all__ = ['tagClassUniversal', 'tagClassApplication', 'tagClassContext',
            'tagClassPrivate', 'tagFormatSimple', 'tagFormatConstructed',
-           'tagCategoryImplicit', 'tagCategoryExplicit', 'tagCategoryUntagged',
-           'Tag', 'TagSet']
+           'tagCategoryImplicit', 'tagCategoryExplicit',
+           'tagCategoryUntagged', 'Tag', 'TagSet']
 
 #: Identifier for ASN.1 class UNIVERSAL
 tagClassUniversal = 0x00

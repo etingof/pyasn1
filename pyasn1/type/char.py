@@ -5,9 +5,10 @@
 # License: http://snmplabs.com/pyasn1/license.html
 #
 import sys
-from pyasn1.type import univ, tag
-from pyasn1 import error
 
+from pyasn1 import error
+from pyasn1.type import tag
+from pyasn1.type import univ
 
 __all__ = ['NumericString', 'PrintableString', 'TeletexString', 'T61String', 'VideotexString',
            'IA5String', 'GraphicString', 'VisibleString', 'ISO646String',

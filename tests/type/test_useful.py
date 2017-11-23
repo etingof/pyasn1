@@ -4,10 +4,10 @@
 # Copyright (c) 2005-2017, Ilya Etingof <etingof@gmail.com>
 # License: http://snmplabs.com/pyasn1/license.html
 #
-import sys
 import datetime
-from copy import deepcopy
 import pickle
+import sys
+from copy import deepcopy
 
 try:
     import unittest2 as unittest
@@ -18,6 +18,7 @@ except ImportError:
 from tests.base import BaseTestCase
 
 from pyasn1.type import useful
+
 
 class FixedOffset(datetime.tzinfo):
     def __init__(self, offset, name):

@@ -7,11 +7,14 @@
 # Original concept and code by Mike C. Fletcher.
 #
 import sys
+
 from pyasn1.type import error
 
-__all__ = ['SingleValueConstraint', 'ContainedSubtypeConstraint', 'ValueRangeConstraint',
-           'ValueSizeConstraint', 'PermittedAlphabetConstraint', 'InnerTypeConstraint',
-           'ConstraintsExclusion', 'ConstraintsIntersection', 'ConstraintsUnion']
+__all__ = ['SingleValueConstraint', 'ContainedSubtypeConstraint',
+           'ValueRangeConstraint', 'ValueSizeConstraint',
+           'PermittedAlphabetConstraint', 'InnerTypeConstraint',
+           'ConstraintsExclusion', 'ConstraintsIntersection',
+           'ConstraintsUnion']
 
 
 class AbstractConstraint(object):
