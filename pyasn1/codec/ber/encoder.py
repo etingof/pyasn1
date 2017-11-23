@@ -157,12 +157,15 @@ class BitStringEncoder(AbstractItemEncoder):
             substrate = alignedValue.asOctets()
             return int2oct(len(substrate) * 8 - valueLength) + substrate, False, True
 
-        tagSet = value.tagSet
+        baseTag = value.tagSet.baseTag
 
         # strip off explicit tags
-        alignedValue = alignedValue.clone(
-            tagSet=tag.TagSet(tagSet.baseTag, tagSet.baseTag)
-        )
+        if baseTag:
+            tagSet = tag.TagSet(baseTag, baseTag)
+        else:
+            tagSet = tag.TagSet()
+
+        alignedValue = alignedValue.clone(tagSet=tagSet)
 
         stop = 0
         substrate = null
