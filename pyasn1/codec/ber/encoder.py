@@ -175,28 +175,52 @@ class BitStringEncoder(AbstractItemEncoder):
 
 
 class OctetStringEncoder(AbstractItemEncoder):
-    def encodeValue(self, value, asn1Spec, encodeFun, **options):
-        if asn1Spec is None:
-            # will strip off explicit tags
-            tagSet = value.tagSet
-            asn1Spec = value.clone(tagSet=tag.TagSet(tagSet.baseTag, tagSet.baseTag))
 
-            value = value.asOctets()
+    def encodeValue(self, value, asn1Spec, encodeFun, **options):
+
+        if asn1Spec is None:
+            substrate = value.asOctets()
 
         elif not isOctetsType(value):
-            # will strip off explicit tags
-            tagSet = asn1Spec.tagSet
-            asn1Spec = asn1Spec.clone(tagSet=tag.TagSet(tagSet.baseTag, tagSet.baseTag))
-
-            value = asn1Spec.clone(value).asOctets()
-
-        maxChunkSize = options.get('maxChunkSize', 0)
-        if not maxChunkSize or len(value) <= maxChunkSize:
-            return value, False, True
+            substrate = asn1Spec.clone(value).asOctets()
 
         else:
+            substrate = value
+
+        maxChunkSize = options.get('maxChunkSize', 0)
+
+        if not maxChunkSize or len(substrate) <= maxChunkSize:
+            return substrate, False, True
+
+        else:
+
+            # strip off explicit tags for inner chunks
+
+            if asn1Spec is None:
+                baseTag = value.tagSet.baseTag
+
+                # strip off explicit tags
+                if baseTag:
+                    tagSet = tag.TagSet(baseTag, baseTag)
+                else:
+                    tagSet = tag.TagSet()
+
+                asn1Spec = value.clone(tagSet=tagSet)
+
+            elif not isOctetsType(value):
+                baseTag = asn1Spec.tagSet.baseTag
+
+                # strip off explicit tags
+                if baseTag:
+                    tagSet = tag.TagSet(baseTag, baseTag)
+                else:
+                    tagSet = tag.TagSet()
+
+                asn1Spec = asn1Spec.clone(tagSet=tagSet)
+
             pos = 0
             substrate = null
+
             while True:
                 chunk = value[pos:pos + maxChunkSize]
                 if not chunk:
