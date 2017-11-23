@@ -123,7 +123,20 @@ class AbstractCharacterString(univ.OctetString):
         def asNumbers(self, padding=True):
             return tuple(bytes(self))
 
+    #
+    # See OctetString.prettyPrint() for the explanation
+    #
+
+    def prettyOut(self, value):
+        return value
+
     def prettyPrint(self, scope=0):
+        # first see if subclass has its own .prettyOut()
+        value = self.prettyOut(self._value)
+
+        if value is not self._value:
+            return value
+
         return AbstractCharacterString.__str__(self)
 
     def __reversed__(self):

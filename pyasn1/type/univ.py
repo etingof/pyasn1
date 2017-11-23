@@ -900,23 +900,37 @@ class OctetString(base.AbstractSimpleAsn1Item):
     # OctetString.prettyPrint() used to return hexified payload
     # representation in cases when non-printable content is present. At the
     # same time `str()` used to produce either octet-stream (Py2) or
-    # text (Py3) representations. Therefore `OctetString.__str__()` is
-    # decoupled from `.prettyPrint` to preserve the original behaviour.
+    # text (Py3) representations.
     #
-    # Eventually we should make `__str__` reporting hexified representation
-    # while both text and octet-stream representation should only be requested
-    # via the `.asOctets()` method.
+    # Therefore `OctetString.__str__()` -> `.prettyPrint()` call chain is
+    # reversed to preserve the original behaviour.
+    #
+    # Eventually we should deprecate `.prettyPrint()` / `.prettyOut()` harness
+    # and end up with just `__str__()` producing hexified representation while
+    # both text and octet-stream representation should only be requested via
+    # the `.asOctets()` method.
     #
     # Note: ASN.1 OCTET STRING is never mean to contain text!
     #
 
+    def prettyOut(self, value):
+        return value
+
     def prettyPrint(self, scope=0):
+        # first see if subclass has its own .prettyOut()
+        value = self.prettyOut(self._value)
+
+        if value is not self._value:
+            return value
+
         numbers = self.asNumbers()
 
         for x in numbers:
+            # hexify if needed
             if x < 32 or x > 126:
                 return '0x' + ''.join(('%.2x' % x for x in numbers))
         else:
+            # this prevents infinite recursion
             return OctetString.__str__(self)
 
     @staticmethod
