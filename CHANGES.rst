@@ -1,4 +1,9 @@
 
+Revision 0.4.2, released XX-11-2017
+-----------------------------------
+
+- Fixed tag production at schema-less OctetString encoder
+
 Revision 0.4.1, released 23-11-2017
 -----------------------------------
 

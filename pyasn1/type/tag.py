@@ -186,7 +186,7 @@ class TagSet(object):
         self.__baseTag = baseTag
         self.__superTags = superTags
         self.__superTagsClassId = tuple(
-            [(superTag.tagClass, superTag.tagId) for superTag in superTags]
+            [(superTag.tagClass, superTag.tagId) for superTag in superTags if superTag]
         )
         self.__lenOfSuperTags = len(superTags)
         self.__hash = hash(self.__superTagsClassId)
