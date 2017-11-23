@@ -1,8 +1,9 @@
 
-Revision 0.4.2, released XX-11-2017
+Revision 0.4.2, released 23-11-2017
 -----------------------------------
 
-- Fixed tag production at schema-less OctetString encoder
+- Fixed explicit tag splitting in chunked encoding mode at
+  OctetString and BitString encoders
 
 Revision 0.4.1, released 23-11-2017
 -----------------------------------
