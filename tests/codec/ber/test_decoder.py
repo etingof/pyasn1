@@ -828,7 +828,7 @@ class SequenceDecoderWithSchemaTestCase(BaseTestCase):
         ) == (self.s, null)
 
 
-class SequenceDecoderWithIntegerOpenTypesTestCase(BaseTestCase):
+class SequenceDecoderWithUnaggedOpenTypesTestCase(BaseTestCase):
     def setUp(self):
         openType = opentype.OpenType(
             'id',
@@ -854,11 +854,33 @@ class SequenceDecoderWithIntegerOpenTypesTestCase(BaseTestCase):
     def testDecodeOpenTypesChoiceTwo(self):
         s, r = decoder.decode(
             ints2octs((48, 16, 2, 1, 2, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=self.s,
-            decodeOpenTypes = True
+            decodeOpenTypes=True
         )
         assert not r
         assert s[0] == 2
         assert s[1] == univ.OctetString('quick brown')
+
+    def testDecodeOpenTypesUnknownType(self):
+        try:
+            s, r = decoder.decode(
+                ints2octs((48, 6, 2, 1, 2, 6, 1, 39)), asn1Spec=self.s,
+                decodeOpenTypes=True
+            )
+
+        except PyAsn1Error:
+            pass
+
+        else:
+            assert False, 'unknown open type tolerated'
+
+    def testDecodeOpenTypesUnknownId(self):
+        s, r = decoder.decode(
+            ints2octs((48, 6, 2, 1, 3, 6, 1, 39)), asn1Spec=self.s,
+            decodeOpenTypes=True
+        )
+        assert not r
+        assert s[0] == 3
+        assert s[1] == univ.OctetString(hexValue='060127')
 
     def testDontDecodeOpenTypesChoiceOne(self):
         s, r = decoder.decode(
@@ -875,6 +897,72 @@ class SequenceDecoderWithIntegerOpenTypesTestCase(BaseTestCase):
         assert not r
         assert s[0] == 2
         assert s[1] == ints2octs((4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110))
+
+
+class SequenceDecoderWithImplicitlyTaggedOpenTypesTestCase(BaseTestCase):
+    def setUp(self):
+        openType = opentype.OpenType(
+            'id',
+            {1: univ.Integer(),
+             2: univ.OctetString()}
+        )
+        self.s = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType('id', univ.Integer()),
+                namedtype.NamedType(
+                    'blob', univ.Any().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 3)), openType=openType
+                )
+            )
+        )
+
+    def testDecodeOpenTypesChoiceOne(self):
+        s, r = decoder.decode(
+            ints2octs((48, 8, 2, 1, 1, 131, 3, 2, 1, 12)), asn1Spec=self.s, decodeOpenTypes=True
+        )
+        assert not r
+        assert s[0] == 1
+        assert s[1] == 12
+
+    def testDecodeOpenTypesUnknownId(self):
+        s, r = decoder.decode(
+            ints2octs((48, 8, 2, 1, 3, 131, 3, 2, 1, 12)), asn1Spec=self.s, decodeOpenTypes=True
+        )
+        assert not r
+        assert s[0] == 3
+        assert s[1] == univ.OctetString(hexValue='02010C')
+
+
+class SequenceDecoderWithExplicitlyTaggedOpenTypesTestCase(BaseTestCase):
+    def setUp(self):
+        openType = opentype.OpenType(
+            'id',
+            {1: univ.Integer(),
+             2: univ.OctetString()}
+        )
+        self.s = univ.Sequence(
+            componentType=namedtype.NamedTypes(
+                namedtype.NamedType('id', univ.Integer()),
+                namedtype.NamedType(
+                    'blob', univ.Any().subtype(explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 3)), openType=openType
+                )
+            )
+        )
+
+    def testDecodeOpenTypesChoiceOne(self):
+        s, r = decoder.decode(
+            ints2octs((48, 8, 2, 1, 1, 163, 3, 2, 1, 12)), asn1Spec=self.s, decodeOpenTypes=True
+        )
+        assert not r
+        assert s[0] == 1
+        assert s[1] == 12
+
+    def testDecodeOpenTypesUnknownId(self):
+        s, r = decoder.decode(
+            ints2octs((48, 8, 2, 1, 3, 163, 3, 2, 1, 12)), asn1Spec=self.s, decodeOpenTypes=True
+        )
+        assert not r
+        assert s[0] == 3
+        assert s[1] == univ.OctetString(hexValue='02010C')
 
 
 class SetDecoderTestCase(BaseTestCase):
