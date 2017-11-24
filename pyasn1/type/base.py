@@ -153,16 +153,29 @@ class Asn1ItemBase(Asn1Item):
 class NoValue(object):
     """Create a singleton instance of NoValue class.
 
-    The *NoValue* sentinel object represents an instance of ASN.1 schema
-    object as opposed to ASN.1 value object.
+    ASN.1 schema objects are always initialized with a *NoValue* instance.
 
-    Only ASN.1 schema-related operations can be performed on ASN.1
-    schema objects.
+    The instantiated ASN.1 schema objects (AKA *ASN.1 value objects*) are
+    always initialized with some data (e.g. :class:`int`, :class:`str` etc)
+    rather than with :class:`NoValue` object.
 
     Warning
     -------
-    Any operation attempted on the *noValue* object will raise the
-    *PyAsn1Error* exception.
+    Any operation attempted on the :class:`NoValue` object will raise the
+    *PyAsn1Error* exception to indicate an attempt of ASN.1 schema
+    use in the context where some usable data is expected.
+
+    Examples
+    --------
+    .. code-block:: python
+
+        schema_obj = Integer()  # e.g. just Integer(noValue)
+
+        schema_obj += 1  # throws exception
+
+        value_obj = Integer(123)
+        
+        value_obj += 1  # OK
     """
     skipMethods = set(
         ('__slots__',
@@ -236,8 +249,10 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         Asn1ItemBase.__init__(self, **kwargs)
         if value is noValue:
             value = self.defaultValue
+
         else:
             value = self.prettyIn(value)
+
             try:
                 self.subtypeSpec(value)
 
@@ -302,6 +317,8 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         this object can also be used like a Python built-in object (e.g. `int`,
         `str`, `dict` etc.).
 
+        The alternative term for value objects is *instantiated ASN.1 schema*.
+
         Returns
         -------
         : :class:`bool`
@@ -310,14 +327,22 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
 
         Note
         ----
-        There is an important distinction between PyASN1 schema and value objects.
-        The PyASN1 schema objects can only participate in ASN.1 schema-related
+        There is an important distinction between ASN1 schema and instantiated ASN.1
+        schema (AKA *value*) objects.
+        
+        The |ASN.1| schema object can only participate in ASN.1 schema-related
         operations (e.g. defining or testing the structure of the data). Most
         obvious uses of ASN.1 schema is to guide serialisation codecs whilst
         encoding/decoding serialised ASN.1 contents.
 
-        The PyASN1 value objects can **additionally** participate in many operations
-        involving regular Python objects (e.g. arithmetic, comprehension etc).
+        The instantiated |ASN.1| schema object can **additionally** participate in
+        many operations involving regular Python objects (e.g. arithmetic, 
+        comprehension etc).
+
+        Technically, |ASN.1| objects initialized with :py:class:`~pyasn1.type.univ.NoValue`
+        sentinel (which is the default) turn into ASN.1 schema. |ASN.1| objects
+        initialized with any  object other than *NoValue* turn into instantiated |ASN.1|
+        schema objects. 
         """
         return self._value is not noValue
 
@@ -355,7 +380,7 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         subtype relationship between Python types. ASN.1 type is mainly identified
         by its tag(s) (:py:class:`~pyasn1.type.tag.TagSet`) and value range
         constraints (:py:class:`~pyasn1.type.constraint.ConstraintsIntersection`).
-        These ASN.1 type properties are implemented as |ASN.1| attributes.  
+        These ASN.1 type properties are implemented as |ASN.1| attributes.
 
         The `subtype()` method accepts the same set arguments as |ASN.1|
         class takes on instantiation except that all parameters

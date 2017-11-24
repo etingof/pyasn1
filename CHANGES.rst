@@ -1,4 +1,9 @@
 
+Revision 0.4.3, released XX-11-2017
+-----------------------------------
+
+- Fixed to the docs here and there
+
 Revision 0.4.2, released 23-11-2017
 -----------------------------------
 

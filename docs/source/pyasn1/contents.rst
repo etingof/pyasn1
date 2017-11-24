@@ -4,12 +4,11 @@
 Library documentation
 =====================
 
-As of this moment, pyasn1 library implements all ASN.1 data
-types as Python objects in accordance with X.208 standard. Later,
-post-1995, revision (X.680) introduced some changes to the schema
-language which may not be fully supported by pyasn1. Aside from data
-types a collection of data transformation codecs comes with the
-pyasn1 package.
+The pyasn1 library implements ASN.1 schema and data object as well as
+BER/DER/CER/Python serialisation codecs.
+
+The X.208 standard is mostly supported, its X.680 revision is supported
+only partially.
 
 As for ASN.1 schema language, pyasn1 package does
 not ship any compiler for it. However, there's a tool called
@@ -25,8 +24,8 @@ No external dependencies required.
 
 .. _pyasn1-types:
 
-ASN.1 types
------------
+Schema objects
+--------------
 
 The ASN.1 data description
 `language <https://www.itu.int/rec/dologin_pub.asp?lang=e&id=T-REC-X.208-198811-W!!PDF-E&type=items>`_
@@ -57,7 +56,8 @@ comprise a *schema* describing data structures of unbounded complexity.
            NamedType('publicExponent', Integer())
        )
 
-ASN.1 schema can be "instantiated" by essentially putting some concrete value
+ASN.1 schema can be "instantiated" by essentially replacing the default
+:ref:`noValue <univ.noValue>` sentinel object with some concrete value
 into the type container. Such instantiated schema object can still be
 used as a schema, but additionally it can play a role of a value in the
 context of any applicable operator (e.g. arithmetic etc.).
@@ -135,6 +135,11 @@ type's values.
    assert child_type_schema.isSubtypeOf(parent_type_schema) == True
    assert child_type_schema.isSameTypeWith(parent_type_schema) == False
 
+ASN.1 types
+-----------
+
+The ASN.1 standard introduces a collection of built-in data types
+categorized by their probable application.
 
 .. toctree::
    :maxdepth: 2
@@ -159,6 +164,9 @@ its :ref:`fields <type.namedtype>` specification.
    /pyasn1/type/namedtype/contents
    /pyasn1/type/opentype/contents
    /pyasn1/type/namedval/contents
+
+The :ref:`noValue <univ.NoValue>` sentinel object is the default for
+ASN.1 schema objects.
 
 .. _pyasn1-codecs:
 
