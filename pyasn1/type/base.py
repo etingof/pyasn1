@@ -221,7 +221,7 @@ class NoValue(object):
         raise error.PyAsn1Error('Attempted "%s" operation on ASN.1 schema object' % attr)
 
     def __repr__(self):
-        return '<%s object at %s>' % (self.__class__.__name__, id(self))
+        return '<%s object at 0x%x>' % (self.__class__.__name__, id(self))
 
 
 noValue = NoValue()
