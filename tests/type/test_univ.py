@@ -149,9 +149,13 @@ class NoValueTestCase(BaseTestCase):
         try:
             if hasattr(sys, 'getsizeof'):
                 sys.getsizeof(univ.noValue)
+            else:
+                raise unittest.SkipTest("no sys.getsizeof() method")
 
         except PyAsn1Error:
             assert False, 'sizeof failed for NoValue object'
+        except TypeError:
+            raise unittest.SkipTest("sys.getsizeof() raises TypeError")
 
 
 class IntegerTestCase(BaseTestCase):
