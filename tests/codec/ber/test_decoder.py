@@ -268,7 +268,7 @@ class NullDecoderTestCase(BaseTestCase):
 
 
 # Useful analysis of OID encoding issues could be found here:
-# http://www.viathinksoft.de/~daniel-marschall/asn.1/oid_facts.html
+# https://misc.daniel-marschall.de/asn.1/oid_facts.html
 class ObjectIdentifierDecoderTestCase(BaseTestCase):
     def testOne(self):
         assert decoder.decode(

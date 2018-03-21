@@ -342,7 +342,7 @@ Revision 0.1.7
 --------------
 
 - License updated to vanilla BSD 2-Clause to ease package use
-  (http://opensource.org/licenses/BSD-2-Clause).
+  (https://opensource.org/licenses/BSD-2-Clause).
 - Test suite made discoverable by unittest/unittest2 discovery feature.
 - Fix to decoder working on indefinite length substrate -- end-of-octets
   marker is now detected by both tag and value. Otherwise zero values may
@@ -406,7 +406,7 @@ Revision 0.1.4
 - Fix to BER Boolean decoder that allows other pre-computed
   values besides 0 and 1
 - Fix to leading 0x80 octet handling in DER/CER/DER ObjectIdentifier decoder.
-  See http://www.cosic.esat.kuleuven.be/publications/article-1432.pdf
+  See https://www.esat.kuleuven.be/cosic/publications/article-1432.pdf
 
 Revision 0.1.3
 --------------
