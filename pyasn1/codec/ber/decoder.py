@@ -337,7 +337,7 @@ class ObjectIdentifierDecoder(AbstractSimpleDecoder):
             elif subId == 128:
                 # ASN.1 spec forbids leading zeros (0x80) in OID
                 # encoding, tolerating it opens a vulnerability. See
-                # http://www.cosic.esat.kuleuven.be/publications/article-1432.pdf
+                # https://www.esat.kuleuven.be/cosic/publications/article-1432.pdf
                 # page 7
                 raise error.PyAsn1Error('Invalid octet 0x80 in OID encoding')
 

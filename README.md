@@ -176,7 +176,7 @@ You could `pip install pyasn1` or download it from [PyPI](https://pypi.python.or
 
 If something does not work as expected, 
 [open an issue](https://github.com/etingof/pyasn1/issues) at GitHub or
-post your question [on Stack Overflow](http://stackoverflow.com/questions/ask)
+post your question [on Stack Overflow](https://stackoverflow.com/questions/ask)
 or try browsing pyasn1 
 [mailing list archives](https://sourceforge.net/p/pyasn1/mailman/pyasn1-users/).
 
