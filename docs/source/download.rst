@@ -24,4 +24,4 @@ You may also want to use `pyasn1-modules`:
 
 Alternatively, you can download the latest release from
 `GitHub <https://github.com/etingof/pyasn1/releases>`_
-or `PyPI <https://pypi.python.org/pypi/pyasn1>`_.
+or `PyPI <https://pypi.org/project/pyasn1>`_.

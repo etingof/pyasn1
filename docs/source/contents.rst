@@ -11,7 +11,7 @@ technology for exchanging structured data in a universally understood,
 hardware agnostic way. Many industrial, security and telephony
 applications heavily rely on ASN.1.
 
-The `pyasn1 <https://pypi.python.org/pypi/pyasn1/>`_ library implements
+The `pyasn1 <https://pypi.org/project/pyasn1/>`_ library implements
 ASN.1 support in pure-Python.
 
 What is ASN.1

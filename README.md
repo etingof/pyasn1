@@ -1,8 +1,8 @@
 
 ASN.1 library for Python
 ------------------------
-[![PyPI](https://img.shields.io/pypi/v/pyasn1.svg?maxAge=2592000)](https://pypi.python.org/pypi/pyasn1)
-[![Python Versions](https://img.shields.io/pypi/pyversions/pyasn1.svg)](https://pypi.python.org/pypi/pyasn1/)
+[![PyPI](https://img.shields.io/pypi/v/pyasn1.svg?maxAge=2592000)](https://pypi.org/project/pyasn1)
+[![Python Versions](https://img.shields.io/pypi/pyversions/pyasn1.svg)](https://pypi.org/project/pyasn1/)
 [![Build status](https://travis-ci.org/etingof/pyasn1.svg?branch=master)](https://secure.travis-ci.org/etingof/pyasn1)
 [![Coverage Status](https://img.shields.io/codecov/c/github/etingof/pyasn1.svg)](https://codecov.io/github/etingof/pyasn1)
 [![GitHub license](https://img.shields.io/badge/license-BSD-blue.svg)](https://raw.githubusercontent.com/etingof/pyasn1/master/LICENSE.txt)
@@ -172,7 +172,7 @@ The pyasn1 package is distributed under terms and conditions of 2-clause
 BSD [license](http://snmplabs.com/pyasn1/license.html). Source code is freely
 available as a GitHub [repo](https://github.com/etingof/pyasn1).
 
-You could `pip install pyasn1` or download it from [PyPI](https://pypi.python.org/pypi/pyasn1).
+You could `pip install pyasn1` or download it from [PyPI](https://pypi.org/project/pyasn1).
 
 If something does not work as expected, 
 [open an issue](https://github.com/etingof/pyasn1/issues) at GitHub or
