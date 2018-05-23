@@ -1,8 +1,10 @@
 
-Revision 0.4.3, released XX-XX-2018
+Revision 0.4.3, released XX-05-2018
 -----------------------------------
 
 - Copyright notice extended to the year 2018
+- Fixed GeneralizedTime.asDateTime to perform milliseconds conversion
+  correctly
 
 Revision 0.4.2, released 23-11-2017
 -----------------------------------
