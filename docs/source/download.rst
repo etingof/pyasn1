@@ -3,10 +3,7 @@ Download & Install
 ==================
 
 The *pyasn1* library is a pure-Python package with no external
-dependencies. Considering how much industrial or finance software
-can be stuck with an old platform (think RHEL 5), we struggle to
-maintain its compatibility back to the very pre-historic Python
-(which is 2.4!).
+dependencies. It works with Python 2.7 and 3.4+.
 
 The best way to obtain PyASN1 is by running `pip`:
 

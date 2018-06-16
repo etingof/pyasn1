@@ -5,12 +5,7 @@
 # License: http://snmplabs.com/pyasn1/license.html
 #
 import sys
-
-try:
-    import unittest2 as unittest
-
-except ImportError:
-    import unittest
+import unittest
 
 from tests.base import BaseTestCase
 
@@ -433,18 +428,17 @@ class RealEncoderWithSchemaTestCase(BaseTestCase):
         ) == ints2octs((9, 7, 3, 49, 50, 51, 69, 49, 49))
 
 
-if sys.version_info[0:2] > (2, 5):
-    class UniversalStringEncoderTestCase(BaseTestCase):
-        def testEncoding(self):
-            assert encoder.encode(char.UniversalString(sys.version_info[0] == 3 and 'abc' or unicode('abc'))) == ints2octs(
-                (28, 12, 0, 0, 0, 97, 0, 0, 0, 98, 0, 0, 0, 99)), 'Incorrect encoding'
+class UniversalStringEncoderTestCase(BaseTestCase):
+    def testEncoding(self):
+        assert encoder.encode(char.UniversalString(sys.version_info[0] == 3 and 'abc' or unicode('abc'))) == ints2octs(
+            (28, 12, 0, 0, 0, 97, 0, 0, 0, 98, 0, 0, 0, 99)), 'Incorrect encoding'
 
 
-    class UniversalStringEncoderWithSchemaTestCase(BaseTestCase):
-        def testEncoding(self):
-            assert encoder.encode(
-                sys.version_info[0] == 3 and 'abc' or unicode('abc'), asn1Spec=char.UniversalString()
-            ) == ints2octs((28, 12, 0, 0, 0, 97, 0, 0, 0, 98, 0, 0, 0, 99)), 'Incorrect encoding'
+class UniversalStringEncoderWithSchemaTestCase(BaseTestCase):
+    def testEncoding(self):
+        assert encoder.encode(
+            sys.version_info[0] == 3 and 'abc' or unicode('abc'), asn1Spec=char.UniversalString()
+        ) == ints2octs((28, 12, 0, 0, 0, 97, 0, 0, 0, 98, 0, 0, 0, 99)), 'Incorrect encoding'
 
 
 class BMPStringEncoderTestCase(BaseTestCase):

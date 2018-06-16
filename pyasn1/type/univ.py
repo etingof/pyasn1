@@ -9,7 +9,6 @@ import sys
 
 from pyasn1 import error
 from pyasn1.codec.ber import eoo
-from pyasn1.compat import binary
 from pyasn1.compat import integer
 from pyasn1.compat import octets
 from pyasn1.type import base
@@ -227,9 +226,8 @@ class Integer(base.AbstractSimpleAsn1Item):
     def __ceil__(self):
         return math.ceil(self._value)
 
-    if sys.version_info[0:2] > (2, 5):
-        def __trunc__(self):
-            return self.clone(math.trunc(self._value))
+    def __trunc__(self):
+        return self.clone(math.trunc(self._value))
 
     def __lt__(self, value):
         return self._value < value
@@ -574,7 +572,7 @@ class BitString(base.AbstractSimpleAsn1Item):
     def asBinary(self):
         """Get |ASN.1| value as a text string of bits.
         """
-        binString = binary.bin(self._value)[2:]
+        binString = bin(self._value)[2:]
         return '0' * (len(self._value) - len(binString)) + binString
 
     @classmethod
@@ -705,19 +703,6 @@ class BitString(base.AbstractSimpleAsn1Item):
             raise error.PyAsn1Error(
                 'Bad BitString initializer type \'%s\'' % (value,)
             )
-
-
-try:
-    # noinspection PyStatementEffect
-    all
-
-except NameError:  # Python 2.4
-    # noinspection PyShadowingBuiltins
-    def all(iterable):
-        for element in iterable:
-            if not element:
-                return False
-        return True
 
 
 class OctetString(base.AbstractSimpleAsn1Item):
@@ -1450,9 +1435,8 @@ class Real(base.AbstractSimpleAsn1Item):
     def __ceil__(self):
         return self.clone(math.ceil(float(self)))
 
-    if sys.version_info[0:2] > (2, 5):
-        def __trunc__(self):
-            return self.clone(math.trunc(float(self)))
+    def __trunc__(self):
+        return self.clone(math.trunc(float(self)))
 
     def __lt__(self, value):
         return float(self) < value

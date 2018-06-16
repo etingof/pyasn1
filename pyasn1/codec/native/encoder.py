@@ -4,11 +4,7 @@
 # Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>
 # License: http://snmplabs.com/pyasn1/license.html
 #
-try:
-    from collections import OrderedDict
-
-except ImportError:
-    OrderedDict = dict
+from collections import OrderedDict
 
 from pyasn1 import debug
 from pyasn1 import error
@@ -220,8 +216,7 @@ class Encoder(object):
 #: of those.
 #:
 #: One exception is that instead of :py:class:`dict`, the :py:class:`OrderedDict`
-#: can be produced (whenever available) to preserve ordering of the components
-#: in ASN.1 SEQUENCE.
+#: is used to preserve ordering of the components in ASN.1 SEQUENCE.
 #:
 #: Parameters
 #: ----------

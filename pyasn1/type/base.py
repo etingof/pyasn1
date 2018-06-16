@@ -7,7 +7,6 @@
 import sys
 
 from pyasn1 import error
-from pyasn1.compat import calling
 from pyasn1.type import constraint
 from pyasn1.type import tag
 from pyasn1.type import tagmap
@@ -164,31 +163,31 @@ class NoValue(object):
     Any operation attempted on the *noValue* object will raise the
     *PyAsn1Error* exception.
     """
-    skipMethods = set(
-        ('__slots__',
-         # attributes
-         '__getattribute__',
-         '__getattr__',
-         '__setattr__',
-         '__delattr__',
-         # class instance
-         '__class__',
-         '__init__',
-         '__del__',
-         '__new__',
-         '__repr__',
-         '__qualname__',
-         '__objclass__',
-         'im_class',
-         '__sizeof__',
-         # pickle protocol
-         '__reduce__',
-         '__reduce_ex__',
-         '__getnewargs__',
-         '__getinitargs__',
-         '__getstate__',
-         '__setstate__')
-    )
+    skipMethods = {
+        '__slots__',
+        # attributes
+        '__getattribute__',
+        '__getattr__',
+        '__setattr__',
+        '__delattr__',
+        # class instance
+        '__class__',
+        '__init__',
+        '__del__',
+        '__new__',
+        '__repr__',
+        '__qualname__',
+        '__objclass__',
+        'im_class',
+        '__sizeof__',
+        # pickle protocol
+        '__reduce__',
+        '__reduce_ex__',
+        '__getnewargs__',
+        '__getinitargs__',
+        '__getstate__',
+        '__setstate__',
+    }
 
     _instance = None
 
@@ -205,7 +204,7 @@ class NoValue(object):
                         if (name not in cls.skipMethods and
                             name.startswith('__') and
                             name.endswith('__') and
-                            calling.callable(getattr(typ, name)))]
+                            callable(getattr(typ, name)))]
 
             for name in set(op_names):
                 setattr(cls, name, getPlug(name))

@@ -5,12 +5,7 @@
 # License: http://snmplabs.com/pyasn1/license.html
 #
 import sys
-
-try:
-    import unittest2 as unittest
-
-except ImportError:
-    import unittest
+import unittest
 
 from tests.base import BaseTestCase
 
@@ -483,10 +478,9 @@ class RealDecoderTestCase(BaseTestCase):
             assert 0, 'accepted too-short real'
 
 
-if sys.version_info[0:2] > (2, 5):
-    class UniversalStringDecoderTestCase(BaseTestCase):
-        def testDecoder(self):
-            assert decoder.decode(ints2octs((28, 12, 0, 0, 0, 97, 0, 0, 0, 98, 0, 0, 0, 99))) == (char.UniversalString(sys.version_info[0] == 3 and 'abc' or unicode('abc')), null)
+class UniversalStringDecoderTestCase(BaseTestCase):
+    def testDecoder(self):
+        assert decoder.decode(ints2octs((28, 12, 0, 0, 0, 97, 0, 0, 0, 98, 0, 0, 0, 99))) == (char.UniversalString(sys.version_info[0] == 3 and 'abc' or unicode('abc')), null)
 
 
 class BMPStringDecoderTestCase(BaseTestCase):
