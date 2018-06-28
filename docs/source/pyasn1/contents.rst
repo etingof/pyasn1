@@ -20,7 +20,7 @@ implementation of pyasn1 classes from ASN.1 specification.
 
 Both `pyasn1 <https://github.com/etingof/pyasn1>`_ and
 `pyasn1-modules <https://github.com/etingof/pyasn1-modules>`_ libraries
-can be used out-of-the-box with Python versions 2.4 through 3.6.
+can be used out-of-the-box with Python versions 2.4 through 3.7.
 No external dependencies required.
 
 .. _pyasn1-types:

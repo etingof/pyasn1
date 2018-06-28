@@ -19,7 +19,7 @@ Features
 * Generic implementation of ASN.1 types (X.208)
 * Standards compliant BER/CER/DER codecs
 * Dumps/loads ASN.1 structures from Python types
-* 100% Python, works with Python 2.4 up to Python 3.6
+* 100% Python, works with Python 2.4 up to Python 3.7
 * MT-safe
 * Contributed ASN.1 compiler [Asn1ate](https://github.com/kimgr/asn1ate)
 
