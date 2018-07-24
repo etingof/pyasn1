@@ -2457,7 +2457,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         scope += 1
         representation = self.__class__.__name__ + ':\n'
         for idx, componentValue in enumerate(self._componentValues):
-            if componentValue is not noValue:
+            if componentValue is not noValue and componentValue.isValue:
                 representation += ' ' * scope
                 if self.componentType:
                     representation += self.componentType.getNameByPosition(idx)
