@@ -1,5 +1,5 @@
 
-Revision 0.4.4, released XX-07-2018
+Revision 0.4.4, released 26-07-2018
 -----------------------------------
 
 - Fixed native encoder type map to include all ASN.1 types
