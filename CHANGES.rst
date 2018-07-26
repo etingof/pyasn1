@@ -4,7 +4,7 @@ Revision 0.4.4, released 26-07-2018
 
 - Fixed native encoder type map to include all ASN.1 types
   rather than just ambiguous ones
-- Fixed crash in `.prettyPrint` of `Sequence` and `Set` occuring
+- Fixed crash in `.prettyPrint` of `Sequence` and `Set` occurring
   at OPTIONAL components
 
 Revision 0.4.3, released 23-05-2018

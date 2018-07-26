@@ -36,7 +36,7 @@ matrix:
     python: '3.7'
   - os: linux
     dist: xenial
-    sudo: false
+    sudo: true
     python: 'nightly'
   - os: linux
     dist: xenial
