@@ -333,7 +333,7 @@ class ObjectIdentifierDecoderTestCase(BaseTestCase):
         except PyAsn1Error:
             pass
         else:
-            assert 0, 'Leading 0x80 tolarated'
+            assert 0, 'Leading 0x80 tolerated'
 
     def testLeading0x80Case2(self):
         try:
@@ -343,7 +343,7 @@ class ObjectIdentifierDecoderTestCase(BaseTestCase):
         except PyAsn1Error:
             pass
         else:
-            assert 0, 'Leading 0x80 tolarated'
+            assert 0, 'Leading 0x80 tolerated'
 
     def testLeading0x80Case3(self):
         try:
@@ -353,7 +353,7 @@ class ObjectIdentifierDecoderTestCase(BaseTestCase):
         except PyAsn1Error:
             pass
         else:
-            assert 0, 'Leading 0x80 tolarated'
+            assert 0, 'Leading 0x80 tolerated'
 
     def testLeading0x80Case4(self):
         try:
@@ -363,7 +363,7 @@ class ObjectIdentifierDecoderTestCase(BaseTestCase):
         except PyAsn1Error:
             pass
         else:
-            assert 0, 'Leading 0x80 tolarated'
+            assert 0, 'Leading 0x80 tolerated'
 
     def testTagFormat(self):
         try:
@@ -379,7 +379,7 @@ class ObjectIdentifierDecoderTestCase(BaseTestCase):
         except PyAsn1Error:
             pass
         else:
-            assert 0, 'zero length tolarated'
+            assert 0, 'zero length tolerated'
 
     def testIndefiniteLength(self):
         try:
@@ -429,12 +429,12 @@ class RealDecoderTestCase(BaseTestCase):
             ints2octs((9, 3, 160, 254, 1))
         ) == (univ.Real((1, 2, -8)), null)
 
-    def testBin4(self):  # check exponenta = 0
+    def testBin4(self):  # check exponent = 0
         assert decoder.decode(  # (1, 2, 0) encoded with base = 2
             ints2octs((9, 3, 128, 0, 1))
         ) == (univ.Real((1, 2, 0)), null)
 
-    def testBin5(self):  # case of 2 octs for exponenta and negative exponenta
+    def testBin5(self):  # case of 2 octs for exponent and negative exponent
         assert decoder.decode(  # (3, 2, -1020) encoded with base = 16
             ints2octs((9, 4, 161, 255, 1, 3))
         ) == (univ.Real((3, 2, -1020)), null)
@@ -1092,7 +1092,7 @@ class SetDecoderWithSchemaTestCase(BaseTestCase):
             ints2octs((49, 15, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=self.s
         ) == (self.s, null)
 
-    def testWithOptionaIndefMode(self):
+    def testWithOptionalIndefMode(self):
         self.__initWithOptional()
         assert decoder.decode(
             ints2octs((49, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 0, 0)), asn1Spec=self.s

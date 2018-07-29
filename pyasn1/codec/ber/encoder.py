@@ -305,7 +305,7 @@ class RealEncoder(AbstractItemEncoder):
         if m < 0:
             ms = -1  # mantissa sign
         if e < 0:
-            es = -1  # exponenta sign 
+            es = -1  # exponent sign
         m *= ms
         if encbase == 8:
             m *= 2 ** (abs(e) % 3 * es)
@@ -331,7 +331,7 @@ class RealEncoder(AbstractItemEncoder):
             return self._dropFloatingPoint(m, self.binEncBase, e)
         # auto choosing base 2/8/16 
         mantissa = [m, m, m]
-        exponenta = [e, e, e]
+        exponent = [e, e, e]
         sign = 1
         encbase = 2
         e = float('inf')
@@ -339,9 +339,9 @@ class RealEncoder(AbstractItemEncoder):
             (sign,
              mantissa[i],
              encBase[i],
-             exponenta[i]) = self._dropFloatingPoint(mantissa[i], encBase[i], exponenta[i])
-            if abs(exponenta[i]) < abs(e) or (abs(exponenta[i]) == abs(e) and mantissa[i] < m):
-                e = exponenta[i]
+             exponent[i]) = self._dropFloatingPoint(mantissa[i], encBase[i], exponent[i])
+            if abs(exponent[i]) < abs(e) or (abs(exponent[i]) == abs(e) and mantissa[i] < m):
+                e = exponent[i]
                 m = int(mantissa[i])
                 encbase = encBase[i]
         return sign, m, encbase, e
@@ -364,7 +364,7 @@ class RealEncoder(AbstractItemEncoder):
             ms, m, encbase, e = self._chooseEncBase(value)
             if ms < 0:  # mantissa sign
                 fo |= 0x40  # sign bit
-            # exponenta & mantissa normalization
+            # exponent & mantissa normalization
             if encbase == 2:
                 while m & 0x1 == 0:
                     m >>= 1

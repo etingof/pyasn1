@@ -70,6 +70,10 @@ class ExplicitTagDecoder(AbstractSimpleDecoder):
 
         value, _ = decodeFun(head, asn1Spec, tagSet, length, **options)
 
+        if debug.logger & debug.flagDecoder:
+            debug.logger('explicit tag container carries %d octets of trailing payload (will be lost!): %s' % (
+                len(_), debug.hexdump(_)))
+
         return value, tail
 
     def indefLenValueDecoder(self, substrate, asn1Spec,

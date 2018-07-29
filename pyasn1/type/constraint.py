@@ -352,7 +352,7 @@ class InnerTypeConstraint(AbstractConstraint):
             if idx not in self.__multipleTypeConstraint:
                 raise error.ValueConstraintError(value)
             constraint, status = self.__multipleTypeConstraint[idx]
-            if status == 'ABSENT':  # XXX presense is not checked!
+            if status == 'ABSENT':  # XXX presence is not checked!
                 raise error.ValueConstraintError(value)
             constraint(value)
 

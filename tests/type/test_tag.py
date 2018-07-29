@@ -31,10 +31,10 @@ class TagReprTestCase(TagTestCaseBase):
 
 class TagCmpTestCase(TagTestCaseBase):
     def testCmp(self):
-        assert self.t1 == self.t2, 'tag comparation fails'
+        assert self.t1 == self.t2, 'tag comparison fails'
 
     def testHash(self):
-        assert hash(self.t1) == hash(self.t2), 'tag hash comparation fails'
+        assert hash(self.t1) == hash(self.t2), 'tag hash comparison fails'
 
     def testSequence(self):
         assert self.t1[0] == self.t2[0] and \
@@ -62,13 +62,13 @@ class TagSetReprTestCase(TagSetTestCaseBase):
 
 class TagSetCmpTestCase(TagSetTestCaseBase):
     def testCmp(self):
-        assert self.ts1 == self.ts2, 'tag set comparation fails'
+        assert self.ts1 == self.ts2, 'tag set comparison fails'
 
     def testHash(self):
         assert hash(self.ts1) == hash(self.ts2), 'tag set hash comp. fails'
 
     def testLen(self):
-        assert len(self.ts1) == len(self.ts2), 'tag length comparation fails'
+        assert len(self.ts1) == len(self.ts2), 'tag length comparison fails'
 
 
 class TaggingTestSuite(TagSetTestCaseBase):

@@ -41,7 +41,7 @@ class TimeEncoderMixIn(object):
     def encodeValue(self, value, asn1Spec, encodeFun, **options):
         # Encoding constraints:
         # - minutes are mandatory, seconds are optional
-        # - subseconds must NOT be zero
+        # - sub-seconds must NOT be zero
         # - no hanging fraction dot
         # - time in UTC (Z)
         # - only dot is allowed for fractions

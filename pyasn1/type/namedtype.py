@@ -265,18 +265,18 @@ class NamedTypes(object):
         return nameToPosMap
 
     def __computeAmbiguousTypes(self):
-        ambigiousTypes = {}
-        partialAmbigiousTypes = ()
+        ambiguousTypes = {}
+        partialAmbiguousTypes = ()
         for idx, namedType in reversed(tuple(enumerate(self.__namedTypes))):
             if namedType.isOptional or namedType.isDefaulted:
-                partialAmbigiousTypes = (namedType,) + partialAmbigiousTypes
+                partialAmbiguousTypes = (namedType,) + partialAmbiguousTypes
             else:
-                partialAmbigiousTypes = (namedType,)
-            if len(partialAmbigiousTypes) == len(self.__namedTypes):
-                ambigiousTypes[idx] = self
+                partialAmbiguousTypes = (namedType,)
+            if len(partialAmbiguousTypes) == len(self.__namedTypes):
+                ambiguousTypes[idx] = self
             else:
-                ambigiousTypes[idx] = NamedTypes(*partialAmbigiousTypes, **dict(terminal=True))
-        return ambigiousTypes
+                ambiguousTypes[idx] = NamedTypes(*partialAmbiguousTypes, **dict(terminal=True))
+        return ambiguousTypes
 
     def getTypeByPosition(self, idx):
         """Return ASN.1 type object by its position in fields set.

@@ -1065,7 +1065,7 @@ class SequenceOf(BaseTestCase):
         else:
             assert False, 'IndexError not raised'
 
-        # this is a deviation from standart sequence protocol
+        # this is a deviation from standard sequence protocol
         assert not s[1]
 
     def testSetItem(self):

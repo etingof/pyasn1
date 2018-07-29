@@ -343,10 +343,10 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
 
             value = self._value
 
-        initilaizers = self.readOnly.copy()
-        initilaizers.update(kwargs)
+        initializers = self.readOnly.copy()
+        initializers.update(kwargs)
 
-        return self.__class__(value, **initilaizers)
+        return self.__class__(value, **initializers)
 
     def subtype(self, value=noValue, **kwargs):
         """Create a specialization of |ASN.1| schema or value object.
@@ -540,10 +540,10 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         """
         cloneValueFlag = kwargs.pop('cloneValueFlag', False)
 
-        initilaizers = self.readOnly.copy()
-        initilaizers.update(kwargs)
+        initializers = self.readOnly.copy()
+        initializers.update(kwargs)
 
-        clone = self.__class__(**initilaizers)
+        clone = self.__class__(**initializers)
 
         if cloneValueFlag:
             self._cloneComponentValues(clone, cloneValueFlag)
