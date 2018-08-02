@@ -17,6 +17,8 @@ from pyasn1.type import useful
 
 __all__ = ['encode']
 
+LOG = debug.registerLoggee(__name__, flags=debug.DEBUG_ENCODER)
+
 
 class AbstractItemEncoder(object):
     supportIndefLenMode = True
@@ -620,13 +622,8 @@ class Encoder(object):
             raise error.PyAsn1Error('Value %r is not ASN.1 type instance '
                                     'and "asn1Spec" not given' % (value,))
 
-        if debug.logger & debug.flagEncoder:
-            logger = debug.logger
-        else:
-            logger = None
-
-        if logger:
-            logger('encoder called in %sdef mode, chunk size %s for '
+        if LOG:
+            LOG('encoder called in %sdef mode, chunk size %s for '
                    'type %s, value:\n%s' % (not options.get('defMode', True) and 'in' or '', options.get('maxChunkSize', 0), asn1Spec is None and value.prettyPrintType() or asn1Spec.prettyPrintType(), value))
 
         if self.fixedDefLengthMode is not None:
@@ -639,8 +636,8 @@ class Encoder(object):
         try:
             concreteEncoder = self.__typeMap[typeId]
 
-            if logger:
-                logger('using value codec %s chosen by type ID %s' % (concreteEncoder.__class__.__name__, typeId))
+            if LOG:
+                LOG('using value codec %s chosen by type ID %s' % (concreteEncoder.__class__.__name__, typeId))
 
         except KeyError:
             if asn1Spec is None:
@@ -657,13 +654,13 @@ class Encoder(object):
             except KeyError:
                 raise error.PyAsn1Error('No encoder for %r (%s)' % (value, tagSet))
 
-            if logger:
-                logger('using value codec %s chosen by tagSet %s' % (concreteEncoder.__class__.__name__, tagSet))
+            if LOG:
+                LOG('using value codec %s chosen by tagSet %s' % (concreteEncoder.__class__.__name__, tagSet))
 
         substrate = concreteEncoder.encode(value, asn1Spec, self, **options)
 
-        if logger:
-            logger('codec %s built %s octets of substrate: %s\nencoder completed' % (concreteEncoder, len(substrate), debug.hexdump(substrate)))
+        if LOG:
+            LOG('codec %s built %s octets of substrate: %s\nencoder completed' % (concreteEncoder, len(substrate), debug.hexdump(substrate)))
 
         return substrate
 
