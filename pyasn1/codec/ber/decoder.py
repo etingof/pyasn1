@@ -18,6 +18,8 @@ from pyasn1.type import useful
 
 __all__ = ['decode']
 
+LOG = debug.registerLoggee(__name__, flags=debug.DEBUG_DECODER)
+
 noValue = base.noValue
 
 
@@ -70,8 +72,8 @@ class ExplicitTagDecoder(AbstractSimpleDecoder):
 
         value, _ = decodeFun(head, asn1Spec, tagSet, length, **options)
 
-        if debug.logger & debug.flagDecoder:
-            debug.logger('explicit tag container carries %d octets of trailing payload (will be lost!): %s' % (
+        if LOG:
+            LOG('explicit tag container carries %d octets of trailing payload (will be lost!): %s' % (
                 len(_), debug.hexdump(_)))
 
         return value, tail
@@ -1067,21 +1069,16 @@ class Decoder(object):
                  decodeFun=None, substrateFun=None,
                  **options):
 
-        if debug.logger & debug.flagDecoder:
-            logger = debug.logger
-        else:
-            logger = None
-
-        if logger:
-            logger('decoder called at scope %s with state %d, working with up to %d octets of substrate: %s' % (debug.scope, state, len(substrate), debug.hexdump(substrate)))
+        if LOG:
+            LOG('decoder called at scope %s with state %d, working with up to %d octets of substrate: %s' % (debug.scope, state, len(substrate), debug.hexdump(substrate)))
 
         allowEoo = options.pop('allowEoo', False)
 
         # Look for end-of-octets sentinel
         if allowEoo and self.supportIndefLength:
             if substrate[:2] == self.__eooSentinel:
-                if logger:
-                    logger('end-of-octets sentinel found')
+                if LOG:
+                    LOG('end-of-octets sentinel found')
                 return eoo.endOfOctets, substrate[2:]
 
         value = noValue
@@ -1146,8 +1143,8 @@ class Decoder(object):
                 else:
                     tagSet = lastTag + tagSet
                 state = stDecodeLength
-                if logger:
-                    logger('tag decoded into %s, decoding length' % tagSet)
+                if LOG:
+                    LOG('tag decoded into %s, decoding length' % tagSet)
             if state is stDecodeLength:
                 # Decode length
                 if not substrate:
@@ -1185,8 +1182,8 @@ class Decoder(object):
                     if len(substrate) < length:
                         raise error.SubstrateUnderrunError('%d-octet short' % (length - len(substrate)))
                 state = stGetValueDecoder
-                if logger:
-                    logger('value length decoded into %d, payload substrate is: %s' % (length, debug.hexdump(length == -1 and substrate or substrate[:length])))
+                if LOG:
+                    LOG('value length decoded into %d, payload substrate is: %s' % (length, debug.hexdump(length == -1 and substrate or substrate[:length])))
             if state is stGetValueDecoder:
                 if asn1Spec is None:
                     state = stGetValueDecoderByTag
@@ -1224,8 +1221,8 @@ class Decoder(object):
                         state = stDecodeValue
                     else:
                         state = stTryAsExplicitTag
-                if logger:
-                    logger('codec %s chosen by a built-in type, decoding %s' % (concreteDecoder and concreteDecoder.__class__.__name__ or "<none>", state is stDecodeValue and 'value' or 'as explicit tag'))
+                if LOG:
+                    LOG('codec %s chosen by a built-in type, decoding %s' % (concreteDecoder and concreteDecoder.__class__.__name__ or "<none>", state is stDecodeValue and 'value' or 'as explicit tag'))
                     debug.scope.push(concreteDecoder is None and '?' or concreteDecoder.protoComponent.__class__.__name__)
             if state is stGetValueDecoderByAsn1Spec:
                 if asn1Spec.__class__ is tagmap.TagMap:
@@ -1233,19 +1230,19 @@ class Decoder(object):
                         chosenSpec = asn1Spec[tagSet]
                     except KeyError:
                         chosenSpec = None
-                    if logger:
-                        logger('candidate ASN.1 spec is a map of:')
+                    if LOG:
+                        LOG('candidate ASN.1 spec is a map of:')
                         for firstOctet, v in asn1Spec.presentTypes.items():
-                            logger('  %s -> %s' % (firstOctet, v.__class__.__name__))
+                            LOG('  %s -> %s' % (firstOctet, v.__class__.__name__))
                         if asn1Spec.skipTypes:
-                            logger('but neither of: ')
+                            LOG('but neither of: ')
                             for firstOctet, v in asn1Spec.skipTypes.items():
-                                logger('  %s -> %s' % (firstOctet, v.__class__.__name__))
-                        logger('new candidate ASN.1 spec is %s, chosen by %s' % (chosenSpec is None and '<none>' or chosenSpec.prettyPrintType(), tagSet))
+                                LOG('  %s -> %s' % (firstOctet, v.__class__.__name__))
+                        LOG('new candidate ASN.1 spec is %s, chosen by %s' % (chosenSpec is None and '<none>' or chosenSpec.prettyPrintType(), tagSet))
                 elif tagSet == asn1Spec.tagSet or tagSet in asn1Spec.tagMap:
                     chosenSpec = asn1Spec
-                    if logger:
-                        logger('candidate ASN.1 spec is %s' % asn1Spec.__class__.__name__)
+                    if LOG:
+                        LOG('candidate ASN.1 spec is %s' % asn1Spec.__class__.__name__)
                 else:
                     chosenSpec = None
 
@@ -1253,16 +1250,16 @@ class Decoder(object):
                     try:
                         # ambiguous type or just faster codec lookup
                         concreteDecoder = typeMap[chosenSpec.typeId]
-                        if logger:
-                            logger('value decoder chosen for an ambiguous type by type ID %s' % (chosenSpec.typeId,))
+                        if LOG:
+                            LOG('value decoder chosen for an ambiguous type by type ID %s' % (chosenSpec.typeId,))
                     except KeyError:
                         # use base type for codec lookup to recover untagged types
                         baseTagSet = tag.TagSet(chosenSpec.tagSet.baseTag,  chosenSpec.tagSet.baseTag)
                         try:
                             # base type or tagged subtype
                             concreteDecoder = tagMap[baseTagSet]
-                            if logger:
-                                logger('value decoder chosen by base %s' % (baseTagSet,))
+                            if LOG:
+                                LOG('value decoder chosen by base %s' % (baseTagSet,))
                         except KeyError:
                             concreteDecoder = None
                     if concreteDecoder:
@@ -1273,8 +1270,8 @@ class Decoder(object):
                 else:
                     concreteDecoder = None
                     state = stTryAsExplicitTag
-                if logger:
-                    logger('codec %s chosen by ASN.1 spec, decoding %s' % (state is stDecodeValue and concreteDecoder.__class__.__name__ or "<none>", state is stDecodeValue and 'value' or 'as explicit tag'))
+                if LOG:
+                    LOG('codec %s chosen by ASN.1 spec, decoding %s' % (state is stDecodeValue and concreteDecoder.__class__.__name__ or "<none>", state is stDecodeValue and 'value' or 'as explicit tag'))
                     debug.scope.push(chosenSpec is None and '?' or chosenSpec.__class__.__name__)
             if state is stDecodeValue:
                 if not options.get('recursiveFlag', True) and not substrateFun:  # deprecate this
@@ -1297,8 +1294,8 @@ class Decoder(object):
                         **options
                     )
 
-                if logger:
-                    logger('codec %s yields type %s, value:\n%s\n...remaining substrate is: %s' % (concreteDecoder.__class__.__name__, value.__class__.__name__, isinstance(value, base.Asn1Item) and value.prettyPrint() or value, substrate and debug.hexdump(substrate) or '<none>'))
+                if LOG:
+                    LOG('codec %s yields type %s, value:\n%s\n...remaining substrate is: %s' % (concreteDecoder.__class__.__name__, value.__class__.__name__, isinstance(value, base.Asn1Item) and value.prettyPrint() or value, substrate and debug.hexdump(substrate) or '<none>'))
 
                 state = stStop
                 break
@@ -1310,20 +1307,20 @@ class Decoder(object):
                 else:
                     concreteDecoder = None
                     state = self.defaultErrorState
-                if logger:
-                    logger('codec %s chosen, decoding %s' % (concreteDecoder and concreteDecoder.__class__.__name__ or "<none>", state is stDecodeValue and 'value' or 'as failure'))
+                if LOG:
+                    LOG('codec %s chosen, decoding %s' % (concreteDecoder and concreteDecoder.__class__.__name__ or "<none>", state is stDecodeValue and 'value' or 'as failure'))
             if state is stDumpRawValue:
                 concreteDecoder = self.defaultRawDecoder
-                if logger:
-                    logger('codec %s chosen, decoding value' % concreteDecoder.__class__.__name__)
+                if LOG:
+                    LOG('codec %s chosen, decoding value' % concreteDecoder.__class__.__name__)
                 state = stDecodeValue
             if state is stErrorCondition:
                 raise error.PyAsn1Error(
                     '%s not in asn1Spec: %r' % (tagSet, asn1Spec)
                 )
-        if logger:
+        if LOG:
             debug.scope.pop()
-            logger('decoder left scope %s, call completed' % debug.scope)
+            LOG('decoder left scope %s, call completed' % debug.scope)
         return value, substrate
 
 

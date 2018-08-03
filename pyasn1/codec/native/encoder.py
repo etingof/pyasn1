@@ -20,6 +20,8 @@ from pyasn1.type import useful
 
 __all__ = ['encode']
 
+LOG = debug.registerLoggee(__name__, flags=debug.DEBUG_ENCODER)
+
 
 class AbstractItemEncoder(object):
     def encode(self, value, encodeFun, **options):
@@ -180,14 +182,9 @@ class Encoder(object):
         if not isinstance(value, base.Asn1Item):
             raise error.PyAsn1Error('value is not valid (should be an instance of an ASN.1 Item)')
 
-        if debug.logger & debug.flagEncoder:
-            logger = debug.logger
-        else:
-            logger = None
-
-        if logger:
+        if LOG:
             debug.scope.push(type(value).__name__)
-            logger('encoder called for type %s <%s>' % (type(value).__name__, value.prettyPrint()))
+            LOG('encoder called for type %s <%s>' % (type(value).__name__, value.prettyPrint()))
 
         tagSet = value.tagSet
 
@@ -204,13 +201,13 @@ class Encoder(object):
             except KeyError:
                 raise error.PyAsn1Error('No encoder for %s' % (value,))
 
-        if logger:
-            logger('using value codec %s chosen by %s' % (concreteEncoder.__class__.__name__, tagSet))
+        if LOG:
+            LOG('using value codec %s chosen by %s' % (concreteEncoder.__class__.__name__, tagSet))
 
         pyObject = concreteEncoder.encode(value, self, **options)
 
-        if logger:
-            logger('encoder %s produced: %s' % (type(concreteEncoder).__name__, repr(pyObject)))
+        if LOG:
+            LOG('encoder %s produced: %s' % (type(concreteEncoder).__name__, repr(pyObject)))
             debug.scope.pop()
 
         return pyObject
