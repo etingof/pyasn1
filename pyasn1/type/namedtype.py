@@ -5,6 +5,7 @@
 # License: http://snmplabs.com/pyasn1/license.html
 #
 import sys
+import threading
 
 from pyasn1 import error
 from pyasn1.type import tag
@@ -114,13 +115,23 @@ class DefaultedNamedType(NamedType):
 
 
 def cached_property(func):
+    # This lock is shared between all instances of a class, which could lead to
+    # threads blocking unnecessarily, but should practically still be more
+    # efficient than precomputing all the properties.
+    lock = threading.Lock()
+
     @property
     def get_property(self):
         try:
             val = self._props[func.__name__]
         except KeyError:
-            val = func(self)
-            self._props[func.__name__] = val
+            lock.acquire()
+            try:
+                val = self._props[func.__name__]
+            except KeyError:
+                val = func(self)
+                self._props[func.__name__] = val
+            lock.release()
         return val
     return get_property
 
