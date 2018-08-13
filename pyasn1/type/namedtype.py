@@ -113,6 +113,18 @@ class DefaultedNamedType(NamedType):
     isDefaulted = True
 
 
+def cached_property(func):
+    @property
+    def get_property(self):
+        try:
+            val = self._props[func.__name__]
+        except KeyError:
+            val = func(self)
+            self._props[func.__name__] = val
+        return val
+    return get_property
+
+
 class NamedTypes(object):
     """Create a collection of named fields for a constructed ASN.1 type.
 
@@ -153,23 +165,25 @@ class NamedTypes(object):
     def __init__(self, *namedTypes, **kwargs):
         self.__namedTypes = namedTypes
         self.__namedTypesLen = len(self.__namedTypes)
-        self.__minTagSet = self.__computeMinTagSet()
-        self.__nameToPosMap = self.__computeNameToPosMap()
-        self.__tagToPosMap = self.__computeTagToPosMap()
-        self.__ambiguousTypes = 'terminal' not in kwargs and self.__computeAmbiguousTypes() or {}
-        self.__uniqueTagMap = self.__computeTagMaps(unique=True)
-        self.__nonUniqueTagMap = self.__computeTagMaps(unique=False)
-        self.__hasOptionalOrDefault = any([True for namedType in self.__namedTypes
-                                           if namedType.isDefaulted or namedType.isOptional])
-        self.__hasOpenTypes = any([True for namedType in self.__namedTypes
-                                   if namedType.openType])
 
-        self.__requiredComponents = frozenset(
-                [idx for idx, nt in enumerate(self.__namedTypes) if not nt.isOptional and not nt.isDefaulted]
-            )
         self.__keys = frozenset([namedType.name for namedType in self.__namedTypes])
         self.__values = tuple([namedType.asn1Object for namedType in self.__namedTypes])
         self.__items = tuple([(namedType.name, namedType.asn1Object) for namedType in self.__namedTypes])
+
+        self.__terminal = kwargs.get('terminal', None)
+        self._props = {}
+
+    @cached_property
+    def __nameToPosMap(self):
+        return self.__computeNameToPosMap()
+
+    @cached_property
+    def __tagToPosMap(self):
+        return self.__computeTagToPosMap()
+
+    @cached_property
+    def __ambiguousTypes(self):
+        return not self.__terminal and self.__computeAmbiguousTypes() or {}
 
     def __repr__(self):
         representation = ', '.join(['%r' % x for x in self.__namedTypes])
@@ -452,7 +466,7 @@ class NamedTypes(object):
 
         return minTagSet or tag.TagSet()
 
-    @property
+    @cached_property
     def minTagSet(self):
         """Return the minimal TagSet among ASN.1 type in callee *NamedTypes*.
 
@@ -465,7 +479,7 @@ class NamedTypes(object):
         : :class:`~pyasn1.type.tagset.TagSet`
             Minimal TagSet among ASN.1 types in callee *NamedTypes*
         """
-        return self.__minTagSet
+        return self.__computeMinTagSet()
 
     def __computeTagMaps(self, unique):
         presentTypes = {}
@@ -488,7 +502,7 @@ class NamedTypes(object):
 
         return tagmap.TagMap(presentTypes, skipTypes, defaultType)
 
-    @property
+    @cached_property
     def tagMap(self):
         """Return a *TagMap* object from tags and types recursively.
 
@@ -510,9 +524,9 @@ class NamedTypes(object):
 
            Integer.tagSet -> Choice
         """
-        return self.__nonUniqueTagMap
+        return self.__computeTagMaps(unique=False)
 
-    @property
+    @cached_property
     def tagMapUnique(self):
         """Return a *TagMap* object from unique tags and types recursively.
 
@@ -540,20 +554,26 @@ class NamedTypes(object):
         Duplicate *TagSet* objects found in the tree of children
         types would cause error.
         """
-        return self.__uniqueTagMap
+        return self.__computeTagMaps(unique=True)
 
-    @property
+    @cached_property
     def hasOptionalOrDefault(self):
-        return self.__hasOptionalOrDefault
+        return any([True for namedType in self.__namedTypes
+                    if namedType.isDefaulted or namedType.isOptional])
 
-    @property
+    @cached_property
     def hasOpenTypes(self):
-        return self.__hasOpenTypes
+        return any([True for namedType in self.__namedTypes
+                    if namedType.openType])
 
     @property
     def namedTypes(self):
         return tuple(self.__namedTypes)
 
-    @property
+    @cached_property
     def requiredComponents(self):
-        return self.__requiredComponents
+        return frozenset([
+            idx
+            for idx, nt in enumerate(self.__namedTypes)
+                if not nt.isOptional and not nt.isDefaulted
+        ])
