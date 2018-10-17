@@ -45,7 +45,7 @@ tool:
 
 .. code-block:: bash
 
-    $ pyasn1gen.py pkcs-1.asn > rsakey.py
+    $ asn1ate pkcs-1.asn > rsakey.py
 
 Though it may not work out as, as it stands now, asn1ate does not support
 all ASN.1 language constructs.
