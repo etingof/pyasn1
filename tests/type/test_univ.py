@@ -1407,6 +1407,22 @@ class Sequence(BaseTestCase):
         s.clear()
         assert s.getComponentByPosition(1, default=None) is None
 
+    def testGetComponentWithConstructedDefault(self):
+
+        class Sequence(univ.Sequence):
+            componentType = namedtype.NamedTypes(
+                namedtype.NamedType('name', univ.OctetString()),
+                namedtype.DefaultedNamedType('nick', univ.SequenceOf(
+                    componentType=univ.Integer()
+                ).setComponentByPosition(0, 1)),
+            )
+
+        s = Sequence()
+
+        assert s.getComponentByPosition(1, default=None, instantiate=False) is None
+        assert s.getComponentByPosition(1, instantiate=False) is univ.noValue
+        assert s.getComponentByPosition(1) == [1]
+
     def testGetComponentNoInstantiation(self):
 
         class Sequence(univ.Sequence):

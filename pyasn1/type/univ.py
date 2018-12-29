@@ -2347,7 +2347,9 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
         if value is noValue:
             if componentTypeLen:
-                value = componentType.getTypeByPosition(idx).clone()
+                value = componentType.getTypeByPosition(idx)
+                if isinstance(value, base.AbstractConstructedAsn1Item):
+                    value = value.clone(cloneValueFlag=componentType[idx].isDefaulted)
 
             elif currentValue is noValue:
                 raise error.PyAsn1Error('Component type not defined')
