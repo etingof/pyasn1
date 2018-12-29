@@ -114,14 +114,15 @@ class AbstractItemEncoder(object):
             header = self.encodeTag(singleTag, isConstructed)
 
             if LOG:
-                LOG('encoded %stag %s into %s' % (isConstructed and 'constructed ' or '',
-                                                  singleTag, debug.hexdump(header)))
+                LOG('encoded %stag %s into %s' % (
+                    isConstructed and 'constructed ' or '',
+                    singleTag, debug.hexdump(ints2octs(header))))
 
             header += self.encodeLength(len(substrate), defModeOverride)
 
             if LOG:
                 LOG('encoded %s octets (tag + payload) into %s' % (
-                    len(substrate), debug.hexdump(header)))
+                    len(substrate), debug.hexdump(ints2octs(header))))
 
             if isOctets:
                 substrate = ints2octs(header) + substrate
