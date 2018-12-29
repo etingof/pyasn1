@@ -47,7 +47,7 @@ master_doc = 'contents'
 
 # General information about the project.
 project = u'ASN.1 types and codecs'
-copyright = u'2005-2018, Ilya Etingof <etingof@gmail.com>'
+copyright = u'2005-2019, Ilya Etingof <etingof@gmail.com>'
 author = u'Ilya Etingof <etingof@gmail.com>'
 
 # The version info for the project you're documenting, acts as replacement for

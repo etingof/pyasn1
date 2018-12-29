@@ -180,5 +180,5 @@ post your question [on Stack Overflow](https://stackoverflow.com/questions/ask)
 or try browsing pyasn1 
 [mailing list archives](https://sourceforge.net/p/pyasn1/mailman/pyasn1-users/).
 
-Copyright (c) 2005-2018, [Ilya Etingof](mailto:etingof@gmail.com).
+Copyright (c) 2005-2019, [Ilya Etingof](mailto:etingof@gmail.com).
 All rights reserved.

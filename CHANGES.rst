@@ -1,5 +1,5 @@
 
-Revision 0.4.5, released XX-10-2018
+Revision 0.4.5, released 29-12-2018
 -----------------------------------
 
 - Debug logging refactored for more efficiency when disabled and
@@ -8,6 +8,7 @@ Revision 0.4.5, released XX-10-2018
   from codec main loop as it used to be.
 - More debug logging added to BER family of codecs to ease encoding
   problems troubleshooting.
+- Copyright notice extended to the year 2019
 - Fixed defaulted constructed SEQUENCE component initialization.
 
 Revision 0.4.4, released 26-07-2018
