@@ -26,6 +26,8 @@ Revision 0.4.6, released XX-06-2019
   becomes a value object.
 - Added `.reset()` method to all constructed types to turn value object
   into a schema object.
+- Fixed `AnyDecoder` to accept possible `TagMap` as `asn1Spec`
+  to make dumping raw value operational
 
 Revision 0.4.5, released 29-12-2018
 -----------------------------------

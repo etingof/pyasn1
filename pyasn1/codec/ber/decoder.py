@@ -1016,7 +1016,16 @@ class AnyDecoder(AbstractSimpleDecoder):
                      tagSet=None, length=None, state=None,
                      decodeFun=None, substrateFun=None,
                      **options):
-        if asn1Spec is None or asn1Spec is not None and tagSet != asn1Spec.tagSet:
+        if asn1Spec is None:
+            isUntagged = True
+
+        elif asn1Spec.__class__ is tagmap.TagMap:
+            isUntagged = tagSet not in asn1Spec.tagMap
+
+        else:
+            isUntagged = tagSet != asn1Spec.tagSet
+
+        if isUntagged:
             fullSubstrate = options['fullSubstrate']
 
             # untagged Any container, recover inner header substrate
@@ -1038,7 +1047,16 @@ class AnyDecoder(AbstractSimpleDecoder):
                              tagSet=None, length=None, state=None,
                              decodeFun=None, substrateFun=None,
                              **options):
-        if asn1Spec is not None and tagSet == asn1Spec.tagSet:
+        if asn1Spec is None:
+            isTagged = False
+
+        elif asn1Spec.__class__ is tagmap.TagMap:
+            isTagged = tagSet in asn1Spec.tagMap
+
+        else:
+            isTagged = tagSet == asn1Spec.tagSet
+
+        if isTagged:
             # tagged Any type -- consume header substrate
             header = null
 
@@ -1208,7 +1226,7 @@ for typeDecoder in tagMap.values():
 
 class Decoder(object):
     defaultErrorState = stErrorCondition
-    #    defaultErrorState = stDumpRawValue
+    #defaultErrorState = stDumpRawValue
     defaultRawDecoder = AnyDecoder()
     supportIndefLength = True
 
@@ -1509,7 +1527,9 @@ class Decoder(object):
                 break
 
             if state is stTryAsExplicitTag:
-                if tagSet and tagSet[0].tagFormat == tag.tagFormatConstructed and tagSet[0].tagClass != tag.tagClassUniversal:
+                if (tagSet and
+                        tagSet[0].tagFormat == tag.tagFormatConstructed and
+                        tagSet[0].tagClass != tag.tagClassUniversal):
                     # Assume explicit tagging
                     concreteDecoder = explicitTagDecoder
                     state = stDecodeValue
