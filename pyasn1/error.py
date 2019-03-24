@@ -13,7 +13,15 @@ class PyAsn1Error(Exception):
     """
 
 
-class PyAsn1StringDecodeError(PyAsn1Error, UnicodeDecodeError):
+class PyAsn1StringError(PyAsn1Error):
+    """Create pyasn1 exception object
+
+    The `PyAsn1StringError` exception is a base class for errors relating to
+    string encoding/decoding and other related problems
+    """
+
+
+class PyAsn1StringDecodeError(PyAsn1StringError, UnicodeDecodeError):
     """Create pyasn1 exception object
 
     The `PyAsn1StringDecodeError` exception represents a failure to decode
@@ -21,7 +29,7 @@ class PyAsn1StringDecodeError(PyAsn1Error, UnicodeDecodeError):
     """
 
 
-class PyAsn1StringEncodeError(PyAsn1Error, UnicodeEncodeError):
+class PyAsn1StringEncodeError(PyAsn1StringError, UnicodeEncodeError):
     """Create pyasn1 exception object
 
     The `PyAsn1StringEncodeError` exception represents a failure to encode
