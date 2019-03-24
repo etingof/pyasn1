@@ -13,7 +13,7 @@ class PyAsn1Error(Exception):
     """
 
 
-class PyAsn1StringError(PyAsn1Error):
+class PyAsn1StringError(PyAsn1Error, UnicodeError):
     """Create pyasn1 exception object
 
     The `PyAsn1StringError` exception is a base class for errors relating to
