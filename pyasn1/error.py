@@ -13,6 +13,22 @@ class PyAsn1Error(Exception):
     """
 
 
+class PyAsn1StringDecodeError(PyAsn1Error, UnicodeDecodeError):
+    """Create pyasn1 exception object
+
+    The `PyAsn1StringDecodeError` exception represents a failure to decode
+    underlying bytes values to a string
+    """
+
+
+class PyAsn1StringEncodeError(PyAsn1Error, UnicodeEncodeError):
+    """Create pyasn1 exception object
+
+    The `PyAsn1StringEncodeError` exception represents a failure to encode
+    underlying string value as bytes
+    """
+
+
 class ValueConstraintError(PyAsn1Error):
     """Create pyasn1 exception object
 
