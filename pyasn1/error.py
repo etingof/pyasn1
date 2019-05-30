@@ -19,6 +19,10 @@ class PyAsn1StringError(PyAsn1Error, UnicodeError):
     The `PyAsn1StringError` exception is a base class for errors relating to
     string encoding/decoding and other related problems
     """
+    def __init__(self, message, unicode_error=None):
+        if isinstance(unicode_error, UnicodeError):
+            UnicodeError.__init__(self, *unicode_error.args)
+        PyAsn1Error.__init__(self, message)
 
 
 class PyAsn1StringDecodeError(PyAsn1StringError, UnicodeDecodeError):
