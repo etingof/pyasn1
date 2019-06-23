@@ -155,6 +155,7 @@ class UTCTimeEncoderTestCase(BaseTestCase):
 class SequenceOfEncoderTestCase(BaseTestCase):
     def testEmpty(self):
         s = univ.SequenceOf()
+        s.clear()
         assert encoder.encode(s) == ints2octs((48, 128, 0, 0))
 
     def testDefMode1(self):
@@ -219,6 +220,7 @@ class SequenceOfEncoderWithSchemaTestCase(BaseTestCase):
 class SetOfEncoderTestCase(BaseTestCase):
     def testEmpty(self):
         s = univ.SetOf()
+        s.clear()
         assert encoder.encode(s) == ints2octs((49, 128, 0, 0))
 
     def testDefMode1(self):

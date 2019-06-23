@@ -1610,6 +1610,8 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
                     raise error.PyAsn1Error('Conflicting positional and keyword params!')
                 kwargs['componentType'] = value
 
+        self._componentValues = noValue
+
         base.AbstractConstructedAsn1Item.__init__(self, **kwargs)
 
     # Python list protocol
@@ -1628,24 +1630,33 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         except error.PyAsn1Error:
             raise IndexError(sys.exc_info()[1])
 
-    def clear(self):
-        self._componentValues = []
-
     def append(self, value):
-        self[len(self)] = value
+        if self._componentValues is noValue:
+            pos = 0
+
+        else:
+            pos = len(self._componentValues)
+
+        self[pos] = value
 
     def count(self, value):
-        return self._componentValues.count(value)
+        return list(self._componentValues.values()).count(value)
 
     def extend(self, values):
         for value in values:
             self.append(value)
 
+        if self._componentValues is noValue:
+            self._componentValues = {}
+
     def index(self, value, start=0, stop=None):
         if stop is None:
             stop = len(self)
+
+        indices, values = zip(*self._componentValues.items())
+
         try:
-            return self._componentValues.index(value, start, stop)
+            return indices[values.index(value, start, stop)]
 
         except error.PyAsn1Error:
             raise ValueError(sys.exc_info()[1])
@@ -1654,13 +1665,22 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         self._componentValues.reverse()
 
     def sort(self, key=None, reverse=False):
-        self._componentValues.sort(key=key, reverse=reverse)
+        self._componentValues = dict(
+            enumerate(sorted(self._componentValues.values(),
+                             key=key, reverse=reverse)))
+
+    def __len__(self):
+        if not self._componentValues:
+            return 0
+
+        return max(self._componentValues) + 1
 
     def __iter__(self):
-        return iter(self._componentValues)
+        for idx in range(0, len(self)):
+            yield self.getComponentByPosition(idx)
 
     def _cloneComponentValues(self, myClone, cloneValueFlag):
-        for idx, componentValue in enumerate(self._componentValues):
+        for idx, componentValue in self._componentValues.items():
             if componentValue is not noValue:
                 if isinstance(componentValue, base.AbstractConstructedAsn1Item):
                     myClone.setComponentByPosition(
@@ -1738,7 +1758,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         try:
             componentValue = self._componentValues[idx]
 
-        except IndexError:
+        except (KeyError, error.PyAsn1Error):
             if not instantiate:
                 return default
 
@@ -1792,35 +1812,55 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         IndexError:
             When idx > len(self)
         """
+        if idx < 0:
+            raise error.PyAsn1Error(
+                'SequenceOf/SetOf index must not be negative')
+
         componentType = self.componentType
 
-        try:
-            currentValue = self._componentValues[idx]
-        except IndexError:
-            currentValue = noValue
+        if self._componentValues is noValue:
+            componentValues = {}
 
-            if len(self._componentValues) < idx:
-                raise error.PyAsn1Error('Component index out of range')
+        else:
+            componentValues = self._componentValues
+
+        currentValue = componentValues.get(idx, noValue)
 
         if value is noValue:
             if componentType is not None:
                 value = componentType.clone()
+
             elif currentValue is noValue:
                 raise error.PyAsn1Error('Component type not defined')
+
         elif not isinstance(value, base.Asn1Item):
-            if componentType is not None and isinstance(componentType, base.AbstractSimpleAsn1Item):
+            if (componentType is not None and
+                    isinstance(componentType, base.AbstractSimpleAsn1Item)):
                 value = componentType.clone(value=value)
-            elif currentValue is not noValue and isinstance(currentValue, base.AbstractSimpleAsn1Item):
+
+            elif (currentValue is not noValue and
+                    isinstance(currentValue, base.AbstractSimpleAsn1Item)):
                 value = currentValue.clone(value=value)
+
             else:
-                raise error.PyAsn1Error('Non-ASN.1 value %r and undefined component type at %r' % (value, self))
+                raise error.PyAsn1Error(
+                    'Non-ASN.1 value %r and undefined component'
+                    ' type at %r' % (value, self))
+
         elif componentType is not None:
             if self.strictConstraints:
-                if not componentType.isSameTypeWith(value, matchTags, matchConstraints):
-                    raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
+                if not componentType.isSameTypeWith(
+                        value, matchTags, matchConstraints):
+                    raise error.PyAsn1Error(
+                        'Component value is tag-incompatible: %r '
+                        'vs %r' % (value, componentType))
+
             else:
-                if not componentType.isSuperTypeOf(value, matchTags, matchConstraints):
-                    raise error.PyAsn1Error('Component value is tag-incompatible: %r vs %r' % (value, componentType))
+                if not componentType.isSuperTypeOf(
+                        value, matchTags, matchConstraints):
+                    raise error.PyAsn1Error(
+                        'Component value is tag-incompatible: '
+                        '%r vs %r' % (value, componentType))
 
         if verifyConstraints and value.isValue:
             try:
@@ -1830,10 +1870,9 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
                 exType, exValue, exTb = sys.exc_info()
                 raise exType('%s at %s' % (exValue, self.__class__.__name__))
 
-        if currentValue is noValue:
-            self._componentValues.append(value)
-        else:
-            self._componentValues[idx] = value
+        componentValues[idx] = value
+
+        self._componentValues = componentValues
 
         return self
 
@@ -1842,16 +1881,34 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         if self.componentType is not None:
             return self.componentType.tagMap
 
+    @property
+    def components(self):
+        return [self._componentValues[idx]
+                for idx in sorted(self._componentValues)]
+
+    def clear(self):
+        self._componentValues = {}
+        return self
+
+    def reset(self):
+        self._componentValues = noValue
+        return self
+
     def prettyPrint(self, scope=0):
         scope += 1
         representation = self.__class__.__name__ + ':\n'
-        for idx, componentValue in enumerate(self._componentValues):
+
+        if not self.isValue:
+            return representation
+
+        for idx, componentValue in enumerate(self):
             representation += ' ' * scope
             if (componentValue is noValue and
                     self.componentType is not None):
                 representation += '<empty>'
             else:
                 representation += componentValue.prettyPrint(scope)
+
         return representation
 
     def prettyPrintType(self, scope=0):
@@ -1890,7 +1947,13 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         The PyASN1 value objects can **additionally** participate in many operations
         involving regular Python objects (e.g. arithmetic, comprehension etc).
         """
-        for componentValue in self._componentValues:
+        if self._componentValues is noValue:
+            return False
+
+        if len(self._componentValues) != len(self):
+            return False
+
+        for componentValue in self._componentValues.values():
             if componentValue is noValue or not componentValue.isValue:
                 return False
 
@@ -2044,6 +2107,10 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
     def __init__(self, **kwargs):
         base.AbstractConstructedAsn1Item.__init__(self, **kwargs)
         self._componentTypeLen = len(self.componentType)
+        if self._componentTypeLen:
+            self._componentValues = []
+        else:
+            self._componentValues = noValue
         self._dynamicNames = self._componentTypeLen or self.DynamicNames()
 
     def __getitem__(self, idx):
@@ -2086,6 +2153,9 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         else:
             return key in self._dynamicNames
 
+    def __len__(self):
+        return len(self._componentValues)
+
     def __iter__(self):
         return iter(self.componentType or self._dynamicNames)
 
@@ -2114,8 +2184,21 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
     def clear(self):
         self._componentValues = []
         self._dynamicNames = self.DynamicNames()
+        return self
+
+    def reset(self):
+        self._componentValues = noValue
+        self._dynamicNames = self.DynamicNames()
+        return self
+
+    @property
+    def components(self):
+        return self._componentValues
 
     def _cloneComponentValues(self, myClone, cloneValueFlag):
+        if self._componentValues is noValue:
+            return
+
         for idx, componentValue in enumerate(self._componentValues):
             if componentValue is not noValue:
                 if isinstance(componentValue, base.AbstractConstructedAsn1Item):
@@ -2275,7 +2358,11 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             s.getComponentByPosition(0, instantiate=False)
         """
         try:
-            componentValue = self._componentValues[idx]
+            if self._componentValues is noValue:
+                componentValue = noValue
+
+            else:
+                componentValue = self._componentValues[idx]
 
         except IndexError:
             componentValue = noValue
@@ -2334,8 +2421,14 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         componentType = self.componentType
         componentTypeLen = self._componentTypeLen
 
+        if self._componentValues is noValue:
+            componentValues = []
+
+        else:
+            componentValues = self._componentValues
+
         try:
-            currentValue = self._componentValues[idx]
+            currentValue = componentValues[idx]
 
         except IndexError:
             currentValue = noValue
@@ -2343,7 +2436,7 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                 if componentTypeLen < idx:
                     raise error.PyAsn1Error('component index out of range')
 
-                self._componentValues = [noValue] * componentTypeLen
+                componentValues = [noValue] * componentTypeLen
 
         if value is noValue:
             if componentTypeLen:
@@ -2389,14 +2482,16 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
                 raise exType('%s at %s' % (exValue, self.__class__.__name__))
 
         if componentTypeLen or idx in self._dynamicNames:
-            self._componentValues[idx] = value
+            componentValues[idx] = value
 
-        elif len(self._componentValues) == idx:
-            self._componentValues.append(value)
+        elif len(componentValues) == idx:
+            componentValues.append(value)
             self._dynamicNames.addField(idx)
 
         else:
             raise error.PyAsn1Error('Component index out of range')
+
+        self._componentValues = componentValues
 
         return self
 
@@ -2427,6 +2522,9 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
         The PyASN1 value objects can **additionally** participate in many operations
         involving regular Python objects (e.g. arithmetic, comprehension etc).
         """
+        if self._componentValues is noValue:
+            return False
+
         componentType = self.componentType
 
         if componentType:
@@ -2496,7 +2594,6 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
     def getNameByPosition(self, idx):
         if self._componentTypeLen:
             return self.componentType[idx].name
-
 
 class Sequence(SequenceAndSetBase):
     __doc__ = SequenceAndSetBase.__doc__
@@ -2959,7 +3056,7 @@ class Choice(Set):
 
     def clear(self):
         self._currentIdx = None
-        Set.clear(self)
+        return Set.clear(self)
 
     # compatibility stubs
 
