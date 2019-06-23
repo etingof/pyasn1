@@ -23,7 +23,7 @@ class NamedValues(object):
 
     Parameters
     ----------
-    \*args: variable number of two-element :py:class:`tuple`
+    *args: variable number of two-element :py:class:`tuple`
 
         name: :py:class:`str`
             Value label
