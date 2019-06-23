@@ -4,6 +4,8 @@
 # Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>
 # License: http://snmplabs.com/pyasn1/license.html
 #
+import sys
+
 from pyasn1 import debug
 from pyasn1 import error
 from pyasn1.codec.ber import eoo
@@ -93,9 +95,15 @@ class AbstractItemEncoder(object):
 
             # base tag?
             if not idx:
-                substrate, isConstructed, isOctets = self.encodeValue(
-                    value, asn1Spec, encodeFun, **options
-                )
+                try:
+                    substrate, isConstructed, isOctets = self.encodeValue(
+                        value, asn1Spec, encodeFun, **options
+                    )
+
+                except error.PyAsn1Error:
+                    exc = sys.exc_info()
+                    raise error.PyAsn1Error(
+                        'Error encoding %r: %s' % (value, exc[1]))
 
                 if LOG:
                     LOG('encoded %svalue %s into %s' % (
@@ -518,6 +526,13 @@ class SequenceEncoder(AbstractItemEncoder):
 
         substrate = null
 
+        omitEmptyOptionals = options.get(
+            'omitEmptyOptionals', self.omitEmptyOptionals)
+
+        if LOG:
+            LOG('%sencoding empty OPTIONAL components' % (
+                    omitEmptyOptionals and 'not ' or ''))
+
         if asn1Spec is None:
             # instance of ASN.1 schema
             value.verifySizeSpec()
@@ -538,7 +553,7 @@ class SequenceEncoder(AbstractItemEncoder):
                             LOG('not encoding DEFAULT component %r' % (namedType,))
                         continue
 
-                    if self.omitEmptyOptionals:
+                    if omitEmptyOptionals:
                         options.update(ifNotEmpty=namedType.isOptional)
 
                 chunk = encodeFun(component, asn1Spec, **options)
@@ -575,7 +590,7 @@ class SequenceEncoder(AbstractItemEncoder):
                         LOG('not encoding DEFAULT component %r' % (namedType,))
                     continue
 
-                if self.omitEmptyOptionals:
+                if omitEmptyOptionals:
                     options.update(ifNotEmpty=namedType.isOptional)
 
                 chunk = encodeFun(component, asn1Spec[idx], **options)

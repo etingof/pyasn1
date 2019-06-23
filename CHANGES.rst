@@ -2,7 +2,9 @@
 Revision 0.4.6, released XX-01-2019
 -----------------------------------
 
-No changes yet
+- Added `omitEmptyOptionals` option which is respected by `Sequence`
+  and `Set` encoders. When `omitEmptyOptionals` is set to `True`, empty
+  initialized optional components are not encoded. Default is `False`.
 
 Revision 0.4.5, released 29-12-2018
 -----------------------------------
