@@ -1027,21 +1027,25 @@ class SequenceOf(BaseTestCase):
         }
 
     def testSubtype(self):
-        self.s1.clear()
-        assert self.s1.subtype(
+        subtype = self.s1.subtype(
             implicitTag=tag.Tag(tag.tagClassPrivate, tag.tagFormatSimple, 2),
             subtypeSpec=constraint.SingleValueConstraint(1, 3),
             sizeSpec=constraint.ValueSizeConstraint(0, 1)
-        ) == self.s1.clone(
+        )
+        subtype.clear()
+        clone = self.s1.clone(
             tagSet=tag.TagSet(tag.Tag(tag.tagClassPrivate,
                                       tag.tagFormatSimple, 2)),
             subtypeSpec=constraint.ConstraintsIntersection(constraint.SingleValueConstraint(1, 3)),
             sizeSpec=constraint.ValueSizeConstraint(0, 1)
         )
+        clone.clear()
+        assert clone == subtype
 
     def testClone(self):
         self.s1.setComponentByPosition(0, univ.OctetString('abc'))
         s = self.s1.clone()
+        s.clear()
         assert len(s) == 0
         s = self.s1.clone(cloneValueFlag=1)
         assert len(s) == 1
@@ -1056,31 +1060,15 @@ class SequenceOf(BaseTestCase):
         s.append('xxx')
         assert s[0]
 
-        try:
-            s[2]
-
-        except IndexError:
-            pass
-
-        else:
-            assert False, 'IndexError not raised'
-
         # this is a deviation from standard sequence protocol
-        assert not s[1]
+        assert not s[2]
 
     def testSetItem(self):
         s = self.s1.clone()
         s.append('xxx')
-
-        try:
-
-            s[2] = 'xxx'
-
-        except IndexError:
-            pass
-
-        else:
-            assert False, 'IndexError not raised'
+        s[2] = 'yyy'
+        assert len(s) == 3
+        assert s[1] == str2octs('')
 
     def testAppend(self):
         self.s1.clear()
@@ -1132,6 +1120,15 @@ class SequenceOf(BaseTestCase):
         assert len(s) == 1
         assert s == [str2octs('abc')]
 
+    def testUntyped(self):
+        n = univ.SequenceOf()
+
+        assert not n.isValue
+
+        n[0] = univ.OctetString('fox')
+
+        assert n.isValue
+
     def testLegacyInitializer(self):
         n = univ.SequenceOf(
             componentType=univ.OctetString()
@@ -1173,6 +1170,39 @@ class SequenceOf(BaseTestCase):
         assert s.getComponentByPosition(0, instantiate=False) == str2octs('test')
         s.clear()
         assert s.getComponentByPosition(0, instantiate=False) is univ.noValue
+
+    def testClear(self):
+
+        class SequenceOf(univ.SequenceOf):
+            componentType = univ.OctetString()
+
+        s = SequenceOf()
+        s.setComponentByPosition(0, 'test')
+
+        assert s.getComponentByPosition(0) == str2octs('test')
+        assert len(s) == 1
+        assert s.isValue
+
+        s.clear()
+
+        assert len(s) == 0
+        assert s == []
+        assert s.isValue
+
+    def testReset(self):
+
+        class SequenceOf(univ.SequenceOf):
+            componentType = univ.OctetString()
+
+        s = SequenceOf()
+        s.setComponentByPosition(0, 'test')
+
+        assert s.getComponentByPosition(0) == str2octs('test')
+        assert s.isValue
+
+        s.reset()
+
+        assert not s.isValue
 
 
 class SequenceOfPicklingTestCase(unittest.TestCase):
@@ -1441,6 +1471,75 @@ class Sequence(BaseTestCase):
         s.clear()
         assert s.getComponentByPosition(1, instantiate=False) is univ.noValue
 
+    def testSchemaWithComponents(self):
+
+        class Sequence(univ.Sequence):
+            componentType = namedtype.NamedTypes(
+                namedtype.NamedType('name', univ.OctetString())
+            )
+
+        s = Sequence()
+
+        assert not s.isValue
+
+        s[0] = 'test'
+
+        assert s.isValue
+
+        s.clear()
+
+        assert not s.isValue
+
+        s.reset()
+
+        assert not s.isValue
+
+    def testSchemaWithOptionalComponents(self):
+
+        class Sequence(univ.Sequence):
+            componentType = namedtype.NamedTypes(
+                namedtype.OptionalNamedType('name', univ.OctetString())
+            )
+
+        s = Sequence()
+
+        assert s.isValue
+
+        s[0] = 'test'
+
+        assert s.isValue
+
+        s.clear()
+
+        assert s.isValue
+
+        s.reset()
+
+        assert not s.isValue
+
+    def testSchemaWithOptionalComponents(self):
+
+        class Sequence(univ.Sequence):
+            componentType = namedtype.NamedTypes(
+                namedtype.DefaultedNamedType('name', univ.OctetString(''))
+            )
+
+        s = Sequence()
+
+        assert s.isValue
+
+        s[0] = 'test'
+
+        assert s.isValue
+
+        s.clear()
+
+        assert s.isValue
+
+        s.reset()
+
+        assert not s.isValue
+
 
 class SequenceWithoutSchema(BaseTestCase):
 
@@ -1500,7 +1599,7 @@ class SequenceWithoutSchema(BaseTestCase):
         assert list(s.items()) == [('field-0', str2octs('abc')), ('field-1', 123)]
 
     def testUpdate(self):
-        s = univ.Sequence()
+        s = univ.Sequence().clear()
         assert not s
         s.setComponentByPosition(0, univ.OctetString('abc'))
         s.setComponentByPosition(1, univ.Integer(123))
@@ -1521,6 +1620,27 @@ class SequenceWithoutSchema(BaseTestCase):
         assert 'field-0' in s
         s.clear()
         assert 'field-0' not in s
+
+    def testSchema(self):
+
+        class Sequence(univ.Sequence):
+            pass
+
+        s = Sequence()
+
+        assert not s.isValue
+
+        s[0] = univ.OctetString('test')
+
+        assert s.isValue
+
+        s.clear()
+
+        assert s.isValue
+
+        s.reset()
+
+        assert not s.isValue
 
 
 class SequencePicklingTestCase(unittest.TestCase):
@@ -1633,7 +1753,7 @@ class Set(BaseTestCase):
 
     def testGetTagMap(self):
         assert self.s1.tagMap.presentTypes == {
-            univ.Set.tagSet: univ.Set()
+            univ.Set.tagSet: univ.Set().clear()
         }
 
     def testGetComponentTagMap(self):

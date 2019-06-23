@@ -476,6 +476,7 @@ class UTF8StringEncoderWithSchemaTestCase(BaseTestCase):
 class SequenceOfEncoderTestCase(BaseTestCase):
     def testEmpty(self):
         s = univ.SequenceOf()
+        s.clear()
         assert encoder.encode(s) == ints2octs((48, 0))
 
     def testDefMode(self):
@@ -570,6 +571,7 @@ class SequenceOfEncoderWithComponentsSchemaTestCase(BaseTestCase):
 class SetOfEncoderTestCase(BaseTestCase):
     def testEmpty(self):
         s = univ.SetOf()
+        s.clear()
         assert encoder.encode(s) == ints2octs((49, 0))
 
     def testDefMode(self):

@@ -567,6 +567,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
             return asn1Object, tail
 
         asn1Object = asn1Spec.clone()
+        asn1Object.clear()
 
         if asn1Spec.typeId in (univ.Sequence.typeId, univ.Set.typeId):
 
@@ -682,6 +683,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
         else:
             asn1Object = asn1Spec.clone()
+            asn1Object.clear()
 
             componentType = asn1Spec.componentType
 
@@ -727,6 +729,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
             )
 
         asn1Object = asn1Spec.clone()
+        asn1Object.clear()
 
         if asn1Spec.typeId in (univ.Sequence.typeId, univ.Set.typeId):
 
@@ -847,6 +850,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
         else:
             asn1Object = asn1Spec.clone()
+            asn1Object.clear()
 
             componentType = asn1Spec.componentType
 

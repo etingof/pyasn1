@@ -467,8 +467,6 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
 
         Asn1ItemBase.__init__(self, **readOnly)
 
-        self._componentValues = []
-
     def __repr__(self):
         representation = '%s %s object at 0x%x' % (
             self.__class__.__name__, self.isValue and 'value' or 'schema', id(self)
@@ -478,38 +476,40 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
             if value is not noValue:
                 representation += ' %s=%r' % (attr, value)
 
-        if self.isValue and self._componentValues:
-            representation += ' payload [%s]' % ', '.join([repr(x) for x in self._componentValues])
+        if self.isValue and self.components:
+            representation += ' payload [%s]' % ', '.join(
+                [repr(x) for x in self.components])
 
         return '<%s>' % representation
 
     def __eq__(self, other):
-        return self is other and True or self._componentValues == other
+        return self is other or self.components == other
 
     def __ne__(self, other):
-        return self._componentValues != other
+        return self.components != other
 
     def __lt__(self, other):
-        return self._componentValues < other
+        return self.components < other
 
     def __le__(self, other):
-        return self._componentValues <= other
+        return self.components <= other
 
     def __gt__(self, other):
-        return self._componentValues > other
+        return self.components > other
 
     def __ge__(self, other):
-        return self._componentValues >= other
+        return self.components >= other
 
     if sys.version_info[0] <= 2:
         def __nonzero__(self):
-            return self._componentValues and True or False
+            return bool(self.components)
     else:
         def __bool__(self):
-            return self._componentValues and True or False
+            return bool(self.components)
 
-    def __len__(self):
-        return len(self._componentValues)
+    @property
+    def components(self):
+        raise error.PyAsn1Error('Method not implemented')
 
     def _cloneComponentValues(self, myClone, cloneValueFlag):
         pass
@@ -630,9 +630,6 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         for k in kwargs:
             self[k] = kwargs[k]
         return self
-
-    def clear(self):
-        self._componentValues = []
 
     # backward compatibility
 
