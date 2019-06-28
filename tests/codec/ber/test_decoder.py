@@ -1429,6 +1429,38 @@ class NonStringDecoderTestCase(BaseTestCase):
         assert self.s == s
 
 
+class ErrorOnDecodingTestCase(BaseTestCase):
+
+    def testErrorCondition(self):
+        decode = decoder.Decoder(decoder.tagMap, decoder.typeMap)
+
+        try:
+            asn1Object, rest = decode(str2octs('abc'))
+
+        except PyAsn1Error:
+            exc = sys.exc_info()[1]
+            assert (isinstance(exc, PyAsn1Error),
+                    'Unexpected exception raised %r' % (exc,))
+
+        else:
+            assert False, 'Unexpected decoder result %r' % (asn1Object,)
+
+    def testRawDump(self):
+        decode = decoder.Decoder(decoder.tagMap, decoder.typeMap)
+
+        decode.defaultErrorState = decoder.stDumpRawValue
+
+        asn1Object, rest = decode(ints2octs(
+            (31, 8, 2, 1, 1, 131, 3, 2, 1, 12)))
+
+        assert (isinstance(asn1Object, univ.Any),
+                'Unexpected raw dump type %r' % (asn1Object,))
+        assert (asn1Object.asNumbers() == (31, 8, 2, 1, 1),
+                'Unexpected raw dump value %r' % (asn1Object,))
+        assert (rest == ints2octs((131, 3, 2, 1, 12)),
+                'Unexpected rest of substrate after raw dump %r' % rest)
+
+
 suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])
 
 if __name__ == '__main__':
