@@ -22,8 +22,9 @@ from pyasn1.type import constraint
 from pyasn1.type import namedtype
 from pyasn1.type import namedval
 from pyasn1.type import error
-from pyasn1.compat.octets import str2octs, ints2octs, octs2ints
+from pyasn1.compat.octets import str2octs, ints2octs, octs2ints, octs2str
 from pyasn1.error import PyAsn1Error
+from pyasn1.error import PyAsn1UnicodeEncodeError, PyAsn1UnicodeDecodeError
 
 
 class NoValueTestCase(BaseTestCase):
@@ -541,6 +542,32 @@ class OctetStringWithUnicodeMixIn(object):
 class OctetStringWithAsciiTestCase(OctetStringWithUnicodeMixIn, BaseTestCase):
     initializer = (97, 102)
     encoding = 'us-ascii'
+
+
+class OctetStringUnicodeErrorTestCase(BaseTestCase):
+    def testEncodeError(self):
+        text = octs2str(ints2octs((0xff, 0xfe)))
+
+        try:
+            univ.OctetString(text, encoding='us-ascii')
+
+        except PyAsn1UnicodeEncodeError:
+            pass
+
+        else:
+            assert False, 'Unicode encoding error not caught'
+
+    def testDecodeError(self):
+        serialized = ints2octs((0xff, 0xfe))
+
+        try:
+            str(univ.OctetString(serialized, encoding='us-ascii'))
+
+        except PyAsn1UnicodeDecodeError:
+            pass
+
+        else:
+            assert False, 'Unicode decoding error not caught'
 
 
 class OctetStringWithUtf8TestCase(OctetStringWithUnicodeMixIn, BaseTestCase):

@@ -54,9 +54,11 @@ class AbstractCharacterString(univ.OctetString):
                 # `str` is Py2 text representation
                 return self._value.encode(self.encoding)
 
-            except UnicodeEncodeError as e:
-                raise error.PyAsn1StringEncodeError(
-                    "Can't encode string '%s' with codec %s" % (self._value, self.encoding), e
+            except UnicodeEncodeError:
+                exc = sys.exc_info()[1]
+                raise error.PyAsn1UnicodeEncodeError(
+                    "Can't encode string '%s' with codec "
+                    "%s" % (self._value, self.encoding), exc
                 )
 
         def __unicode__(self):
@@ -75,9 +77,11 @@ class AbstractCharacterString(univ.OctetString):
                 else:
                     return unicode(value)
 
-            except (UnicodeDecodeError, LookupError) as e:
-                raise error.PyAsn1StringDecodeError(
-                    "Can't decode string '%s' with codec %s" % (value, self.encoding), e
+            except (UnicodeDecodeError, LookupError) as exc:
+                exc = sys.exc_info()[1]
+                raise error.PyAsn1UnicodeDecodeError(
+                    "Can't decode string '%s' with codec "
+                    "%s" % (value, self.encoding), exc
                 )
 
         def asOctets(self, padding=True):
@@ -94,9 +98,11 @@ class AbstractCharacterString(univ.OctetString):
         def __bytes__(self):
             try:
                 return self._value.encode(self.encoding)
-            except UnicodeEncodeError as e:
-                raise error.PyAsn1StringEncodeError(
-                    "Can't encode string '%s' with codec %s" % (self._value, self.encoding), e
+            except UnicodeEncodeError:
+                exc = sys.exc_info()[1]
+                raise error.PyAsn1UnicodeEncodeError(
+                    "Can't encode string '%s' with codec "
+                    "%s" % (self._value, self.encoding), exc
                 )
 
         def prettyIn(self, value):
@@ -112,9 +118,11 @@ class AbstractCharacterString(univ.OctetString):
                 else:
                     return str(value)
 
-            except (UnicodeDecodeError, LookupError) as e:
-                raise error.PyAsn1StringDecodeError(
-                    "Can't decode string '%s' with codec %s" % (value, self.encoding), e
+            except (UnicodeDecodeError, LookupError):
+                exc = sys.exc_info()[1]
+                raise error.PyAsn1UnicodeDecodeError(
+                    "Can't decode string '%s' with codec "
+                    "%s" % (value, self.encoding), exc
                 )
 
         def asOctets(self, padding=True):

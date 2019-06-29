@@ -825,9 +825,11 @@ class OctetString(base.AbstractSimpleAsn1Item):
             elif isinstance(value, unicode):
                 try:
                     return value.encode(self.encoding)
-                except (LookupError, UnicodeEncodeError) as e:
-                    raise error.PyAsn1StringEncodeError(
-                        "Can't encode string '%s' with codec %s" % (value, self.encoding), e
+                except (LookupError, UnicodeEncodeError):
+                    exc = sys.exc_info()[1]
+                    raise error.PyAsn1UnicodeEncodeError(
+                        "Can't encode string '%s' with codec "
+                        "%s" % (value, self.encoding), exc
                     )
             elif isinstance(value, (tuple, list)):
                 try:
@@ -846,9 +848,11 @@ class OctetString(base.AbstractSimpleAsn1Item):
             try:
                 return self._value.decode(self.encoding)
 
-            except UnicodeDecodeError as e:
-                raise error.PyAsn1StringDecodeError(
-                    "Can't decode string '%s' with codec %s" % (self._value, self.encoding), e
+            except UnicodeDecodeError:
+                exc = sys.exc_info()[1]
+                raise error.PyAsn1UnicodeDecodeError(
+                    "Can't decode string '%s' with codec "
+                    "%s" % (self._value, self.encoding), exc
                 )
 
         def asOctets(self):
@@ -865,7 +869,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
                 try:
                     return value.encode(self.encoding)
                 except UnicodeEncodeError as e:
-                    raise error.PyAsn1StringEncodeError(
+                    raise error.PyAsn1UnicodeEncodeError(
                         "Can't encode string '%s' with '%s' codec" % (value, self.encoding), e
                     )
             elif isinstance(value, OctetString):  # a shortcut, bytes() would work the same way
@@ -881,9 +885,12 @@ class OctetString(base.AbstractSimpleAsn1Item):
             try:
                 return self._value.decode(self.encoding)
 
-            except UnicodeDecodeError as e:
-                raise error.PyAsn1StringDecodeError(
-                    "Can't decode string '%s' with '%s' codec at '%s'" % (self._value, self.encoding, self.__class__.__name__), e
+            except UnicodeDecodeError:
+                exc = sys.exc_info()[1]
+                raise error.PyAsn1UnicodeDecodeError(
+                    "Can't decode string '%s' with '%s' codec at "
+                    "'%s'" % (self._value, self.encoding,
+                              self.__class__.__name__), exc
                 )
 
         def __bytes__(self):
