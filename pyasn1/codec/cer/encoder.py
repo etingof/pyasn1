@@ -31,17 +31,20 @@ class RealEncoder(encoder.RealEncoder):
 # specialized GeneralStringEncoder here
 
 class TimeEncoderMixIn(object):
-    zchar, = str2octs('Z')
-    pluschar, = str2octs('+')
-    minuschar, = str2octs('-')
-    commachar, = str2octs(',')
-    minLength = 12
-    maxLength = 19
+    Z_CHAR = ord('Z')
+    PLUS_CHAR = ord('+')
+    MINUS_CHAR = ord('-')
+    COMMA_CHAR = ord(',')
+    DOT_CHAR = ord('.')
+    ZERO_CHAR = ord('0')
+
+    MIN_LENGTH = 12
+    MAX_LENGTH = 19
 
     def encodeValue(self, value, asn1Spec, encodeFun, **options):
-        # Encoding constraints:
+        # CER encoding constraints:
         # - minutes are mandatory, seconds are optional
-        # - sub-seconds must NOT be zero
+        # - sub-seconds must NOT be zero / no meaningless zeros
         # - no hanging fraction dot
         # - time in UTC (Z)
         # - only dot is allowed for fractions
@@ -49,19 +52,45 @@ class TimeEncoderMixIn(object):
         if asn1Spec is not None:
             value = asn1Spec.clone(value)
 
-        octets = value.asOctets()
+        numbers = value.asNumbers()
 
-        if not self.minLength < len(octets) < self.maxLength:
-            raise error.PyAsn1Error('Length constraint violated: %r' % value)
+        if self.PLUS_CHAR in numbers or self.MINUS_CHAR in numbers:
+            raise error.PyAsn1Error('Must be UTC time: %r' % value)
 
-        if self.pluschar in octets or self.minuschar in octets:
-            raise error.PyAsn1Error('Must be UTC time: %r' % octets)
+        if numbers[-1] != self.Z_CHAR:
+            raise error.PyAsn1Error('Missing "Z" time zone specifier: %r' % value)
 
-        if octets[-1] != self.zchar:
-            raise error.PyAsn1Error('Missing "Z" time zone specifier: %r' % octets)
-
-        if self.commachar in octets:
+        if self.COMMA_CHAR in numbers:
             raise error.PyAsn1Error('Comma in fractions disallowed: %r' % value)
+
+        if self.DOT_CHAR in numbers:
+
+            isModified = False
+
+            numbers = list(numbers)
+
+            searchIndex = min(numbers.index(self.DOT_CHAR) + 4, len(numbers) - 1)
+
+            while numbers[searchIndex] != self.DOT_CHAR:
+                if numbers[searchIndex] == self.ZERO_CHAR:
+                    del numbers[searchIndex]
+                    isModified = True
+
+                searchIndex -= 1
+
+            searchIndex += 1
+
+            if searchIndex < len(numbers):
+                if numbers[searchIndex] == self.Z_CHAR:
+                    # drop hanging comma
+                    del numbers[searchIndex - 1]
+                    isModified = True
+
+            if isModified:
+                value = value.clone(numbers)
+
+        if not self.MIN_LENGTH < len(numbers) < self.MAX_LENGTH:
+            raise error.PyAsn1Error('Length constraint violated: %r' % value)
 
         options.update(maxChunkSize=1000)
 
@@ -71,13 +100,13 @@ class TimeEncoderMixIn(object):
 
 
 class GeneralizedTimeEncoder(TimeEncoderMixIn, encoder.OctetStringEncoder):
-    minLength = 12
-    maxLength = 19
+    MIN_LENGTH = 12
+    MAX_LENGTH = 20
 
 
 class UTCTimeEncoder(TimeEncoderMixIn, encoder.OctetStringEncoder):
-    minLength = 10
-    maxLength = 14
+    MIN_LENGTH = 10
+    MAX_LENGTH = 14
 
 
 class SetEncoder(encoder.SequenceEncoder):

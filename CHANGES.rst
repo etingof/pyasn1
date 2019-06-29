@@ -29,6 +29,10 @@ Revision 0.4.6, released XX-06-2019
 - Added `PyAsn1UnicodeDecodeError`/`PyAsn1UnicodeDecodeError` exceptions
   to help the caller treating unicode errors happening internally
   to pyasn1 at the upper layers.
+- Added support for subseconds CER/DER encoding edge cases in
+  `GeneralizedTime` codec.
+- Fixed 3-digit fractional seconds value CER/DER encoding of
+  `GeneralizedTime`.
 - Fixed `AnyDecoder` to accept possible `TagMap` as `asn1Spec`
   to make dumping raw value operational
 
