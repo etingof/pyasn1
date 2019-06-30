@@ -87,7 +87,7 @@ class GeneralizedTimeEncoderTestCase(BaseTestCase):
     def testDecimalCommaPoint(self):
         try:
             assert encoder.encode(
-                    useful.GeneralizedTime('20150501120112,1Z')
+                useful.GeneralizedTime('20150501120112,1Z')
              )
         except PyAsn1Error:
             pass
@@ -96,8 +96,28 @@ class GeneralizedTimeEncoderTestCase(BaseTestCase):
 
     def testWithSubseconds(self):
         assert encoder.encode(
-                    useful.GeneralizedTime('20170801120112.59Z')
+                useful.GeneralizedTime('20170801120112.59Z')
              ) == ints2octs((24, 18, 50, 48, 49, 55, 48, 56, 48, 49, 49, 50, 48, 49, 49, 50, 46, 53, 57, 90))
+
+    def testWithSubsecondsWithZeros(self):
+        assert encoder.encode(
+                useful.GeneralizedTime('20170801120112.099Z')
+             ) == ints2octs((24, 18, 50, 48, 49, 55, 48, 56, 48, 49, 49, 50, 48, 49, 49, 50, 46, 57, 57, 90))
+
+    def testWithSubsecondsMax(self):
+        assert encoder.encode(
+                useful.GeneralizedTime('20170801120112.999Z')
+             ) == ints2octs((24, 19, 50, 48, 49, 55, 48, 56, 48, 49, 49, 50, 48, 49, 49, 50, 46, 57, 57, 57, 90))
+
+    def testWithSubsecondsMin(self):
+        assert encoder.encode(
+                useful.GeneralizedTime('20170801120112.000Z')
+             ) == ints2octs((24, 15, 50, 48, 49, 55, 48, 56, 48, 49, 49, 50, 48, 49, 49, 50, 90))
+
+    def testWithSubsecondsDanglingDot(self):
+        assert encoder.encode(
+                useful.GeneralizedTime('20170801120112.Z')
+             ) == ints2octs((24, 15, 50, 48, 49, 55, 48, 56, 48, 49, 49, 50, 48, 49, 49, 50, 90))
 
     def testWithSeconds(self):
         assert encoder.encode(
