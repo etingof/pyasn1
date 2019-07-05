@@ -1854,13 +1854,19 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
                     'Non-ASN.1 value %r and undefined component'
                     ' type at %r' % (value, self))
 
-        elif componentType is not None:
-            if self.strictConstraints:
-                if not componentType.isSameTypeWith(
-                        value, matchTags, matchConstraints):
+        elif componentType is not None and (matchTags or matchConstraints):
+            subtypeChecker = (
+                    self.strictConstraints and
+                    componentType.isSameTypeWith or
+                    componentType.isSuperTypeOf)
+
+            if not subtypeChecker(value, matchTags, matchConstraints):
+                # TODO: we should wrap componentType with UnnamedType to carry
+                # additional properties associated with componentType
+                if componentType.typeId != Any.typeId:
                     raise error.PyAsn1Error(
-                        'Component value is tag-incompatible: %r '
-                        'vs %r' % (value, componentType))
+                        'Component value is tag-incompatible: %r vs '
+                        '%r' % (value, componentType))
 
             else:
                 if not componentType.isSuperTypeOf(

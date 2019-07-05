@@ -89,6 +89,8 @@ class AbstractItemEncoder(object):
 
         defMode = options.get('defMode', True)
 
+        substrate = null
+
         for idx, singleTag in enumerate(tagSet.superTags):
 
             defModeOverride = defMode
@@ -556,18 +558,32 @@ class SequenceEncoder(AbstractItemEncoder):
                     if omitEmptyOptionals:
                         options.update(ifNotEmpty=namedType.isOptional)
 
-                chunk = encodeFun(component, asn1Spec, **options)
-
                 # wrap open type blob if needed
-                if namedTypes and namedType.openType:
-                    wrapType = namedType.asn1Object
-                    if wrapType.tagSet and not wrapType.isSameTypeWith(component):
-                        chunk = encodeFun(chunk, wrapType, **options)
+                if (namedTypes and namedType.openType
+                        and namedType.asn1Object.tagSet):
 
-                        if LOG:
-                            LOG('wrapped open type with wrap type %r' % (wrapType,))
+                    if component.typeId in (
+                        univ.SetOf.typeId, univ.SequenceOf.typeId):
+                            substrate += encodeFun(
+                                component, asn1Spec,
+                                **dict(options, openType=True))
 
-                substrate += chunk
+                    else:
+                        chunk = encodeFun(component, asn1Spec, **options)
+
+                        wrapType = namedType.asn1Object
+
+                        if wrapType.isSameTypeWith(component):
+                            substrate += chunk
+
+                        else:
+                            substrate += encodeFun(chunk, wrapType, **options)
+
+                            if LOG:
+                                LOG('wrapped with wrap type %r' % (wrapType,))
+
+                else:
+                    substrate += encodeFun(component, asn1Spec, **options)
 
         else:
             # bare Python value + ASN.1 schema
@@ -593,18 +609,31 @@ class SequenceEncoder(AbstractItemEncoder):
                 if omitEmptyOptionals:
                     options.update(ifNotEmpty=namedType.isOptional)
 
-                chunk = encodeFun(component, asn1Spec[idx], **options)
-
                 # wrap open type blob if needed
-                if namedType.openType:
-                    wrapType = namedType.asn1Object
-                    if wrapType.tagSet and not wrapType.isSameTypeWith(component):
-                        chunk = encodeFun(chunk, wrapType, **options)
+                if namedType.openType and namedType.asn1Object.tagSet:
 
-                        if LOG:
-                            LOG('wrapped open type with wrap type %r' % (wrapType,))
+                    if component.typeId in (
+                        univ.SetOf.typeId, univ.SequenceOf.typeId):
+                            substrate += encodeFun(
+                                component, asn1Spec[idx],
+                                **dict(options, openType=True))
 
-                substrate += chunk
+                    else:
+                        chunk = encodeFun(component, asn1Spec[idx], **options)
+
+                        wrapType = namedType.asn1Object
+
+                        if wrapType.isSameTypeWith(component):
+                            substrate += chunk
+
+                        else:
+                            substrate += encodeFun(chunk, wrapType, **options)
+
+                            if LOG:
+                                LOG('wrapped with wrap type %r' % (wrapType,))
+
+                else:
+                    substrate += encodeFun(component, asn1Spec[idx], **options)
 
         return substrate, True, True
 
@@ -613,13 +642,32 @@ class SequenceOfEncoder(AbstractItemEncoder):
     def encodeValue(self, value, asn1Spec, encodeFun, **options):
         if asn1Spec is None:
             value.verifySizeSpec()
+
+            wrapType = value.componentType
+
         else:
-            asn1Spec = asn1Spec.componentType
+            asn1Spec = wrapType = asn1Spec.componentType
+
+        openType = options.pop('openType', False)
 
         substrate = null
 
         for idx, component in enumerate(value):
-            substrate += encodeFun(value[idx], asn1Spec, **options)
+            if openType:
+                # do not use asn1Spec even if given because it's a wrapper
+                chunk = encodeFun(component, **options)
+
+                if not wrapType.isSameTypeWith(component):
+                    # wrap encoded value with wrapper container (e.g. ANY)
+                    chunk = encodeFun(chunk, wrapType, **options)
+
+                    if LOG:
+                        LOG('wrapped with wrap type %r' % (wrapType,))
+
+            else:
+                chunk = encodeFun(component, asn1Spec, **options)
+
+            substrate += chunk
 
         return substrate, True, True
 
