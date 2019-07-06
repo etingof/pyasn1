@@ -671,12 +671,28 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                                 LOG('resolved open type %r by governing '
                                     'value %r' % (openType, governingValue))
 
-                            component, rest = decodeFun(
-                                asn1Object.getComponentByPosition(idx).asOctets(),
-                                asn1Spec=openType
-                            )
+                            containerValue = asn1Object.getComponentByPosition(idx)
 
-                            asn1Object.setComponentByPosition(idx, component)
+                            if containerValue.typeId in (
+                                    univ.SetOf.typeId, univ.SequenceOf.typeId):
+
+                                for pos, containerElement in enumerate(
+                                        containerValue):
+
+                                    component, rest = decodeFun(
+                                        containerValue[pos].asOctets(),
+                                        asn1Spec=openType
+                                    )
+
+                                    containerValue[pos] = component
+
+                            else:
+                                component, rest = decodeFun(
+                                    asn1Object.getComponentByPosition(idx).asOctets(),
+                                    asn1Spec=openType
+                                )
+
+                                asn1Object.setComponentByPosition(idx, component)
 
             else:
                 asn1Object.verifySizeSpec()
@@ -799,7 +815,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                 if not namedTypes.requiredComponents.issubset(seenIndices):
                     raise error.PyAsn1Error('ASN.1 object %s has uninitialized components' % asn1Object.__class__.__name__)
 
-                if  namedTypes.hasOpenTypes:
+                if namedTypes.hasOpenTypes:
 
                     openTypes = options.get('openTypes', {})
 
@@ -837,13 +853,29 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                                 LOG('resolved open type %r by governing '
                                     'value %r' % (openType, governingValue))
 
-                            component, rest = decodeFun(
-                                asn1Object.getComponentByPosition(idx).asOctets(),
-                                asn1Spec=openType, allowEoo=True
-                            )
+                            containerValue = asn1Object.getComponentByPosition(idx)
 
-                            if component is not eoo.endOfOctets:
-                                asn1Object.setComponentByPosition(idx, component)
+                            if containerValue.typeId in (
+                                    univ.SetOf.typeId, univ.SequenceOf.typeId):
+
+                                for pos, containerElement in enumerate(
+                                        containerValue):
+
+                                    component, rest = decodeFun(
+                                        containerValue[pos].asOctets(),
+                                        asn1Spec=openType, allowEoo=True
+                                    )
+
+                                    containerValue[pos] = component
+
+                            else:
+                                component, rest = decodeFun(
+                                    asn1Object.getComponentByPosition(idx).asOctets(),
+                                    asn1Spec=openType, allowEoo=True
+                                )
+
+                                if component is not eoo.endOfOctets:
+                                    asn1Object.setComponentByPosition(idx, component)
 
                 else:
                     asn1Object.verifySizeSpec()

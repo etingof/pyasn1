@@ -2,6 +2,7 @@
 Revision 0.4.6, released XX-06-2019
 -----------------------------------
 
+- Added previously missing `SET OF ANY` construct encoding/decoding support.
 - Added `omitEmptyOptionals` option which is respected by `Sequence`
   and `Set` encoders. When `omitEmptyOptionals` is set to `True`, empty
   initialized optional components are not encoded. Default is `False`.
