@@ -12,7 +12,8 @@ from pyasn1.type import constraint
 from pyasn1.type import tag
 from pyasn1.type import tagmap
 
-__all__ = ['Asn1Item', 'Asn1ItemBase', 'AbstractSimpleAsn1Item', 'AbstractConstructedAsn1Item']
+__all__ = ['Asn1Item', 'Asn1ItemBase', 'AbstractSimpleAsn1Item',
+           'AbstractConstructedAsn1Item']
 
 
 class Asn1Item(object):
@@ -535,8 +536,7 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         Note
         ----
         Due to the mutable nature of the |ASN.1| object, even if no arguments
-        are supplied, new |ASN.1| object will always be created as a shallow
-        copy of `self`.
+        are supplied, a new |ASN.1| object will be created and returned.
         """
         cloneValueFlag = kwargs.pop('cloneValueFlag', False)
 
@@ -588,9 +588,8 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
 
         Note
         ----
-        Due to the immutable nature of the |ASN.1| object, if no arguments
-        are supplied, no new |ASN.1| object will be created and `self` will
-        be returned instead.
+        Due to the mutable nature of the |ASN.1| object, even if no arguments
+        are supplied, a new |ASN.1| object will be created and returned.
         """
 
         initializers = self.readOnly.copy()
