@@ -109,6 +109,37 @@ class UTCTimeEncoder(TimeEncoderMixIn, encoder.OctetStringEncoder):
     MAX_LENGTH = 14
 
 
+class SetOfEncoder(encoder.SequenceOfEncoder):
+    def encodeValue(self, value, asn1Spec, encodeFun, **options):
+        chunks = self._encodeComponents(
+            value, asn1Spec, encodeFun, **options)
+
+        # sort by serialised and padded components
+        if len(chunks) > 1:
+            zero = str2octs('\x00')
+            maxLen = max(map(len, chunks))
+            paddedChunks = [
+                (x.ljust(maxLen, zero), x) for x in chunks
+            ]
+            paddedChunks.sort(key=lambda x: x[0])
+
+            chunks = [x[1] for x in paddedChunks]
+
+        return null.join(chunks), True, True
+
+
+class SequenceOfEncoder(encoder.SequenceOfEncoder):
+    def encodeValue(self, value, asn1Spec, encodeFun, **options):
+
+        if options.get('ifNotEmpty', False) and not len(value):
+            return null, True, True
+
+        chunks = self._encodeComponents(
+            value, asn1Spec, encodeFun, **options)
+
+        return null.join(chunks), True, True
+
+
 class SetEncoder(encoder.SequenceEncoder):
     @staticmethod
     def _componentSortKey(componentAndType):
@@ -197,53 +228,8 @@ class SetEncoder(encoder.SequenceEncoder):
         return substrate, True, True
 
 
-class SetOfEncoder(encoder.SequenceOfEncoder):
-    def encodeValue(self, value, asn1Spec, encodeFun, **options):
-        if asn1Spec is None:
-            value.verifySizeSpec()
-        else:
-            asn1Spec = asn1Spec.componentType
-
-        components = [encodeFun(x, asn1Spec, **options)
-                      for x in value]
-
-        # sort by serialised and padded components
-        if len(components) > 1:
-            zero = str2octs('\x00')
-            maxLen = max(map(len, components))
-            paddedComponents = [
-                (x.ljust(maxLen, zero), x) for x in components
-                ]
-            paddedComponents.sort(key=lambda x: x[0])
-
-            components = [x[1] for x in paddedComponents]
-
-        substrate = null.join(components)
-
-        return substrate, True, True
-
-
 class SequenceEncoder(encoder.SequenceEncoder):
     omitEmptyOptionals = True
-
-
-class SequenceOfEncoder(encoder.SequenceOfEncoder):
-    def encodeValue(self, value, asn1Spec, encodeFun, **options):
-
-        if options.get('ifNotEmpty', False) and not len(value):
-            return null, True, True
-
-        if asn1Spec is None:
-            value.verifySizeSpec()
-        else:
-            asn1Spec = asn1Spec.componentType
-
-        substrate = null
-
-        for idx, component in enumerate(value):
-            substrate += encodeFun(value[idx], asn1Spec, **options)
-
-        return substrate, True, True
 
 
 tagMap = encoder.tagMap.copy()
