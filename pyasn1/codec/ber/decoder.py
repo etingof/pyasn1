@@ -681,7 +681,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
                                     component, rest = decodeFun(
                                         containerValue[pos].asOctets(),
-                                        asn1Spec=openType
+                                        asn1Spec=openType, **options
                                     )
 
                                     containerValue[pos] = component
@@ -689,7 +689,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                             else:
                                 component, rest = decodeFun(
                                     asn1Object.getComponentByPosition(idx).asOctets(),
-                                    asn1Spec=openType
+                                    asn1Spec=openType, **options
                                 )
 
                                 asn1Object.setComponentByPosition(idx, component)
@@ -741,7 +741,8 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
         if asn1Spec is None:
             return self._decodeComponents(
-                substrate, tagSet=tagSet, decodeFun=decodeFun, allowEoo=True, **options
+                substrate, tagSet=tagSet, decodeFun=decodeFun,
+                **dict(options, allowEoo=True)
             )
 
         asn1Object = asn1Spec.clone()
@@ -863,7 +864,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
                                     component, rest = decodeFun(
                                         containerValue[pos].asOctets(),
-                                        asn1Spec=openType, allowEoo=True
+                                        asn1Spec=openType, **dict(options, allowEoo=True)
                                     )
 
                                     containerValue[pos] = component
@@ -871,7 +872,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                             else:
                                 component, rest = decodeFun(
                                     asn1Object.getComponentByPosition(idx).asOctets(),
-                                    asn1Spec=openType, allowEoo=True
+                                    asn1Spec=openType, **dict(options, allowEoo=True)
                                 )
 
                                 if component is not eoo.endOfOctets:
