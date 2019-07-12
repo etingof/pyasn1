@@ -835,7 +835,7 @@ class SequenceDecoderWithSchemaTestCase(BaseTestCase):
         ) == (self.s, null)
 
 
-class SequenceDecoderWithUnaggedOpenTypesTestCase(BaseTestCase):
+class SequenceDecoderWithUntaggedOpenTypesTestCase(BaseTestCase):
     def setUp(self):
         openType = opentype.OpenType(
             'id',

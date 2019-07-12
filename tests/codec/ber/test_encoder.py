@@ -762,7 +762,7 @@ class SequenceEncoderWithUntaggedOpenTypesTestCase(BaseTestCase):
         self.s[1] = univ.Integer(12)
 
         assert encoder.encode(self.s, asn1Spec=self.s) == ints2octs(
-            (48, 6, 2, 1, 1, 2, 1, 12)
+            (48, 5, 2, 1, 1, 49, 50)
         )
 
     def testEncodeOpenTypeChoiceTwo(self):
@@ -772,7 +772,7 @@ class SequenceEncoderWithUntaggedOpenTypesTestCase(BaseTestCase):
         self.s[1] = univ.OctetString('quick brown')
 
         assert encoder.encode(self.s, asn1Spec=self.s) == ints2octs(
-            (48, 16, 2, 1, 2, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)
+            (48, 14, 2, 1, 2, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)
         )
 
     def testEncodeOpenTypeUnknownId(self):
@@ -823,7 +823,7 @@ class SequenceEncoderWithImplicitlyTaggedOpenTypesTestCase(BaseTestCase):
         self.s[1] = univ.Integer(12)
 
         assert encoder.encode(self.s, asn1Spec=self.s) == ints2octs(
-            (48, 8, 2, 1, 1, 131, 3, 2, 1, 12)
+            (48, 9, 2, 1, 1, 131, 4, 131, 2, 49, 50)
         )
 
 
@@ -850,8 +850,8 @@ class SequenceEncoderWithExplicitlyTaggedOpenTypesTestCase(BaseTestCase):
         self.s[1] = univ.Integer(12)
 
         assert encoder.encode(self.s, asn1Spec=self.s) == ints2octs(
-            (48, 8, 2, 1, 1, 163, 3, 2, 1, 12)
-        )
+            (48, 9, 2, 1, 1, 163, 4, 163, 2, 49, 50)
+    )
 
 
 class SequenceEncoderWithUntaggedSetOfOpenTypesTestCase(BaseTestCase):
@@ -878,7 +878,7 @@ class SequenceEncoderWithUntaggedSetOfOpenTypesTestCase(BaseTestCase):
         self.s[1].append(univ.Integer(12))
 
         assert encoder.encode(self.s, asn1Spec=self.s) == ints2octs(
-            (48, 8, 2, 1, 1, 49, 3, 2, 1, 12)
+            (48, 7, 2, 1, 1, 49, 2, 49, 50)
         )
 
     def testEncodeOpenTypeChoiceTwo(self):
@@ -888,8 +888,8 @@ class SequenceEncoderWithUntaggedSetOfOpenTypesTestCase(BaseTestCase):
         self.s[1].append(univ.OctetString('quick brown'))
 
         assert encoder.encode(self.s, asn1Spec=self.s) == ints2octs(
-            (48, 18, 2, 1, 2, 49, 13, 4, 11, 113, 117, 105, 99,
-             107, 32, 98, 114, 111, 119, 110)
+            (48, 16, 2, 1, 2, 49, 11, 113, 117, 105, 99, 107, 32, 98, 114,
+             111, 119, 110)
         )
 
     def testEncodeOpenTypeUnknownId(self):
@@ -944,7 +944,7 @@ class SequenceEncoderWithImplicitlyTaggedSetOfOpenTypesTestCase(BaseTestCase):
         self.s[1].append(univ.Integer(12))
 
         assert encoder.encode(self.s, asn1Spec=self.s) == ints2octs(
-            (48, 10, 2, 1, 1, 49, 5, 131, 3, 2, 1, 12)
+            (48, 11, 2, 1, 1, 49, 6, 131, 4, 131, 2, 49, 50)
         )
 
 
@@ -974,7 +974,7 @@ class SequenceEncoderWithExplicitlyTaggedSetOfOpenTypesTestCase(BaseTestCase):
         self.s[1].append(univ.Integer(12))
 
         assert encoder.encode(self.s, asn1Spec=self.s) == ints2octs(
-            (48, 10, 2, 1, 1, 49, 5, 163, 3, 2, 1, 12)
+            (48, 11, 2, 1, 1, 49, 6, 163, 4, 163, 2, 49, 50)
         )
 
 
