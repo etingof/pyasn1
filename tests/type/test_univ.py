@@ -1090,12 +1090,29 @@ class SequenceOf(BaseTestCase):
         # this is a deviation from standard sequence protocol
         assert not s[2]
 
+    def testGetItemSlice(self):
+        s = self.s1.clone()
+        s.extend(['xxx', 'yyy', 'zzz'])
+        assert s[:1] == [str2octs('xxx')]
+        assert s[-2:] == [str2octs('yyy'), str2octs('zzz')]
+        assert s[1:2] == [str2octs('yyy')]
+
     def testSetItem(self):
         s = self.s1.clone()
         s.append('xxx')
         s[2] = 'yyy'
         assert len(s) == 3
         assert s[1] == str2octs('')
+
+    def testSetItemSlice(self):
+        s = self.s1.clone()
+        s[:1] = ['xxx']
+        assert s == [str2octs('xxx')]
+        s[-2:] = ['yyy', 'zzz']
+        assert s == [str2octs('yyy'), str2octs('zzz')]
+        s[1:2] = ['yyy']
+        assert s == [str2octs('yyy'), str2octs('yyy')]
+        assert len(s) == 2
 
     def testAppend(self):
         self.s1.clear()

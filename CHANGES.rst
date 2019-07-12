@@ -1,5 +1,5 @@
 
-Revision 0.4.6, released XX-06-2019
+Revision 0.4.6, released XX-07-2019
 -----------------------------------
 
 - Added previously missing `SET OF ANY` construct encoding/decoding support.
@@ -9,6 +9,7 @@ Revision 0.4.6, released XX-06-2019
 - New elements to `SequenceOf`/`SetOf` objects can now be added at any
   position - the requirement for the new elements to reside at the end
   of the existing ones (i.e. s[len(s)] = 123) is removed.
+- List-like slicing support added to `SequenceOf`/`SetOf` objects.
 - Removed default initializer from `SequenceOf`/`SetOf` types to ensure
   consistent behaviour with the rest of ASN.1 types. Before this change,
   `SequenceOf`/`SetOf` instances immediately become value objects behaving
