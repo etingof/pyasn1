@@ -1677,7 +1677,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
                              key=key, reverse=reverse)))
 
     def __len__(self):
-        if not self._componentValues:
+        if self._componentValues is noValue or not self._componentValues:
             return 0
 
         return max(self._componentValues) + 1
@@ -1762,6 +1762,17 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
             # returns noValue
             s.getComponentByPosition(0, instantiate=False)
         """
+        if isinstance(idx, slice):
+            indices = tuple(range(len(self)))
+            return [self.getComponentByPosition(subidx, default, instantiate)
+                    for subidx in indices[idx]]
+
+        if idx < 0:
+            idx = len(self) + idx
+            if idx < 0:
+                raise error.PyAsn1Error(
+                    'SequenceOf/SetOf index is out of range')
+
         try:
             componentValue = self._componentValues[idx]
 
@@ -1819,9 +1830,20 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
         IndexError:
             When idx > len(self)
         """
+        if isinstance(idx, slice):
+            indices = tuple(range(len(self)))
+            startIdx = indices and indices[idx][0] or 0
+            for subIdx, subValue in enumerate(value):
+                self.setComponentByPosition(
+                    startIdx + subIdx, subValue, verifyConstraints,
+                    matchTags, matchConstraints)
+            return self
+
         if idx < 0:
-            raise error.PyAsn1Error(
-                'SequenceOf/SetOf index must not be negative')
+            idx = len(self) + idx
+            if idx < 0:
+                raise error.PyAsn1Error(
+                    'SequenceOf/SetOf index is out of range')
 
         componentType = self.componentType
 
