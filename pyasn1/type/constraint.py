@@ -37,10 +37,11 @@ class AbstractConstraint(object):
             )
 
     def __repr__(self):
-        representation = '%s object at 0x%x' % (self.__class__.__name__, id(self))
+        representation = '%s object' % (self.__class__.__name__)
 
         if self._values:
-            representation += ' consts %s' % ', '.join([repr(x) for x in self._values])
+            representation += ', consts %s' % ', '.join(
+                [repr(x) for x in self._values])
 
         return '<%s>' % representation
 

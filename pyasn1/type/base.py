@@ -222,7 +222,7 @@ class NoValue(object):
         raise error.PyAsn1Error('Attempted "%s" operation on ASN.1 schema object' % attr)
 
     def __repr__(self):
-        return '<%s object at 0x%x>' % (self.__class__.__name__, id(self))
+        return '<%s object>' % self.__class__.__name__
 
 
 noValue = NoValue()
@@ -249,19 +249,18 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
         self._value = value
 
     def __repr__(self):
-        representation = '%s %s object at 0x%x' % (
-            self.__class__.__name__, self.isValue and 'value' or 'schema', id(self)
-        )
+        representation = '%s %s object' % (
+            self.__class__.__name__, self.isValue and 'value' or 'schema')
 
         for attr, value in self.readOnly.items():
             if value:
-                representation += ' %s %s' % (attr, value)
+                representation += ', %s %s' % (attr, value)
 
         if self.isValue:
             value = self.prettyPrint()
             if len(value) > 32:
                 value = value[:16] + '...' + value[-16:]
-            representation += ' payload [%s]' % value
+            representation += ', payload [%s]' % value
 
         return '<%s>' % representation
 
@@ -469,16 +468,16 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         Asn1ItemBase.__init__(self, **readOnly)
 
     def __repr__(self):
-        representation = '%s %s object at 0x%x' % (
-            self.__class__.__name__, self.isValue and 'value' or 'schema', id(self)
+        representation = '%s %s object' % (
+            self.__class__.__name__, self.isValue and 'value' or 'schema'
         )
 
         for attr, value in self.readOnly.items():
             if value is not noValue:
-                representation += ' %s=%r' % (attr, value)
+                representation += ', %s=%r' % (attr, value)
 
         if self.isValue and self.components:
-            representation += ' payload [%s]' % ', '.join(
+            representation += ', payload [%s]' % ', '.join(
                 [repr(x) for x in self.components])
 
         return '<%s>' % representation

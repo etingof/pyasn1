@@ -49,9 +49,10 @@ class NamedType(object):
         representation = '%s=%r' % (self.name, self.asn1Object)
 
         if self.openType:
-            representation += ' openType: %r' % self.openType
+            representation += ', open type %r' % self.openType
 
-        return '<%s object at 0x%x type %s>' % (self.__class__.__name__, id(self), representation)
+        return '<%s object, type %s>' % (
+            self.__class__.__name__, representation)
 
     def __eq__(self, other):
         return self.__nameAndType == other
@@ -173,7 +174,8 @@ class NamedTypes(object):
 
     def __repr__(self):
         representation = ', '.join(['%r' % x for x in self.__namedTypes])
-        return '<%s object at 0x%x types %s>' % (self.__class__.__name__, id(self), representation)
+        return '<%s object, types %s>' % (
+            self.__class__.__name__, representation)
 
     def __eq__(self, other):
         return self.__namedTypes == other
