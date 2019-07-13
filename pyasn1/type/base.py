@@ -12,8 +12,8 @@ from pyasn1.type import constraint
 from pyasn1.type import tag
 from pyasn1.type import tagmap
 
-__all__ = ['Asn1Item', 'Asn1ItemBase', 'AbstractSimpleAsn1Item',
-           'AbstractConstructedAsn1Item']
+__all__ = ['Asn1Item', 'Asn1Type', 'SimpleAsn1Type',
+           'ConstructedAsn1Type']
 
 
 class Asn1Item(object):
@@ -26,7 +26,17 @@ class Asn1Item(object):
         return Asn1Item._typeCounter
 
 
-class Asn1ItemBase(Asn1Item):
+class Asn1Type(Asn1Item):
+    """Base class for all classes representing ASN.1 types.
+
+    In the user code, |ASN.1| class is normally used only for telling
+    ASN.1 objects from others.
+
+    Note
+    ----
+    For as long as ASN.1 is concerned, a way to compare ASN.1 types
+    is to use :meth:`isSameTypeWith` and :meth:`isSuperTypeOf` methods.
+    """
     #: Set or return a :py:class:`~pyasn1.type.tag.TagSet` object representing
     #: ASN.1 tag(s) associated with |ASN.1| type.
     tagSet = tag.TagSet()
@@ -147,8 +157,12 @@ class Asn1ItemBase(Asn1Item):
     def getSubtypeSpec(self):
         return self.subtypeSpec
 
+    # backward compatibility
     def hasValue(self):
         return self.isValue
+
+# Backward compatibility
+Asn1ItemBase = Asn1Type
 
 
 class NoValue(object):
@@ -228,13 +242,25 @@ class NoValue(object):
 noValue = NoValue()
 
 
-# Base class for "simple" ASN.1 objects. These are immutable.
-class AbstractSimpleAsn1Item(Asn1ItemBase):
+class SimpleAsn1Type(Asn1Type):
+    """Base class for all simple classes representing ASN.1 types.
+
+    ASN.1 distinguishes types by their ability to hold other objects.
+    Scalar types are known as *simple* in ASN.1.
+
+    In the user code, |ASN.1| class is normally used only for telling
+    ASN.1 objects from others.
+
+    Note
+    ----
+    For as long as ASN.1 is concerned, a way to compare ASN.1 types
+    is to use :meth:`isSameTypeWith` and :meth:`isSuperTypeOf` methods.
+    """
     #: Default payload value
     defaultValue = noValue
 
     def __init__(self, value=noValue, **kwargs):
-        Asn1ItemBase.__init__(self, **kwargs)
+        Asn1Type.__init__(self, **kwargs)
         if value is noValue:
             value = self.defaultValue
         else:
@@ -426,9 +452,11 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
     def prettyPrint(self, scope=0):
         return self.prettyOut(self._value)
 
-    # noinspection PyUnusedLocal
     def prettyPrintType(self, scope=0):
         return '%s -> %s' % (self.tagSet, self.__class__.__name__)
+
+# Backward compatibility
+AbstractSimpleAsn1Item = SimpleAsn1Type
 
 #
 # Constructed types:
@@ -450,9 +478,22 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
 #
 
 
-class AbstractConstructedAsn1Item(Asn1ItemBase):
+class ConstructedAsn1Type(Asn1Type):
+    """Base class for all constructed classes representing ASN.1 types.
 
-    #: If `True`, requires exact component type matching,
+    ASN.1 distinguishes types by their ability to hold other objects.
+    Those "nesting" types are known as *constructed* in ASN.1.
+
+    In the user code, |ASN.1| class is normally used only for telling
+    ASN.1 objects from others.
+
+    Note
+    ----
+    For as long as ASN.1 is concerned, a way to compare ASN.1 types
+    is to use :meth:`isSameTypeWith` and :meth:`isSuperTypeOf` methods.
+    """
+
+    #: If :obj:`True`, requires exact component type matching,
     #: otherwise subtype relation is only enforced
     strictConstraints = False
 
@@ -466,7 +507,7 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
         }
         readOnly.update(kwargs)
 
-        Asn1ItemBase.__init__(self, **readOnly)
+        Asn1Type.__init__(self, **readOnly)
 
     def __repr__(self):
         representation = '%s %s object' % (
@@ -637,3 +678,6 @@ class AbstractConstructedAsn1Item(Asn1ItemBase):
 
     def getComponentType(self):
         return self.componentType
+
+# Backward compatibility
+AbstractConstructedAsn1Item = ConstructedAsn1Type

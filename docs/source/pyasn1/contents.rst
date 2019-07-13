@@ -139,6 +139,7 @@ type's values.
 .. toctree::
    :maxdepth: 2
 
+   /pyasn1/type/base/contents
    /pyasn1/type/univ/contents
    /pyasn1/type/char/contents
    /pyasn1/type/useful/contents

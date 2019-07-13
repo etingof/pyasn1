@@ -10,7 +10,7 @@ from pyasn1.type import tag
 __all__ = ['endOfOctets']
 
 
-class EndOfOctets(base.AbstractSimpleAsn1Item):
+class EndOfOctets(base.SimpleAsn1Type):
     defaultValue = 0
     tagSet = tag.initTagSet(
         tag.Tag(tag.tagClassUniversal, tag.tagFormatSimple, 0x00)

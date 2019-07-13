@@ -658,7 +658,7 @@ Revision 0.0.5a
 Revision 0.0.4a
 ---------------
 
-* Asn1ItemBase.prettyPrinter() -> \*.prettyPrint()
+* Asn1Type.prettyPrinter() -> \*.prettyPrint()
 
 Revision 0.0.3a
 ---------------

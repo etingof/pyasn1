@@ -32,7 +32,3 @@ and constructed.
    /pyasn1/type/univ/set
    /pyasn1/type/univ/sequence
    /pyasn1/type/univ/choice
-
-.. _univ.noValue:
-
-.. autoclass:: pyasn1.type.univ.NoValue()
