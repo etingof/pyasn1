@@ -1040,7 +1040,7 @@ class Null(OctetString):
     Keyword Args
     ------------
     value: :class:`str` or :py:class:`~pyasn1.type.univ.Null` object
-        Python empty string literal or any object that evaluates to `False`
+        Python empty string literal or any object that evaluates to :obj:`False`
 
     tagSet: :py:class:`~pyasn1.type.tag.TagSet`
         Object representing non-default ASN.1 tag(s)
@@ -1180,8 +1180,8 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
         Returns
         -------
         : :class:`bool`
-            :class:`True` if this |ASN.1| object is a parent (e.g. prefix) of the other |ASN.1| object
-            or :class:`False` otherwise.
+            :obj:`True` if this |ASN.1| object is a parent (e.g. prefix) of the other |ASN.1| object
+            or :obj:`False` otherwise.
         """
         l = len(self)
         if l <= len(other):
@@ -1349,8 +1349,8 @@ class Real(base.AbstractSimpleAsn1Item):
         Returns
         -------
         : :class:`bool`
-            :class:`True` if calling object represents plus infinity
-            or :class:`False` otherwise.
+            :obj:`True` if calling object represents plus infinity
+            or :obj:`False` otherwise.
 
         """
         return self._value == self._plusInf
@@ -1362,8 +1362,8 @@ class Real(base.AbstractSimpleAsn1Item):
         Returns
         -------
         : :class:`bool`
-            :class:`True` if calling object represents minus infinity
-            or :class:`False` otherwise.
+            :obj:`True` if calling object represents minus infinity
+            or :obj:`False` otherwise.
         """
         return self._value == self._minusInf
 
@@ -1716,8 +1716,8 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
             object instead of the requested component.
 
         instantiate: :class:`bool`
-            If `True` (default), inner component will be automatically instantiated.
-            If 'False' either existing component or the `noValue` object will be
+            If :obj:`True` (default), inner component will be automatically instantiated.
+            If :obj:`False` either existing component or the :class:`NoValue` object will be
             returned.
 
         Returns
@@ -1813,13 +1813,13 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
             or ASN.1 value object to assign to |ASN.1| component.
 
         verifyConstraints: :class:`bool`
-             If `False`, skip constraints validation
+             If :obj:`False`, skip constraints validation
 
         matchTags: :class:`bool`
-             If `False`, skip component tags matching
+             If :obj:`False`, skip component tags matching
 
         matchConstraints: :class:`bool`
-             If `False`, skip component constraints matching
+             If :obj:`False`, skip component constraints matching
 
         Returns
         -------
@@ -1969,17 +1969,17 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
     def isValue(self):
         """Indicate that |ASN.1| object represents ASN.1 value.
 
-        If *isValue* is `False` then this object represents just ASN.1 schema.
+        If *isValue* is :obj:`False` then this object represents just ASN.1 schema.
 
-        If *isValue* is `True` then, in addition to its ASN.1 schema features,
-        this object can also be used like a Python built-in object (e.g. `int`,
-        `str`, `dict` etc.).
+        If *isValue* is :obj:`True` then, in addition to its ASN.1 schema features,
+        this object can also be used like a Python built-in object
+        (e.g. :class:`int`, :class:`str`, :class:`dict` etc.).
 
         Returns
         -------
         : :class:`bool`
-            :class:`False` if object represents just ASN.1 schema.
-            :class:`True` if object represents ASN.1 schema and can be used as a normal value.
+            :obj:`False` if object represents just ASN.1 schema.
+            :obj:`True` if object represents ASN.1 schema and can be used as a normal value.
 
         Note
         ----
@@ -2280,14 +2280,16 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             object instead of the requested component.
 
         instantiate: :class:`bool`
-            If `True` (default), inner component will be automatically instantiated.
-            If 'False' either existing component or the `noValue` object will be
-            returned.
+            If :obj:`True` (default), inner component will be automatically
+            instantiated.
+            If :obj:`False` either existing component or the :class:`NoValue`
+            object will be returned.
 
         Returns
         -------
         : :py:class:`~pyasn1.type.base.PyAsn1Item`
-            Instantiate |ASN.1| component type or return existing component value
+            Instantiate |ASN.1| component type or return existing
+            component value
         """
         if self._componentTypeLen:
             idx = self.componentType.getPositionByName(name)
@@ -2320,13 +2322,13 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             or ASN.1 value object to assign to |ASN.1| component.
 
         verifyConstraints: :class:`bool`
-             If `False`, skip constraints validation
+             If :obj:`False`, skip constraints validation
 
         matchTags: :class:`bool`
-             If `False`, skip component tags matching
+             If :obj:`False`, skip component tags matching
 
         matchConstraints: :class:`bool`
-             If `False`, skip component constraints matching
+             If :obj:`False`, skip component constraints matching
 
         Returns
         -------
@@ -2364,9 +2366,10 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             object instead of the requested component.
 
         instantiate: :class:`bool`
-            If `True` (default), inner component will be automatically instantiated.
-            If 'False' either existing component or the `noValue` object will be
-            returned.
+            If :obj:`True` (default), inner component will be automatically
+            instantiated.
+            If :obj:`False` either existing component or the :class:`NoValue`
+            object will be returned.
 
         Returns
         -------
@@ -2461,13 +2464,13 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             or ASN.1 value object to assign to |ASN.1| component.
 
         verifyConstraints : :class:`bool`
-             If `False`, skip constraints validation
+             If :obj:`False`, skip constraints validation
 
         matchTags: :class:`bool`
-             If `False`, skip component tags matching
+             If :obj:`False`, skip component tags matching
 
         matchConstraints: :class:`bool`
-             If `False`, skip component constraints matching
+             If :obj:`False`, skip component constraints matching
 
         Returns
         -------
@@ -2554,17 +2557,18 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
     def isValue(self):
         """Indicate that |ASN.1| object represents ASN.1 value.
 
-        If *isValue* is `False` then this object represents just ASN.1 schema.
+        If *isValue* is :obj:`False` then this object represents just ASN.1 schema.
 
-        If *isValue* is `True` then, in addition to its ASN.1 schema features,
-        this object can also be used like a Python built-in object (e.g. `int`,
-        `str`, `dict` etc.).
+        If *isValue* is :obj:`True` then, in addition to its ASN.1 schema features,
+        this object can also be used like a Python built-in object (e.g.
+        :class:`int`, :class:`str`, :class:`dict` etc.).
 
         Returns
         -------
         : :class:`bool`
-            :class:`False` if object represents just ASN.1 schema.
-            :class:`True` if object represents ASN.1 schema and can be used as a normal value.
+            :obj:`False` if object represents just ASN.1 schema.
+            :obj:`True` if object represents ASN.1 schema and can be used as a
+            normal value.
 
         Note
         ----
@@ -2741,9 +2745,10 @@ class Set(SequenceAndSetBase):
             object instead of the requested component.
 
         instantiate: :class:`bool`
-            If `True` (default), inner component will be automatically instantiated.
-            If 'False' either existing component or the `noValue` object will be
-            returned.
+            If :obj:`True` (default), inner component will be automatically
+            instantiated.
+            If :obj:`False` either existing component or the :class:`noValue`
+            object will be returned.
 
         Returns
         -------
@@ -2781,16 +2786,16 @@ class Set(SequenceAndSetBase):
             or ASN.1 value object to assign to |ASN.1| component.
 
         verifyConstraints : :class:`bool`
-            If `False`, skip constraints validation
+            If :obj:`False`, skip constraints validation
 
         matchTags: :class:`bool`
-            If `False`, skip component tags matching
+            If :obj:`False`, skip component tags matching
 
         matchConstraints: :class:`bool`
-            If `False`, skip component constraints matching
+            If :obj:`False`, skip component constraints matching
 
         innerFlag: :class:`bool`
-            If `True`, search for matching *tagSet* recursively.
+            If :obj:`True`, search for matching *tagSet* recursively.
 
         Returns
         -------
@@ -3009,13 +3014,13 @@ class Choice(Set):
             set to *idx* component, previous value is dropped.
 
         verifyConstraints : :class:`bool`
-            If `False`, skip constraints validation
+            If :obj:`False`, skip constraints validation
 
         matchTags: :class:`bool`
-            If `False`, skip component tags matching
+            If :obj:`False`, skip component tags matching
 
         matchConstraints: :class:`bool`
-            If `False`, skip component constraints matching
+            If :obj:`False`, skip component constraints matching
 
         Returns
         -------
@@ -3085,17 +3090,18 @@ class Choice(Set):
     def isValue(self):
         """Indicate that |ASN.1| object represents ASN.1 value.
 
-        If *isValue* is `False` then this object represents just ASN.1 schema.
+        If *isValue* is :obj:`False` then this object represents just ASN.1 schema.
 
-        If *isValue* is `True` then, in addition to its ASN.1 schema features,
-        this object can also be used like a Python built-in object (e.g. `int`,
-        `str`, `dict` etc.).
+        If *isValue* is :obj:`True` then, in addition to its ASN.1 schema features,
+        this object can also be used like a Python built-in object (e.g.
+        :class:`int`, :class:`str`, :class:`dict` etc.).
 
         Returns
         -------
         : :class:`bool`
-            :class:`False` if object represents just ASN.1 schema.
-            :class:`True` if object represents ASN.1 schema and can be used as a normal value.
+            :obj:`False` if object represents just ASN.1 schema.
+            :obj:`True` if object represents ASN.1 schema and can be used as a normal
+            value.
 
         Note
         ----

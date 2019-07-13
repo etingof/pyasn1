@@ -92,8 +92,8 @@ class Asn1ItemBase(Asn1Item):
         Returns
         -------
         : :class:`bool`
-            :class:`True` if *other* is |ASN.1| type,
-            :class:`False` otherwise.
+            :obj:`True` if *other* is |ASN.1| type,
+            :obj:`False` otherwise.
         """
         return (self is other or
                 (not matchTags or self.tagSet == other.tagSet) and
@@ -116,8 +116,8 @@ class Asn1ItemBase(Asn1Item):
         Returns
         -------
             : :class:`bool`
-                :class:`True` if *other* is a subtype of |ASN.1| type,
-                :class:`False` otherwise.
+                :obj:`True` if *other* is a subtype of |ASN.1| type,
+                :obj:`False` otherwise.
         """
         return (not matchTags or
                 (self.tagSet.isSuperTagSetOf(other.tagSet)) and
@@ -296,17 +296,18 @@ class AbstractSimpleAsn1Item(Asn1ItemBase):
     def isValue(self):
         """Indicate that |ASN.1| object represents ASN.1 value.
 
-        If *isValue* is `False` then this object represents just ASN.1 schema.
+        If *isValue* is :obj:`False` then this object represents just
+        ASN.1 schema.
 
-        If *isValue* is `True` then, in addition to its ASN.1 schema features,
-        this object can also be used like a Python built-in object (e.g. `int`,
-        `str`, `dict` etc.).
+        If *isValue* is :obj:`True` then, in addition to its ASN.1 schema
+        features, this object can also be used like a Python built-in object
+        (e.g. :class:`int`, :class:`str`, :class:`dict` etc.).
 
         Returns
         -------
         : :class:`bool`
-            :class:`False` if object represents just ASN.1 schema.
-            :class:`True` if object represents ASN.1 schema and can be used as a normal value.
+            :obj:`False` if object represents just ASN.1 schema.
+            :obj:`True` if object represents ASN.1 schema and can be used as a normal value.
 
         Note
         ----

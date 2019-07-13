@@ -320,7 +320,7 @@ class TagSet(object):
         Returns
         -------
         : :py:class:`bool`
-            `True` if callee is a supertype of *tagSet*
+            :obj:`True` if callee is a supertype of *tagSet*
         """
         if len(tagSet) < self.__lenOfSuperTags:
             return False
