@@ -1922,10 +1922,20 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
                 for idx in sorted(self._componentValues)]
 
     def clear(self):
+        """Remove all components and become an empty |ASN.1| value object.
+
+        Has the same effect on |ASN.1| object as it does on :class:`list`
+        built-in.
+        """
         self._componentValues = {}
         return self
 
     def reset(self):
+        """Remove all components and become a |ASN.1| schema object.
+
+        See :meth:`isValue` property for more information on the
+        distinction between value and schema objects.
+        """
         self._componentValues = noValue
         return self
 
@@ -2217,11 +2227,21 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
             self[k] = mappingValue[k]
 
     def clear(self):
+        """Remove all components and become an empty |ASN.1| value object.
+
+        Has the same effect on |ASN.1| object as it does on :class:`dict`
+        built-in.
+        """
         self._componentValues = []
         self._dynamicNames = self.DynamicNames()
         return self
 
     def reset(self):
+        """Remove all components and become a |ASN.1| schema object.
+
+        See :meth:`isValue` property for more information on the
+        distinction between value and schema objects.
+        """
         self._componentValues = noValue
         self._dynamicNames = self.DynamicNames()
         return self
@@ -2556,6 +2576,12 @@ class SequenceAndSetBase(base.AbstractConstructedAsn1Item):
 
         The PyASN1 value objects can **additionally** participate in many operations
         involving regular Python objects (e.g. arithmetic, comprehension etc).
+
+        It is sufficient for |ASN.1| objects to have all non-optional and non-defaulted
+        components being value objects to be considered as a value objects as a whole.
+        In other words, even having one or more optional components not turned into
+        value objects, |ASN.1| object is still considered as a value object. Defaulted
+        components are normally value objects by default.
         """
         if self._componentValues is noValue:
             return False

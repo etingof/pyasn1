@@ -8,7 +8,7 @@
 
 .. autoclass:: pyasn1.type.univ.SetOf(componentType=NoValue(), tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), sizeSpec=ConstraintsIntersection())
    :members: isValue, isSameTypeWith, isSuperTypeOf, tagSet, effectiveTagSet, tagMap, componentType, subtypeSpec, sizeSpec,
-             getComponentByPosition, setComponentByPosition
+             getComponentByPosition, setComponentByPosition, clear, reset
 
    .. note::
 
