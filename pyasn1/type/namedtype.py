@@ -293,7 +293,7 @@ class NamedTypes(object):
 
         Raises
         ------
-        : :class:`~pyasn1.error.PyAsn1Error`
+        ~pyasn1.error.PyAsn1Error
             If given position is out of fields range
         """
         try:
@@ -317,7 +317,7 @@ class NamedTypes(object):
 
         Raises
         ------
-        : :class:`~pyasn1.error.PyAsn1Error`
+        ~pyasn1.error.PyAsn1Error
             If *tagSet* is not present or ASN.1 types are not unique within callee *NamedTypes*
         """
         try:
@@ -341,7 +341,7 @@ class NamedTypes(object):
 
         Raises
         ------
-        : :class:`~pyasn1.error.PyAsn1Error`
+        ~pyasn1.error.PyAsn1Error
             If given field name is not present in callee *NamedTypes*
         """
         try:
@@ -365,7 +365,7 @@ class NamedTypes(object):
 
         Raises
         ------
-        : :class:`~pyasn1.error.PyAsn1Error`
+        ~pyasn1.error.PyAsn1Error
             If *name* is not present or not unique within callee *NamedTypes*
         """
         try:
@@ -394,7 +394,7 @@ class NamedTypes(object):
 
         Raises
         ------
-        : :class:`~pyasn1.error.PyAsn1Error`
+        ~pyasn1.error.PyAsn1Error
             If given position is out of fields range
         """
         try:
@@ -426,7 +426,7 @@ class NamedTypes(object):
 
         Raises
         ------
-        : :class:`~pyasn1.error.PyAsn1Error`
+        ~pyasn1.error.PyAsn1Error
             If *tagSet* is not present or not unique within callee *NamedTypes*
             or *idx* is out of fields range
         """

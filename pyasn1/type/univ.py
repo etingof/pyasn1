@@ -52,7 +52,7 @@ class Integer(base.AbstractSimpleAsn1Item):
 
     Raises
     ------
-    :py:class:`~pyasn1.error.PyAsn1Error`
+    ~pyasn1.error.PyAsn1Error
         On constraint violation or bad initializer.
 
     Examples
@@ -296,7 +296,7 @@ class Boolean(Integer):
 
     Raises
     ------
-    :py:class:`~pyasn1.error.PyAsn1Error`
+    ~pyasn1.error.PyAsn1Error
         On constraint violation or bad initializer.
 
     Examples
@@ -386,7 +386,7 @@ class BitString(base.AbstractSimpleAsn1Item):
 
     Raises
     ------
-    :py:class:`~pyasn1.error.PyAsn1Error`
+    ~pyasn1.error.PyAsn1Error
         On constraint violation or bad initializer.
 
     Examples
@@ -754,7 +754,7 @@ class OctetString(base.AbstractSimpleAsn1Item):
 
     Raises
     ------
-    :py:class:`~pyasn1.error.PyAsn1Error`
+    ~pyasn1.error.PyAsn1Error
         On constraint violation or bad initializer.
 
     Examples
@@ -1047,7 +1047,7 @@ class Null(OctetString):
 
     Raises
     ------
-    :py:class:`~pyasn1.error.PyAsn1Error`
+    ~pyasn1.error.PyAsn1Error
         On constraint violation or bad initializer.
 
     Examples
@@ -1106,7 +1106,7 @@ class ObjectIdentifier(base.AbstractSimpleAsn1Item):
 
     Raises
     ------
-    :py:class:`~pyasn1.error.PyAsn1Error`
+    ~pyasn1.error.PyAsn1Error
         On constraint violation or bad initializer.
 
     Examples
@@ -1242,7 +1242,7 @@ class Real(base.AbstractSimpleAsn1Item):
 
     Raises
     ------
-    :py:class:`~pyasn1.error.PyAsn1Error`
+    ~pyasn1.error.PyAsn1Error
         On constraint violation or bad initializer.
 
     Examples
@@ -1527,7 +1527,7 @@ class Enumerated(Integer):
 
     Raises
     ------
-    :py:class:`~pyasn1.error.PyAsn1Error`
+    ~pyasn1.error.PyAsn1Error
         On constraint violation or bad initializer.
 
     Examples
@@ -1827,7 +1827,7 @@ class SequenceOfAndSetOfBase(base.AbstractConstructedAsn1Item):
 
         Raises
         ------
-        IndexError:
+        IndexError
             When idx > len(self)
         """
         if isinstance(idx, slice):
@@ -3160,7 +3160,7 @@ class Any(OctetString):
 
     Raises
     ------
-    :py:class:`~pyasn1.error.PyAsn1Error`
+    ~pyasn1.error.PyAsn1Error
         On constraint violation or bad initializer.
 
     Examples

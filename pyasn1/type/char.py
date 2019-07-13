@@ -44,7 +44,7 @@ class AbstractCharacterString(univ.OctetString):
 
     Raises
     ------
-    :py:class:`~pyasn1.error.PyAsn1Error`
+    ~pyasn1.error.PyAsn1Error
         On constraint violation or bad initializer.
     """
 

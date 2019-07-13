@@ -212,3 +212,16 @@ implemented in pyasn1.
    /pyasn1/codec/cer/contents
    /pyasn1/codec/der/contents
    /pyasn1/codec/native/contents
+
+Exceptions
+----------
+
+Operations on PyASN1 schema and value objects might cause errors. These
+errors are manifested to the caller in form of Python exceptions.
+
+The exception hierarchy is as follows (ordered from least specific).
+
+.. toctree::
+   :maxdepth: 2
+
+   /pyasn1/error/contents

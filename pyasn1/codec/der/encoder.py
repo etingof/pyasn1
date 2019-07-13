@@ -82,7 +82,7 @@ class Encoder(encoder.Encoder):
 #:
 #: Raises
 #: ------
-#: :py:class:`~pyasn1.error.PyAsn1Error`
+#: ~pyasn1.error.PyAsn1Error
 #:     On encoding errors
 #:
 #: Examples

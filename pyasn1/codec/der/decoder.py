@@ -67,7 +67,7 @@ class Decoder(decoder.Decoder):
 #:
 #: Raises
 #: ------
-#: :py:class:`~pyasn1.error.PyAsn1Error`
+#: ~pyasn1.error.PyAsn1Error, ~pyasn1.error.SubstrateUnderrunError
 #:     On decoding errors
 #:
 #: Examples
