@@ -832,22 +832,27 @@ class OctetString(base.SimpleAsn1Type):
         def prettyIn(self, value):
             if isinstance(value, str):
                 return value
+
             elif isinstance(value, unicode):
                 try:
                     return value.encode(self.encoding)
+
                 except (LookupError, UnicodeEncodeError):
                     exc = sys.exc_info()[1]
                     raise error.PyAsn1UnicodeEncodeError(
                         "Can't encode string '%s' with codec "
                         "%s" % (value, self.encoding), exc
                     )
+
             elif isinstance(value, (tuple, list)):
                 try:
                     return ''.join([chr(x) for x in value])
+
                 except ValueError:
                     raise error.PyAsn1Error(
                         "Bad %s initializer '%s'" % (self.__class__.__name__, value)
                     )
+
             else:
                 return str(value)
 
@@ -875,19 +880,26 @@ class OctetString(base.SimpleAsn1Type):
         def prettyIn(self, value):
             if isinstance(value, bytes):
                 return value
+
             elif isinstance(value, str):
                 try:
                     return value.encode(self.encoding)
-                except UnicodeEncodeError as e:
+
+                except UnicodeEncodeError:
+                    exc = sys.exc_info()[1]
                     raise error.PyAsn1UnicodeEncodeError(
-                        "Can't encode string '%s' with '%s' codec" % (value, self.encoding), e
+                        "Can't encode string '%s' with '%s' "
+                        "codec" % (value, self.encoding), exc
                     )
             elif isinstance(value, OctetString):  # a shortcut, bytes() would work the same way
                 return value.asOctets()
+
             elif isinstance(value, base.SimpleAsn1Type):  # this mostly targets Integer objects
                 return self.prettyIn(str(value))
+
             elif isinstance(value, (tuple, list)):
                 return self.prettyIn(bytes(value))
+
             else:
                 return bytes(value)
 

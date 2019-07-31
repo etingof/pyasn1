@@ -81,7 +81,7 @@ class AbstractCharacterString(univ.OctetString):
                 else:
                     return unicode(value)
 
-            except (UnicodeDecodeError, LookupError) as exc:
+            except (UnicodeDecodeError, LookupError):
                 exc = sys.exc_info()[1]
                 raise error.PyAsn1UnicodeDecodeError(
                     "Can't decode string '%s' with codec "
