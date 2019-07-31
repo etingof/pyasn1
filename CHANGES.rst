@@ -1,5 +1,5 @@
 
-Revision 0.4.6, released XX-07-2019
+Revision 0.4.6, released 31-07-2019
 -----------------------------------
 
 - Added previously missing `SET OF ANY` construct encoding/decoding support.
