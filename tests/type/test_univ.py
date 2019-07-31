@@ -150,13 +150,18 @@ class NoValueTestCase(BaseTestCase):
         try:
             if hasattr(sys, 'getsizeof'):
                 sys.getsizeof(univ.noValue)
-            else:
+
+            # TODO: remove when Py2.5 support is gone
+            elif sys.version_info > (2, 6):
                 raise unittest.SkipTest("no sys.getsizeof() method")
 
         except PyAsn1Error:
             assert False, 'sizeof failed for NoValue object'
+
         except TypeError:
-            raise unittest.SkipTest("sys.getsizeof() raises TypeError")
+            # TODO: remove when Py2.5 support is gone
+            if sys.version_info > (2, 6):
+                raise unittest.SkipTest("sys.getsizeof() raises TypeError")
 
 
 class IntegerTestCase(BaseTestCase):
@@ -554,8 +559,10 @@ class OctetStringUnicodeErrorTestCase(BaseTestCase):
         except PyAsn1UnicodeEncodeError:
             pass
 
+        # TODO: remove when Py2.5 support is gone
         else:
-            assert False, 'Unicode encoding error not caught'
+            if sys.version_info > (2, 6):
+                assert False, 'Unicode encoding error not caught'
 
     def testDecodeError(self):
         serialized = ints2octs((0xff, 0xfe))
@@ -566,8 +573,10 @@ class OctetStringUnicodeErrorTestCase(BaseTestCase):
         except PyAsn1UnicodeDecodeError:
             pass
 
+        # TODO: remove when Py2.5 support is gone
         else:
-            assert False, 'Unicode decoding error not caught'
+            if sys.version_info > (2, 6):
+                assert False, 'Unicode decoding error not caught'
 
 
 class OctetStringWithUtf8TestCase(OctetStringWithUnicodeMixIn, BaseTestCase):

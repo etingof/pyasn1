@@ -1695,6 +1695,9 @@ class SequenceOfAndSetOfBase(base.ConstructedAsn1Type):
 
         indices, values = zip(*self._componentValues.items())
 
+        # TODO: remove when Py2.5 support is gone
+        values = list(values)
+
         try:
             return indices[values.index(value, start, stop)]
 
