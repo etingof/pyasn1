@@ -501,8 +501,8 @@ class ConstraintsIntersection(AbstractConstraintSet):
 class ConstraintsUnion(AbstractConstraintSet):
     """Create a ConstraintsUnion logic operator object.
 
-    The ConstraintsUnion logic operator only succeeds if
-    *at least a single* operand succeeds.
+    The ConstraintsUnion logic operator succeeds if
+    *at least* a single operand succeeds.
 
     The ConstraintsUnion object can be applied to
     any constraint and logic operator objects.
@@ -526,7 +526,7 @@ class ConstraintsUnion(AbstractConstraintSet):
             CapitalOrSmall ::=
                 IA5String (FROM ("A".."Z") | FROM ("a".."z"))
             '''
-            subtypeSpec = ConstraintsIntersection(
+            subtypeSpec = ConstraintsUnion(
                 PermittedAlphabetConstraint('A', 'Z'),
                 PermittedAlphabetConstraint('a', 'z')
             )
