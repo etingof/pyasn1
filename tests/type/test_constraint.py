@@ -128,6 +128,69 @@ class PermittedAlphabetConstraintTestCase(SingleValueConstraintTestCase):
             assert 0, 'constraint check fails'
 
 
+class WithComponentsConstraintTestCase(BaseTestCase):
+
+    def testGoodVal(self):
+        c = constraint.WithComponentsConstraint(
+            ('A', constraint.ComponentPresentConstraint()),
+            ('B', constraint.ComponentAbsentConstraint()))
+
+        try:
+            c({'A': 1})
+
+        except error.ValueConstraintError:
+            assert 0, 'constraint check fails'
+
+    def testGoodValWithExtraFields(self):
+        c = constraint.WithComponentsConstraint(
+            ('A', constraint.ComponentPresentConstraint()),
+            ('B', constraint.ComponentAbsentConstraint())
+        )
+
+        try:
+            c({'A': 1, 'C': 2})
+
+        except error.ValueConstraintError:
+            assert 0, 'constraint check fails'
+
+    def testEmptyConstraint(self):
+        c = constraint.WithComponentsConstraint()
+
+        try:
+            c({'A': 1})
+
+        except error.ValueConstraintError:
+            assert 0, 'constraint check fails'
+
+    def testBadVal(self):
+        c = constraint.WithComponentsConstraint(
+            ('A', constraint.ComponentPresentConstraint())
+        )
+
+        try:
+            c({'B': 2})
+
+        except error.ValueConstraintError:
+            pass
+
+        else:
+            assert 0, 'constraint check fails'
+
+    def testBadValExtraFields(self):
+        c = constraint.WithComponentsConstraint(
+            ('A', constraint.ComponentPresentConstraint())
+        )
+
+        try:
+            c({'B': 2, 'C': 3})
+
+        except error.ValueConstraintError:
+            pass
+
+        else:
+            assert 0, 'constraint check fails'
+
+
 class ConstraintsIntersectionTestCase(BaseTestCase):
     def setUp(self):
         BaseTestCase.setUp(self)

@@ -2042,6 +2042,41 @@ class SequenceOfAndSetOfBase(base.ConstructedAsn1Type):
 
         return True
 
+    @property
+    def isInconsistent(self):
+        """Run necessary checks to ensure |ASN.1| object consistency.
+
+        Default action is to verify |ASN.1| object against constraints imposed
+        by `subtypeSpec`.
+
+        Raises
+        ------
+        :py:class:`~pyasn1.error.PyAsn1tError` on any inconsistencies found
+        """
+        if self.componentType is noValue or not self.subtypeSpec:
+            return False
+
+        if self._componentValues is noValue:
+            return True
+
+        mapping = {}
+
+        for idx, value in self._componentValues.items():
+            # Absent fields are not in the mapping
+            if value is noValue:
+                continue
+
+            mapping[idx] = value
+
+        try:
+            # Represent SequenceOf/SetOf as a bare dict to constraints chain
+            self.subtypeSpec(mapping)
+
+        except error.PyAsn1Error:
+            exc = sys.exc_info()[1]
+            return exc
+
+        return False
 
 class SequenceOf(SequenceOfAndSetOfBase):
     __doc__ = SequenceOfAndSetOfBase.__doc__
@@ -2636,6 +2671,44 @@ class SequenceAndSetBase(base.ConstructedAsn1Type):
                     return False
 
         return True
+
+    @property
+    def isInconsistent(self):
+        """Run necessary checks to ensure |ASN.1| object consistency.
+
+        Default action is to verify |ASN.1| object against constraints imposed
+        by `subtypeSpec`.
+
+        Raises
+        ------
+        :py:class:`~pyasn1.error.PyAsn1tError` on any inconsistencies found
+        """
+        if self.componentType is noValue or not self.subtypeSpec:
+            return False
+
+        if self._componentValues is noValue:
+            return True
+
+        mapping = {}
+
+        for idx, value in enumerate(self._componentValues):
+            # Absent fields are not in the mapping
+            if value is noValue:
+                continue
+
+            name = self.componentType.getNameByPosition(idx)
+
+            mapping[name] = value
+
+        try:
+            # Represent Sequence/Set as a bare dict to constraints chain
+            self.subtypeSpec(mapping)
+
+        except error.PyAsn1Error:
+            exc = sys.exc_info()[1]
+            return exc
+
+        return False
 
     def prettyPrint(self, scope=0):
         """Return an object representation string.

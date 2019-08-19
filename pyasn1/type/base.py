@@ -677,24 +677,6 @@ class ConstructedAsn1Type(Asn1Type):
 
         return clone
 
-    @property
-    def isInconsistent(self):
-        """Run necessary checks to ensure object consistency.
-
-        Default action is to verify |ASN.1| object against constraints imposed
-        by `subtypeSpec`.
-
-        Raises
-        ------
-        :py:class:`~pyasn1.error.PyAsn1tError` on any inconsistencies found
-        """
-        try:
-            self.subtypeSpec(self)
-
-        except error.PyAsn1Error:
-            exc = sys.exc_info()[1]
-            return exc
-
     def getComponentByPosition(self, idx):
         raise error.PyAsn1Error('Method not implemented')
 

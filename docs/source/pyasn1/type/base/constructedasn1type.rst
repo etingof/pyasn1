@@ -7,4 +7,4 @@
 ------------
 
 .. autoclass:: pyasn1.type.base.ConstructedAsn1Type(tagSet=TagSet(), subtypeSpec=ConstraintsIntersection(), componentType=None)
-   :members: isSameTypeWith, isSuperTypeOf, tagSet, effectiveTagSet, tagMap, subtypeSpec, isInconsistent
+   :members: isSameTypeWith, isSuperTypeOf, tagSet, effectiveTagSet, tagMap, subtypeSpec

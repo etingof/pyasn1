@@ -16,6 +16,10 @@ Revision 0.4.7, released XX-09-2019
   objects as the type in field definition. When a bare Python value is
   assigned, then field type object is cloned and initialized with the
   bare value (constraints verificaton would run at this moment).
+- Added `WithComponentsConstraint` along with related
+  `ComponentPresentConstraint` and `ComponentAbsentConstraint` classes
+  to be used with `Sequence`/`Set` types representing
+  `SET ... WITH COMPONENTS ...` like ASN.1 constructs.
 
 Revision 0.4.6, released 31-07-2019
 -----------------------------------

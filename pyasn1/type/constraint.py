@@ -342,6 +342,139 @@ class PermittedAlphabetConstraint(SingleValueConstraint):
             raise error.ValueConstraintError(value)
 
 
+class ComponentPresentConstraint(AbstractConstraint):
+    """Create a ComponentPresentConstraint object.
+
+    The ComponentPresentConstraint is only satisfied when the value
+    is not `None`.
+
+    The ComponentPresentConstraint object is typically used with
+    `WithComponentsConstraint`.
+
+    Examples
+    --------
+    .. code-block:: python
+
+        present = ComponentPresentConstraint()
+
+        # this will succeed
+        present('whatever')
+
+        # this will raise ValueConstraintError
+        present(None)
+    """
+    def _setValues(self, values):
+        self._values = ('<must be present>',)
+
+        if values:
+            raise error.PyAsn1Error('No arguments expected')
+
+    def _testValue(self, value, idx):
+        if value is None:
+            raise error.ValueConstraintError(
+                'Component is not present:')
+
+
+class ComponentAbsentConstraint(AbstractConstraint):
+    """Create a ComponentAbsentConstraint object.
+
+    The ComponentAbsentConstraint is only satisfied when the value
+    is `None`.
+
+    The ComponentAbsentConstraint object is typically used with
+    `WithComponentsConstraint`.
+
+    Examples
+    --------
+    .. code-block:: python
+
+        absent = ComponentAbsentConstraint()
+
+        # this will succeed
+        absent(None)
+
+        # this will raise ValueConstraintError
+        absent('whatever')
+    """
+    def _setValues(self, values):
+        self._values = ('<must be absent>',)
+
+        if values:
+            raise error.PyAsn1Error('No arguments expected')
+
+    def _testValue(self, value, idx):
+        if value is not None:
+            raise error.ValueConstraintError(
+                'Component is not absent: %r' % value)
+
+
+class WithComponentsConstraint(AbstractConstraint):
+    """Create a WithComponentsConstraint object.
+
+    The WithComponentsConstraint satisfies any mapping object that has
+    constrained fields present or absent, what is indicated by
+    `ComponentPresentConstraint` and `ComponentAbsentConstraint`
+    objects respectively.
+
+    The WithComponentsConstraint object is typically applied
+    to  :class:`~pyasn1.type.univ.Set` or
+    :class:`~pyasn1.type.univ.Sequence` types.
+
+    Parameters
+    ----------
+    *fields: :class:`tuple`
+        Zero or more tuples of (`field`, `constraint`) indicating constrained
+        fields.
+
+    Examples
+    --------
+
+    .. code-block:: python
+
+        class Item(Sequence):  #  Set is similar
+            '''
+            ASN.1 specification:
+
+            Item ::= SEQUENCE {
+                id    INTEGER OPTIONAL,
+                name  OCTET STRING OPTIONAL
+            } WITH COMPONENTS id PRESENT, name ABSENT | id ABSENT, name PRESENT
+            '''
+            componentType = NamedTypes(
+                OptionalNamedType('id', Integer()),
+                OptionalNamedType('name', OctetString())
+            )
+            withComponents = ConstraintsIntersection(
+                WithComponentsConstraint(
+                    ('id', ComponentPresentConstraint()),
+                    ('name', ComponentAbsentConstraint())
+                ),
+                WithComponentsConstraint(
+                    ('id', ComponentAbsentConstraint()),
+                    ('name', ComponentPresentConstraint())
+                )
+            )
+
+        item = Item()
+
+        # This will succeed
+        item['id'] = 1
+
+        # This will succeed
+        item['name'] = 'John'
+
+        # This will fail on encoding
+        descr['id'] = 1
+        descr['name'] = 'John'
+    """
+    def _testValue(self, value, idx):
+        for field, constraint in self._values:
+            constraint(value.get(field))
+
+    def _setValues(self, values):
+        AbstractConstraint._setValues(self, values)
+
+
 # This is a bit kludgy, meaning two op modes within a single constraint
 class InnerTypeConstraint(AbstractConstraint):
     """Value must satisfy the type and presence constraints"""
