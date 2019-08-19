@@ -537,7 +537,9 @@ class SequenceEncoder(AbstractItemEncoder):
 
         if asn1Spec is None:
             # instance of ASN.1 schema
-            value.verifySizeSpec()
+            inconsistency = value.isInconsistent
+            if inconsistency:
+                raise inconsistency
 
             namedTypes = value.componentType
 
@@ -643,7 +645,9 @@ class SequenceOfEncoder(AbstractItemEncoder):
     def _encodeComponents(self, value, asn1Spec, encodeFun, **options):
 
         if asn1Spec is None:
-            value.verifySizeSpec()
+            inconsistency = value.isInconsistent
+            if inconsistency:
+                raise inconsistency
 
         else:
             asn1Spec = asn1Spec.componentType

@@ -695,7 +695,9 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                                 asn1Object.setComponentByPosition(idx, component)
 
             else:
-                asn1Object.verifySizeSpec()
+                inconsistency = asn1Object.isInconsistent
+                if inconsistency:
+                    raise inconsistency
 
         else:
             asn1Object = asn1Spec.clone()
@@ -879,7 +881,9 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                                     asn1Object.setComponentByPosition(idx, component)
 
                 else:
-                    asn1Object.verifySizeSpec()
+                    inconsistency = asn1Object.isInconsistent
+                    if inconsistency:
+                        raise inconsistency
 
         else:
             asn1Object = asn1Spec.clone()

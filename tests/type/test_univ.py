@@ -1040,22 +1040,14 @@ class SequenceOf(BaseTestCase):
         else:
             pass
 
-    def testSizeSpec(self):
+    def testConsistency(self):
         s = self.s1.clone(sizeSpec=constraint.ConstraintsUnion(
             constraint.ValueSizeConstraint(1, 1)
         ))
         s.setComponentByPosition(0, univ.OctetString('abc'))
-        try:
-            s.verifySizeSpec()
-        except PyAsn1Error:
-            assert 0, 'size spec fails'
+        assert not s.isInconsistent, 'size spec fails'
         s.setComponentByPosition(1, univ.OctetString('abc'))
-        try:
-            s.verifySizeSpec()
-        except PyAsn1Error:
-            pass
-        else:
-            assert 0, 'size spec fails'
+        assert s.isInconsistent, 'size spec fails'
 
     def testGetComponentTagMap(self):
         assert self.s1.componentType.tagMap.presentTypes == {

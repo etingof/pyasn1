@@ -72,7 +72,9 @@ class SetEncoder(AbstractItemEncoder):
     protoDict = dict
 
     def encode(self, value, encodeFun, **options):
-        value.verifySizeSpec()
+        inconsistency = value.isInconsistent
+        if inconsistency:
+            raise inconsistency
 
         namedTypes = value.componentType
         substrate = self.protoDict()
@@ -90,7 +92,9 @@ class SequenceEncoder(SetEncoder):
 
 class SequenceOfEncoder(AbstractItemEncoder):
     def encode(self, value, encodeFun, **options):
-        value.verifySizeSpec()
+        inconsistency = value.isInconsistent
+        if inconsistency:
+            raise inconsistency
         return [encodeFun(x, **options) for x in value]
 
 
