@@ -498,16 +498,38 @@ class ConstructedAsn1Type(Asn1Type):
     strictConstraints = False
 
     componentType = None
-    sizeSpec = None
+
+    # backward compatibility, unused
+    sizeSpec = constraint.ConstraintsIntersection()
 
     def __init__(self, **kwargs):
         readOnly = {
             'componentType': self.componentType,
+            # backward compatibility, unused
             'sizeSpec': self.sizeSpec
         }
+
+        # backward compatibility: preserve legacy sizeSpec support
+        kwargs = self._moveSizeSpec(**kwargs)
+
         readOnly.update(kwargs)
 
         Asn1Type.__init__(self, **readOnly)
+
+    def _moveSizeSpec(self, **kwargs):
+        # backward compatibility, unused
+        sizeSpec = kwargs.pop('sizeSpec', self.sizeSpec)
+        if sizeSpec:
+            subtypeSpec = kwargs.pop('subtypeSpec', self.subtypeSpec)
+            if subtypeSpec:
+                subtypeSpec = sizeSpec
+
+            else:
+                subtypeSpec += sizeSpec
+
+            kwargs['subtypeSpec'] = subtypeSpec
+
+        return kwargs
 
     def __repr__(self):
         representation = '%s %s object' % (
@@ -667,7 +689,7 @@ class ConstructedAsn1Type(Asn1Type):
         :py:class:`~pyasn1.error.PyAsn1tError` on any inconsistencies found
         """
         try:
-            self.sizeSpec(self)
+            self.subtypeSpec(self)
 
         except error.PyAsn1Error:
             exc = sys.exc_info()[1]
@@ -694,8 +716,9 @@ class ConstructedAsn1Type(Asn1Type):
     def getComponentType(self):
         return self.componentType
 
+    # backward compatibility, unused
     def verifySizeSpec(self):
-        self.sizeSpec(self)
+        self.subtypeSpec(self)
 
 
 # Backward compatibility

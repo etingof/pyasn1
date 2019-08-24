@@ -7,6 +7,15 @@ Revision 0.4.7, released XX-09-2019
   purpose e.g. ensuring all required fields are in a good shape. By default
   this check invokes subtype constraints verification and is run by codecs
   on value de/serialisation.
+- Deprecate `subtypeSpec` attributes and keyword argument. It is now
+  recommended to pass `ValueSizeConstraint`, as well as all other constraints,
+  to `subtypeSpec`.
+- Fixed a design bug in a way of how the items assigned to constructed
+  types are verified. Now if `Asn1Type`-based object is assigned, its
+  compatibility is verified based on having all tags and constraint
+  objects as the type in field definition. When a bare Python value is
+  assigned, then field type object is cloned and initialized with the
+  bare value (constraints verificaton would run at this moment).
 
 Revision 0.4.6, released 31-07-2019
 -----------------------------------
