@@ -721,5 +721,5 @@ class ConstructedAsn1Type(Asn1Type):
         self.subtypeSpec(self)
 
 
-# Backward compatibility
+        # Backward compatibility
 AbstractConstructedAsn1Item = ConstructedAsn1Type
