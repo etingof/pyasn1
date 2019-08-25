@@ -992,11 +992,13 @@ class SequenceOf(BaseTestCase):
         assert self.s1 == self.s2, '__cmp__() fails'
 
     def testSubtypeSpec(self):
-        s = self.s1.clone(subtypeSpec=constraint.ConstraintsUnion(
-            constraint.SingleValueConstraint(str2octs('abc'))
-        ))
+        s = self.s1.clone(
+            componentType=univ.OctetString().subtype(
+                subtypeSpec=constraint.SingleValueConstraint(str2octs('abc'))))
         try:
-            s.setComponentByPosition(0, univ.OctetString('abc'))
+            s.setComponentByPosition(
+                0, univ.OctetString().subtype(
+                    'abc', subtypeSpec=constraint.SingleValueConstraint(str2octs('abc'))))
         except PyAsn1Error:
             assert 0, 'constraint fails'
         try:
@@ -1006,7 +1008,7 @@ class SequenceOf(BaseTestCase):
                 s.setComponentByPosition(1, univ.OctetString('Abc'),
                                          verifyConstraints=False)
             except PyAsn1Error:
-                assert 0, 'constraint failes with verifyConstraints=True'
+                assert 0, 'constraint fails with verifyConstraints=False'
         else:
             assert 0, 'constraint fails'
 
@@ -1041,7 +1043,7 @@ class SequenceOf(BaseTestCase):
             pass
 
     def testConsistency(self):
-        s = self.s1.clone(sizeSpec=constraint.ConstraintsUnion(
+        s = self.s1.clone(subtypeSpec=constraint.ConstraintsUnion(
             constraint.ValueSizeConstraint(1, 1)
         ))
         s.setComponentByPosition(0, univ.OctetString('abc'))
@@ -1057,15 +1059,13 @@ class SequenceOf(BaseTestCase):
     def testSubtype(self):
         subtype = self.s1.subtype(
             implicitTag=tag.Tag(tag.tagClassPrivate, tag.tagFormatSimple, 2),
-            subtypeSpec=constraint.SingleValueConstraint(1, 3),
-            sizeSpec=constraint.ValueSizeConstraint(0, 1)
+            subtypeSpec=constraint.ValueSizeConstraint(0, 1)
         )
         subtype.clear()
         clone = self.s1.clone(
             tagSet=tag.TagSet(tag.Tag(tag.tagClassPrivate,
                                       tag.tagFormatSimple, 2)),
-            subtypeSpec=constraint.ConstraintsIntersection(constraint.SingleValueConstraint(1, 3)),
-            sizeSpec=constraint.ValueSizeConstraint(0, 1)
+            subtypeSpec=constraint.ValueSizeConstraint(0, 1)
         )
         clone.clear()
         assert clone == subtype

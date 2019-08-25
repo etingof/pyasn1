@@ -6,8 +6,8 @@
 |ASN.1| type
 ------------
 
-.. autoclass:: pyasn1.type.univ.Sequence(componentType=NamedTypes(), tagSet=tagSet(), subtypeSpec=ConstraintsIntersection(), sizeSpec=ConstraintsIntersection())
-   :members: isValue, isSameTypeWith, isSuperTypeOf, tagSet, effectiveTagSet, tagMap, componentType, subtypeSpec, sizeSpec, getComponentByPosition,
+.. autoclass:: pyasn1.type.univ.Sequence(componentType=NamedTypes(), tagSet=tagSet(), subtypeSpec=ConstraintsIntersection())
+   :members: isValue, isSameTypeWith, isSuperTypeOf, tagSet, effectiveTagSet, tagMap, componentType, subtypeSpec, getComponentByPosition,
              setComponentByPosition, getComponentByName, setComponentByName, setDefaultComponents,
              clear, reset, isInconsistent
 
