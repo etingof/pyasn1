@@ -169,7 +169,9 @@ class SetEncoder(encoder.SequenceEncoder):
 
         if asn1Spec is None:
             # instance of ASN.1 schema
-            value.verifySizeSpec()
+            inconsistency = value.isInconsistent
+            if inconsistency:
+                raise inconsistency
 
             namedTypes = value.componentType
 

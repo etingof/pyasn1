@@ -3004,7 +3004,7 @@ class Choice(Set):
         if self._currentIdx is not None:
             yield self.componentType[self._currentIdx].getName(), self[self._currentIdx]
 
-    def verifySizeSpec(self):
+    def checkConsistency(self):
         if self._currentIdx is None:
             raise error.PyAsn1Error('Component not chosen')
 

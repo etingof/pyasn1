@@ -2,7 +2,11 @@
 Revision 0.4.7, released XX-09-2019
 -----------------------------------
 
-No changes yet
+- Added `isInconsistent` property to all constructed types. This property
+  conceptually replaces `verifySizeSpec` method to serve a more general
+  purpose e.g. ensuring all required fields are in a good shape. By default
+  this check invokes subtype constraints verification and is run by codecs
+  on value de/serialisation.
 
 Revision 0.4.6, released 31-07-2019
 -----------------------------------

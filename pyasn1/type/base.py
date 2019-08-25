@@ -655,8 +655,23 @@ class ConstructedAsn1Type(Asn1Type):
 
         return clone
 
-    def verifySizeSpec(self):
-        self.sizeSpec(self)
+    @property
+    def isInconsistent(self):
+        """Run necessary checks to ensure object consistency.
+
+        Default action is to verify |ASN.1| object against constraints imposed
+        by `subtypeSpec`.
+
+        Raises
+        ------
+        :py:class:`~pyasn1.error.PyAsn1tError` on any inconsistencies found
+        """
+        try:
+            self.sizeSpec(self)
+
+        except error.PyAsn1Error:
+            exc = sys.exc_info()[1]
+            return exc
 
     def getComponentByPosition(self, idx):
         raise error.PyAsn1Error('Method not implemented')
@@ -678,6 +693,10 @@ class ConstructedAsn1Type(Asn1Type):
 
     def getComponentType(self):
         return self.componentType
+
+    def verifySizeSpec(self):
+        self.sizeSpec(self)
+
 
 # Backward compatibility
 AbstractConstructedAsn1Item = ConstructedAsn1Type
