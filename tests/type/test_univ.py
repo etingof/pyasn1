@@ -1249,6 +1249,37 @@ class SequenceOf(BaseTestCase):
 
         assert not s.isValue
 
+    def testIsInconsistentSizeConstraint(self):
+
+        class SequenceOf(univ.SequenceOf):
+            componentType = univ.OctetString()
+            subtypeSpec = constraint.ValueSizeConstraint(0, 1)
+
+        s = SequenceOf()
+
+        assert s.isInconsistent
+
+        s[0] = 'test'
+
+        assert not s.isInconsistent
+
+        s[0] = 'test'
+        s[1] = 'test'
+
+        assert s.isInconsistent
+
+        s.clear()
+
+        assert not s.isInconsistent
+
+        s.reset()
+
+        assert s.isInconsistent
+
+        s[1] = 'test'
+
+        assert not s.isInconsistent
+
 
 class SequenceOfPicklingTestCase(unittest.TestCase):
 
@@ -1584,6 +1615,77 @@ class Sequence(BaseTestCase):
         s.reset()
 
         assert not s.isValue
+
+    def testIsInconsistentWithComponentsConstraint(self):
+
+        class Sequence(univ.Sequence):
+            componentType = namedtype.NamedTypes(
+                namedtype.OptionalNamedType('name', univ.OctetString()),
+                namedtype.DefaultedNamedType('age', univ.Integer(65))
+            )
+            subtypeSpec = constraint.WithComponentsConstraint(
+                ('name', constraint.ComponentPresentConstraint()),
+                ('age', constraint.ComponentAbsentConstraint())
+            )
+
+        s = Sequence()
+
+        assert s.isInconsistent
+
+        s[0] = 'test'
+
+        assert not s.isInconsistent
+
+        s[0] = 'test'
+        s[1] = 23
+
+        assert s.isInconsistent
+
+        s.clear()
+
+        assert s.isInconsistent
+
+        s.reset()
+
+        assert s.isInconsistent
+
+        s[1] = 23
+
+        assert s.isInconsistent
+
+    def testIsInconsistentSizeConstraint(self):
+
+        class Sequence(univ.Sequence):
+            componentType = namedtype.NamedTypes(
+                namedtype.OptionalNamedType('name', univ.OctetString()),
+                namedtype.DefaultedNamedType('age', univ.Integer(65))
+            )
+            subtypeSpec = constraint.ValueSizeConstraint(0, 1)
+
+        s = Sequence()
+
+        assert not s.isInconsistent
+
+        s[0] = 'test'
+
+        assert not s.isInconsistent
+
+        s[0] = 'test'
+        s[1] = 23
+
+        assert s.isInconsistent
+
+        s.clear()
+
+        assert not s.isInconsistent
+
+        s.reset()
+
+        assert s.isInconsistent
+
+        s[1] = 23
+
+        assert not s.isInconsistent
 
 
 class SequenceWithoutSchema(BaseTestCase):
