@@ -436,40 +436,40 @@ class RealEncoderWithSchemaTestCase(BaseTestCase):
 if sys.version_info[0:2] > (2, 5):
     class UniversalStringEncoderTestCase(BaseTestCase):
         def testEncoding(self):
-            assert encoder.encode(char.UniversalString(sys.version_info[0] == 3 and 'abc' or unicode('abc'))) == ints2octs(
+            assert encoder.encode(char.UniversalString(sys.version_info[0] >= 3 and 'abc' or unicode('abc'))) == ints2octs(
                 (28, 12, 0, 0, 0, 97, 0, 0, 0, 98, 0, 0, 0, 99)), 'Incorrect encoding'
 
 
     class UniversalStringEncoderWithSchemaTestCase(BaseTestCase):
         def testEncoding(self):
             assert encoder.encode(
-                sys.version_info[0] == 3 and 'abc' or unicode('abc'), asn1Spec=char.UniversalString()
+                sys.version_info[0] >= 3 and 'abc' or unicode('abc'), asn1Spec=char.UniversalString()
             ) == ints2octs((28, 12, 0, 0, 0, 97, 0, 0, 0, 98, 0, 0, 0, 99)), 'Incorrect encoding'
 
 
 class BMPStringEncoderTestCase(BaseTestCase):
     def testEncoding(self):
-        assert encoder.encode(char.BMPString(sys.version_info[0] == 3 and 'abc' or unicode('abc'))) == ints2octs(
+        assert encoder.encode(char.BMPString(sys.version_info[0] >= 3 and 'abc' or unicode('abc'))) == ints2octs(
             (30, 6, 0, 97, 0, 98, 0, 99)), 'Incorrect encoding'
 
 
 class BMPStringEncoderWithSchemaTestCase(BaseTestCase):
     def testEncoding(self):
         assert encoder.encode(
-            sys.version_info[0] == 3 and 'abc' or unicode('abc'), asn1Spec=char.BMPString()
+            sys.version_info[0] >= 3 and 'abc' or unicode('abc'), asn1Spec=char.BMPString()
         ) == ints2octs((30, 6, 0, 97, 0, 98, 0, 99)), 'Incorrect encoding'
 
 
 class UTF8StringEncoderTestCase(BaseTestCase):
     def testEncoding(self):
-        assert encoder.encode(char.UTF8String(sys.version_info[0] == 3 and 'abc' or unicode('abc'))) == ints2octs(
+        assert encoder.encode(char.UTF8String(sys.version_info[0] >= 3 and 'abc' or unicode('abc'))) == ints2octs(
             (12, 3, 97, 98, 99)), 'Incorrect encoding'
 
 
 class UTF8StringEncoderWithSchemaTestCase(BaseTestCase):
     def testEncoding(self):
         assert encoder.encode(
-            sys.version_info[0] == 3 and 'abc' or unicode('abc'), asn1Spec=char.UTF8String()
+            sys.version_info[0] >= 3 and 'abc' or unicode('abc'), asn1Spec=char.UTF8String()
         ) == ints2octs((12, 3, 97, 98, 99)), 'Incorrect encoding'
 
 
