@@ -536,8 +536,8 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
         components = []
         componentTypes = set()
 
-        while substrate:
-            component, substrate = decodeFun(substrate, **options)
+        while not isEmpty(substrate):
+            component = decodeFun(substrate, **options)
             if component is eoo.endOfOctets:
                 break
 
@@ -571,7 +571,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                 matchTags=False, matchConstraints=False
             )
 
-        return asn1Object, substrate
+        return asn1Object
 
     def valueDecoder(self, substrate, asn1Spec,
                      tagSet=None, length=None, state=None,
@@ -580,7 +580,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
         if tagSet[0].tagFormat != tag.tagFormatConstructed:
             raise error.PyAsn1Error('Constructed tag format expected')
 
-        head, tail = substrate[:length], substrate[length:]
+        head = popSubstream(substrate, length)
 
         if substrateFun is not None:
             if asn1Spec is not None:
@@ -623,7 +623,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
             seenIndices = set()
             idx = 0
-            while head:
+            while not isEmpty(head):
                 if not namedTypes:
                     componentType = None
 
@@ -646,7 +646,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                             'Excessive components decoded at %r' % (asn1Spec,)
                         )
 
-                component, head = decodeFun(head, componentType, **options)
+                component = decodeFun(head, componentType, **options)
 
                 if not isDeterministic and namedTypes:
                     if isSetType:
@@ -750,8 +750,8 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
             idx = 0
 
-            while head:
-                component, head = decodeFun(head, componentType, **options)
+            while not isEmpty(head):
+                component = decodeFun(head, componentType, **options)
                 asn1Object.setComponentByPosition(
                     idx, component,
                     verifyConstraints=False,
@@ -760,7 +760,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
                 idx += 1
 
-        return asn1Object, tail
+        return asn1Object
 
     def indefLenValueDecoder(self, substrate, asn1Spec,
                              tagSet=None, length=None, state=None,
@@ -804,7 +804,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
             seenIndices = set()
             idx = 0
-            while substrate:
+            while not isEmpty(substrate):
                 if len(namedTypes) <= idx:
                     asn1Spec = None
 
@@ -827,7 +827,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                             'Excessive components decoded at %r' % (asn1Object,)
                         )
 
-                component, substrate = decodeFun(substrate, asn1Spec, allowEoo=True, **options)
+                component = decodeFun(substrate, asn1Spec, allowEoo=True, **options)
                 if component is eoo.endOfOctets:
                     break
 
@@ -936,8 +936,8 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
             idx = 0
 
-            while substrate:
-                component, substrate = decodeFun(substrate, componentType, allowEoo=True, **options)
+            while not isEmpty(substrate):
+                component = decodeFun(substrate, componentType, allowEoo=True, **options)
 
                 if component is eoo.endOfOctets:
                     break
@@ -955,7 +955,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                     'No EOO seen before substrate ends'
                 )
 
-        return asn1Object, substrate
+        return asn1Object
 
 
 class SequenceOrSequenceOfDecoder(UniversalConstructedTypeDecoder):
