@@ -4,10 +4,13 @@
 # Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>
 # License: http://snmplabs.com/pyasn1/license.html
 #
+from io import BytesIO
+
+from pyasn1.codec.ber.decoder import asSeekableStream
 from pyasn1.codec.cer import decoder
 from pyasn1.type import univ
 
-__all__ = ['decode']
+__all__ = ['decode', 'decodeStream']
 
 
 class BitStringDecoder(decoder.BitStringDecoder):
@@ -39,6 +42,21 @@ for typeDecoder in tagMap.values():
 
 class Decoder(decoder.Decoder):
     supportIndefLength = False
+
+
+_decode = Decoder(tagMap, decoder.typeMap)
+
+
+def decodeStream(substrate, asn1Spec=None, **kwargs):
+    """Iterator of objects in a substrate."""
+    # TODO: This should become `decode` after API-breaking approved
+    substrate = asSeekableStream(substrate)
+    while True:
+        result = _decode(substrate, asn1Spec, **kwargs)
+        if result is None:
+            break
+        yield result
+        # TODO: Check about eoo.endOfOctets?
 
 
 #: Turns DER octet stream into an ASN.1 object.
@@ -91,4 +109,9 @@ class Decoder(decoder.Decoder):
 #:    SequenceOf:
 #:     1 2 3
 #:
-decode = Decoder(tagMap, typeMap)
+def decode(substrate, asn1Spec=None, **kwargs):
+    # TODO: Temporary solution before merging with upstream
+    #   It preserves the original API
+    substrate = BytesIO(substrate)
+    iterator = decodeStream(substrate, asn1Spec=asn1Spec, **kwargs)
+    return next(iterator), substrate.read()
