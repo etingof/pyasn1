@@ -4,6 +4,7 @@
 # Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>
 # License: http://snmplabs.com/pyasn1/license.html
 #
+import os
 import sys
 
 from pyasn1 import debug
@@ -34,20 +35,30 @@ LOG = debug.registerLoggee(__name__, flags=debug.DEBUG_DECODER)
 noValue = base.noValue
 
 
+def asStream(substrate):
+    # TODO: Apply sparingly or remove
+    # :type substrate: Union[bytes, BytesIO, BufferedReader]
+    # :rtype: BufferedReader
+    if isinstance(substrate, bytes):
+        substrate = BytesIO(substrate)
+    if isinstance(substrate, BytesIO):
+        return BufferedReader(substrate)
+    if isinstance(substrate, BufferedReader):
+        return substrate
+    raise ValueError("Cannot be converted to stream")
+
+
+def isEmpty(substrate):
+    # :type substrate: Union[bytes, BytesIO, BufferedReader]
+    # :rtype: bool
+    if isinstance(substrate, bytes):
+        return not bool(substrate)
+    else:
+        return not bool(asStream(substrate).peek(1))
+
+
 class AbstractDecoder(object):
     protoComponent = None
-
-    @classmethod
-    def asStream(cls, substrate):
-        # TODO: Apply sparingly or remove
-        # type: (Union[bytes, BytesIO, BufferedReader]) -> BufferedReader
-        if isinstance(substrate, bytes):
-            substrate = BytesIO(substrate)
-        if isinstance(substrate, BytesIO):
-            return BufferedReader(substrate)
-        if isinstance(substrate, BufferedReader):
-            return substrate
-        raise ValueError("Cannot be converted to stream")
 
     def valueDecoder(self, substrate, asn1Spec,
                      tagSet=None, length=None, state=None,
@@ -67,9 +78,13 @@ class AbstractDecoder(object):
 class AbstractSimpleDecoder(AbstractDecoder):
     @staticmethod
     def substrateCollector(asn1Object, substrate, length):
-        return substrate[:length], substrate[length:]
+        # :type substrate: BytesIO
+        # :type length: int
+        # :rtype: object
+        return substrate.read(length)
 
     def _createComponent(self, asn1Spec, tagSet, value, **options):
+        # :type value: str???
         if options.get('native'):
             return value
         elif asn1Spec is None:
@@ -93,15 +108,16 @@ class ExplicitTagDecoder(AbstractSimpleDecoder):
                 substrate, length
             )
 
-        head, tail = substrate[:length], substrate[length:]
+        # head = substrate.read(length)
 
-        value, _ = decodeFun(head, asn1Spec, tagSet, length, **options)
+        value = decodeFun(substrate, asn1Spec, tagSet, length, **options)
 
-        if LOG:
-            LOG('explicit tag container carries %d octets of trailing payload '
-                '(will be lost!): %s' % (len(_), debug.hexdump(_)))
+        # TODO: Don't know what to with this
+        # if LOG:
+        #    LOG('explicit tag container carries %d octets of trailing payload '
+        #        '(will be lost!): %s' % (len(_), debug.hexdump(_)))
 
-        return value, tail
+        return value
 
     def indefLenValueDecoder(self, substrate, asn1Spec,
                              tagSet=None, length=None, state=None,
@@ -113,12 +129,12 @@ class ExplicitTagDecoder(AbstractSimpleDecoder):
                 substrate, length
             )
 
-        value, substrate = decodeFun(substrate, asn1Spec, tagSet, length, **options)
+        value = decodeFun(substrate, asn1Spec, tagSet, length, **options)
 
-        eooMarker, substrate = decodeFun(substrate, allowEoo=True, **options)
+        eooMarker = decodeFun(substrate, allowEoo=True, **options)
 
         if eooMarker is eoo.endOfOctets:
-            return value, substrate
+            return value
         else:
             raise error.PyAsn1Error('Missing end-of-octets terminator')
 
@@ -137,14 +153,14 @@ class IntegerDecoder(AbstractSimpleDecoder):
         if tagSet[0].tagFormat != tag.tagFormatSimple:
             raise error.PyAsn1Error('Simple tag format expected')
 
-        head, tail = substrate[:length], substrate[length:]
+        head = substrate.read(length)
 
         if not head:
-            return self._createComponent(asn1Spec, tagSet, 0, **options), tail
+            return self._createComponent(asn1Spec, tagSet, 0, **options)
 
         value = from_bytes(head, signed=True)
 
-        return self._createComponent(asn1Spec, tagSet, value, **options), tail
+        return self._createComponent(asn1Spec, tagSet, value, **options)
 
 
 class BooleanDecoder(IntegerDecoder):
@@ -163,13 +179,13 @@ class BitStringDecoder(AbstractSimpleDecoder):
                      tagSet=None, length=None, state=None,
                      decodeFun=None, substrateFun=None,
                      **options):
-        head, tail = substrate[:length], substrate[length:]
+        head = substrate.read(length)
 
         if substrateFun:
             return substrateFun(self._createComponent(
                 asn1Spec, tagSet, noValue, **options), substrate, length)
 
-        if not head:
+        if isEmpty(head):
             raise error.PyAsn1Error('Empty BIT STRING substrate')
 
         if tagSet[0].tagFormat == tag.tagFormatSimple:  # XXX what tag to check?
@@ -183,7 +199,7 @@ class BitStringDecoder(AbstractSimpleDecoder):
             value = self.protoComponent.fromOctetString(
                 head[1:], internalFormat=True, padding=trailingBits)
 
-            return self._createComponent(asn1Spec, tagSet, value, **options), tail
+            return self._createComponent(asn1Spec, tagSet, value, **options)
 
         if not self.supportConstructedForm:
             raise error.PyAsn1Error('Constructed encoding form prohibited '
@@ -1306,17 +1322,23 @@ class Decoder(object):
                  decodeFun=None, substrateFun=None,
                  **options):
 
-        if LOG:
-            LOG('decoder called at scope %s with state %d, working with up to %d octets of substrate: %s' % (debug.scope, state, len(substrate), debug.hexdump(substrate)))
+        substrate = asStream(substrate)
+
+        # TODO: Fix
+        # if LOG:
+        #    LOG('decoder called at scope %s with state %d, working with up to %d octets of substrate: %s' % (debug.scope, state, len(substrate), debug.hexdump(substrate)))
 
         allowEoo = options.pop('allowEoo', False)
 
         # Look for end-of-octets sentinel
         if allowEoo and self.supportIndefLength:
-            if substrate[:2] == self.__eooSentinel:
+            eoo_candidate = substrate.read(2)
+            if eoo_candidate == self.__eooSentinel:
                 if LOG:
                     LOG('end-of-octets sentinel found')
-                return eoo.endOfOctets, substrate[2:]
+                return eoo.endOfOctets
+            else:
+                substrate.seek(-2, whence=os.SEEK_CUR)
 
         value = noValue
 
@@ -1325,26 +1347,25 @@ class Decoder(object):
         tagCache = self.__tagCache
         tagSetCache = self.__tagSetCache
 
-        fullSubstrate = substrate
+        # fullSubstrate = substrate
 
         while state is not stStop:
 
             if state is stDecodeTag:
-                if not substrate:
+                if isEmpty(substrate):
                     raise error.SubstrateUnderrunError(
                         'Short octet stream on tag decoding'
                     )
 
                 # Decode tag
                 isShortTag = True
-                firstOctet = substrate[0]
-                substrate = substrate[1:]
+                firstOctet = ord(substrate.read(1))  # Note: read returns bytes, not ints.
 
                 try:
                     lastTag = tagCache[firstOctet]
 
                 except KeyError:
-                    integerTag = oct2int(firstOctet)
+                    integerTag = firstOctet
                     tagClass = integerTag & 0xC0
                     tagFormat = integerTag & 0x20
                     tagId = integerTag & 0x1F
@@ -1356,14 +1377,12 @@ class Decoder(object):
 
                         try:
                             while True:
-                                integerTag = oct2int(substrate[lengthOctetIdx])
+                                integerTag = ord(substrate.read(1))
                                 lengthOctetIdx += 1
                                 tagId <<= 7
                                 tagId |= (integerTag & 0x7F)
                                 if not integerTag & 0x80:
                                     break
-
-                            substrate = substrate[lengthOctetIdx:]
 
                         except IndexError:
                             raise error.SubstrateUnderrunError(
@@ -1405,7 +1424,7 @@ class Decoder(object):
                         'Short octet stream on length decoding'
                     )
 
-                firstOctet = oct2int(substrate[0])
+                firstOctet = ord(substrate.read(1))
 
                 if firstOctet < 128:
                     size = 1
@@ -1414,7 +1433,7 @@ class Decoder(object):
                 elif firstOctet > 128:
                     size = firstOctet & 0x7F
                     # encoded in size bytes
-                    encodedLength = octs2ints(substrate[1:size + 1])
+                    encodedLength = list(substrate.read(size))
                     # missing check on maximum size, which shouldn't be a
                     # problem, we can handle more than is possible
                     if len(encodedLength) != size:
@@ -1432,20 +1451,20 @@ class Decoder(object):
                     size = 1
                     length = -1
 
-                substrate = substrate[size:]
-
                 if length == -1:
                     if not self.supportIndefLength:
                         raise error.PyAsn1Error('Indefinite length encoding not supported by this codec')
 
                 else:
-                    if len(substrate) < length:
-                        raise error.SubstrateUnderrunError('%d-octet short' % (length - len(substrate)))
+                    # TODO: Check substrate length
+                    # if len(substrate) < length:
+                    #     raise error.SubstrateUnderrunError('%d-octet short' % (length - len(substrate)))
 
                 state = stGetValueDecoder
 
-                if LOG:
-                    LOG('value length decoded into %d, payload substrate is: %s' % (length, debug.hexdump(length == -1 and substrate or substrate[:length])))
+                # TODO: Fix
+                # if LOG:
+                #    LOG('value length decoded into %d, payload substrate is: %s' % (length, debug.hexdump(length == -1 and substrate or substrate[:length])))
 
             if state is stGetValueDecoder:
                 if asn1Spec is None:
@@ -1564,10 +1583,11 @@ class Decoder(object):
                 if not options.get('recursiveFlag', True) and not substrateFun:  # deprecate this
                     substrateFun = lambda a, b, c: (a, b[:c])
 
-                options.update(fullSubstrate=fullSubstrate)
+                # TODO: Is this used for something?
+                # options.update(fullSubstrate=fullSubstrate)
 
                 if length == -1:  # indef length
-                    value, substrate = concreteDecoder.indefLenValueDecoder(
+                    value = concreteDecoder.indefLenValueDecoder(
                         substrate, asn1Spec,
                         tagSet, length, stGetValueDecoder,
                         self, substrateFun,
@@ -1575,15 +1595,16 @@ class Decoder(object):
                     )
 
                 else:
-                    value, substrate = concreteDecoder.valueDecoder(
+                    value = concreteDecoder.valueDecoder(
                         substrate, asn1Spec,
                         tagSet, length, stGetValueDecoder,
                         self, substrateFun,
                         **options
                     )
 
-                if LOG:
-                    LOG('codec %s yields type %s, value:\n%s\n...remaining substrate is: %s' % (concreteDecoder.__class__.__name__, value.__class__.__name__, isinstance(value, base.Asn1Item) and value.prettyPrint() or value, substrate and debug.hexdump(substrate) or '<none>'))
+                # TODO: Fix
+                # if LOG:
+                #    LOG('codec %s yields type %s, value:\n%s\n...remaining substrate is: %s' % (concreteDecoder.__class__.__name__, value.__class__.__name__, isinstance(value, base.Asn1Item) and value.prettyPrint() or value, substrate and debug.hexdump(substrate) or '<none>'))
 
                 state = stStop
                 break
@@ -1620,7 +1641,7 @@ class Decoder(object):
             debug.scope.pop()
             LOG('decoder left scope %s, call completed' % debug.scope)
 
-        return value, substrate
+        return value
 
 
 #: Turns BER octet stream into an ASN.1 object.
