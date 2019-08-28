@@ -411,12 +411,12 @@ class ComponentAbsentConstraint(AbstractConstraint):
 class WithComponentsConstraint(AbstractConstraint):
     """Create a WithComponentsConstraint object.
 
-    The WithComponentsConstraint satisfies any mapping object that has
+    The `WithComponentsConstraint` satisfies any mapping object that has
     constrained fields present or absent, what is indicated by
     `ComponentPresentConstraint` and `ComponentAbsentConstraint`
     objects respectively.
 
-    The WithComponentsConstraint object is typically applied
+    The `WithComponentsConstraint` object is typically applied
     to  :class:`~pyasn1.type.univ.Set` or
     :class:`~pyasn1.type.univ.Sequence` types.
 
@@ -425,6 +425,16 @@ class WithComponentsConstraint(AbstractConstraint):
     *fields: :class:`tuple`
         Zero or more tuples of (`field`, `constraint`) indicating constrained
         fields.
+
+    Notes
+    -----
+    On top of the primary use of `WithComponentsConstraint` (ensuring presence
+    or absence of particular components of a :class:`~pyasn1.type.univ.Set` or
+    :class:`~pyasn1.type.univ.Sequence`), it is also possible to pass any other
+    constraint objects or their combinations. In case of scalar fields, these
+    constraints will be verified in addition to the constraints belonging to
+    scalar components themselves. However, formally, these additional
+    constraints do not change the type of these ASN.1 objects.
 
     Examples
     --------
