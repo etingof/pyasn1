@@ -424,7 +424,7 @@ class RealDecoder(AbstractSimpleDecoder):
         head = substrate.read(length)
 
         if not head:
-            return self._createComponent(asn1Spec, tagSet, 0.0, **options), tail
+            return self._createComponent(asn1Spec, tagSet, 0.0, **options)
 
         fo = oct2int(head[0])
         head = head[1:]
@@ -515,7 +515,7 @@ class RealDecoder(AbstractSimpleDecoder):
                 'Unknown encoding (tag %s)' % fo
             )
 
-        return self._createComponent(asn1Spec, tagSet, value, **options), tail
+        return self._createComponent(asn1Spec, tagSet, value, **options)
 
 
 class AbstractConstructedDecoder(AbstractDecoder):
@@ -604,7 +604,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                     LOG('Unused trailing %d octets encountered: %s' % (
                         len(trailing), debug.hexdump(trailing)))
 
-            return asn1Object, tail
+            return asn1Object
 
         asn1Object = asn1Spec.clone()
         asn1Object.clear()
@@ -992,7 +992,7 @@ class ChoiceDecoder(AbstractConstructedDecoder):
                      tagSet=None, length=None, state=None,
                      decodeFun=None, substrateFun=None,
                      **options):
-        head, tail = substrate[:length], substrate[length:]
+        head = substrate.read(length)
 
         if asn1Spec is None:
             asn1Object = self.protoComponent.clone(tagSet=tagSet)
@@ -1007,7 +1007,7 @@ class ChoiceDecoder(AbstractConstructedDecoder):
             if LOG:
                 LOG('decoding %s as explicitly tagged CHOICE' % (tagSet,))
 
-            component, head = decodeFun(
+            component = decodeFun(
                 head, asn1Object.componentTagMap, **options
             )
 
@@ -1015,7 +1015,7 @@ class ChoiceDecoder(AbstractConstructedDecoder):
             if LOG:
                 LOG('decoding %s as untagged CHOICE' % (tagSet,))
 
-            component, head = decodeFun(
+            component = decodeFun(
                 head, asn1Object.componentTagMap,
                 tagSet, length, state, **options
             )
@@ -1032,7 +1032,7 @@ class ChoiceDecoder(AbstractConstructedDecoder):
             innerFlag=False
         )
 
-        return asn1Object, tail
+        return asn1Object
 
     def indefLenValueDecoder(self, substrate, asn1Spec,
                              tagSet=None, length=None, state=None,
@@ -1050,12 +1050,12 @@ class ChoiceDecoder(AbstractConstructedDecoder):
             if LOG:
                 LOG('decoding %s as explicitly tagged CHOICE' % (tagSet,))
 
-            component, substrate = decodeFun(
+            component = decodeFun(
                 substrate, asn1Object.componentType.tagMapUnique, **options
             )
 
             # eat up EOO marker
-            eooMarker, substrate = decodeFun(
+            eooMarker = decodeFun(
                 substrate, allowEoo=True, **options
             )
 
@@ -1066,7 +1066,7 @@ class ChoiceDecoder(AbstractConstructedDecoder):
             if LOG:
                 LOG('decoding %s as untagged CHOICE' % (tagSet,))
 
-            component, substrate = decodeFun(
+            component = decodeFun(
                 substrate, asn1Object.componentType.tagMapUnique,
                 tagSet, length, state, **options
             )
@@ -1083,7 +1083,7 @@ class ChoiceDecoder(AbstractConstructedDecoder):
             innerFlag=False
         )
 
-        return asn1Object, substrate
+        return asn1Object
 
 
 class AnyDecoder(AbstractSimpleDecoder):
@@ -1103,22 +1103,24 @@ class AnyDecoder(AbstractSimpleDecoder):
             isUntagged = tagSet != asn1Spec.tagSet
 
         if isUntagged:
-            fullSubstrate = options['fullSubstrate']
-
-            # untagged Any container, recover inner header substrate
-            length += len(fullSubstrate) - len(substrate)
-            substrate = fullSubstrate
-
-            if LOG:
-                LOG('decoding as untagged ANY, substrate %s' % debug.hexdump(substrate))
+            # TODO: I don't know how to deal with the "fullSubstrate" concept yet.
+            raise NotImplementedError("Untagged Any not supported.")
+            # fullSubstrate = options['fullSubstrate']
+            #
+            # # untagged Any container, recover inner header substrate
+            # length += len(fullSubstrate) - len(substrate)
+            # substrate = fullSubstrate
+            #
+            # if LOG:
+            #     LOG('decoding as untagged ANY, substrate %s' % debug.hexdump(substrate))
 
         if substrateFun:
             return substrateFun(self._createComponent(asn1Spec, tagSet, noValue, **options),
                                 substrate, length)
 
-        head, tail = substrate[:length], substrate[length:]
+        head = substrate.read(length)
 
-        return self._createComponent(asn1Spec, tagSet, head, **options), tail
+        return self._createComponent(asn1Spec, tagSet, head, **options)
 
     def indefLenValueDecoder(self, substrate, asn1Spec,
                              tagSet=None, length=None, state=None,
@@ -1141,13 +1143,15 @@ class AnyDecoder(AbstractSimpleDecoder):
                 LOG('decoding as tagged ANY')
 
         else:
-            fullSubstrate = options['fullSubstrate']
-
-            # untagged Any, recover header substrate
-            header = fullSubstrate[:-len(substrate)]
-
-            if LOG:
-                LOG('decoding as untagged ANY, header substrate %s' % debug.hexdump(header))
+            # TODO: I don't know how to deal with the "fullSubstrate" concept yet.
+            raise NotImplementedError("Untagged Any not supported.")
+            # fullSubstrate = options['fullSubstrate']
+            #
+            # # untagged Any, recover header substrate
+            # header = fullSubstrate[:-len(substrate)]
+            #
+            # if LOG:
+            #     LOG('decoding as untagged ANY, header substrate %s' % debug.hexdump(header))
 
         # Any components do not inherit initial tag
         asn1Spec = self.protoComponent
@@ -1162,8 +1166,8 @@ class AnyDecoder(AbstractSimpleDecoder):
         # All inner fragments are of the same type, treat them as octet string
         substrateFun = self.substrateCollector
 
-        while substrate:
-            component, substrate = decodeFun(substrate, asn1Spec,
+        while not isEmpty(substrate):
+            component = decodeFun(substrate, asn1Spec,
                                              substrateFun=substrateFun,
                                              allowEoo=True, **options)
             if component is eoo.endOfOctets:
@@ -1177,10 +1181,10 @@ class AnyDecoder(AbstractSimpleDecoder):
             )
 
         if substrateFun:
-            return header, substrate
+            return header  # TODO: Weird
 
         else:
-            return self._createComponent(asn1Spec, tagSet, header, **options), substrate
+            return self._createComponent(asn1Spec, tagSet, header, **options)
 
 
 # character string types
@@ -1455,6 +1459,7 @@ class Decoder(object):
                         raise error.PyAsn1Error('Indefinite length encoding not supported by this codec')
 
                 else:
+                    pass
                     # TODO: Check substrate length
                     # if len(substrate) < length:
                     #     raise error.SubstrateUnderrunError('%d-octet short' % (length - len(substrate)))
@@ -1594,11 +1599,8 @@ class Decoder(object):
                     )
 
                 else:
-                    data = substrate.read(length)
-                    if len(data) != length:
-                        raise RuntimeError("Invalid length")  # TODO: Better exception
                     value = concreteDecoder.valueDecoder(
-                        data, asn1Spec,
+                        substrate, asn1Spec,
                         tagSet, length, stGetValueDecoder,
                         self, substrateFun,
                         **options
