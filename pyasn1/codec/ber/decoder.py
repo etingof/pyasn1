@@ -4,6 +4,8 @@
 # Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>
 # License: http://snmplabs.com/pyasn1/license.html
 #
+import sys
+
 from pyasn1 import debug
 from pyasn1 import error
 from pyasn1.codec.ber import eoo
@@ -16,6 +18,15 @@ from pyasn1.type import tagmap
 from pyasn1.type import univ
 from pyasn1.type import useful
 
+# Compatibility
+if sys.version_info < (3,):
+    from io import StringIO as BytesIO
+    bytes = str
+else:
+    from io import BytesIO
+    # bytes as-is
+from io import BufferedReader  # We need peek
+
 __all__ = ['decode']
 
 LOG = debug.registerLoggee(__name__, flags=debug.DEBUG_DECODER)
@@ -26,16 +37,30 @@ noValue = base.noValue
 class AbstractDecoder(object):
     protoComponent = None
 
+    @classmethod
+    def asStream(cls, substrate):
+        # TODO: Apply sparingly or remove
+        # type: (Union[bytes, BytesIO, BufferedReader]) -> BufferedReader
+        if isinstance(substrate, bytes):
+            substrate = BytesIO(substrate)
+        if isinstance(substrate, BytesIO):
+            return BufferedReader(substrate)
+        if isinstance(substrate, BufferedReader):
+            return substrate
+        raise ValueError("Cannot be converted to stream")
+
     def valueDecoder(self, substrate, asn1Spec,
                      tagSet=None, length=None, state=None,
                      decodeFun=None, substrateFun=None,
                      **options):
+        # Note: return the value only
         raise error.PyAsn1Error('Decoder not implemented for %s' % (tagSet,))
 
     def indefLenValueDecoder(self, substrate, asn1Spec,
                              tagSet=None, length=None, state=None,
                              decodeFun=None, substrateFun=None,
                              **options):
+        # Note: return the value only
         raise error.PyAsn1Error('Indefinite length mode decoder not implemented for %s' % (tagSet,))
 
 
