@@ -899,16 +899,16 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                                 for pos, containerElement in enumerate(
                                         containerValue):
 
-                                    component, rest = decodeFun(
-                                        containerValue[pos].asOctets(),
+                                    component = decodeFun(
+                                        asStream(containerValue[pos].asOctets()),
                                         asn1Spec=openType, **dict(options, allowEoo=True)
                                     )
 
                                     containerValue[pos] = component
 
                             else:
-                                component, rest = decodeFun(
-                                    asn1Object.getComponentByPosition(idx).asOctets(),
+                                component = decodeFun(
+                                    asStream(asn1Object.getComponentByPosition(idx).asOctets()),
                                     asn1Spec=openType, **dict(options, allowEoo=True)
                                 )
 
@@ -1098,16 +1098,14 @@ class AnyDecoder(AbstractSimpleDecoder):
             isUntagged = tagSet != asn1Spec.tagSet
 
         if isUntagged:
-            # TODO: I don't know how to deal with the "fullSubstrate" concept yet.
-            raise NotImplementedError("Untagged Any not supported.")
-            # fullSubstrate = options['fullSubstrate']
-            #
-            # # untagged Any container, recover inner header substrate
-            # length += len(fullSubstrate) - len(substrate)
-            # substrate = fullSubstrate
-            #
-            # if LOG:
-            #     LOG('decoding as untagged ANY, substrate %s' % debug.hexdump(substrate))
+            fullPosition = options['fullPosition']
+            currentPosition = substrate.tell()
+
+            substrate.seek(fullPosition, os.SEEK_SET)
+            length += (currentPosition - fullPosition)
+
+            if LOG:
+                LOG('decoding as untagged ANY, substrate %s' % debug.hexdump(substrate.peek()))
 
         if substrateFun:
             return substrateFun(self._createComponent(asn1Spec, tagSet, noValue, **options),
@@ -1138,15 +1136,14 @@ class AnyDecoder(AbstractSimpleDecoder):
                 LOG('decoding as tagged ANY')
 
         else:
-            # TODO: I don't know how to deal with the "fullSubstrate" concept yet.
-            raise NotImplementedError("Untagged Any not supported.")
-            # fullSubstrate = options['fullSubstrate']
-            #
-            # # untagged Any, recover header substrate
-            # header = fullSubstrate[:-len(substrate)]
-            #
-            # if LOG:
-            #     LOG('decoding as untagged ANY, header substrate %s' % debug.hexdump(header))
+            fullPosition = options['fullPosition']
+            currentPosition = substrate.tell()
+
+            substrate.seek(fullPosition, os.SEEK_SET)
+            header = substrate.read(currentPosition - fullPosition)
+
+            if LOG:
+                LOG('decoding as untagged ANY, header substrate %s' % debug.hexdump(header))
 
         # Any components do not inherit initial tag
         asn1Spec = self.protoComponent
@@ -1343,7 +1340,7 @@ class Decoder(object):
         tagCache = self.__tagCache
         tagSetCache = self.__tagSetCache
 
-        # fullSubstrate = substrate
+        fullPosition = substrate.tell()
 
         while state is not stStop:
 
@@ -1580,8 +1577,7 @@ class Decoder(object):
                 if not options.get('recursiveFlag', True) and not substrateFun:  # deprecate this
                     substrateFun = lambda a, b, c: (a, b[:c])
 
-                # TODO: Is this used for something?
-                # options.update(fullSubstrate=fullSubstrate)
+                options.update(fullPosition=fullPosition)  # TODO: was fullSubstrate
 
                 if length == -1:  # indef length
                     value = concreteDecoder.indefLenValueDecoder(
