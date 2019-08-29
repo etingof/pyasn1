@@ -6,10 +6,11 @@
 #
 from pyasn1 import error
 from pyasn1.codec.ber import decoder
+from pyasn1.codec.ber.decoder import asStream
 from pyasn1.compat.octets import oct2int
 from pyasn1.type import univ
 
-__all__ = ['decode']
+__all__ = ['decode', 'decodeStream']
 
 
 class BooleanDecoder(decoder.AbstractSimpleDecoder):
@@ -19,7 +20,7 @@ class BooleanDecoder(decoder.AbstractSimpleDecoder):
                      tagSet=None, length=None, state=None,
                      decodeFun=None, substrateFun=None,
                      **options):
-        head, tail = substrate[:length], substrate[length:]
+        head = substrate.read(1)
         if not head or length != 1:
             raise error.PyAsn1Error('Not single-octet Boolean payload')
         byte = oct2int(head[0])
@@ -32,7 +33,7 @@ class BooleanDecoder(decoder.AbstractSimpleDecoder):
             value = 0
         else:
             raise error.PyAsn1Error('Unexpected Boolean payload: %s' % byte)
-        return self._createComponent(asn1Spec, tagSet, value, **options), tail
+        return self._createComponent(asn1Spec, tagSet, value, **options)
 
 # TODO: prohibit non-canonical encoding
 BitStringDecoder = decoder.BitStringDecoder
@@ -111,4 +112,10 @@ class Decoder(decoder.Decoder):
 #:    SequenceOf:
 #:     1 2 3
 #:
-decode = Decoder(tagMap, decoder.typeMap)
+decodeStream = Decoder(tagMap, decoder.typeMap)
+
+
+def decode(substrate, asn1Spec=None, decoderInstance=decodeStream, **kwargs):
+    stream = decoder.asStream(substrate)
+    value = decoderInstance(stream, asn1Spec, **kwargs)
+    return value, stream.read()

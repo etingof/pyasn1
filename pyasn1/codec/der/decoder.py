@@ -7,7 +7,7 @@
 from pyasn1.codec.cer import decoder
 from pyasn1.type import univ
 
-__all__ = ['decode']
+__all__ = ['decode', 'decodeStream']
 
 
 class BitStringDecoder(decoder.BitStringDecoder):
@@ -91,4 +91,10 @@ class Decoder(decoder.Decoder):
 #:    SequenceOf:
 #:     1 2 3
 #:
-decode = Decoder(tagMap, typeMap)
+decodeStream = Decoder(tagMap, decoder.typeMap)
+
+
+def decode(substrate, asn1Spec=None, decoderInstance=decodeStream, **kwargs):
+    stream = decoder.asStream(substrate)
+    value = decoderInstance(stream, asn1Spec, **kwargs)
+    return value, stream.read()
