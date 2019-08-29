@@ -5,7 +5,6 @@
 # License: http://snmplabs.com/pyasn1/license.html
 #
 import os
-import sys
 from io import BytesIO, BufferedReader
 
 from pyasn1 import debug
@@ -30,8 +29,10 @@ noValue = base.noValue
 
 def asStream(substrate):
     # TODO: Apply sparingly or remove
-    # :type substrate: Union[bytes, BytesIO, BufferedReader]
+    # :type substrate: Union[bytes, BytesIO, BufferedReader, OctetString]
     # :rtype: BufferedReader
+    if isinstance(substrate, univ.OctetString):
+        substrate = substrate.asOctets()
     if isinstance(substrate, bytes):
         substrate = BytesIO(substrate)
     if isinstance(substrate, BytesIO):
@@ -714,7 +715,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                                         containerValue):
 
                                     component, rest = decodeFun(
-                                        containerValue[pos].asOctets(),
+                                        asStream(containerValue[pos].asOctets()),
                                         asn1Spec=openType, **options
                                     )
 
@@ -722,7 +723,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
                             else:
                                 component, rest = decodeFun(
-                                    asn1Object.getComponentByPosition(idx).asOctets(),
+                                    asStream(asn1Object.getComponentByPosition(idx).asOctets()),
                                     asn1Spec=openType, **options
                                 )
 
@@ -986,7 +987,7 @@ class ChoiceDecoder(AbstractConstructedDecoder):
                      tagSet=None, length=None, state=None,
                      decodeFun=None, substrateFun=None,
                      **options):
-        head = substrate.read(length)
+        head = popSubstream(substrate, length)
 
         if asn1Spec is None:
             asn1Object = self.protoComponent.clone(tagSet=tagSet)
@@ -1414,7 +1415,7 @@ class Decoder(object):
 
             if state is stDecodeLength:
                 # Decode length
-                if not substrate:
+                if isEmpty(substrate):
                     raise error.SubstrateUnderrunError(
                         'Short octet stream on length decoding'
                     )
@@ -1439,7 +1440,7 @@ class Decoder(object):
                     length = 0
                     for lengthOctet in encodedLength:
                         length <<= 8
-                        length |= lengthOctet
+                        length |= oct2int(lengthOctet)
                     size += 1
 
                 else:
@@ -1640,6 +1641,9 @@ class Decoder(object):
         return value
 
 
+decodeStream = Decoder(tagMap, typeMap)
+
+
 #: Turns BER octet stream into an ASN.1 object.
 #:
 #: Takes BER octet-stream and decode it into an ASN.1 object
@@ -1690,13 +1694,11 @@ class Decoder(object):
 #:    SequenceOf:
 #:     1 2 3
 #:
-def decode(substrate, asn1Spec=None, **kwargs):
+def decode(substrate, asn1Spec=None, decoderInstance=decodeStream, **kwargs):
     stream = asStream(substrate)
-    value = decodeStream(stream, asn1Spec, **kwargs)
+    value = decoderInstance(stream, asn1Spec, **kwargs)
     return value, stream.read()
 
-
-decodeStream = Decoder(tagMap, typeMap)
 
 # XXX
 # non-recursive decoding; return position rather than substrate
