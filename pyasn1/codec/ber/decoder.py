@@ -6,6 +6,7 @@
 #
 import os
 import sys
+from io import BytesIO, BufferedReader
 
 from pyasn1 import debug
 from pyasn1 import error
@@ -19,16 +20,8 @@ from pyasn1.type import tagmap
 from pyasn1.type import univ
 from pyasn1.type import useful
 
-# Compatibility
-if sys.version_info < (3,):
-    from io import StringIO as BytesIO
-    bytes = str
-else:
-    from io import BytesIO
-    # bytes as-is
-from io import BufferedReader  # We need peek
 
-__all__ = ['decode']
+__all__ = ['decode', 'decodeStream']
 
 LOG = debug.registerLoggee(__name__, flags=debug.DEBUG_DECODER)
 
@@ -45,7 +38,7 @@ def asStream(substrate):
         return BufferedReader(substrate)
     if isinstance(substrate, BufferedReader):
         return substrate
-    raise ValueError("Cannot be converted to stream")
+    raise ValueError("%s Cannot be converted to stream" % substrate.__class__)
 
 
 def popSubstream(substrate, length):
@@ -595,12 +588,13 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
             return substrateFun(asn1Object, substrate, length)
 
         if asn1Spec is None:
-            asn1Object, trailing = self._decodeComponents(
+            asn1Object = self._decodeComponents(
                 head, tagSet=tagSet, decodeFun=decodeFun, **options
             )
 
-            if trailing:
+            if not isEmpty(head):
                 if LOG:
+                    trailing = head.read()
                     LOG('Unused trailing %d octets encountered: %s' % (
                         len(trailing), debug.hexdump(trailing)))
 
@@ -1325,8 +1319,6 @@ class Decoder(object):
                  decodeFun=None, substrateFun=None,
                  **options):
 
-        substrate = asStream(substrate)
-
         # TODO: Fix
         # if LOG:
         #    LOG('decoder called at scope %s with state %d, working with up to %d octets of substrate: %s' % (debug.scope, state, len(substrate), debug.hexdump(substrate)))
@@ -1341,7 +1333,7 @@ class Decoder(object):
                     LOG('end-of-octets sentinel found')
                 return eoo.endOfOctets
             else:
-                substrate.seek(-2, whence=os.SEEK_CUR)
+                substrate.seek(-2, os.SEEK_CUR)
 
         value = noValue
 
@@ -1698,7 +1690,13 @@ class Decoder(object):
 #:    SequenceOf:
 #:     1 2 3
 #:
-decode = Decoder(tagMap, typeMap)
+def decode(substrate, asn1Spec=None, **kwargs):
+    stream = asStream(substrate)
+    value = decodeStream(stream, asn1Spec, **kwargs)
+    return value, stream.read()
+
+
+decodeStream = Decoder(tagMap, typeMap)
 
 # XXX
 # non-recursive decoding; return position rather than substrate
