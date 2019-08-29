@@ -714,7 +714,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                                 for pos, containerElement in enumerate(
                                         containerValue):
 
-                                    component, rest = decodeFun(
+                                    component = decodeFun(
                                         asStream(containerValue[pos].asOctets()),
                                         asn1Spec=openType, **options
                                     )
@@ -722,7 +722,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                                     containerValue[pos] = component
 
                             else:
-                                component, rest = decodeFun(
+                                component = decodeFun(
                                     asStream(asn1Object.getComponentByPosition(idx).asOctets()),
                                     asn1Spec=openType, **options
                                 )
