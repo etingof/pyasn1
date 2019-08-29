@@ -62,6 +62,9 @@ class Decoder(decoder.Decoder):
     pass
 
 
+decodeStream = Decoder(tagMap, decoder.typeMap)
+
+
 #: Turns CER octet stream into an ASN.1 object.
 #:
 #: Takes CER octet-stream and decode it into an ASN.1 object
@@ -112,10 +115,7 @@ class Decoder(decoder.Decoder):
 #:    SequenceOf:
 #:     1 2 3
 #:
-decodeStream = Decoder(tagMap, decoder.typeMap)
-
-
-def decode(substrate, asn1Spec=None, decoderInstance=decodeStream, **kwargs):
-    stream = decoder.asStream(substrate)
-    value = decoderInstance(stream, asn1Spec, **kwargs)
+def decode(substrate, asn1Spec=None, **kwargs):
+    stream = asStream(substrate)
+    value = decodeStream(stream, asn1Spec, **kwargs)
     return value, stream.read()

@@ -1596,10 +1596,12 @@ class NonStringDecoderTestCase(BaseTestCase):
 class ErrorOnDecodingTestCase(BaseTestCase):
 
     def testErrorCondition(self):
-        instance = decoder.Decoder(decoder.tagMap, decoder.typeMap)
+        decode = decoder.Decoder(decoder.tagMap, decoder.typeMap)
+        substrate = b'abc'
+        stream = decoder.asStream(substrate)
 
         try:
-            asn1Object, _ = decoder.decode(b'abc', decoderInstance=instance)
+            asn1Object = decode(stream)
 
         except PyAsn1Error:
             exc = sys.exc_info()[1]
@@ -1610,12 +1612,14 @@ class ErrorOnDecodingTestCase(BaseTestCase):
             assert False, 'Unexpected decoder result %r' % (asn1Object,)
 
     def testRawDump(self):
-        instance = decoder.Decoder(decoder.tagMap, decoder.typeMap)
+        decode = decoder.Decoder(decoder.tagMap, decoder.typeMap)
+        substrate = ints2octs((31, 8, 2, 1, 1, 131, 3, 2, 1, 12))
+        stream = decoder.asStream(substrate, )
 
-        instance.defaultErrorState = decoder.stDumpRawValue
+        decode.defaultErrorState = decoder.stDumpRawValue
 
-        asn1Object, rest = decoder.decode(ints2octs(
-            (31, 8, 2, 1, 1, 131, 3, 2, 1, 12)), decoderInstance=instance)
+        asn1Object = decode(stream)
+        rest = stream.read()
 
         assert isinstance(asn1Object, univ.Any), (
             'Unexpected raw dump type %r' % (asn1Object,))

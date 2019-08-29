@@ -1690,9 +1690,9 @@ decodeStream = Decoder(tagMap, typeMap)
 #:    SequenceOf:
 #:     1 2 3
 #:
-def decode(substrate, asn1Spec=None, decoderInstance=decodeStream, **kwargs):
+def decode(substrate, asn1Spec=None, **kwargs):
     stream = asStream(substrate)
-    value = decoderInstance(stream, asn1Spec, **kwargs)
+    value = decodeStream(stream, asn1Spec, **kwargs)
     return value, stream.read()
 
 
