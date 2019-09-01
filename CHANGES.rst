@@ -1,5 +1,5 @@
 
-Revision 0.4.7, released XX-09-2019
+Revision 0.4.7, released 01-09-2019
 -----------------------------------
 
 - Added `isInconsistent` property to all constructed types. This property

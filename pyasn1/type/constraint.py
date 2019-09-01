@@ -454,7 +454,7 @@ class WithComponentsConstraint(AbstractConstraint):
                 OptionalNamedType('id', Integer()),
                 OptionalNamedType('name', OctetString())
             )
-            withComponents = ConstraintsIntersection(
+            withComponents = ConstraintsUnion(
                 WithComponentsConstraint(
                     ('id', ComponentPresentConstraint()),
                     ('name', ComponentAbsentConstraint())
@@ -471,9 +471,11 @@ class WithComponentsConstraint(AbstractConstraint):
         item['id'] = 1
 
         # This will succeed
+        item.reset()
         item['name'] = 'John'
 
-        # This will fail on encoding
+        # This will fail (on encoding)
+        item.reset()
         descr['id'] = 1
         descr['name'] = 'John'
     """
