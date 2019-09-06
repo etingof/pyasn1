@@ -1730,9 +1730,9 @@ def decodeStream(substrate, asn1Spec=None, **kwargs):
 def decode(substrate, asn1Spec=None, **kwargs):
     # TODO: Temporary solution before merging with upstream
     #   It preserves the original API
-    substrate = BytesIO(substrate)
-    iterator = decodeStream(substrate, asn1Spec=asn1Spec, **kwargs)
-    return next(iterator), substrate.read()
+    substrate = asSeekableStream(substrate)
+    value = _decode(substrate, asn1Spec=asn1Spec, **kwargs)
+    return value, substrate.read()
 
 
 # XXX
