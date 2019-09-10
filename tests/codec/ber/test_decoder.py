@@ -1720,6 +1720,20 @@ class CompressedFilesTestCase(BaseTestCase):
         finally:
             os.remove(path)
 
+    def testZipfileMany(self):
+        _, path = tempfile.mkstemp(suffix=".zip")
+        try:
+            with zipfile.ZipFile(path, "w") as myzip:
+                #for i in range(100):
+                myzip.writestr("data", ints2octs((2, 1, 12, 35, 128, 3, 2, 0, 169, 3, 2, 1, 138, 0, 0)) * 1000)
+
+            with zipfile.ZipFile(path, "r") as myzip:
+                with myzip.open("data", "r") as source:
+                    values = list(decoder.decodeStream(source))
+                    assert values == [12, (1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1)] * 1000
+        finally:
+            os.remove(path)
+
 
 suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])
 
