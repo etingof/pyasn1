@@ -64,7 +64,7 @@ def endOfStream(substrate):
     if isinstance(substrate, BytesIO):
         cp = substrate.tell()
         substrate.seek(0, os.SEEK_END)
-        result = not(substrate.tell() - cp)
+        result = substrate.tell() == cp
         substrate.seek(cp, os.SEEK_SET)
         return result
     else:
@@ -183,7 +183,7 @@ class IntegerDecoder(AbstractSimpleDecoder):
             raise error.PyAsn1Error('Simple tag format expected')
 
         the_bytes = substrate.read(length)
-        if len(the_bytes) == 0:
+        if not the_bytes:
             return self._createComponent(asn1Spec, tagSet, 0, **options)
 
         value = from_bytes(the_bytes, signed=True)
@@ -212,7 +212,7 @@ class BitStringDecoder(AbstractSimpleDecoder):
             return substrateFun(self._createComponent(
                 asn1Spec, tagSet, noValue, **options), substrate, length)
 
-        if endOfStream(substrate) or not length:
+        if not length or endOfStream(substrate):
             raise error.PyAsn1Error('Empty BIT STRING substrate')
 
         if tagSet[0].tagFormat == tag.tagFormatSimple:  # XXX what tag to check?
