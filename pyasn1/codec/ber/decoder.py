@@ -46,13 +46,13 @@ def asSeekableStream(substrate):
     try:
         if _PY2 and isinstance(substrate, file):
             return BytesIO(substrate.read())  # Not optimal for really large files
-        elif not substrate.seekable():
-            return BufferedReader(substrate, _BUFFER_SIZE)
-        else:
+        elif substrate.seekable():
             return substrate
+        else:
+            # TODO: Implement for non-seekable streams
+            raise NotImplementedError("Cannot use non-seekable bit stream: " + substrate.__class__.__name__)
     except AttributeError as f:
-        print(f)
-        raise TypeError("Cannot convert " + substrate.__class__.__name__ + " to seekable bit stream.")
+        raise TypeError("Cannot convert " + substrate.__class__.__name__ + " to a seekable bit stream.")
 
 
 def endOfStream(substrate):
