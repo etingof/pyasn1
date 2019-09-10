@@ -34,10 +34,20 @@ _PY2 = sys.version_info < (3,)
 
 
 def asSeekableStream(substrate):
-    """Convert object to seekable bytes stream.
+    """Convert object to seekable byte-stream.
 
-    :type substrate: Union[bytes, IOBase, univ.OctetString]
-    :rtype: IOBase
+    Parameters
+    ----------
+    substrate: :py:class:`bytes` or :py:class:`io.IOBase` or :py:class:`univ.OctetString`
+
+    Returns
+    -------
+    : :py:class:`io.IOBase`
+
+    Raises
+    ------
+    ~pyasn1.error.PyAsn1Error
+        If the supplied substrate cannot be converted to a seekable stream.
     """
     if isinstance(substrate, bytes):
         return BytesIO(substrate)
@@ -56,10 +66,19 @@ def asSeekableStream(substrate):
 
 
 def endOfStream(substrate):
-    """Check whether we have reached an end of stream.
+    """Check whether we have reached the end of a stream.
 
-    :type substrate: IOBase
-    :rtype: bool
+    Although it is more effective to read and catch exceptions, this
+    function
+
+    Parameters
+    ----------
+    substrate: :py:class:`IOBase`
+        Stream to check
+
+    Returns
+    -------
+    : :py:class:`bool`
     """
     if isinstance(substrate, BytesIO):
         cp = substrate.tell()
@@ -72,9 +91,20 @@ def endOfStream(substrate):
 
 
 def peek(substrate, size=-1):
-    """Peak the stream
+    """Peek the stream.
 
-    :param size:
+    Parameters
+    ----------
+    substrate: :py:class:`IOBase`
+        Stream to read from.
+
+    size: :py:class:`int`
+        How many bytes to peek (-1 = all available)
+
+    Returns
+    -------
+    : :py:class:`bytes` or :py:class:`str`
+        The return type depends on Python major version
     """
     if hasattr(substrate, "peek"):
         return substrate.peek(size)
