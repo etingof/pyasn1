@@ -1715,12 +1715,8 @@ class CompressedFilesTestCase(BaseTestCase):
 
             with zipfile.ZipFile(path, "r") as myzip:
                 with myzip.open("data", "r") as source:
-                    if sys.version_info < (3,):
-                        with self.assertRaises(UnsupportedSubstrateError):
-                            _ = list(decoder.decodeStream(source))
-                    else:
-                        values = list(decoder.decodeStream(source))
-                        assert values == [12, (1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1)]
+                    values = list(decoder.decodeStream(source))
+                    assert values == [12, (1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1)]
         finally:
             os.remove(path)
 
