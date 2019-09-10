@@ -34,6 +34,10 @@ class SubstrateUnderrunError(PyAsn1Error):
     """
 
 
+class UnsupportedSubstrateError(PyAsn1Error):
+    """Unsupported substrate type to parse as ASN.1 data."""
+
+
 class PyAsn1UnicodeError(PyAsn1Error, UnicodeError):
     """Unicode text processing error
 

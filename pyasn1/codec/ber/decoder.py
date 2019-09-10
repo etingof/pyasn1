@@ -13,7 +13,7 @@ from pyasn1 import error
 from pyasn1.codec.ber import eoo
 from pyasn1.compat.integer import from_bytes
 from pyasn1.compat.octets import oct2int, octs2ints, ints2octs, null
-from pyasn1.error import PyAsn1Error
+from pyasn1.error import PyAsn1Error, UnsupportedSubstrateError
 from pyasn1.type import base
 from pyasn1.type import char
 from pyasn1.type import tag
@@ -50,9 +50,9 @@ def asSeekableStream(substrate):
             return substrate
         else:
             # TODO: Implement for non-seekable streams
-            raise NotImplementedError("Cannot use non-seekable bit stream: " + substrate.__class__.__name__)
-    except AttributeError as f:
-        raise TypeError("Cannot convert " + substrate.__class__.__name__ + " to a seekable bit stream.")
+            raise UnsupportedSubstrateError("Cannot use non-seekable bit stream: " + substrate.__class__.__name__)
+    except AttributeError:
+        raise UnsupportedSubstrateError("Cannot convert " + substrate.__class__.__name__ + " to a seekable bit stream.")
 
 
 def endOfStream(substrate):
@@ -1668,7 +1668,10 @@ _decode = Decoder(tagMap, typeMap)
 def decodeStream(substrate, asn1Spec=None, **kwargs):
     """Iterator of objects in a substrate."""
     # TODO: This should become `decode` after API-breaking approved
-    substrate = asSeekableStream(substrate)
+    try:
+        substrate = asSeekableStream(substrate)
+    except TypeError:
+        raise PyAsn1Error
     while True:
         result = _decode(substrate, asn1Spec, **kwargs)
         if result is None:
