@@ -63,7 +63,7 @@ class _CachingStreamWrapper(IOBase):
         read_from_cache = self._cache.read(n)
         if n != -1:
             n -= len(read_from_cache)
-            if n <= 0:
+            if not n:  # 0 bytes left to read
                 return read_from_cache
 
         read_from_raw = self._raw.read(n)
