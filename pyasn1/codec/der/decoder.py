@@ -6,7 +6,7 @@
 #
 from io import BytesIO
 
-from pyasn1.codec.ber.decoder import asSeekableStream
+from pyasn1.codec.ber.decoder import _asSeekableStream
 from pyasn1.codec.cer import decoder
 from pyasn1.type import univ
 
@@ -50,7 +50,7 @@ _decode = Decoder(tagMap, decoder.typeMap)
 def decodeStream(substrate, asn1Spec=None, **kwargs):
     """Iterator of objects in a substrate."""
     # TODO: This should become `decode` after API-breaking approved
-    substrate = asSeekableStream(substrate)
+    substrate = _asSeekableStream(substrate)
     while True:
         result = _decode(substrate, asn1Spec, **kwargs)
         if result is None:
@@ -112,6 +112,6 @@ def decodeStream(substrate, asn1Spec=None, **kwargs):
 def decode(substrate, asn1Spec=None, **kwargs):
     # TODO: Temporary solution before merging with upstream
     #   It preserves the original API
-    substrate = asSeekableStream(substrate)
+    substrate = _asSeekableStream(substrate)
     value = _decode(substrate, asn1Spec=asn1Spec, **kwargs)
     return value, substrate.read()
