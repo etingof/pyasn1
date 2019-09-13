@@ -6,7 +6,7 @@
 #
 import os
 import sys
-from io import BytesIO, BufferedReader, IOBase
+from io import BytesIO, BufferedReader, IOBase, DEFAULT_BUFFER_SIZE
 
 from pyasn1 import debug
 from pyasn1 import error
@@ -22,28 +22,31 @@ from pyasn1.type import univ
 from pyasn1.type import useful
 
 
-__all__ = ['decodeStream']
+__all__ = ['decodeStream', 'decode']
 
 LOG = debug.registerLoggee(__name__, flags=debug.DEBUG_DECODER)
 
 noValue = base.noValue
 
 
-_MAX_BUFFER_SIZE = 1024
 _PY2 = sys.version_info < (3,)
 
 
-class _CachedStreamWrapper(IOBase):
-    """Wrapper around non-seekable streams."""
+class _CachingStreamWrapper(IOBase):
+    """Wrapper around non-seekable streams.
+
+    Note that the implementation is tied to the decoder,
+    not checking for dangerous arguments for the sake
+    of performance.
+    """
     def __init__(self, raw):
         self._raw = raw
         self._cache = BytesIO()
-        self._marked_position_ = 0
+        self._markedPosition_ = 0
 
     def peek(self, n):
-        pos = self._cache.tell()
         result = self.read(n)
-        self._cache.seek(pos, os.SEEK_SET)
+        self._cache.seek(-len(result), os.SEEK_CUR)
         return result
 
     def seekable(self):
@@ -61,37 +64,32 @@ class _CachedStreamWrapper(IOBase):
         return read_from_cache + read_from_raw
 
     @property
-    def _marked_position(self):
+    def _markedPosition(self):
         # This closely corresponds with how _marked_position attribute
         # is manipulated with in Decoder.__call__ and (indefLen)ValueDecoder's
-        return self._marked_position_
+        return self._markedPosition_
 
-    @_marked_position.setter
-    def _marked_position(self, value):
-        self._marked_position_ = value
+    @_markedPosition.setter
+    def _markedPosition(self, value):
+        self._markedPosition_ = value
         self.seek(value)
-        self.reset()
 
-    def tell(self):
-        return self._cache.tell()
-
-    def reset(self):
-        """Keep the buffered data reasonably large.
-
-        Whenever we se _marked_position, we know for sure
-        that we will not return back, and thus it is
-        safe to drop all cached data.
-        """
-        if self._cache.tell() > _MAX_BUFFER_SIZE:
+        # Whenever we set _marked_position, we know for sure
+        # that we will not return back, and thus it is
+        # safe to drop all cached data.
+        if self._cache.tell() > DEFAULT_BUFFER_SIZE:
             current = self._cache.read()
             self._cache.seek(0, os.SEEK_SET)
             self._cache.truncate()
             self._cache.write(current)
             self._cache.seek(0, os.SEEK_SET)
-            self._marked_position_ = 0
+            self._markedPosition_ = 0
+
+    def tell(self):
+        return self._cache.tell()
 
 
-def asSeekableStream(substrate):
+def _asSeekableStream(substrate):
     """Convert object to seekable byte-stream.
 
     Parameters
@@ -113,11 +111,11 @@ def asSeekableStream(substrate):
         return BytesIO(substrate.asOctets())
     try:
         if _PY2 and isinstance(substrate, file):  # Special case (it is not possible to set attributes)
-            return BufferedReader(substrate, _MAX_BUFFER_SIZE)
+            return BufferedReader(substrate)
         elif substrate.seekable():  # Will fail for most invalid types
             return substrate
         else:
-            return _CachedStreamWrapper(substrate)
+            return _CachingStreamWrapper(substrate)
     except AttributeError:
         raise UnsupportedSubstrateError("Cannot convert " + substrate.__class__.__name__ + " to a seekable bit stream.")
 
@@ -839,7 +837,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                                         containerValue):
 
                                     component = decodeFun(
-                                        asSeekableStream(containerValue[pos].asOctets()),
+                                        _asSeekableStream(containerValue[pos].asOctets()),
                                         asn1Spec=openType, **options
                                     )
 
@@ -847,7 +845,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
                             else:
                                 component = decodeFun(
-                                    asSeekableStream(asn1Object.getComponentByPosition(idx).asOctets()),
+                                    _asSeekableStream(asn1Object.getComponentByPosition(idx).asOctets()),
                                     asn1Spec=openType, **options
                                 )
 
@@ -1023,7 +1021,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                                         containerValue):
 
                                     component = decodeFun(
-                                        asSeekableStream(containerValue[pos].asOctets()),
+                                        _asSeekableStream(containerValue[pos].asOctets()),
                                         asn1Spec=openType, **dict(options, allowEoo=True)
                                     )
 
@@ -1031,7 +1029,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
                             else:
                                 component = decodeFun(
-                                    asSeekableStream(asn1Object.getComponentByPosition(idx).asOctets()),
+                                    _asSeekableStream(asn1Object.getComponentByPosition(idx).asOctets()),
                                     asn1Spec=openType, **dict(options, allowEoo=True)
                                 )
 
@@ -1221,7 +1219,7 @@ class AnyDecoder(AbstractSimpleDecoder):
             isUntagged = tagSet != asn1Spec.tagSet
 
         if isUntagged:
-            fullPosition = substrate._marked_position
+            fullPosition = substrate._markedPosition
             currentPosition = substrate.tell()
 
             substrate.seek(fullPosition, os.SEEK_SET)
@@ -1260,7 +1258,7 @@ class AnyDecoder(AbstractSimpleDecoder):
 
         else:
             # TODO: Seems not to be tested
-            fullPosition = substrate._marked_position
+            fullPosition = substrate._markedPosition
             currentPosition = substrate.tell()
 
             substrate.seek(fullPosition, os.SEEK_SET)
@@ -1462,7 +1460,7 @@ class Decoder(object):
         tagCache = self.__tagCache
         tagSetCache = self.__tagSetCache
 
-        substrate._marked_position = substrate.tell()
+        substrate._markedPosition = substrate.tell()
 
         while state is not stStop:
 
@@ -1756,7 +1754,7 @@ def decodeStream(substrate, asn1Spec=None, **kwargs):
     """Iterator of objects in a substrate."""
     # TODO: This should become `decode` after API-breaking approved
     try:
-        substrate = asSeekableStream(substrate)
+        substrate = _asSeekableStream(substrate)
     except TypeError:
         raise PyAsn1Error
     while True:
@@ -1820,7 +1818,7 @@ def decodeStream(substrate, asn1Spec=None, **kwargs):
 def decode(substrate, asn1Spec=None, **kwargs):
     # TODO: Temporary solution before merging with upstream
     #   It preserves the original API
-    substrate = asSeekableStream(substrate)
+    substrate = _asSeekableStream(substrate)
     value = _decode(substrate, asn1Spec=asn1Spec, **kwargs)
     return value, substrate.read()
 
