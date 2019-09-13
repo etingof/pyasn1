@@ -38,6 +38,9 @@ class _CachingStreamWrapper(IOBase):
     Note that the implementation is tied to the decoder,
     not checking for dangerous arguments for the sake
     of performance.
+
+    The read bytes are kept in an internal cache until
+    setting _markedPosition which may reset the cache.
     """
     def __init__(self, raw):
         self._raw = raw
@@ -53,36 +56,42 @@ class _CachingStreamWrapper(IOBase):
         return True
 
     def seek(self, n=-1, whence=os.SEEK_SET):
+        # Note that this not safe for seeking forward.
         return self._cache.seek(n, whence)
 
     def read(self, n=-1):
         read_from_cache = self._cache.read(n)
         if n != -1:
             n -= len(read_from_cache)
+            if n <= 0:
+                return read_from_cache
+
         read_from_raw = self._raw.read(n)
         self._cache.write(read_from_raw)
         return read_from_cache + read_from_raw
 
     @property
     def _markedPosition(self):
-        # This closely corresponds with how _marked_position attribute
-        # is manipulated with in Decoder.__call__ and (indefLen)ValueDecoder's
+        """Position where the currently processed element starts.
+
+        This is used for back-tracking in Decoder.__call__
+        and (indefLen)ValueDecoder and should not be used for other purposes.
+        The client is not supposed to ever seek before this position.
+        """
         return self._markedPosition_
 
     @_markedPosition.setter
     def _markedPosition(self, value):
+        # By setting the value, we ensure we won't seek back before it.
+        # `value` should be the same as the current position
+        # We don't check for this for performance reasons.
         self._markedPosition_ = value
-        self.seek(value)
 
         # Whenever we set _marked_position, we know for sure
         # that we will not return back, and thus it is
         # safe to drop all cached data.
         if self._cache.tell() > DEFAULT_BUFFER_SIZE:
-            current = self._cache.read()
-            self._cache.seek(0, os.SEEK_SET)
-            self._cache.truncate()
-            self._cache.write(current)
-            self._cache.seek(0, os.SEEK_SET)
+            self._cache = BytesIO(self._cache.read())
             self._markedPosition_ = 0
 
     def tell(self):
