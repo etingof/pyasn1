@@ -120,7 +120,7 @@ def _asSeekableStream(substrate):
         raise UnsupportedSubstrateError("Cannot convert " + substrate.__class__.__name__ + " to a seekable bit stream.")
 
 
-def endOfStream(substrate):
+def _endOfStream(substrate):
     """Check whether we have reached the end of a stream.
 
     Although it is more effective to read and catch exceptions, this
@@ -145,7 +145,7 @@ def endOfStream(substrate):
         return not substrate.peek(1)
 
 
-def peek(substrate, size=-1):
+def _peek(substrate, size=-1):
     """Peek the stream.
 
     Parameters
@@ -297,7 +297,7 @@ class BitStringDecoder(AbstractSimpleDecoder):
             return substrateFun(self._createComponent(
                 asn1Spec, tagSet, noValue, **options), substrate, length)
 
-        if not length or endOfStream(substrate):
+        if not length or _endOfStream(substrate):
             raise error.PyAsn1Error('Empty BIT STRING substrate')
 
         if tagSet[0].tagFormat == tag.tagFormatSimple:  # XXX what tag to check?
@@ -1226,7 +1226,7 @@ class AnyDecoder(AbstractSimpleDecoder):
             length += (currentPosition - fullPosition)
 
             if LOG:
-                LOG('decoding as untagged ANY, substrate %s' % debug.hexdump(peek(substrate, length)))
+                LOG('decoding as untagged ANY, substrate %s' % debug.hexdump(_peek(substrate, length)))
 
         if substrateFun:
             return substrateFun(self._createComponent(asn1Spec, tagSet, noValue, **options),
