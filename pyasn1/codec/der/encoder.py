@@ -8,7 +8,7 @@ from pyasn1 import error
 from pyasn1.codec.cer import encoder
 from pyasn1.type import univ
 
-__all__ = ['encode']
+__all__ = ['Encoder', 'encode']
 
 
 class SetEncoder(encoder.SetEncoder):
@@ -42,22 +42,33 @@ class SetEncoder(encoder.SetEncoder):
         else:
             return compType.tagSet
 
-tagMap = encoder.tagMap.copy()
-tagMap.update({
+
+TAG_MAP = encoder.TAG_MAP.copy()
+
+TAG_MAP.update({
     # Set & SetOf have same tags
     univ.Set.tagSet: SetEncoder()
 })
 
-typeMap = encoder.typeMap.copy()
-typeMap.update({
+TYPE_MAP = encoder.TYPE_MAP.copy()
+
+TYPE_MAP.update({
     # Set & SetOf have same tags
     univ.Set.typeId: SetEncoder()
 })
 
 
-class Encoder(encoder.Encoder):
+class SingleItemEncoder(encoder.SingleItemEncoder):
     fixedDefLengthMode = True
     fixedChunkSize = 0
+
+    TAG_MAP = TAG_MAP
+    TYPE_MAP = TYPE_MAP
+
+
+class Encoder(encoder.Encoder):
+    SINGLE_ITEM_ENCODER = SingleItemEncoder
+
 
 #: Turns ASN.1 object into DER octet stream.
 #:
@@ -104,4 +115,4 @@ class Encoder(encoder.Encoder):
 #:    >>> encode(seq)
 #:    b'0\t\x02\x01\x01\x02\x01\x02\x02\x01\x03'
 #:
-encode = Encoder(tagMap, typeMap)
+encode = Encoder()

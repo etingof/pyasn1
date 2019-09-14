@@ -84,7 +84,6 @@ class GeneralizedTimeEncoderTestCase(BaseTestCase):
         else:
             assert 0, 'Missing timezone tolerated'
 
-
     def testDecimalCommaPoint(self):
         try:
             assert encoder.encode(

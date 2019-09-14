@@ -4,59 +4,59 @@
 # Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>
 # License: http://snmplabs.com/pyasn1/license.html
 #
-from io import BytesIO
-
-from pyasn1.codec.ber.decoder import _asSeekableStream
 from pyasn1.codec.cer import decoder
 from pyasn1.type import univ
 
-__all__ = ['decode', 'decodeStream']
+__all__ = ['decode', 'StreamingDecoder']
 
 
-class BitStringDecoder(decoder.BitStringDecoder):
+class BitStringPayloadDecoder(decoder.BitStringPayloadDecoder):
     supportConstructedForm = False
 
 
-class OctetStringDecoder(decoder.OctetStringDecoder):
+class OctetStringPayloadDecoder(decoder.OctetStringPayloadDecoder):
     supportConstructedForm = False
+
 
 # TODO: prohibit non-canonical encoding
-RealDecoder = decoder.RealDecoder
+RealPayloadDecoder = decoder.RealPayloadDecoder
 
-tagMap = decoder.tagMap.copy()
-tagMap.update(
-    {univ.BitString.tagSet: BitStringDecoder(),
-     univ.OctetString.tagSet: OctetStringDecoder(),
-     univ.Real.tagSet: RealDecoder()}
+TAG_MAP = decoder.TAG_MAP.copy()
+TAG_MAP.update(
+    {univ.BitString.tagSet: BitStringPayloadDecoder(),
+     univ.OctetString.tagSet: OctetStringPayloadDecoder(),
+     univ.Real.tagSet: RealPayloadDecoder()}
 )
 
-typeMap = decoder.typeMap.copy()
+TYPE_MAP = decoder.TYPE_MAP.copy()
 
 # Put in non-ambiguous types for faster codec lookup
-for typeDecoder in tagMap.values():
+for typeDecoder in TAG_MAP.values():
     if typeDecoder.protoComponent is not None:
         typeId = typeDecoder.protoComponent.__class__.typeId
-        if typeId is not None and typeId not in typeMap:
-            typeMap[typeId] = typeDecoder
+        if typeId is not None and typeId not in TYPE_MAP:
+            TYPE_MAP[typeId] = typeDecoder
 
 
-class Decoder(decoder.Decoder):
+class SingleItemDecoder(decoder.SingleItemDecoder):
+    __doc__ = decoder.SingleItemDecoder.__doc__
+
+    TAG_MAP = TAG_MAP
+    TYPE_MAP = TYPE_MAP
+
     supportIndefLength = False
 
 
-_decode = Decoder(tagMap, decoder.typeMap)
+class StreamingDecoder(decoder.StreamingDecoder):
+    __doc__ = decoder.StreamingDecoder.__doc__
+
+    SINGLE_ITEM_DECODER = SingleItemDecoder
 
 
-def decodeStream(substrate, asn1Spec=None, **kwargs):
-    """Iterator of objects in a substrate."""
-    # TODO: This should become `decode` after API-breaking approved
-    substrate = _asSeekableStream(substrate)
-    while True:
-        result = _decode(substrate, asn1Spec, **kwargs)
-        if result is None:
-            break
-        yield result
-        # TODO: Check about eoo.endOfOctets?
+class Decoder(decoder.Decoder):
+    __doc__ = decoder.Decoder.__doc__
+
+    STREAMING_DECODER = StreamingDecoder
 
 
 #: Turns DER octet stream into an ASN.1 object.
@@ -109,9 +109,4 @@ def decodeStream(substrate, asn1Spec=None, **kwargs):
 #:    SequenceOf:
 #:     1 2 3
 #:
-def decode(substrate, asn1Spec=None, **kwargs):
-    # TODO: Temporary solution before merging with upstream
-    #   It preserves the original API
-    substrate = _asSeekableStream(substrate)
-    value = _decode(substrate, asn1Spec=asn1Spec, **kwargs)
-    return value, substrate.read()
+decode = Decoder()
