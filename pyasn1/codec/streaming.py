@@ -98,7 +98,10 @@ def asSeekableStream(substrate):
     : :py:class:`~pyasn1.error.PyAsn1Error`
         If the supplied substrate cannot be converted to a seekable stream.
     """
-    if isinstance(substrate, bytes):
+    if isinstance(substrate, io.BytesIO):
+        return substrate
+
+    elif isinstance(substrate, bytes):
         return io.BytesIO(substrate)
 
     elif isinstance(substrate, univ.OctetString):
@@ -225,7 +228,7 @@ def readFromStream(substrate, size=-1, context=None):
         if received is None:  # non-blocking stream can do this
             yield error.SubstrateUnderrunError(context=context)
 
-        elif size != 0 and not received:  # end-of-stream
+        elif not received and size != 0:  # end-of-stream
             raise error.EndOfStreamError(context=context)
 
         elif len(received) < size:
