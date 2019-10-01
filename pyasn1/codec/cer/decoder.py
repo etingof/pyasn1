@@ -5,7 +5,7 @@
 # License: http://snmplabs.com/pyasn1/license.html
 #
 from pyasn1 import error
-from pyasn1.codec import streaming
+from pyasn1.codec.streaming import readFromStream
 from pyasn1.codec.ber import decoder
 from pyasn1.compat.octets import oct2int
 from pyasn1.type import univ
@@ -26,7 +26,7 @@ class BooleanPayloadDecoder(decoder.AbstractSimplePayloadDecoder):
         if length != 1:
             raise error.PyAsn1Error('Not single-octet Boolean payload')
 
-        for chunk in streaming.read(substrate, length, options):
+        for chunk in readFromStream(substrate, length, options):
             if isinstance(chunk, SubstrateUnderrunError):
                 yield chunk
 

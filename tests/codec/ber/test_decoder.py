@@ -142,13 +142,13 @@ class BitStringDecoderTestCase(BaseTestCase):
     def testDefModeChunkedSubst(self):
         assert decoder.decode(
             ints2octs((35, 8, 3, 2, 0, 169, 3, 2, 1, 138)),
-            substrateFun=lambda a, b, c, d: streaming.read(b, c)
+            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)
         ) == (ints2octs((3, 2, 0, 169, 3, 2, 1, 138)), str2octs(''))
 
     def testIndefModeChunkedSubst(self):
         assert decoder.decode(
             ints2octs((35, 128, 3, 2, 0, 169, 3, 2, 1, 138, 0, 0)),
-            substrateFun=lambda a, b, c, d: streaming.read(b, c)
+            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)
         ) == (ints2octs((3, 2, 0, 169, 3, 2, 1, 138, 0, 0)), str2octs(''))
 
     def testTypeChecking(self):
@@ -186,14 +186,14 @@ class OctetStringDecoderTestCase(BaseTestCase):
         assert decoder.decode(
             ints2octs(
                 (36, 23, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120)),
-            substrateFun=lambda a, b, c, d: streaming.read(b, c)
+            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)
         ) == (ints2octs((4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120)), str2octs(''))
 
     def testIndefModeChunkedSubst(self):
         assert decoder.decode(
             ints2octs((36, 128, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111,
                        120, 0, 0)),
-            substrateFun=lambda a, b, c, d: streaming.read(b, c)
+            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)
         ) == (ints2octs(
             (4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120, 0, 0)), str2octs(''))
 
@@ -246,7 +246,7 @@ class ExpTaggedOctetStringDecoderTestCase(BaseTestCase):
     def testDefModeSubst(self):
         assert decoder.decode(
             ints2octs((101, 17, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120)),
-            substrateFun=lambda a, b, c, d: streaming.read(b, c)
+            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)
         ) == (ints2octs((4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120)), str2octs(''))
 
     def testIndefModeSubst(self):
@@ -254,7 +254,7 @@ class ExpTaggedOctetStringDecoderTestCase(BaseTestCase):
             ints2octs((
                       101, 128, 36, 128, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120, 0,
                       0, 0, 0)),
-            substrateFun=lambda a, b, c, d: streaming.read(b, c)
+            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)
         ) == (ints2octs(
             (36, 128, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120, 0, 0, 0, 0)), str2octs(''))
 
@@ -682,13 +682,13 @@ class SequenceDecoderTestCase(BaseTestCase):
     def testWithOptionalAndDefaultedDefModeSubst(self):
         assert decoder.decode(
             ints2octs((48, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1)),
-            substrateFun=lambda a, b, c, d: streaming.read(b, c)
+            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)
         ) == (ints2octs((5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1)), str2octs(''))
 
     def testWithOptionalAndDefaultedIndefModeSubst(self):
         assert decoder.decode(
             ints2octs((48, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)),
-            substrateFun=lambda a, b, c, d: streaming.read(b, c)
+            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)
         ) == (ints2octs(
             (5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)), str2octs(''))
 
@@ -1168,13 +1168,13 @@ class SetDecoderTestCase(BaseTestCase):
     def testWithOptionalAndDefaultedDefModeSubst(self):
         assert decoder.decode(
             ints2octs((49, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1)),
-            substrateFun=lambda a, b, c, d: streaming.read(b, c)
+            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)
         ) == (ints2octs((5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1)), str2octs(''))
 
     def testWithOptionalAndDefaultedIndefModeSubst(self):
         assert decoder.decode(
             ints2octs((49, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)),
-            substrateFun=lambda a, b, c, d: streaming.read(b, c)
+            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)
         ) == (ints2octs(
             (5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)), str2octs(''))
 
@@ -1500,14 +1500,14 @@ class AnyDecoderTestCase(BaseTestCase):
         assert decoder.decode(
             ints2octs((4, 3, 102, 111, 120)),
             asn1Spec=self.s,
-            substrateFun=lambda a, b, c, d: streaming.read(b, c)
+            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)
         ) == (ints2octs((4, 3, 102, 111, 120)), str2octs(''))
 
     def testTaggedExSubst(self):
         assert decoder.decode(
             ints2octs((164, 5, 4, 3, 102, 111, 120)),
             asn1Spec=self.s,
-            substrateFun=lambda a, b, c, d: streaming.read(b, c)
+            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)
         ) == (ints2octs((164, 5, 4, 3, 102, 111, 120)), str2octs(''))
 
 
