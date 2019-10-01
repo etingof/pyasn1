@@ -1471,6 +1471,9 @@ for typeDecoder in TAG_MAP.values():
  stStop) = [x for x in range(10)]
 
 
+EOO_SENTINEL = ints2octs((0, 0))
+
+
 class SingleItemDecoder(object):
     defaultErrorState = stErrorCondition
     #defaultErrorState = stDumpRawValue
@@ -1487,7 +1490,6 @@ class SingleItemDecoder(object):
         # Tag & TagSet objects caches
         self.__tagCache = {}
         self.__tagSetCache = {}
-        self.__eooSentinel = ints2octs((0, 0))
 
     def __call__(self, substrate, asn1Spec=None,
                  tagSet=None, length=None, state=stDecodeTag,
@@ -1508,7 +1510,7 @@ class SingleItemDecoder(object):
                 if isinstance(eoo_candidate, SubstrateUnderrunError):
                     yield eoo_candidate
 
-            if eoo_candidate == self.__eooSentinel:
+            if eoo_candidate == EOO_SENTINEL:
                 if LOG:
                     LOG('end-of-octets sentinel found')
                 yield eoo.endOfOctets
