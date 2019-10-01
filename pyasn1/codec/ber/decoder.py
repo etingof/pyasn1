@@ -8,8 +8,11 @@ import os
 
 from pyasn1 import debug
 from pyasn1 import error
-from pyasn1.codec import streaming
 from pyasn1.codec.ber import eoo
+from pyasn1.codec.streaming import asSeekableStream
+from pyasn1.codec.streaming import isEndOfStream
+from pyasn1.codec.streaming import peekIntoStream
+from pyasn1.codec.streaming import readFromStream
 from pyasn1.compat.integer import from_bytes
 from pyasn1.compat.octets import oct2int, octs2ints, ints2octs, null
 from pyasn1.error import PyAsn1Error
@@ -19,7 +22,6 @@ from pyasn1.type import tag
 from pyasn1.type import tagmap
 from pyasn1.type import univ
 from pyasn1.type import useful
-
 
 __all__ = ['StreamingDecoder', 'Decoder', 'decode']
 
@@ -64,7 +66,7 @@ class AbstractPayloadDecoder(object):
 class AbstractSimplePayloadDecoder(AbstractPayloadDecoder):
     @staticmethod
     def substrateCollector(asn1Object, substrate, length, options):
-        for chunk in streaming.read(substrate, length, options):
+        for chunk in readFromStream(substrate, length, options):
             yield chunk
 
     def _createComponent(self, asn1Spec, tagSet, value, **options):
@@ -112,13 +114,11 @@ class RawPayloadDecoder(AbstractSimplePayloadDecoder):
             for value in decodeFun(
                     substrate, asn1Spec, tagSet, length,
                     allowEoo=True, **options):
+
                 if value is eoo.endOfOctets:
-                    break
+                    return
 
                 yield value
-
-            if value is eoo.endOfOctets:
-                break
 
 
 rawPayloadDecoder = RawPayloadDecoder()
@@ -135,7 +135,7 @@ class IntegerPayloadDecoder(AbstractSimplePayloadDecoder):
         if tagSet[0].tagFormat != tag.tagFormatSimple:
             raise error.PyAsn1Error('Simple tag format expected')
 
-        for chunk in streaming.read(substrate, length, options):
+        for chunk in readFromStream(substrate, length, options):
             if isinstance(chunk, SubstrateUnderrunError):
                 yield chunk
 
@@ -175,7 +175,7 @@ class BitStringPayloadDecoder(AbstractSimplePayloadDecoder):
         if not length:
             raise error.PyAsn1Error('Empty BIT STRING substrate')
 
-        for chunk in streaming.isEndOfStream(substrate):
+        for chunk in isEndOfStream(substrate):
             if isinstance(chunk, SubstrateUnderrunError):
                 yield chunk
 
@@ -184,7 +184,7 @@ class BitStringPayloadDecoder(AbstractSimplePayloadDecoder):
 
         if tagSet[0].tagFormat == tag.tagFormatSimple:  # XXX what tag to check?
 
-            for trailingBits in streaming.read(substrate, 1, options):
+            for trailingBits in readFromStream(substrate, 1, options):
                 if isinstance(trailingBits, SubstrateUnderrunError):
                     yield trailingBits
 
@@ -194,7 +194,7 @@ class BitStringPayloadDecoder(AbstractSimplePayloadDecoder):
                     'Trailing bits overflow %s' % trailingBits
                 )
 
-            for chunk in streaming.read(substrate, length - 1, options):
+            for chunk in readFromStream(substrate, length - 1, options):
                 if isinstance(chunk, SubstrateUnderrunError):
                     yield chunk
 
@@ -263,11 +263,11 @@ class BitStringPayloadDecoder(AbstractSimplePayloadDecoder):
                     substrate, self.protoComponent, substrateFun=substrateFun,
                     allowEoo=True, **options):
 
-                if isinstance(component, SubstrateUnderrunError):
-                    yield component
-
                 if component is eoo.endOfOctets:
                     break
+
+                if isinstance(component, SubstrateUnderrunError):
+                    yield component
 
             if component is eoo.endOfOctets:
                 break
@@ -303,7 +303,7 @@ class OctetStringPayloadDecoder(AbstractSimplePayloadDecoder):
             return
 
         if tagSet[0].tagFormat == tag.tagFormatSimple:  # XXX what tag to check?
-            for chunk in streaming.read(substrate, length, options):
+            for chunk in readFromStream(substrate, length, options):
                 if isinstance(chunk, SubstrateUnderrunError):
                     yield chunk
 
@@ -383,7 +383,7 @@ class NullPayloadDecoder(AbstractSimplePayloadDecoder):
         if tagSet[0].tagFormat != tag.tagFormatSimple:
             raise error.PyAsn1Error('Simple tag format expected')
 
-        for chunk in streaming.read(substrate, length, options):
+        for chunk in readFromStream(substrate, length, options):
             if isinstance(chunk, SubstrateUnderrunError):
                 yield chunk
 
@@ -405,7 +405,7 @@ class ObjectIdentifierPayloadDecoder(AbstractSimplePayloadDecoder):
         if tagSet[0].tagFormat != tag.tagFormatSimple:
             raise error.PyAsn1Error('Simple tag format expected')
 
-        for chunk in streaming.read(substrate, length, options):
+        for chunk in readFromStream(substrate, length, options):
             if isinstance(chunk, SubstrateUnderrunError):
                 yield chunk
 
@@ -465,7 +465,7 @@ class RealPayloadDecoder(AbstractSimplePayloadDecoder):
         if tagSet[0].tagFormat != tag.tagFormatSimple:
             raise error.PyAsn1Error('Simple tag format expected')
 
-        for chunk in streaming.read(substrate, length, options):
+        for chunk in readFromStream(substrate, length, options):
             if isinstance(chunk, SubstrateUnderrunError):
                 yield chunk
 
@@ -663,7 +663,7 @@ class ConstructedPayloadDecoderBase(AbstractConstructedPayloadDecoder):
 
             if substrate.tell() < original_position + length:
                 if LOG:
-                    for trailing in streaming.read(substrate, context=options):
+                    for trailing in readFromStream(substrate, context=options):
                         if isinstance(trailing, SubstrateUnderrunError):
                             yield trailing
 
@@ -805,7 +805,7 @@ class ConstructedPayloadDecoderBase(AbstractConstructedPayloadDecoder):
                                 for pos, containerElement in enumerate(
                                         containerValue):
 
-                                    stream = streaming.asSeekableStream(containerValue[pos].asOctets())
+                                    stream = asSeekableStream(containerValue[pos].asOctets())
 
                                     for component in decodeFun(stream, asn1Spec=openType, **options):
                                         if isinstance(component, SubstrateUnderrunError):
@@ -814,7 +814,7 @@ class ConstructedPayloadDecoderBase(AbstractConstructedPayloadDecoder):
                                     containerValue[pos] = component
 
                             else:
-                                stream = streaming.asSeekableStream(asn1Object.getComponentByPosition(idx).asOctets())
+                                stream = asSeekableStream(asn1Object.getComponentByPosition(idx).asOctets())
 
                                 for component in decodeFun(stream, asn1Spec=openType, **options):
                                     if isinstance(component, SubstrateUnderrunError):
@@ -1023,7 +1023,7 @@ class ConstructedPayloadDecoderBase(AbstractConstructedPayloadDecoder):
                                 for pos, containerElement in enumerate(
                                         containerValue):
 
-                                    stream = streaming.asSeekableStream(containerValue[pos].asOctets())
+                                    stream = asSeekableStream(containerValue[pos].asOctets())
 
                                     for component in decodeFun(stream, asn1Spec=openType,
                                                                **dict(options, allowEoo=True)):
@@ -1036,7 +1036,7 @@ class ConstructedPayloadDecoderBase(AbstractConstructedPayloadDecoder):
                                     containerValue[pos] = component
 
                             else:
-                                stream = streaming.asSeekableStream(asn1Object.getComponentByPosition(idx).asOctets())
+                                stream = asSeekableStream(asn1Object.getComponentByPosition(idx).asOctets())
                                 for component in decodeFun(stream, asn1Spec=openType,
                                                            **dict(options, allowEoo=True)):
                                     if isinstance(component, SubstrateUnderrunError):
@@ -1257,7 +1257,7 @@ class AnyPayloadDecoder(AbstractSimplePayloadDecoder):
             length += currentPosition - fullPosition
 
             if LOG:
-                for chunk in streaming.peek(substrate, length):
+                for chunk in peekIntoStream(substrate, length):
                     if isinstance(chunk, SubstrateUnderrunError):
                         yield chunk
                 LOG('decoding as untagged ANY, substrate '
@@ -1271,7 +1271,7 @@ class AnyPayloadDecoder(AbstractSimplePayloadDecoder):
 
             return
 
-        for chunk in streaming.read(substrate, length, options):
+        for chunk in readFromStream(substrate, length, options):
             if isinstance(chunk, SubstrateUnderrunError):
                 yield chunk
 
@@ -1303,7 +1303,7 @@ class AnyPayloadDecoder(AbstractSimplePayloadDecoder):
             currentPosition = substrate.tell()
 
             substrate.seek(fullPosition, os.SEEK_SET)
-            for chunk in streaming.read(substrate, currentPosition - fullPosition, options):
+            for chunk in readFromStream(substrate, currentPosition - fullPosition, options):
                 if isinstance(chunk, SubstrateUnderrunError):
                     yield chunk
 
@@ -1504,7 +1504,7 @@ class SingleItemDecoder(object):
         # Look for end-of-octets sentinel
         if allowEoo and self.supportIndefLength:
 
-            for eoo_candidate in streaming.read(substrate, 2, options):
+            for eoo_candidate in readFromStream(substrate, 2, options):
                 if isinstance(eoo_candidate, SubstrateUnderrunError):
                     yield eoo_candidate
 
@@ -1532,7 +1532,7 @@ class SingleItemDecoder(object):
                 # Decode tag
                 isShortTag = True
 
-                for firstByte in streaming.read(substrate, 1, options):
+                for firstByte in readFromStream(substrate, 1, options):
                     if isinstance(firstByte, SubstrateUnderrunError):
                         yield firstByte
 
@@ -1553,7 +1553,7 @@ class SingleItemDecoder(object):
                         tagId = 0
 
                         while True:
-                            for integerByte in streaming.read(substrate, 1, options):
+                            for integerByte in readFromStream(substrate, 1, options):
                                 if isinstance(integerByte, SubstrateUnderrunError):
                                     yield integerByte
 
@@ -1600,7 +1600,7 @@ class SingleItemDecoder(object):
 
             if state is stDecodeLength:
                 # Decode length
-                for firstOctet in streaming.read(substrate, 1, options):
+                for firstOctet in readFromStream(substrate, 1, options):
                     if isinstance(firstOctet, SubstrateUnderrunError):
                         yield firstOctet
 
@@ -1612,7 +1612,7 @@ class SingleItemDecoder(object):
                 elif firstOctet > 128:
                     size = firstOctet & 0x7F
                     # encoded in size bytes
-                    for encodedLength in streaming.read(substrate, size, options):
+                    for encodedLength in readFromStream(substrate, size, options):
                         if isinstance(encodedLength, SubstrateUnderrunError):
                             yield encodedLength
                     encodedLength = list(encodedLength)
@@ -1901,7 +1901,7 @@ class StreamingDecoder(object):
     SINGLE_ITEM_DECODER = SingleItemDecoder
 
     def __init__(self, substrate, asn1Spec=None, **kwargs):
-        self._substrate = streaming.asSeekableStream(substrate)
+        self._substrate = asSeekableStream(substrate)
         self._asn1Spec = asn1Spec
         self._options = kwargs
         self._decoder = self.SINGLE_ITEM_DECODER()
@@ -1912,7 +1912,7 @@ class StreamingDecoder(object):
                     self._substrate, self._asn1Spec, **self._options):
                 yield asn1Object
 
-            for chunk in streaming.isEndOfStream(self._substrate):
+            for chunk in isEndOfStream(self._substrate):
                 if isinstance(chunk, SubstrateUnderrunError):
                     yield
 
@@ -1988,14 +1988,14 @@ class Decoder(object):
             1 2 3
 
         """
-        substrate = streaming.asSeekableStream(substrate)
+        substrate = asSeekableStream(substrate)
 
         for asn1Object in cls.STREAMING_DECODER(substrate, asn1Spec, **kwargs):
             if isinstance(asn1Object, SubstrateUnderrunError):
                 raise error.SubstrateUnderrunError('Short substrate on input')
 
             try:
-                tail = next(streaming.read(substrate))
+                tail = next(readFromStream(substrate))
 
             except error.EndOfStreamError:
                 tail = null

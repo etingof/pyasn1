@@ -154,8 +154,8 @@ def isEndOfStream(substrate):
         yield not received
 
 
-def peek(substrate, size=-1):
-    """Peek the stream.
+def peekIntoStream(substrate, size=-1):
+    """Peek into stream.
 
     Parameters
     ----------
@@ -183,14 +183,14 @@ def peek(substrate, size=-1):
     else:
         current_position = substrate.tell()
         try:
-            for chunk in read(substrate, size):
+            for chunk in readFromStream(substrate, size):
                 yield chunk
 
         finally:
             substrate.seek(current_position)
 
 
-def read(substrate, size=-1, context=None):
+def readFromStream(substrate, size=-1, context=None):
     """Read from the stream.
 
     Parameters
