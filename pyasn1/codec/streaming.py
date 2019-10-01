@@ -209,7 +209,7 @@ def read(substrate, size=-1, context=None):
 
     Yields
     ------
-    : :py:class:`bytes` or :py:class:`str` or None
+    : :py:class:`bytes` or :py:class:`str` or :py:class:`SubstrateUnderrunError`
         Returns read data or :py:class:`~pyasn1.error.SubstrateUnderrunError`
         object if no `size` bytes is readily available in the stream. The
         data type depends on Python major version
