@@ -1118,8 +1118,6 @@ class ChoicePayloadDecoder(ConstructedPayloadDecoderBase):
                      tagSet=None, length=None, state=None,
                      decodeFun=None, substrateFun=None,
                      **options):
-        # head = popSubstream(substrate, length)
-
         if asn1Spec is None:
             asn1Object = self.protoComponent.clone(tagSet=tagSet)
 
@@ -1900,17 +1898,16 @@ class StreamingDecoder(object):
          1 2 3
     """
 
-    SINGLE_ITEM_DECODER = SingleItemDecoder
+    SINGLE_ITEM_DECODER = SingleItemDecoder()
 
     def __init__(self, substrate, asn1Spec=None, **kwargs):
         self._substrate = asSeekableStream(substrate)
         self._asn1Spec = asn1Spec
         self._options = kwargs
-        self._decoder = self.SINGLE_ITEM_DECODER()
 
     def __iter__(self):
         while True:
-            for asn1Object in self._decoder(
+            for asn1Object in self.SINGLE_ITEM_DECODER(
                     self._substrate, self._asn1Spec, **self._options):
                 yield asn1Object
 
