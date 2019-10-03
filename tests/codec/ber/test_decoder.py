@@ -1611,11 +1611,11 @@ class ErrorOnDecodingTestCase(BaseTestCase):
         substrate = ints2octs((31, 8, 2, 1, 1, 131, 3, 2, 1, 12))
         stream = streaming.asSeekableStream(substrate)
 
-        class StateMachine(decoder.SingleItemDecoder):
+        class SingleItemEncoder(decoder.SingleItemDecoder):
             defaultErrorState = decoder.stDumpRawValue
 
         class StreamingDecoder(decoder.StreamingDecoder):
-            SINGLE_ITEM_DECODER = StateMachine
+            SINGLE_ITEM_DECODER = SingleItemEncoder()
 
         class OneShotDecoder(decoder.Decoder):
             STREAMING_DECODER = StreamingDecoder
