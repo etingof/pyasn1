@@ -21,8 +21,10 @@ from pyasn1.type import error
 class SingleValueConstraintTestCase(BaseTestCase):
     def setUp(self):
         BaseTestCase.setUp(self)
-        self.c1 = constraint.SingleValueConstraint(1, 2)
-        self.c2 = constraint.SingleValueConstraint(3, 4)
+        self.v1 = 1, 2
+        self.v2 = 3, 4
+        self.c1 = constraint.SingleValueConstraint(*self.v1)
+        self.c2 = constraint.SingleValueConstraint(*self.v2)
 
     def testCmp(self):
         assert self.c1 == self.c1, 'comparison fails'
@@ -44,6 +46,27 @@ class SingleValueConstraintTestCase(BaseTestCase):
             pass
         else:
             assert 0, 'constraint check fails'
+
+    def testContains(self):
+        for v in self.v1:
+            assert v in self.c1
+            assert v not in self.c2
+
+        for v in self.v2:
+            assert v in self.c2
+            assert v not in self.c1
+
+    def testIter(self):
+        assert set(self.v1) == set(self.c1)
+        assert set(self.v2) == set(self.c2)
+
+    def testSub(self):
+        subconst = self.c1 - constraint.SingleValueConstraint(self.v1[0])
+        assert list(subconst) == [self.v1[1]]
+
+    def testAdd(self):
+        superconst = self.c1 + self.c2
+        assert set(superconst) == set(self.v1 + self.v2)
 
 
 class ContainedSubtypeConstraintTestCase(BaseTestCase):
@@ -110,20 +133,25 @@ class ValueSizeConstraintTestCase(BaseTestCase):
 
 class PermittedAlphabetConstraintTestCase(SingleValueConstraintTestCase):
     def setUp(self):
-        self.c1 = constraint.PermittedAlphabetConstraint('A', 'B', 'C')
-        self.c2 = constraint.PermittedAlphabetConstraint('DEF')
+        self.v1 = 'A', 'B'
+        self.v2 = 'C', 'D'
+        self.c1 = constraint.PermittedAlphabetConstraint(*self.v1)
+        self.c2 = constraint.PermittedAlphabetConstraint(*self.v2)
 
     def testGoodVal(self):
         try:
             self.c1('A')
+
         except error.ValueConstraintError:
             assert 0, 'constraint check fails'
 
     def testBadVal(self):
         try:
             self.c1('E')
+
         except error.ValueConstraintError:
             pass
+
         else:
             assert 0, 'constraint check fails'
 

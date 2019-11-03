@@ -2,7 +2,9 @@
 Revision 0.4.8, released XX-09-2019
 -----------------------------------
 
-No changes yet.
+- Added ability of combining `SingleValueConstraint` and
+  `PermittedAlphabetConstraint` objects into one for proper modeling
+  `FROM ... EXCEPT ...` ASN.1 clause.
 
 Revision 0.4.7, released 01-09-2019
 -----------------------------------
