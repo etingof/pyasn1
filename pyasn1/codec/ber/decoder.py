@@ -139,10 +139,11 @@ class IntegerPayloadDecoder(AbstractSimplePayloadDecoder):
             if isinstance(chunk, SubstrateUnderrunError):
                 yield chunk
 
-        if not chunk:
-            yield self._createComponent(asn1Spec, tagSet, 0, **options)
+        if chunk:
+            value = from_bytes(chunk, signed=True)
 
-        value = from_bytes(chunk, signed=True)
+        else:
+            value = 0
 
         yield self._createComponent(asn1Spec, tagSet, value, **options)
 
