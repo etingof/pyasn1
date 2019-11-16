@@ -2,27 +2,13 @@ language: python
 cache: pip
 matrix:
   include:
-  - os: linux
-    dist: trusty
-    python: '2.7'
-  - os: linux
-    dist: trusty
-    python: '3.5'
-  - os: linux
-    dist: trusty
-    python: '3.6'
-  - os: linux
-    dist: xenial
-    python: '3.7'
-  - os: linux
-    dist: trusty
-    python: 'nightly'
-  - os: linux
-    dist: trusty
-    python: 'pypy'
-  - os: linux
-    dist: trusty
-    python: 'pypy3'
+  - python: '2.7'
+  - python: '3.5'
+  - python: '3.6'
+  - python: '3.7'
+  - python: 'nightly'
+  - python: 'pypy'
+  - python: 'pypy3'
 install:
   - pip install codecov
   - pip install -r requirements.txt -r devel-requirements.txt
