@@ -19,6 +19,7 @@ script:
   - if [[ $TRAVIS_PYTHON_VERSION == '3.5' ]]; then (make -C docs html); fi
   - if [[ $TRAVIS_PYTHON_VERSION == '3.6' ]]; then (make -C docs html); fi
   - if [[ $TRAVIS_PYTHON_VERSION == '3.7' ]]; then (make -C docs html); fi
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.8' ]]; then (make -C docs html); fi
   - if [[ $TRAVIS_PYTHON_VERSION == 'nightly' ]]; then (make -C docs html); fi
 after_success:
   - PYTHONPATH=.:$PYTHONPATH coverage run --omit=*test* tests/__main__.py
