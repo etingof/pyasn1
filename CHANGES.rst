@@ -1,5 +1,5 @@
 
-Revision 0.4.8, released XX-09-2019
+Revision 0.4.8, released 16-11-2019
 -----------------------------------
 
 - Added ability of combining `SingleValueConstraint` and
