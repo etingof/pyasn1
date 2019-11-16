@@ -7,12 +7,7 @@
 import math
 import pickle
 import sys
-
-try:
-    import unittest2 as unittest
-
-except ImportError:
-    import unittest
+import unittest
 
 from tests.base import BaseTestCase
 
@@ -278,9 +273,8 @@ class IntegerTestCase(BaseTestCase):
     def testCeil(self):
         assert math.ceil(univ.Integer(1)) == 1, '__ceil__() fails'
 
-    if sys.version_info[0:2] > (2, 5):
-        def testTrunc(self):
-            assert math.trunc(univ.Integer(1)) == 1, '__trunc__() fails'
+    def testTrunc(self):
+        assert math.trunc(univ.Integer(1)) == 1, '__trunc__() fails'
 
     def testPrettyIn(self):
         assert univ.Integer('3') == 3, 'prettyIn() fails'
@@ -437,9 +431,8 @@ class BitStringTestCase(BaseTestCase):
         assert self.b.clone("'A98A'H")[1] == 0
         assert self.b.clone("'A98A'H")[2] == 1
 
-    if sys.version_info[:2] > (2, 4):
-        def testReverse(self):
-            assert list(reversed(univ.BitString([0, 0, 1]))) == list(univ.BitString([1, 0, 0]))
+    def testReverse(self):
+        assert list(reversed(univ.BitString([0, 0, 1]))) == list(univ.BitString([1, 0, 0]))
 
     def testAsOctets(self):
         assert self.b.clone(hexValue='A98A').asOctets() == ints2octs((0xa9, 0x8a)), 'testAsOctets() fails'
@@ -539,9 +532,8 @@ class OctetStringWithUnicodeMixIn(object):
         assert self.encodedPythonString in s
         assert self.encodedPythonString * 2 not in s
 
-    if sys.version_info[:2] > (2, 4):
-       def testReverse(self):
-           assert list(reversed(univ.OctetString(self.encodedPythonString))) == list(reversed(self.encodedPythonString))
+    def testReverse(self):
+        assert list(reversed(univ.OctetString(self.encodedPythonString))) == list(reversed(self.encodedPythonString))
 
 
 class OctetStringWithAsciiTestCase(OctetStringWithUnicodeMixIn, BaseTestCase):
@@ -860,9 +852,8 @@ class RealTestCase(BaseTestCase):
     def testCeil(self):
         assert math.ceil(univ.Real(1.2)) == 2.0, '__ceil__() fails'
 
-    if sys.version_info[0:2] > (2, 5):
-        def testTrunc(self):
-            assert math.trunc(univ.Real(1.1)) == 1.0, '__trunc__() fails'
+    def testTrunc(self):
+        assert math.trunc(univ.Real(1.1)) == 1.0, '__trunc__() fails'
 
     def testTag(self):
         assert univ.Real().tagSet == tag.TagSet(

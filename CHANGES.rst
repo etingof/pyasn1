@@ -2,7 +2,7 @@
 Revision 0.5.0, released XX-11-2019
 -----------------------------------
 
-No changes yet
+- Removed support for EOL Pythons 2.4, 2.5, 2.6, 3.2 and 3.3.
 
 Revision 0.4.8, released 16-11-2019
 -----------------------------------
