@@ -480,7 +480,7 @@ class RealDecoderTestCase(BaseTestCase):
 
 class UniversalStringDecoderTestCase(BaseTestCase):
     def testDecoder(self):
-        assert decoder.decode(ints2octs((28, 12, 0, 0, 0, 97, 0, 0, 0, 98, 0, 0, 0, 99))) == (char.UniversalString(sys.version_info[0] == 3 and 'abc' or unicode('abc')), null)
+        assert decoder.decode(ints2octs((28, 12, 0, 0, 0, 97, 0, 0, 0, 98, 0, 0, 0, 99))) == (char.UniversalString(sys.version_info[0] >= 3 and 'abc' or unicode('abc')), null)
 
 
 class BMPStringDecoderTestCase(BaseTestCase):
