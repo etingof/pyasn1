@@ -181,11 +181,13 @@ class SingleItemDecoder(object):
 
 
 class Decoder(object):
-    SINGLE_ITEM_DECODER = SingleItemDecoder()
+    SINGLE_ITEM_DECODER = SingleItemDecoder
 
-    @classmethod
-    def __call__(cls, pyObject, asn1Spec=None, **kwargs):
-        return cls.SINGLE_ITEM_DECODER(pyObject, asn1Spec=asn1Spec, **kwargs)
+    def __init__(self, **options):
+        self._singleItemDecoder = self.SINGLE_ITEM_DECODER()
+
+    def __call__(self, pyObject, asn1Spec=None, **kwargs):
+        return self._singleItemDecoder(pyObject, asn1Spec=asn1Spec, **kwargs)
 
 
 #: Turns Python objects of built-in types into ASN.1 objects.

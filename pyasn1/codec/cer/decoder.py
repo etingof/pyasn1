@@ -80,7 +80,7 @@ class SingleItemDecoder(decoder.SingleItemDecoder):
 class StreamingDecoder(decoder.StreamingDecoder):
     __doc__ = decoder.StreamingDecoder.__doc__
 
-    SINGLE_ITEM_DECODER = SingleItemDecoder()
+    SINGLE_ITEM_DECODER = SingleItemDecoder
 
 
 class Decoder(decoder.Decoder):

@@ -67,7 +67,7 @@ class SingleItemEncoder(encoder.SingleItemEncoder):
 
 
 class Encoder(encoder.Encoder):
-    SINGLE_ITEM_ENCODER = SingleItemEncoder()
+    SINGLE_ITEM_ENCODER = SingleItemEncoder
 
 
 #: Turns ASN.1 object into DER octet stream.

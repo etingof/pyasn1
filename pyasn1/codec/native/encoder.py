@@ -225,11 +225,14 @@ class SingleItemEncoder(object):
 
 
 class Encoder(object):
-    SINGLE_ITEM_ENCODER = SingleItemEncoder()
+    SINGLE_ITEM_ENCODER = SingleItemEncoder
 
-    @classmethod
-    def __call__(cls, pyObject, asn1Spec=None, **kwargs):
-        return cls.SINGLE_ITEM_ENCODER(pyObject, asn1Spec=asn1Spec, **kwargs)
+    def __init__(self, **kwargs):
+        self._singleItemEncoder = self.SINGLE_ITEM_ENCODER()
+
+    def __call__(self, pyObject, asn1Spec=None, **options):
+        return self._singleItemEncoder(
+            pyObject, asn1Spec=asn1Spec, **options)
 
 
 #: Turns ASN.1 object into a Python built-in type object(s).

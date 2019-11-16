@@ -1615,7 +1615,7 @@ class ErrorOnDecodingTestCase(BaseTestCase):
             defaultErrorState = decoder.stDumpRawValue
 
         class StreamingDecoder(decoder.StreamingDecoder):
-            SINGLE_ITEM_DECODER = SingleItemEncoder()
+            SINGLE_ITEM_DECODER = SingleItemEncoder
 
         class OneShotDecoder(decoder.Decoder):
             STREAMING_DECODER = StreamingDecoder

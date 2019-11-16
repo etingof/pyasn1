@@ -846,11 +846,14 @@ class SingleItemEncoder(object):
 
 
 class Encoder(object):
-    SINGLE_ITEM_ENCODER = SingleItemEncoder()
+    SINGLE_ITEM_ENCODER = SingleItemEncoder
 
-    @classmethod
-    def __call__(cls, pyObject, asn1Spec=None, **options):
-        return cls.SINGLE_ITEM_ENCODER(pyObject, asn1Spec=asn1Spec, **options)
+    def __init__(self, **options):
+        self._singleItemEncoder = self.SINGLE_ITEM_ENCODER()
+
+    def __call__(self, pyObject, asn1Spec=None, **options):
+        return self._singleItemEncoder(
+            pyObject, asn1Spec=asn1Spec, **options)
 
 
 #: Turns ASN.1 object into BER octet stream.

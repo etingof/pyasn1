@@ -1899,16 +1899,17 @@ class StreamingDecoder(object):
          1 2 3
     """
 
-    SINGLE_ITEM_DECODER = SingleItemDecoder()
+    SINGLE_ITEM_DECODER = SingleItemDecoder
 
-    def __init__(self, substrate, asn1Spec=None, **kwargs):
+    def __init__(self, substrate, asn1Spec=None, **options):
+        self._singleItemDecoder = self.SINGLE_ITEM_DECODER()
         self._substrate = asSeekableStream(substrate)
         self._asn1Spec = asn1Spec
-        self._options = kwargs
+        self._options = options
 
     def __iter__(self):
         while True:
-            for asn1Object in self.SINGLE_ITEM_DECODER(
+            for asn1Object in self._singleItemDecoder(
                     self._substrate, self._asn1Spec, **self._options):
                 yield asn1Object
 
@@ -1990,7 +1991,10 @@ class Decoder(object):
         """
         substrate = asSeekableStream(substrate)
 
-        for asn1Object in cls.STREAMING_DECODER(substrate, asn1Spec, **kwargs):
+        streamingDecoder = cls.STREAMING_DECODER(
+            substrate, asn1Spec, **kwargs)
+
+        for asn1Object in streamingDecoder:
             if isinstance(asn1Object, SubstrateUnderrunError):
                 raise error.SubstrateUnderrunError('Short substrate on input')
 
