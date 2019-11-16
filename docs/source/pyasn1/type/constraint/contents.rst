@@ -32,6 +32,7 @@ they get attached to ASN.1 type object at a *.subtypeSpec* attribute.
    /pyasn1/type/constraint/valuerange
    /pyasn1/type/constraint/valuesize
    /pyasn1/type/constraint/permittedalphabet
+   /pyasn1/type/constraint/withcomponents
 
 
 Logic operations on constraints

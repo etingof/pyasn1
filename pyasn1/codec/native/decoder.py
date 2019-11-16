@@ -195,7 +195,7 @@ class Decoder(object):
 #:
 #: Raises
 #: ------
-#: :py:class:`~pyasn1.error.PyAsn1Error`
+#: ~pyasn1.error.PyAsn1Error
 #:     On decoding errors
 #:
 #: Examples

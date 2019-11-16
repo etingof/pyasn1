@@ -567,6 +567,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
             return asn1Object, tail
 
         asn1Object = asn1Spec.clone()
+        asn1Object.clear()
 
         if asn1Spec.typeId in (univ.Sequence.typeId, univ.Set.typeId):
 
@@ -637,7 +638,10 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                     openTypes = options.get('openTypes', {})
 
                     if LOG:
-                        LOG('using open types map: %r' % openTypes)
+                        LOG('user-specified open types map:')
+
+                        for k, v in openTypes.items():
+                            LOG('%s -> %r' % (k, v))
 
                     if openTypes or options.get('decodeOpenTypes', False):
 
@@ -657,6 +661,17 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
                             except KeyError:
 
+                                if LOG:
+                                    LOG('default open types map of component '
+                                        '"%s.%s" governed by component "%s.%s"'
+                                        ':' % (asn1Object.__class__.__name__,
+                                               namedType.name,
+                                               asn1Object.__class__.__name__,
+                                               namedType.openType.name))
+
+                                    for k, v in namedType.openType.items():
+                                        LOG('%s -> %r' % (k, v))
+
                                 try:
                                     openType = namedType.openType[governingValue]
 
@@ -670,18 +685,37 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                                 LOG('resolved open type %r by governing '
                                     'value %r' % (openType, governingValue))
 
-                            component, rest = decodeFun(
-                                asn1Object.getComponentByPosition(idx).asOctets(),
-                                asn1Spec=openType
-                            )
+                            containerValue = asn1Object.getComponentByPosition(idx)
 
-                            asn1Object.setComponentByPosition(idx, component)
+                            if containerValue.typeId in (
+                                    univ.SetOf.typeId, univ.SequenceOf.typeId):
+
+                                for pos, containerElement in enumerate(
+                                        containerValue):
+
+                                    component, rest = decodeFun(
+                                        containerValue[pos].asOctets(),
+                                        asn1Spec=openType, **options
+                                    )
+
+                                    containerValue[pos] = component
+
+                            else:
+                                component, rest = decodeFun(
+                                    asn1Object.getComponentByPosition(idx).asOctets(),
+                                    asn1Spec=openType, **options
+                                )
+
+                                asn1Object.setComponentByPosition(idx, component)
 
             else:
-                asn1Object.verifySizeSpec()
+                inconsistency = asn1Object.isInconsistent
+                if inconsistency:
+                    raise inconsistency
 
         else:
             asn1Object = asn1Spec.clone()
+            asn1Object.clear()
 
             componentType = asn1Spec.componentType
 
@@ -723,10 +757,12 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
         if asn1Spec is None:
             return self._decodeComponents(
-                substrate, tagSet=tagSet, decodeFun=decodeFun, allowEoo=True, **options
+                substrate, tagSet=tagSet, decodeFun=decodeFun,
+                **dict(options, allowEoo=True)
             )
 
         asn1Object = asn1Spec.clone()
+        asn1Object.clear()
 
         if asn1Spec.typeId in (univ.Sequence.typeId, univ.Set.typeId):
 
@@ -796,12 +832,15 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                 if not namedTypes.requiredComponents.issubset(seenIndices):
                     raise error.PyAsn1Error('ASN.1 object %s has uninitialized components' % asn1Object.__class__.__name__)
 
-                if  namedTypes.hasOpenTypes:
+                if namedTypes.hasOpenTypes:
 
                     openTypes = options.get('openTypes', {})
 
                     if LOG:
-                        LOG('using open types map: %r' % openTypes)
+                        LOG('user-specified open types map:')
+
+                        for k, v in openTypes.items():
+                            LOG('%s -> %r' % (k, v))
 
                     if openTypes or options.get('decodeOpenTypes', False):
 
@@ -821,6 +860,17 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
                             except KeyError:
 
+                                if LOG:
+                                    LOG('default open types map of component '
+                                        '"%s.%s" governed by component "%s.%s"'
+                                        ':' % (asn1Object.__class__.__name__,
+                                               namedType.name,
+                                               asn1Object.__class__.__name__,
+                                               namedType.openType.name))
+
+                                    for k, v in namedType.openType.items():
+                                        LOG('%s -> %r' % (k, v))
+
                                 try:
                                     openType = namedType.openType[governingValue]
 
@@ -834,19 +884,38 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                                 LOG('resolved open type %r by governing '
                                     'value %r' % (openType, governingValue))
 
-                            component, rest = decodeFun(
-                                asn1Object.getComponentByPosition(idx).asOctets(),
-                                asn1Spec=openType, allowEoo=True
-                            )
+                            containerValue = asn1Object.getComponentByPosition(idx)
 
-                            if component is not eoo.endOfOctets:
-                                asn1Object.setComponentByPosition(idx, component)
+                            if containerValue.typeId in (
+                                    univ.SetOf.typeId, univ.SequenceOf.typeId):
+
+                                for pos, containerElement in enumerate(
+                                        containerValue):
+
+                                    component, rest = decodeFun(
+                                        containerValue[pos].asOctets(),
+                                        asn1Spec=openType, **dict(options, allowEoo=True)
+                                    )
+
+                                    containerValue[pos] = component
+
+                            else:
+                                component, rest = decodeFun(
+                                    asn1Object.getComponentByPosition(idx).asOctets(),
+                                    asn1Spec=openType, **dict(options, allowEoo=True)
+                                )
+
+                                if component is not eoo.endOfOctets:
+                                    asn1Object.setComponentByPosition(idx, component)
 
                 else:
-                    asn1Object.verifySizeSpec()
+                    inconsistency = asn1Object.isInconsistent
+                    if inconsistency:
+                        raise inconsistency
 
         else:
             asn1Object = asn1Spec.clone()
+            asn1Object.clear()
 
             componentType = asn1Spec.componentType
 
@@ -1012,7 +1081,16 @@ class AnyDecoder(AbstractSimpleDecoder):
                      tagSet=None, length=None, state=None,
                      decodeFun=None, substrateFun=None,
                      **options):
-        if asn1Spec is None or asn1Spec is not None and tagSet != asn1Spec.tagSet:
+        if asn1Spec is None:
+            isUntagged = True
+
+        elif asn1Spec.__class__ is tagmap.TagMap:
+            isUntagged = tagSet not in asn1Spec.tagMap
+
+        else:
+            isUntagged = tagSet != asn1Spec.tagSet
+
+        if isUntagged:
             fullSubstrate = options['fullSubstrate']
 
             # untagged Any container, recover inner header substrate
@@ -1034,7 +1112,16 @@ class AnyDecoder(AbstractSimpleDecoder):
                              tagSet=None, length=None, state=None,
                              decodeFun=None, substrateFun=None,
                              **options):
-        if asn1Spec is not None and tagSet == asn1Spec.tagSet:
+        if asn1Spec is None:
+            isTagged = False
+
+        elif asn1Spec.__class__ is tagmap.TagMap:
+            isTagged = tagSet in asn1Spec.tagMap
+
+        else:
+            isTagged = tagSet == asn1Spec.tagSet
+
+        if isTagged:
             # tagged Any type -- consume header substrate
             header = null
 
@@ -1204,7 +1291,7 @@ for typeDecoder in tagMap.values():
 
 class Decoder(object):
     defaultErrorState = stErrorCondition
-    #    defaultErrorState = stDumpRawValue
+    #defaultErrorState = stDumpRawValue
     defaultRawDecoder = AnyDecoder()
     supportIndefLength = True
 
@@ -1505,7 +1592,9 @@ class Decoder(object):
                 break
 
             if state is stTryAsExplicitTag:
-                if tagSet and tagSet[0].tagFormat == tag.tagFormatConstructed and tagSet[0].tagClass != tag.tagClassUniversal:
+                if (tagSet and
+                        tagSet[0].tagFormat == tag.tagFormatConstructed and
+                        tagSet[0].tagClass != tag.tagClassUniversal):
                     # Assume explicit tagging
                     concreteDecoder = explicitTagDecoder
                     state = stDecodeValue
@@ -1563,7 +1652,7 @@ class Decoder(object):
 #:
 #: Raises
 #: ------
-#: :py:class:`~pyasn1.error.PyAsn1Error`
+#: ~pyasn1.error.PyAsn1Error, ~pyasn1.error.SubstrateUnderrunError
 #:     On decoding errors
 #:
 #: Examples

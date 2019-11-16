@@ -17,8 +17,9 @@ from pyasn1.type import constraint
 from pyasn1.type import namedtype
 from pyasn1.type import namedval
 from pyasn1.type import error
-from pyasn1.compat.octets import str2octs, ints2octs, octs2ints
+from pyasn1.compat.octets import str2octs, ints2octs, octs2ints, octs2str
 from pyasn1.error import PyAsn1Error
+from pyasn1.error import PyAsn1UnicodeEncodeError, PyAsn1UnicodeDecodeError
 
 
 class NoValueTestCase(BaseTestCase):
@@ -144,13 +145,18 @@ class NoValueTestCase(BaseTestCase):
         try:
             if hasattr(sys, 'getsizeof'):
                 sys.getsizeof(univ.noValue)
-            else:
+
+            # TODO: remove when Py2.5 support is gone
+            elif sys.version_info > (2, 6):
                 raise unittest.SkipTest("no sys.getsizeof() method")
 
         except PyAsn1Error:
             assert False, 'sizeof failed for NoValue object'
+
         except TypeError:
-            raise unittest.SkipTest("sys.getsizeof() raises TypeError")
+            # TODO: remove when Py2.5 support is gone
+            if sys.version_info > (2, 6):
+                raise unittest.SkipTest("sys.getsizeof() raises TypeError")
 
 
 class IntegerTestCase(BaseTestCase):
@@ -533,6 +539,48 @@ class OctetStringWithUnicodeMixIn(object):
 class OctetStringWithAsciiTestCase(OctetStringWithUnicodeMixIn, BaseTestCase):
     initializer = (97, 102)
     encoding = 'us-ascii'
+
+
+class OctetStringUnicodeErrorTestCase(BaseTestCase):
+    def testEncodeError(self):
+        serialized = ints2octs((0xff, 0xfe))
+
+        if sys.version_info < (3, 0):
+            text = serialized.decode('iso-8859-1')
+
+        else:
+            text = octs2str(serialized)
+
+        try:
+            univ.OctetString(text, encoding='us-ascii')
+
+        except PyAsn1UnicodeEncodeError:
+            pass
+
+        # TODO: remove when Py2.5 support is gone
+        else:
+            if sys.version_info > (2, 6):
+                assert False, 'Unicode encoding error not caught'
+
+    def testDecodeError(self):
+        serialized = ints2octs((0xff, 0xfe))
+
+        octetString = univ.OctetString(serialized, encoding='us-ascii')
+
+        try:
+            if sys.version_info < (3, 0):
+                unicode(octetString)
+
+            else:
+                str(octetString)
+
+        except PyAsn1UnicodeDecodeError:
+            pass
+
+        # TODO: remove when Py2.5 support is gone
+        else:
+            if sys.version_info > (2, 6):
+                assert False, 'Unicode decoding error not caught'
 
 
 class OctetStringWithUtf8TestCase(OctetStringWithUnicodeMixIn, BaseTestCase):
@@ -947,11 +995,13 @@ class SequenceOf(BaseTestCase):
         assert self.s1 == self.s2, '__cmp__() fails'
 
     def testSubtypeSpec(self):
-        s = self.s1.clone(subtypeSpec=constraint.ConstraintsUnion(
-            constraint.SingleValueConstraint(str2octs('abc'))
-        ))
+        s = self.s1.clone(
+            componentType=univ.OctetString().subtype(
+                subtypeSpec=constraint.SingleValueConstraint(str2octs('abc'))))
         try:
-            s.setComponentByPosition(0, univ.OctetString('abc'))
+            s.setComponentByPosition(
+                0, univ.OctetString().subtype(
+                    'abc', subtypeSpec=constraint.SingleValueConstraint(str2octs('abc'))))
         except PyAsn1Error:
             assert 0, 'constraint fails'
         try:
@@ -961,7 +1011,7 @@ class SequenceOf(BaseTestCase):
                 s.setComponentByPosition(1, univ.OctetString('Abc'),
                                          verifyConstraints=False)
             except PyAsn1Error:
-                assert 0, 'constraint failes with verifyConstraints=True'
+                assert 0, 'constraint fails with verifyConstraints=False'
         else:
             assert 0, 'constraint fails'
 
@@ -995,22 +1045,14 @@ class SequenceOf(BaseTestCase):
         else:
             pass
 
-    def testSizeSpec(self):
-        s = self.s1.clone(sizeSpec=constraint.ConstraintsUnion(
+    def testConsistency(self):
+        s = self.s1.clone(subtypeSpec=constraint.ConstraintsUnion(
             constraint.ValueSizeConstraint(1, 1)
         ))
         s.setComponentByPosition(0, univ.OctetString('abc'))
-        try:
-            s.verifySizeSpec()
-        except PyAsn1Error:
-            assert 0, 'size spec fails'
+        assert not s.isInconsistent, 'size spec fails'
         s.setComponentByPosition(1, univ.OctetString('abc'))
-        try:
-            s.verifySizeSpec()
-        except PyAsn1Error:
-            pass
-        else:
-            assert 0, 'size spec fails'
+        assert s.isInconsistent, 'size spec fails'
 
     def testGetComponentTagMap(self):
         assert self.s1.componentType.tagMap.presentTypes == {
@@ -1018,21 +1060,23 @@ class SequenceOf(BaseTestCase):
         }
 
     def testSubtype(self):
-        self.s1.clear()
-        assert self.s1.subtype(
+        subtype = self.s1.subtype(
             implicitTag=tag.Tag(tag.tagClassPrivate, tag.tagFormatSimple, 2),
-            subtypeSpec=constraint.SingleValueConstraint(1, 3),
-            sizeSpec=constraint.ValueSizeConstraint(0, 1)
-        ) == self.s1.clone(
+            subtypeSpec=constraint.ValueSizeConstraint(0, 1)
+        )
+        subtype.clear()
+        clone = self.s1.clone(
             tagSet=tag.TagSet(tag.Tag(tag.tagClassPrivate,
                                       tag.tagFormatSimple, 2)),
-            subtypeSpec=constraint.ConstraintsIntersection(constraint.SingleValueConstraint(1, 3)),
-            sizeSpec=constraint.ValueSizeConstraint(0, 1)
+            subtypeSpec=constraint.ValueSizeConstraint(0, 1)
         )
+        clone.clear()
+        assert clone == subtype
 
     def testClone(self):
         self.s1.setComponentByPosition(0, univ.OctetString('abc'))
         s = self.s1.clone()
+        s.clear()
         assert len(s) == 0
         s = self.s1.clone(cloneValueFlag=1)
         assert len(s) == 1
@@ -1047,31 +1091,32 @@ class SequenceOf(BaseTestCase):
         s.append('xxx')
         assert s[0]
 
-        try:
-            s[2]
-
-        except IndexError:
-            pass
-
-        else:
-            assert False, 'IndexError not raised'
-
         # this is a deviation from standard sequence protocol
-        assert not s[1]
+        assert not s[2]
+
+    def testGetItemSlice(self):
+        s = self.s1.clone()
+        s.extend(['xxx', 'yyy', 'zzz'])
+        assert s[:1] == [str2octs('xxx')]
+        assert s[-2:] == [str2octs('yyy'), str2octs('zzz')]
+        assert s[1:2] == [str2octs('yyy')]
 
     def testSetItem(self):
         s = self.s1.clone()
         s.append('xxx')
+        s[2] = 'yyy'
+        assert len(s) == 3
+        assert s[1] == str2octs('')
 
-        try:
-
-            s[2] = 'xxx'
-
-        except IndexError:
-            pass
-
-        else:
-            assert False, 'IndexError not raised'
+    def testSetItemSlice(self):
+        s = self.s1.clone()
+        s[:1] = ['xxx']
+        assert s == [str2octs('xxx')]
+        s[-2:] = ['yyy', 'zzz']
+        assert s == [str2octs('yyy'), str2octs('zzz')]
+        s[1:2] = ['yyy']
+        assert s == [str2octs('yyy'), str2octs('yyy')]
+        assert len(s) == 2
 
     def testAppend(self):
         self.s1.clear()
@@ -1123,6 +1168,15 @@ class SequenceOf(BaseTestCase):
         assert len(s) == 1
         assert s == [str2octs('abc')]
 
+    def testUntyped(self):
+        n = univ.SequenceOf()
+
+        assert not n.isValue
+
+        n[0] = univ.OctetString('fox')
+
+        assert n.isValue
+
     def testLegacyInitializer(self):
         n = univ.SequenceOf(
             componentType=univ.OctetString()
@@ -1164,6 +1218,70 @@ class SequenceOf(BaseTestCase):
         assert s.getComponentByPosition(0, instantiate=False) == str2octs('test')
         s.clear()
         assert s.getComponentByPosition(0, instantiate=False) is univ.noValue
+
+    def testClear(self):
+
+        class SequenceOf(univ.SequenceOf):
+            componentType = univ.OctetString()
+
+        s = SequenceOf()
+        s.setComponentByPosition(0, 'test')
+
+        assert s.getComponentByPosition(0) == str2octs('test')
+        assert len(s) == 1
+        assert s.isValue
+
+        s.clear()
+
+        assert len(s) == 0
+        assert s == []
+        assert s.isValue
+
+    def testReset(self):
+
+        class SequenceOf(univ.SequenceOf):
+            componentType = univ.OctetString()
+
+        s = SequenceOf()
+        s.setComponentByPosition(0, 'test')
+
+        assert s.getComponentByPosition(0) == str2octs('test')
+        assert s.isValue
+
+        s.reset()
+
+        assert not s.isValue
+
+    def testIsInconsistentSizeConstraint(self):
+
+        class SequenceOf(univ.SequenceOf):
+            componentType = univ.OctetString()
+            subtypeSpec = constraint.ValueSizeConstraint(0, 1)
+
+        s = SequenceOf()
+
+        assert s.isInconsistent
+
+        s[0] = 'test'
+
+        assert not s.isInconsistent
+
+        s[0] = 'test'
+        s[1] = 'test'
+
+        assert s.isInconsistent
+
+        s.clear()
+
+        assert not s.isInconsistent
+
+        s.reset()
+
+        assert s.isInconsistent
+
+        s[1] = 'test'
+
+        assert not s.isInconsistent
 
 
 class SequenceOfPicklingTestCase(unittest.TestCase):
@@ -1432,6 +1550,146 @@ class Sequence(BaseTestCase):
         s.clear()
         assert s.getComponentByPosition(1, instantiate=False) is univ.noValue
 
+    def testSchemaWithComponents(self):
+
+        class Sequence(univ.Sequence):
+            componentType = namedtype.NamedTypes(
+                namedtype.NamedType('name', univ.OctetString())
+            )
+
+        s = Sequence()
+
+        assert not s.isValue
+
+        s[0] = 'test'
+
+        assert s.isValue
+
+        s.clear()
+
+        assert not s.isValue
+
+        s.reset()
+
+        assert not s.isValue
+
+    def testSchemaWithOptionalComponents(self):
+
+        class Sequence(univ.Sequence):
+            componentType = namedtype.NamedTypes(
+                namedtype.OptionalNamedType('name', univ.OctetString())
+            )
+
+        s = Sequence()
+
+        assert s.isValue
+
+        s[0] = 'test'
+
+        assert s.isValue
+
+        s.clear()
+
+        assert s.isValue
+
+        s.reset()
+
+        assert not s.isValue
+
+    def testSchemaWithOptionalComponents(self):
+
+        class Sequence(univ.Sequence):
+            componentType = namedtype.NamedTypes(
+                namedtype.DefaultedNamedType('name', univ.OctetString(''))
+            )
+
+        s = Sequence()
+
+        assert s.isValue
+
+        s[0] = 'test'
+
+        assert s.isValue
+
+        s.clear()
+
+        assert s.isValue
+
+        s.reset()
+
+        assert not s.isValue
+
+    def testIsInconsistentWithComponentsConstraint(self):
+
+        class Sequence(univ.Sequence):
+            componentType = namedtype.NamedTypes(
+                namedtype.OptionalNamedType('name', univ.OctetString()),
+                namedtype.DefaultedNamedType('age', univ.Integer(65))
+            )
+            subtypeSpec = constraint.WithComponentsConstraint(
+                ('name', constraint.ComponentPresentConstraint()),
+                ('age', constraint.ComponentAbsentConstraint())
+            )
+
+        s = Sequence()
+
+        assert s.isInconsistent
+
+        s[0] = 'test'
+
+        assert not s.isInconsistent
+
+        s[0] = 'test'
+        s[1] = 23
+
+        assert s.isInconsistent
+
+        s.clear()
+
+        assert s.isInconsistent
+
+        s.reset()
+
+        assert s.isInconsistent
+
+        s[1] = 23
+
+        assert s.isInconsistent
+
+    def testIsInconsistentSizeConstraint(self):
+
+        class Sequence(univ.Sequence):
+            componentType = namedtype.NamedTypes(
+                namedtype.OptionalNamedType('name', univ.OctetString()),
+                namedtype.DefaultedNamedType('age', univ.Integer(65))
+            )
+            subtypeSpec = constraint.ValueSizeConstraint(0, 1)
+
+        s = Sequence()
+
+        assert not s.isInconsistent
+
+        s[0] = 'test'
+
+        assert not s.isInconsistent
+
+        s[0] = 'test'
+        s[1] = 23
+
+        assert s.isInconsistent
+
+        s.clear()
+
+        assert not s.isInconsistent
+
+        s.reset()
+
+        assert s.isInconsistent
+
+        s[1] = 23
+
+        assert not s.isInconsistent
+
 
 class SequenceWithoutSchema(BaseTestCase):
 
@@ -1491,7 +1749,7 @@ class SequenceWithoutSchema(BaseTestCase):
         assert list(s.items()) == [('field-0', str2octs('abc')), ('field-1', 123)]
 
     def testUpdate(self):
-        s = univ.Sequence()
+        s = univ.Sequence().clear()
         assert not s
         s.setComponentByPosition(0, univ.OctetString('abc'))
         s.setComponentByPosition(1, univ.Integer(123))
@@ -1512,6 +1770,27 @@ class SequenceWithoutSchema(BaseTestCase):
         assert 'field-0' in s
         s.clear()
         assert 'field-0' not in s
+
+    def testSchema(self):
+
+        class Sequence(univ.Sequence):
+            pass
+
+        s = Sequence()
+
+        assert not s.isValue
+
+        s[0] = univ.OctetString('test')
+
+        assert s.isValue
+
+        s.clear()
+
+        assert s.isValue
+
+        s.reset()
+
+        assert not s.isValue
 
 
 class SequencePicklingTestCase(unittest.TestCase):
@@ -1624,7 +1903,7 @@ class Set(BaseTestCase):
 
     def testGetTagMap(self):
         assert self.s1.tagMap.presentTypes == {
-            univ.Set.tagSet: univ.Set()
+            univ.Set.tagSet: univ.Set().clear()
         }
 
     def testGetComponentTagMap(self):

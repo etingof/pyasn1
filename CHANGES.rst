@@ -1,8 +1,76 @@
 
-Revision 0.4.6, released XX-01-2019
+Revision 0.5.0, released XX-11-2019
 -----------------------------------
 
 - Removed support for EOL Pythons 2.4, 2.5, 2.6, 3.2 and 3.3.
+
+Revision 0.4.8, released 16-11-2019
+-----------------------------------
+
+- Added ability of combining `SingleValueConstraint` and
+  `PermittedAlphabetConstraint` objects into one for proper modeling
+  `FROM ... EXCEPT ...` ASN.1 clause.
+
+Revision 0.4.7, released 01-09-2019
+-----------------------------------
+
+- Added `isInconsistent` property to all constructed types. This property
+  conceptually replaces `verifySizeSpec` method to serve a more general
+  purpose e.g. ensuring all required fields are in a good shape. By default
+  this check invokes subtype constraints verification and is run by codecs
+  on value de/serialisation.
+- Deprecate `subtypeSpec` attributes and keyword argument. It is now
+  recommended to pass `ValueSizeConstraint`, as well as all other constraints,
+  to `subtypeSpec`.
+- Fixed a design bug in a way of how the items assigned to constructed
+  types are verified. Now if `Asn1Type`-based object is assigned, its
+  compatibility is verified based on having all tags and constraint
+  objects as the type in field definition. When a bare Python value is
+  assigned, then field type object is cloned and initialized with the
+  bare value (constraints verificaton would run at this moment).
+- Added `WithComponentsConstraint` along with related
+  `ComponentPresentConstraint` and `ComponentAbsentConstraint` classes
+  to be used with `Sequence`/`Set` types representing
+  `SET ... WITH COMPONENTS ...` like ASN.1 constructs.
+
+Revision 0.4.6, released 31-07-2019
+-----------------------------------
+
+- Added previously missing `SET OF ANY` construct encoding/decoding support.
+- Added `omitEmptyOptionals` option which is respected by `Sequence`
+  and `Set` encoders. When `omitEmptyOptionals` is set to `True`, empty
+  initialized optional components are not encoded. Default is `False`.
+- New elements to `SequenceOf`/`SetOf` objects can now be added at any
+  position - the requirement for the new elements to reside at the end
+  of the existing ones (i.e. s[len(s)] = 123) is removed.
+- List-like slicing support added to `SequenceOf`/`SetOf` objects.
+- Removed default initializer from `SequenceOf`/`SetOf` types to ensure
+  consistent behaviour with the rest of ASN.1 types. Before this change,
+  `SequenceOf`/`SetOf` instances immediately become value objects behaving
+  like an empty list. With this change, `SequenceOf`/`SetOf` objects
+  remain schema objects unless a component is added or `.clear()` is
+  called.
+  This change can potentially cause incompatibilities with existing
+  pyasn1 objects which assume `SequenceOf`/`SetOf` instances are value
+  objects right upon instantiation.
+  The behaviour of `Sequence`/`Set` types depends on the `componentType`
+  initializer: if on `componentType` is given, the behaviour is the
+  same as `SequenceOf`/`SetOf` have. IF `componentType` is given, but
+  neither optional nor defaulted components are present, the created
+  instance remains schema object, If, however, either optional or
+  defaulted component isi present, the created instance immediately
+  becomes a value object.
+- Added `.reset()` method to all constructed types to turn value object
+  into a schema object.
+- Added `PyAsn1UnicodeDecodeError`/`PyAsn1UnicodeDecodeError` exceptions
+  to help the caller treating unicode errors happening internally
+  to pyasn1 at the upper layers.
+- Added support for subseconds CER/DER encoding edge cases in
+  `GeneralizedTime` codec.
+- Fixed 3-digit fractional seconds value CER/DER encoding of
+  `GeneralizedTime`.
+- Fixed `AnyDecoder` to accept possible `TagMap` as `asn1Spec`
+  to make dumping raw value operational
 
 Revision 0.4.5, released 29-12-2018
 -----------------------------------
@@ -624,7 +692,7 @@ Revision 0.0.5a
 Revision 0.0.4a
 ---------------
 
-* Asn1ItemBase.prettyPrinter() -> \*.prettyPrint()
+* Asn1Type.prettyPrinter() -> \*.prettyPrint()
 
 Revision 0.0.3a
 ---------------
