@@ -1592,7 +1592,8 @@ class NonStringDecoderTestCase(BaseTestCase):
 class ErrorOnDecodingTestCase(BaseTestCase):
 
     def testErrorCondition(self):
-        decode = decoder.SingleItemDecoder(decoder.TAG_MAP, decoder.TYPE_MAP)
+        decode = decoder.SingleItemDecoder(
+            tagMap=decoder.TAG_MAP, typeMap=decoder.TYPE_MAP)
         substrate = ints2octs((00, 1, 2))
         stream = streaming.asSeekableStream(substrate)
 

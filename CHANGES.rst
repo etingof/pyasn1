@@ -22,6 +22,9 @@ Revision 0.5.0, released XX-09-2019
   `StreamingDecoder` class. Previously published API is implemented
   as a thin wrapper on top of that ensuring backward compatibility.
 
+Revision 0.4.8, released XX-09-2019
+-----------------------------------
+
 - Added ability of combining `SingleValueConstraint` and
   `PermittedAlphabetConstraint` objects into one for proper modeling
   `FROM ... EXCEPT ...` ASN.1 clause.

@@ -135,9 +135,9 @@ class SingleItemDecoder(object):
     TAG_MAP = TAG_MAP
     TYPE_MAP = TYPE_MAP
 
-    def __init__(self, tagMap=None, typeMap=None):
-        self.__tagMap = tagMap or self.TAG_MAP
-        self.__typeMap = typeMap or self.TYPE_MAP
+    def __init__(self, **options):
+        self._tagMap = options.get('tagMap', self.TAG_MAP)
+        self._typeMap = options.get('typeMap', self.TYPE_MAP)
 
     def __call__(self, pyObject, asn1Spec, **options):
 
@@ -152,14 +152,14 @@ class SingleItemDecoder(object):
                 'Item, not %s)' % asn1Spec.__class__.__name__)
 
         try:
-            valueDecoder = self.__typeMap[asn1Spec.typeId]
+            valueDecoder = self._typeMap[asn1Spec.typeId]
 
         except KeyError:
             # use base type for codec lookup to recover untagged types
             baseTagSet = tag.TagSet(asn1Spec.tagSet.baseTag, asn1Spec.tagSet.baseTag)
 
             try:
-                valueDecoder = self.__tagMap[baseTagSet]
+                valueDecoder = self._tagMap[baseTagSet]
 
             except KeyError:
                 raise error.PyAsn1Error('Unknown ASN.1 tag %s' % asn1Spec.tagSet)
@@ -184,7 +184,7 @@ class Decoder(object):
     SINGLE_ITEM_DECODER = SingleItemDecoder
 
     def __init__(self, **options):
-        self._singleItemDecoder = self.SINGLE_ITEM_DECODER()
+        self._singleItemDecoder = self.SINGLE_ITEM_DECODER(**options)
 
     def __call__(self, pyObject, asn1Spec=None, **kwargs):
         return self._singleItemDecoder(pyObject, asn1Spec=asn1Spec, **kwargs)

@@ -1483,12 +1483,13 @@ class SingleItemDecoder(object):
     TAG_MAP = TAG_MAP
     TYPE_MAP = TYPE_MAP
 
-    def __init__(self, tagMap=None, typeMap=None):
-        self.__tagMap = tagMap or self.TAG_MAP
-        self.__typeMap = typeMap or self.TYPE_MAP
+    def __init__(self, **options):
+        self._tagMap = options.get('tagMap', self.TAG_MAP)
+        self._typeMap = options.get('typeMap', self.TYPE_MAP)
+
         # Tag & TagSet objects caches
-        self.__tagCache = {}
-        self.__tagSetCache = {}
+        self._tagCache = {}
+        self._tagSetCache = {}
 
     def __call__(self, substrate, asn1Spec=None,
                  tagSet=None, length=None, state=stDecodeTag,
@@ -1518,10 +1519,10 @@ class SingleItemDecoder(object):
             else:
                 substrate.seek(-2, os.SEEK_CUR)
 
-        tagMap = self.__tagMap
-        typeMap = self.__typeMap
-        tagCache = self.__tagCache
-        tagSetCache = self.__tagSetCache
+        tagMap = self._tagMap
+        typeMap = self._typeMap
+        tagCache = self._tagCache
+        tagSetCache = self._tagSetCache
 
         value = noValue
 
@@ -1902,7 +1903,7 @@ class StreamingDecoder(object):
     SINGLE_ITEM_DECODER = SingleItemDecoder
 
     def __init__(self, substrate, asn1Spec=None, **options):
-        self._singleItemDecoder = self.SINGLE_ITEM_DECODER()
+        self._singleItemDecoder = self.SINGLE_ITEM_DECODER(**options)
         self._substrate = asSeekableStream(substrate)
         self._asn1Spec = asn1Spec
         self._options = options
@@ -1931,7 +1932,7 @@ class Decoder(object):
     STREAMING_DECODER = StreamingDecoder
 
     @classmethod
-    def __call__(cls, substrate, asn1Spec=None, **kwargs):
+    def __call__(cls, substrate, asn1Spec=None, **options):
         """Turns BER/CER/DER octet stream into an ASN.1 object.
 
         Takes BER/CER/DER octet-stream in form of :py:class:`bytes` (Python 3)
@@ -1992,7 +1993,7 @@ class Decoder(object):
         substrate = asSeekableStream(substrate)
 
         streamingDecoder = cls.STREAMING_DECODER(
-            substrate, asn1Spec, **kwargs)
+            substrate, asn1Spec, **options)
 
         for asn1Object in streamingDecoder:
             if isinstance(asn1Object, SubstrateUnderrunError):

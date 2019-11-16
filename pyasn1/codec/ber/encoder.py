@@ -781,9 +781,9 @@ class SingleItemEncoder(object):
     TAG_MAP = TAG_MAP
     TYPE_MAP = TYPE_MAP
 
-    def __init__(self, tagMap=None, typeMap=None):
-        self.__tagMap = tagMap or self.TAG_MAP
-        self.__typeMap = typeMap or self.TYPE_MAP
+    def __init__(self, **options):
+        self._tagMap = options.get('tagMap', self.TAG_MAP)
+        self._typeMap = options.get('typeMap', self.TYPE_MAP)
 
     def __call__(self, value, asn1Spec=None, **options):
         try:
@@ -810,7 +810,7 @@ class SingleItemEncoder(object):
             options.update(maxChunkSize=self.fixedChunkSize)
 
         try:
-            concreteEncoder = self.__typeMap[typeId]
+            concreteEncoder = self._typeMap[typeId]
 
             if LOG:
                 LOG('using value codec %s chosen by type ID '
@@ -826,7 +826,7 @@ class SingleItemEncoder(object):
             baseTagSet = tag.TagSet(tagSet.baseTag, tagSet.baseTag)
 
             try:
-                concreteEncoder = self.__tagMap[baseTagSet]
+                concreteEncoder = self._tagMap[baseTagSet]
 
             except KeyError:
                 raise error.PyAsn1Error('No encoder for %r (%s)' % (value, tagSet))
@@ -849,7 +849,7 @@ class Encoder(object):
     SINGLE_ITEM_ENCODER = SingleItemEncoder
 
     def __init__(self, **options):
-        self._singleItemEncoder = self.SINGLE_ITEM_ENCODER()
+        self._singleItemEncoder = self.SINGLE_ITEM_ENCODER(**options)
 
     def __call__(self, pyObject, asn1Spec=None, **options):
         return self._singleItemEncoder(

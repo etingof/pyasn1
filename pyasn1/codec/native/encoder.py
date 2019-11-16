@@ -180,9 +180,9 @@ class SingleItemEncoder(object):
     TAG_MAP = TAG_MAP
     TYPE_MAP = TYPE_MAP
 
-    def __init__(self, tagMap=None, typeMap=None):
-        self.__tagMap = tagMap or self.TAG_MAP
-        self.__typeMap = typeMap or self.TYPE_MAP
+    def __init__(self, **options):
+        self._tagMap = options.get('tagMap', self.TAG_MAP)
+        self._typeMap = options.get('typeMap', self.TYPE_MAP)
 
     def __call__(self, value, **options):
         if not isinstance(value, base.Asn1Item):
@@ -197,7 +197,7 @@ class SingleItemEncoder(object):
         tagSet = value.tagSet
 
         try:
-            concreteEncoder = self.__typeMap[value.typeId]
+            concreteEncoder = self._typeMap[value.typeId]
 
         except KeyError:
             # use base type for codec lookup to recover untagged types
@@ -205,7 +205,7 @@ class SingleItemEncoder(object):
                 value.tagSet.baseTag, value.tagSet.baseTag)
 
             try:
-                concreteEncoder = self.__tagMap[baseTagSet]
+                concreteEncoder = self._tagMap[baseTagSet]
 
             except KeyError:
                 raise error.PyAsn1Error('No encoder for %s' % (value,))
@@ -227,8 +227,8 @@ class SingleItemEncoder(object):
 class Encoder(object):
     SINGLE_ITEM_ENCODER = SingleItemEncoder
 
-    def __init__(self, **kwargs):
-        self._singleItemEncoder = self.SINGLE_ITEM_ENCODER()
+    def __init__(self, **options):
+        self._singleItemEncoder = self.SINGLE_ITEM_ENCODER(**options)
 
     def __call__(self, pyObject, asn1Spec=None, **options):
         return self._singleItemEncoder(
