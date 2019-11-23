@@ -1,8 +1,8 @@
 
-Revision 0.5.0, released XX-09-2019
+Revision 0.5.0, released XX-11-2019
 -----------------------------------
 
-- Make BER/CER/DER decodersstreaming and suspendible
+- Make BER/CER/DER decoders streaming and suspendible
 
   The goal of this change is to make the decoder yielding on input
   data starvation and resuming from where it stopped whenever the
