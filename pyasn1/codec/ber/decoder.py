@@ -5,15 +5,17 @@
 # License: http://snmplabs.com/pyasn1/license.html
 #
 import os
-import sys
-from io import BytesIO, BufferedReader, IOBase, DEFAULT_BUFFER_SIZE
 
 from pyasn1 import debug
 from pyasn1 import error
 from pyasn1.codec.ber import eoo
+from pyasn1.codec.streaming import asSeekableStream
+from pyasn1.codec.streaming import isEndOfStream
+from pyasn1.codec.streaming import peekIntoStream
+from pyasn1.codec.streaming import readFromStream
 from pyasn1.compat.integer import from_bytes
 from pyasn1.compat.octets import oct2int, octs2ints, ints2octs, null
-from pyasn1.error import PyAsn1Error, UnsupportedSubstrateError
+from pyasn1.error import PyAsn1Error
 from pyasn1.type import base
 from pyasn1.type import char
 from pyasn1.type import tag
@@ -21,166 +23,16 @@ from pyasn1.type import tagmap
 from pyasn1.type import univ
 from pyasn1.type import useful
 
-
-__all__ = ['decodeStream', 'decode']
+__all__ = ['StreamingDecoder', 'Decoder', 'decode']
 
 LOG = debug.registerLoggee(__name__, flags=debug.DEBUG_DECODER)
 
 noValue = base.noValue
 
-
-_PY2 = sys.version_info < (3,)
-
-
-class _CachingStreamWrapper(IOBase):
-    """Wrapper around non-seekable streams.
-
-    Note that the implementation is tied to the decoder,
-    not checking for dangerous arguments for the sake
-    of performance.
-
-    The read bytes are kept in an internal cache until
-    setting _markedPosition which may reset the cache.
-    """
-    def __init__(self, raw):
-        self._raw = raw
-        self._cache = BytesIO()
-        self._markedPosition_ = 0
-
-    def peek(self, n):
-        result = self.read(n)
-        self._cache.seek(-len(result), os.SEEK_CUR)
-        return result
-
-    def seekable(self):
-        return True
-
-    def seek(self, n=-1, whence=os.SEEK_SET):
-        # Note that this not safe for seeking forward.
-        return self._cache.seek(n, whence)
-
-    def read(self, n=-1):
-        read_from_cache = self._cache.read(n)
-        if n != -1:
-            n -= len(read_from_cache)
-            if not n:  # 0 bytes left to read
-                return read_from_cache
-
-        read_from_raw = self._raw.read(n)
-        self._cache.write(read_from_raw)
-        return read_from_cache + read_from_raw
-
-    @property
-    def _markedPosition(self):
-        """Position where the currently processed element starts.
-
-        This is used for back-tracking in Decoder.__call__
-        and (indefLen)ValueDecoder and should not be used for other purposes.
-        The client is not supposed to ever seek before this position.
-        """
-        return self._markedPosition_
-
-    @_markedPosition.setter
-    def _markedPosition(self, value):
-        # By setting the value, we ensure we won't seek back before it.
-        # `value` should be the same as the current position
-        # We don't check for this for performance reasons.
-        self._markedPosition_ = value
-
-        # Whenever we set _marked_position, we know for sure
-        # that we will not return back, and thus it is
-        # safe to drop all cached data.
-        if self._cache.tell() > DEFAULT_BUFFER_SIZE:
-            self._cache = BytesIO(self._cache.read())
-            self._markedPosition_ = 0
-
-    def tell(self):
-        return self._cache.tell()
+SubstrateUnderrunError = error.SubstrateUnderrunError
 
 
-def _asSeekableStream(substrate):
-    """Convert object to seekable byte-stream.
-
-    Parameters
-    ----------
-    substrate: :py:class:`bytes` or :py:class:`io.IOBase` or :py:class:`univ.OctetString`
-
-    Returns
-    -------
-    : :py:class:`io.IOBase`
-
-    Raises
-    ------
-    ~pyasn1.error.PyAsn1Error
-        If the supplied substrate cannot be converted to a seekable stream.
-    """
-    if isinstance(substrate, bytes):
-        return BytesIO(substrate)
-    elif isinstance(substrate, univ.OctetString):
-        return BytesIO(substrate.asOctets())
-    try:
-        if _PY2 and isinstance(substrate, file):  # Special case (it is not possible to set attributes)
-            return BufferedReader(substrate)
-        elif substrate.seekable():  # Will fail for most invalid types
-            return substrate
-        else:
-            return _CachingStreamWrapper(substrate)
-    except AttributeError:
-        raise UnsupportedSubstrateError("Cannot convert " + substrate.__class__.__name__ + " to a seekable bit stream.")
-
-
-def _endOfStream(substrate):
-    """Check whether we have reached the end of a stream.
-
-    Although it is more effective to read and catch exceptions, this
-    function
-
-    Parameters
-    ----------
-    substrate: :py:class:`IOBase`
-        Stream to check
-
-    Returns
-    -------
-    : :py:class:`bool`
-    """
-    if isinstance(substrate, BytesIO):
-        cp = substrate.tell()
-        substrate.seek(0, os.SEEK_END)
-        result = substrate.tell() == cp
-        substrate.seek(cp, os.SEEK_SET)
-        return result
-    else:
-        return not substrate.peek(1)
-
-
-def _peek(substrate, size=-1):
-    """Peek the stream.
-
-    Parameters
-    ----------
-    substrate: :py:class:`IOBase`
-        Stream to read from.
-
-    size: :py:class:`int`
-        How many bytes to peek (-1 = all available)
-
-    Returns
-    -------
-    : :py:class:`bytes` or :py:class:`str`
-        The return type depends on Python major version
-    """
-    if hasattr(substrate, "peek"):
-        return substrate.peek(size)
-    else:
-        current_position = substrate.tell()
-        try:
-            return substrate.read(size)
-        finally:
-            substrate.seek(current_position)
-
-
-class AbstractDecoder(object):
+class AbstractPayloadDecoder(object):
     protoComponent = None
 
     def valueDecoder(self, substrate, asn1Spec,
@@ -189,10 +41,9 @@ class AbstractDecoder(object):
                      **options):
         """Decode value with fixed byte length.
 
-        If the decoder does not consume a precise byte length,
-        it is considered an error.
+        The decoder is allowed to consume as many bytes as necessary.
         """
-        raise error.PyAsn1Error('Decoder not implemented for %s' % (tagSet,))  # TODO: Seems more like an NotImplementedError?
+        raise error.PyAsn1Error('SingleItemDecoder not implemented for %s' % (tagSet,))  # TODO: Seems more like an NotImplementedError?
 
     def indefLenValueDecoder(self, substrate, asn1Spec,
                              tagSet=None, length=None, state=None,
@@ -204,11 +55,19 @@ class AbstractDecoder(object):
         """
         raise error.PyAsn1Error('Indefinite length mode decoder not implemented for %s' % (tagSet,)) # TODO: Seems more like an NotImplementedError?
 
-
-class AbstractSimpleDecoder(AbstractDecoder):
     @staticmethod
-    def substrateCollector(asn1Object, substrate, length):
-        return substrate.read(length)
+    def _passAsn1Object(asn1Object, options):
+        if 'asn1Object' not in options:
+            options['asn1Object'] = asn1Object
+
+        return options
+
+
+class AbstractSimplePayloadDecoder(AbstractPayloadDecoder):
+    @staticmethod
+    def substrateCollector(asn1Object, substrate, length, options):
+        for chunk in readFromStream(substrate, length, options):
+            yield chunk
 
     def _createComponent(self, asn1Spec, tagSet, value, **options):
         if options.get('native'):
@@ -221,7 +80,7 @@ class AbstractSimpleDecoder(AbstractDecoder):
             return asn1Spec.clone(value)
 
 
-class ExplicitTagDecoder(AbstractSimpleDecoder):
+class RawPayloadDecoder(AbstractSimplePayloadDecoder):
     protoComponent = univ.Any('')
 
     def valueDecoder(self, substrate, asn1Spec,
@@ -229,43 +88,43 @@ class ExplicitTagDecoder(AbstractSimpleDecoder):
                      decodeFun=None, substrateFun=None,
                      **options):
         if substrateFun:
-            return substrateFun(
-                self._createComponent(asn1Spec, tagSet, '', **options),
-                substrate, length
-            )
-        value = decodeFun(substrate, asn1Spec, tagSet, length, **options)
+            asn1Object = self._createComponent(asn1Spec, tagSet, '', **options)
 
-        # TODO:
-        # if LOG:
-        #    LOG('explicit tag container carries %d octets of trailing payload '
-        #        '(will be lost!): %s' % (len(_), debug.hexdump(_)))
+            for chunk in substrateFun(asn1Object, substrate, length, options):
+                yield chunk
 
-        return value
+            return
+
+        for value in decodeFun(substrate, asn1Spec, tagSet, length, **options):
+            yield value
 
     def indefLenValueDecoder(self, substrate, asn1Spec,
                              tagSet=None, length=None, state=None,
                              decodeFun=None, substrateFun=None,
                              **options):
         if substrateFun:
-            return substrateFun(
-                self._createComponent(asn1Spec, tagSet, '', **options),
-                substrate, length
-            )
+            asn1Object = self._createComponent(asn1Spec, tagSet, '', **options)
 
-        value = decodeFun(substrate, asn1Spec, tagSet, length, **options)
+            for chunk in substrateFun(asn1Object, substrate, length, options):
+                yield chunk
 
-        eooMarker = decodeFun(substrate, allowEoo=True, **options)
+            return
 
-        if eooMarker is eoo.endOfOctets:
-            return value
-        else:
-            raise error.PyAsn1Error('Missing end-of-octets terminator')
+        while True:
+            for value in decodeFun(
+                    substrate, asn1Spec, tagSet, length,
+                    allowEoo=True, **options):
+
+                if value is eoo.endOfOctets:
+                    return
+
+                yield value
 
 
-explicitTagDecoder = ExplicitTagDecoder()
+rawPayloadDecoder = RawPayloadDecoder()
 
 
-class IntegerDecoder(AbstractSimpleDecoder):
+class IntegerPayloadDecoder(AbstractSimplePayloadDecoder):
     protoComponent = univ.Integer(0)
 
     def valueDecoder(self, substrate, asn1Spec,
@@ -276,24 +135,28 @@ class IntegerDecoder(AbstractSimpleDecoder):
         if tagSet[0].tagFormat != tag.tagFormatSimple:
             raise error.PyAsn1Error('Simple tag format expected')
 
-        the_bytes = substrate.read(length)
-        if not the_bytes:
-            return self._createComponent(asn1Spec, tagSet, 0, **options)
+        for chunk in readFromStream(substrate, length, options):
+            if isinstance(chunk, SubstrateUnderrunError):
+                yield chunk
 
-        value = from_bytes(the_bytes, signed=True)
+        if chunk:
+            value = from_bytes(chunk, signed=True)
 
-        return self._createComponent(asn1Spec, tagSet, value, **options)
+        else:
+            value = 0
+
+        yield self._createComponent(asn1Spec, tagSet, value, **options)
 
 
-class BooleanDecoder(IntegerDecoder):
+class BooleanPayloadDecoder(IntegerPayloadDecoder):
     protoComponent = univ.Boolean(0)
 
     def _createComponent(self, asn1Spec, tagSet, value, **options):
-        return IntegerDecoder._createComponent(
+        return IntegerPayloadDecoder._createComponent(
             self, asn1Spec, tagSet, value and 1 or 0, **options)
 
 
-class BitStringDecoder(AbstractSimpleDecoder):
+class BitStringPayloadDecoder(AbstractSimplePayloadDecoder):
     protoComponent = univ.BitString(())
     supportConstructedForm = True
 
@@ -303,24 +166,45 @@ class BitStringDecoder(AbstractSimpleDecoder):
                      **options):
 
         if substrateFun:
-            return substrateFun(self._createComponent(
-                asn1Spec, tagSet, noValue, **options), substrate, length)
+            asn1Object = self._createComponent(asn1Spec, tagSet, noValue, **options)
 
-        if not length or _endOfStream(substrate):
+            for chunk in substrateFun(asn1Object, substrate, length, options):
+                yield chunk
+
+            return
+
+        if not length:
+            raise error.PyAsn1Error('Empty BIT STRING substrate')
+
+        for chunk in isEndOfStream(substrate):
+            if isinstance(chunk, SubstrateUnderrunError):
+                yield chunk
+
+        if chunk:
             raise error.PyAsn1Error('Empty BIT STRING substrate')
 
         if tagSet[0].tagFormat == tag.tagFormatSimple:  # XXX what tag to check?
 
-            trailingBits = ord(substrate.read(1))
+            for trailingBits in readFromStream(substrate, 1, options):
+                if isinstance(trailingBits, SubstrateUnderrunError):
+                    yield trailingBits
+
+            trailingBits = ord(trailingBits)
             if trailingBits > 7:
                 raise error.PyAsn1Error(
                     'Trailing bits overflow %s' % trailingBits
                 )
 
-            value = self.protoComponent.fromOctetString(
-                substrate.read(length - 1), internalFormat=True, padding=trailingBits)
+            for chunk in readFromStream(substrate, length - 1, options):
+                if isinstance(chunk, SubstrateUnderrunError):
+                    yield chunk
 
-            return self._createComponent(asn1Spec, tagSet, value, **options)
+            value = self.protoComponent.fromOctetString(
+                chunk, internalFormat=True, padding=trailingBits)
+
+            yield self._createComponent(asn1Spec, tagSet, value, **options)
+
+            return
 
         if not self.supportConstructedForm:
             raise error.PyAsn1Error('Constructed encoding form prohibited '
@@ -337,8 +221,11 @@ class BitStringDecoder(AbstractSimpleDecoder):
         current_position = substrate.tell()
 
         while substrate.tell() - current_position < length:
-            component = decodeFun(substrate, self.protoComponent,
-                                        substrateFun=substrateFun, **options)
+            for component in decodeFun(
+                    substrate, self.protoComponent, substrateFun=substrateFun,
+                    **options):
+                if isinstance(component, SubstrateUnderrunError):
+                    yield component
 
             trailingBits = oct2int(component[0])
             if trailingBits > 7:
@@ -351,7 +238,7 @@ class BitStringDecoder(AbstractSimpleDecoder):
                 prepend=bitString, padding=trailingBits
             )
 
-        return self._createComponent(asn1Spec, tagSet, bitString, **options)
+        yield self._createComponent(asn1Spec, tagSet, bitString, **options)
 
     def indefLenValueDecoder(self, substrate, asn1Spec,
                              tagSet=None, length=None, state=None,
@@ -359,21 +246,32 @@ class BitStringDecoder(AbstractSimpleDecoder):
                              **options):
 
         if substrateFun:
-            return substrateFun(self._createComponent(asn1Spec, tagSet, noValue, **options), substrate, length)
+            asn1Object = self._createComponent(asn1Spec, tagSet, noValue, **options)
+
+            for chunk in substrateFun(asn1Object, substrate, length, options):
+                yield chunk
+
+            return
 
         # All inner fragments are of the same type, treat them as octet string
         substrateFun = self.substrateCollector
 
         bitString = self.protoComponent.fromOctetString(null, internalFormat=True)
 
-        while True:
-            component = decodeFun(substrate, self.protoComponent,
-                                  substrateFun=substrateFun,
-                                  allowEoo=True, **options)
+        while True:  # loop over fragments
+
+            for component in decodeFun(
+                    substrate, self.protoComponent, substrateFun=substrateFun,
+                    allowEoo=True, **options):
+
+                if component is eoo.endOfOctets:
+                    break
+
+                if isinstance(component, SubstrateUnderrunError):
+                    yield component
+
             if component is eoo.endOfOctets:
                 break
-            if component is None:
-                raise error.SubstrateUnderrunError('No EOO seen before substrate ends')
 
             trailingBits = oct2int(component[0])
             if trailingBits > 7:
@@ -386,10 +284,10 @@ class BitStringDecoder(AbstractSimpleDecoder):
                 prepend=bitString, padding=trailingBits
             )
 
-        return self._createComponent(asn1Spec, tagSet, bitString, **options)
+        yield self._createComponent(asn1Spec, tagSet, bitString, **options)
 
 
-class OctetStringDecoder(AbstractSimpleDecoder):
+class OctetStringPayloadDecoder(AbstractSimplePayloadDecoder):
     protoComponent = univ.OctetString('')
     supportConstructedForm = True
 
@@ -398,11 +296,21 @@ class OctetStringDecoder(AbstractSimpleDecoder):
                      decodeFun=None, substrateFun=None,
                      **options):
         if substrateFun:
-            return substrateFun(self._createComponent(asn1Spec, tagSet, noValue, **options),
-                                substrate, length)
+            asn1Object = self._createComponent(asn1Spec, tagSet, noValue, **options)
+
+            for chunk in substrateFun(asn1Object, substrate, length, options):
+                yield chunk
+
+            return
 
         if tagSet[0].tagFormat == tag.tagFormatSimple:  # XXX what tag to check?
-            return self._createComponent(asn1Spec, tagSet, substrate.read(length), **options)
+            for chunk in readFromStream(substrate, length, options):
+                if isinstance(chunk, SubstrateUnderrunError):
+                    yield chunk
+
+            yield self._createComponent(asn1Spec, tagSet, chunk, **options)
+
+            return
 
         if not self.supportConstructedForm:
             raise error.PyAsn1Error('Constructed encoding form prohibited at %s' % self.__class__.__name__)
@@ -418,12 +326,15 @@ class OctetStringDecoder(AbstractSimpleDecoder):
         original_position = substrate.tell()
         # head = popSubstream(substrate, length)
         while substrate.tell() - original_position < length:
-            component = decodeFun(substrate, self.protoComponent,
-                                        substrateFun=substrateFun,
-                                        **options)
+            for component in decodeFun(
+                    substrate, self.protoComponent, substrateFun=substrateFun,
+                    **options):
+                if isinstance(component, SubstrateUnderrunError):
+                    yield component
+
             header += component
 
-        return self._createComponent(asn1Spec, tagSet, header, **options)
+        yield self._createComponent(asn1Spec, tagSet, header, **options)
 
     def indefLenValueDecoder(self, substrate, asn1Spec,
                              tagSet=None, length=None, state=None,
@@ -431,31 +342,38 @@ class OctetStringDecoder(AbstractSimpleDecoder):
                              **options):
         if substrateFun and substrateFun is not self.substrateCollector:
             asn1Object = self._createComponent(asn1Spec, tagSet, noValue, **options)
-            return substrateFun(asn1Object, substrate, length)
+
+            for chunk in substrateFun(asn1Object, substrate, length, options):
+                yield chunk
+
+            return
 
         # All inner fragments are of the same type, treat them as octet string
         substrateFun = self.substrateCollector
 
         header = null
 
-        while True:
-            component = decodeFun(substrate,
-                                             self.protoComponent,
-                                             substrateFun=substrateFun,
-                                             allowEoo=True, **options)
+        while True:  # loop over fragments
+
+            for component in decodeFun(
+                    substrate, self.protoComponent, substrateFun=substrateFun,
+                    allowEoo=True, **options):
+
+                if isinstance(component, SubstrateUnderrunError):
+                    yield component
+
+                if component is eoo.endOfOctets:
+                    break
+
             if component is eoo.endOfOctets:
                 break
-            if not component:
-                raise error.SubstrateUnderrunError(
-                    'No EOO seen before substrate ends'
-                )
 
             header += component
 
-        return self._createComponent(asn1Spec, tagSet, header, **options)
+        yield self._createComponent(asn1Spec, tagSet, header, **options)
 
 
-class NullDecoder(AbstractSimpleDecoder):
+class NullPayloadDecoder(AbstractSimplePayloadDecoder):
     protoComponent = univ.Null('')
 
     def valueDecoder(self, substrate, asn1Spec,
@@ -466,17 +384,19 @@ class NullDecoder(AbstractSimpleDecoder):
         if tagSet[0].tagFormat != tag.tagFormatSimple:
             raise error.PyAsn1Error('Simple tag format expected')
 
-        head = substrate.read(length)
+        for chunk in readFromStream(substrate, length, options):
+            if isinstance(chunk, SubstrateUnderrunError):
+                yield chunk
 
         component = self._createComponent(asn1Spec, tagSet, '', **options)
 
-        if head:
+        if chunk:
             raise error.PyAsn1Error('Unexpected %d-octet substrate for Null' % length)
 
-        return component
+        yield component
 
 
-class ObjectIdentifierDecoder(AbstractSimpleDecoder):
+class ObjectIdentifierPayloadDecoder(AbstractSimplePayloadDecoder):
     protoComponent = univ.ObjectIdentifier(())
 
     def valueDecoder(self, substrate, asn1Spec,
@@ -486,17 +406,20 @@ class ObjectIdentifierDecoder(AbstractSimpleDecoder):
         if tagSet[0].tagFormat != tag.tagFormatSimple:
             raise error.PyAsn1Error('Simple tag format expected')
 
-        head = substrate.read(length)
-        if not head:
+        for chunk in readFromStream(substrate, length, options):
+            if isinstance(chunk, SubstrateUnderrunError):
+                yield chunk
+
+        if not chunk:
             raise error.PyAsn1Error('Empty substrate')
 
-        head = octs2ints(head)
+        chunk = octs2ints(chunk)
 
         oid = ()
         index = 0
-        substrateLen = len(head)
+        substrateLen = len(chunk)
         while index < substrateLen:
-            subId = head[index]
+            subId = chunk[index]
             index += 1
             if subId < 128:
                 oid += (subId,)
@@ -510,7 +433,7 @@ class ObjectIdentifierDecoder(AbstractSimpleDecoder):
                         raise error.SubstrateUnderrunError(
                             'Short substrate for sub-OID past %s' % (oid,)
                         )
-                    nextSubId = head[index]
+                    nextSubId = chunk[index]
                     index += 1
                 oid += ((subId << 7) + nextSubId,)
             elif subId == 128:
@@ -528,12 +451,12 @@ class ObjectIdentifierDecoder(AbstractSimpleDecoder):
         elif oid[0] >= 80:
             oid = (2, oid[0] - 80) + oid[1:]
         else:
-            raise error.PyAsn1Error('Malformed first OID octet: %s' % head[0])
+            raise error.PyAsn1Error('Malformed first OID octet: %s' % chunk[0])
 
-        return self._createComponent(asn1Spec, tagSet, oid, **options)
+        yield self._createComponent(asn1Spec, tagSet, oid, **options)
 
 
-class RealDecoder(AbstractSimpleDecoder):
+class RealPayloadDecoder(AbstractSimplePayloadDecoder):
     protoComponent = univ.Real()
 
     def valueDecoder(self, substrate, asn1Spec,
@@ -543,15 +466,18 @@ class RealDecoder(AbstractSimpleDecoder):
         if tagSet[0].tagFormat != tag.tagFormatSimple:
             raise error.PyAsn1Error('Simple tag format expected')
 
-        head = substrate.read(length)
+        for chunk in readFromStream(substrate, length, options):
+            if isinstance(chunk, SubstrateUnderrunError):
+                yield chunk
 
-        if not head:
-            return self._createComponent(asn1Spec, tagSet, 0.0, **options)
+        if not chunk:
+            yield self._createComponent(asn1Spec, tagSet, 0.0, **options)
+            return
 
-        fo = oct2int(head[0])
-        head = head[1:]
+        fo = oct2int(chunk[0])
+        chunk = chunk[1:]
         if fo & 0x80:  # binary encoding
-            if not head:
+            if not chunk:
                 raise error.PyAsn1Error("Incomplete floating-point value")
 
             if LOG:
@@ -560,12 +486,12 @@ class RealDecoder(AbstractSimpleDecoder):
             n = (fo & 0x03) + 1
 
             if n == 4:
-                n = oct2int(head[0])
-                head = head[1:]
+                n = oct2int(chunk[0])
+                chunk = chunk[1:]
 
-            eo, head = head[:n], head[n:]
+            eo, chunk = chunk[:n], chunk[n:]
 
-            if not eo or not head:
+            if not eo or not chunk:
                 raise error.PyAsn1Error('Real exponent screwed')
 
             e = oct2int(eo[0]) & 0x80 and -1 or 0
@@ -587,10 +513,10 @@ class RealDecoder(AbstractSimpleDecoder):
                 e *= 4
             p = 0
 
-            while head:  # value
+            while chunk:  # value
                 p <<= 8
-                p |= oct2int(head[0])
-                head = head[1:]
+                p |= oct2int(chunk[0])
+                chunk = chunk[1:]
 
             if fo & 0x40:  # sign bit
                 p = -p
@@ -606,7 +532,7 @@ class RealDecoder(AbstractSimpleDecoder):
             value = fo & 0x01 and '-inf' or 'inf'
 
         elif fo & 0xc0 == 0:  # character encoding
-            if not head:
+            if not chunk:
                 raise error.PyAsn1Error("Incomplete floating-point value")
 
             if LOG:
@@ -614,13 +540,13 @@ class RealDecoder(AbstractSimpleDecoder):
 
             try:
                 if fo & 0x3 == 0x1:  # NR1
-                    value = (int(head), 10, 0)
+                    value = (int(chunk), 10, 0)
 
                 elif fo & 0x3 == 0x2:  # NR2
-                    value = float(head)
+                    value = float(chunk)
 
                 elif fo & 0x3 == 0x3:  # NR3
-                    value = float(head)
+                    value = float(chunk)
 
                 else:
                     raise error.SubstrateUnderrunError(
@@ -637,14 +563,14 @@ class RealDecoder(AbstractSimpleDecoder):
                 'Unknown encoding (tag %s)' % fo
             )
 
-        return self._createComponent(asn1Spec, tagSet, value, **options)
+        yield self._createComponent(asn1Spec, tagSet, value, **options)
 
 
-class AbstractConstructedDecoder(AbstractDecoder):
+class AbstractConstructedPayloadDecoder(AbstractPayloadDecoder):
     protoComponent = None
 
 
-class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
+class ConstructedPayloadDecoderBase(AbstractConstructedPayloadDecoder):
     protoRecordComponent = None
     protoSequenceComponent = None
 
@@ -654,36 +580,43 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
     def _getComponentPositionByType(self, asn1Object, tagSet, idx):
         raise NotImplementedError()
 
-    def _decodeComponents(self, substrate, tagSet=None, decodeFun=None, **options):
+    def _decodeComponentsSchemaless(
+            self, substrate, tagSet=None, decodeFun=None,
+            length=None, **options):
+
+        asn1Object = None
+
         components = []
         componentTypes = set()
 
-        while True:
-            component = decodeFun(substrate, **options)
-            if component is eoo.endOfOctets:
-                break
-            if component is None:
-                # TODO: Not an error in this case?
+        original_position = substrate.tell()
+
+        while length == -1 or substrate.tell() < original_position + length:
+            for component in decodeFun(substrate, **options):
+                if isinstance(component, SubstrateUnderrunError):
+                    yield component
+
+            if length == -1 and component is eoo.endOfOctets:
                 break
 
             components.append(component)
             componentTypes.add(component.tagSet)
 
-        # Now we have to guess is it SEQUENCE/SET or SEQUENCE OF/SET OF
-        # The heuristics is:
-        # * 1+ components of different types -> likely SEQUENCE/SET
-        # * otherwise -> likely SEQUENCE OF/SET OF
-        if len(componentTypes) > 1:
-            protoComponent = self.protoRecordComponent
+            # Now we have to guess is it SEQUENCE/SET or SEQUENCE OF/SET OF
+            # The heuristics is:
+            # * 1+ components of different types -> likely SEQUENCE/SET
+            # * otherwise -> likely SEQUENCE OF/SET OF
+            if len(componentTypes) > 1:
+                protoComponent = self.protoRecordComponent
 
-        else:
-            protoComponent = self.protoSequenceComponent
+            else:
+                protoComponent = self.protoSequenceComponent
 
-        asn1Object = protoComponent.clone(
-            # construct tagSet from base tag from prototype ASN.1 object
-            # and additional tags recovered from the substrate
-            tagSet=tag.TagSet(protoComponent.tagSet.baseTag, *tagSet.superTags)
-        )
+            asn1Object = protoComponent.clone(
+                # construct tagSet from base tag from prototype ASN.1 object
+                # and additional tags recovered from the substrate
+                tagSet=tag.TagSet(protoComponent.tagSet.baseTag, *tagSet.superTags)
+            )
 
         if LOG:
             LOG('guessed %r container type (pass `asn1Spec` to guide the '
@@ -696,7 +629,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                 matchTags=False, matchConstraints=False
             )
 
-        return asn1Object
+        yield asn1Object
 
     def valueDecoder(self, substrate, asn1Spec,
                      tagSet=None, length=None, state=None,
@@ -707,7 +640,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
         original_position = substrate.tell()
 
-        if substrateFun is not None:
+        if substrateFun:
             if asn1Spec is not None:
                 asn1Object = asn1Spec.clone()
 
@@ -717,23 +650,35 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
             else:
                 asn1Object = self.protoRecordComponent, self.protoSequenceComponent
 
-            return substrateFun(asn1Object, substrate, length)
+            for chunk in substrateFun(asn1Object, substrate, length, options):
+                yield chunk
+
+            return
 
         if asn1Spec is None:
-            asn1Object = self._decodeComponents(
-                substrate, tagSet=tagSet, decodeFun=decodeFun, **options
-            )
+            for asn1Object in self._decodeComponentsSchemaless(
+                    substrate, tagSet=tagSet, decodeFun=decodeFun,
+                    length=length, **options):
+                if isinstance(asn1Object, SubstrateUnderrunError):
+                    yield asn1Object
 
             if substrate.tell() < original_position + length:
                 if LOG:
-                    trailing = substrate.read()
+                    for trailing in readFromStream(substrate, context=options):
+                        if isinstance(trailing, SubstrateUnderrunError):
+                            yield trailing
+
                     LOG('Unused trailing %d octets encountered: %s' % (
                         len(trailing), debug.hexdump(trailing)))
 
-            return asn1Object
+            yield asn1Object
+
+            return
 
         asn1Object = asn1Spec.clone()
         asn1Object.clear()
+
+        options = self._passAsn1Object(asn1Object, options)
 
         if asn1Spec.typeId in (univ.Sequence.typeId, univ.Set.typeId):
 
@@ -772,7 +717,9 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                             'Excessive components decoded at %r' % (asn1Spec,)
                         )
 
-                component = decodeFun(substrate, componentType, **options)
+                for component in decodeFun(substrate, componentType, **options):
+                    if isinstance(component, SubstrateUnderrunError):
+                        yield component
 
                 if not isDeterministic and namedTypes:
                     if isSetType:
@@ -859,18 +806,20 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                                 for pos, containerElement in enumerate(
                                         containerValue):
 
-                                    component = decodeFun(
-                                        _asSeekableStream(containerValue[pos].asOctets()),
-                                        asn1Spec=openType, **options
-                                    )
+                                    stream = asSeekableStream(containerValue[pos].asOctets())
+
+                                    for component in decodeFun(stream, asn1Spec=openType, **options):
+                                        if isinstance(component, SubstrateUnderrunError):
+                                            yield component
 
                                     containerValue[pos] = component
 
                             else:
-                                component = decodeFun(
-                                    _asSeekableStream(asn1Object.getComponentByPosition(idx).asOctets()),
-                                    asn1Spec=openType, **options
-                                )
+                                stream = asSeekableStream(asn1Object.getComponentByPosition(idx).asOctets())
+
+                                for component in decodeFun(stream, asn1Spec=openType, **options):
+                                    if isinstance(component, SubstrateUnderrunError):
+                                        yield component
 
                                 asn1Object.setComponentByPosition(idx, component)
 
@@ -880,9 +829,6 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                     raise inconsistency
 
         else:
-            asn1Object = asn1Spec.clone()
-            asn1Object.clear()
-
             componentType = asn1Spec.componentType
 
             if LOG:
@@ -891,7 +837,10 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
             idx = 0
 
             while substrate.tell() - original_position < length:
-                component = decodeFun(substrate, componentType, **options)
+                for component in decodeFun(substrate, componentType, **options):
+                    if isinstance(component, SubstrateUnderrunError):
+                        yield component
+
                 asn1Object.setComponentByPosition(
                     idx, component,
                     verifyConstraints=False,
@@ -900,7 +849,7 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
                 idx += 1
 
-        return asn1Object
+        yield asn1Object
 
     def indefLenValueDecoder(self, substrate, asn1Spec,
                              tagSet=None, length=None, state=None,
@@ -919,16 +868,26 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
             else:
                 asn1Object = self.protoRecordComponent, self.protoSequenceComponent
 
-            return substrateFun(asn1Object, substrate, length)
+            for chunk in substrateFun(asn1Object, substrate, length, options):
+                yield chunk
+
+            return
 
         if asn1Spec is None:
-            return self._decodeComponents(
-                substrate, tagSet=tagSet, decodeFun=decodeFun,
-                **dict(options, allowEoo=True)
-            )
+            for asn1Object in self._decodeComponentsSchemaless(
+                    substrate, tagSet=tagSet, decodeFun=decodeFun,
+                    length=length, **dict(options, allowEoo=True)):
+                if isinstance(asn1Object, SubstrateUnderrunError):
+                    yield asn1Object
+
+            yield asn1Object
+
+            return
 
         asn1Object = asn1Spec.clone()
         asn1Object.clear()
+
+        options = self._passAsn1Object(asn1Object, options)
 
         if asn1Spec.typeId in (univ.Sequence.typeId, univ.Set.typeId):
 
@@ -943,8 +902,10 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                     asn1Spec))
 
             seenIndices = set()
+
             idx = 0
-            while True:  #not endOfStream(substrate):
+
+            while True:  # loop over components
                 if len(namedTypes) <= idx:
                     asn1Spec = None
 
@@ -967,17 +928,21 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                             'Excessive components decoded at %r' % (asn1Object,)
                         )
 
-                component = decodeFun(substrate, asn1Spec, allowEoo=True, **options)
+                for component in decodeFun(substrate, asn1Spec, allowEoo=True, **options):
+
+                    if isinstance(component, SubstrateUnderrunError):
+                        yield component
+
+                    if component is eoo.endOfOctets:
+                        break
+
                 if component is eoo.endOfOctets:
                     break
-                if component is None:
-                    raise error.SubstrateUnderrunError(
-                        'No EOO seen before substrate ends'
-                    )
 
                 if not isDeterministic and namedTypes:
                     if isSetType:
                         idx = namedTypes.getPositionByType(component.effectiveTagSet)
+
                     elif namedTypes[idx].isOptional or namedTypes[idx].isDefaulted:
                         idx = namedTypes.getPositionNearType(component.effectiveTagSet, idx)
 
@@ -995,7 +960,9 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
             if namedTypes:
                 if not namedTypes.requiredComponents.issubset(seenIndices):
-                    raise error.PyAsn1Error('ASN.1 object %s has uninitialized components' % asn1Object.__class__.__name__)
+                    raise error.PyAsn1Error(
+                        'ASN.1 object %s has uninitialized '
+                        'components' % asn1Object.__class__.__name__)
 
                 if namedTypes.hasOpenTypes:
 
@@ -1057,20 +1024,28 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                                 for pos, containerElement in enumerate(
                                         containerValue):
 
-                                    component = decodeFun(
-                                        _asSeekableStream(containerValue[pos].asOctets()),
-                                        asn1Spec=openType, **dict(options, allowEoo=True)
-                                    )
+                                    stream = asSeekableStream(containerValue[pos].asOctets())
+
+                                    for component in decodeFun(stream, asn1Spec=openType,
+                                                               **dict(options, allowEoo=True)):
+                                        if isinstance(component, SubstrateUnderrunError):
+                                            yield component
+
+                                        if component is eoo.endOfOctets:
+                                            break
 
                                     containerValue[pos] = component
 
                             else:
-                                component = decodeFun(
-                                    _asSeekableStream(asn1Object.getComponentByPosition(idx).asOctets()),
-                                    asn1Spec=openType, **dict(options, allowEoo=True)
-                                )
+                                stream = asSeekableStream(asn1Object.getComponentByPosition(idx).asOctets())
+                                for component in decodeFun(stream, asn1Spec=openType,
+                                                           **dict(options, allowEoo=True)):
+                                    if isinstance(component, SubstrateUnderrunError):
+                                        yield component
 
-                                if component is not eoo.endOfOctets:
+                                    if component is eoo.endOfOctets:
+                                        break
+
                                     asn1Object.setComponentByPosition(idx, component)
 
                 else:
@@ -1079,9 +1054,6 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
                         raise inconsistency
 
         else:
-            asn1Object = asn1Spec.clone()
-            asn1Object.clear()
-
             componentType = asn1Spec.componentType
 
             if LOG:
@@ -1090,14 +1062,18 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
             idx = 0
 
             while True:
-                component = decodeFun(substrate, componentType, allowEoo=True, **options)
+
+                for component in decodeFun(
+                        substrate, componentType, allowEoo=True, **options):
+
+                    if isinstance(component, SubstrateUnderrunError):
+                        yield component
+
+                    if component is eoo.endOfOctets:
+                        break
 
                 if component is eoo.endOfOctets:
                     break
-                if component is None:
-                    raise error.SubstrateUnderrunError(
-                        'No EOO seen before substrate ends'
-                    )
 
                 asn1Object.setComponentByPosition(
                     idx, component,
@@ -1107,46 +1083,42 @@ class UniversalConstructedTypeDecoder(AbstractConstructedDecoder):
 
                 idx += 1
 
+        yield asn1Object
 
-        return asn1Object
 
-
-class SequenceOrSequenceOfDecoder(UniversalConstructedTypeDecoder):
+class SequenceOrSequenceOfPayloadDecoder(ConstructedPayloadDecoderBase):
     protoRecordComponent = univ.Sequence()
     protoSequenceComponent = univ.SequenceOf()
 
 
-class SequenceDecoder(SequenceOrSequenceOfDecoder):
+class SequencePayloadDecoder(SequenceOrSequenceOfPayloadDecoder):
     protoComponent = univ.Sequence()
 
 
-class SequenceOfDecoder(SequenceOrSequenceOfDecoder):
+class SequenceOfPayloadDecoder(SequenceOrSequenceOfPayloadDecoder):
     protoComponent = univ.SequenceOf()
 
 
-class SetOrSetOfDecoder(UniversalConstructedTypeDecoder):
+class SetOrSetOfPayloadDecoder(ConstructedPayloadDecoderBase):
     protoRecordComponent = univ.Set()
     protoSequenceComponent = univ.SetOf()
 
 
-class SetDecoder(SetOrSetOfDecoder):
+class SetPayloadDecoder(SetOrSetOfPayloadDecoder):
     protoComponent = univ.Set()
 
 
-
-class SetOfDecoder(SetOrSetOfDecoder):
+class SetOfPayloadDecoder(SetOrSetOfPayloadDecoder):
     protoComponent = univ.SetOf()
 
 
-class ChoiceDecoder(AbstractConstructedDecoder):
+class ChoicePayloadDecoder(ConstructedPayloadDecoderBase):
     protoComponent = univ.Choice()
 
     def valueDecoder(self, substrate, asn1Spec,
                      tagSet=None, length=None, state=None,
                      decodeFun=None, substrateFun=None,
                      **options):
-        # head = popSubstream(substrate, length)
-
         if asn1Spec is None:
             asn1Object = self.protoComponent.clone(tagSet=tagSet)
 
@@ -1154,24 +1126,31 @@ class ChoiceDecoder(AbstractConstructedDecoder):
             asn1Object = asn1Spec.clone()
 
         if substrateFun:
-            return substrateFun(asn1Object, substrate, length)
+            for chunk in substrateFun(asn1Object, substrate, length, options):
+                yield chunk
+
+            return
+
+        options = self._passAsn1Object(asn1Object, options)
 
         if asn1Object.tagSet == tagSet:
             if LOG:
                 LOG('decoding %s as explicitly tagged CHOICE' % (tagSet,))
 
-            component = decodeFun(
-                substrate, asn1Object.componentTagMap, **options
-            )
+            for component in decodeFun(
+                    substrate, asn1Object.componentTagMap, **options):
+                if isinstance(component, SubstrateUnderrunError):
+                    yield component
 
         else:
             if LOG:
                 LOG('decoding %s as untagged CHOICE' % (tagSet,))
 
-            component = decodeFun(
-                substrate, asn1Object.componentTagMap,
-                tagSet, length, state, **options
-            )
+            for component in decodeFun(
+                    substrate, asn1Object.componentTagMap, tagSet, length,
+                    state, **options):
+                if isinstance(component, SubstrateUnderrunError):
+                    yield component
 
         effectiveTagSet = component.effectiveTagSet
 
@@ -1185,7 +1164,7 @@ class ChoiceDecoder(AbstractConstructedDecoder):
             innerFlag=False
         )
 
-        return asn1Object
+        yield asn1Object
 
     def indefLenValueDecoder(self, substrate, asn1Spec,
                              tagSet=None, length=None, state=None,
@@ -1193,53 +1172,67 @@ class ChoiceDecoder(AbstractConstructedDecoder):
                              **options):
         if asn1Spec is None:
             asn1Object = self.protoComponent.clone(tagSet=tagSet)
+
         else:
             asn1Object = asn1Spec.clone()
 
         if substrateFun:
-            return substrateFun(asn1Object, substrate, length)
+            for chunk in substrateFun(asn1Object, substrate, length, options):
+                yield chunk
 
-        if asn1Object.tagSet == tagSet:
-            if LOG:
-                LOG('decoding %s as explicitly tagged CHOICE' % (tagSet,))
+            return
 
-            component = decodeFun(
-                substrate, asn1Object.componentType.tagMapUnique, **options
-            )
+        options = self._passAsn1Object(asn1Object, options)
 
-            # eat up EOO marker
-            eooMarker = decodeFun(
-                substrate, allowEoo=True, **options
-            )
-
-            if eooMarker is not eoo.endOfOctets:
-                raise error.PyAsn1Error('No EOO seen before substrate ends')
-
-        else:
-            if LOG:
-                LOG('decoding %s as untagged CHOICE' % (tagSet,))
-
-            component = decodeFun(
-                substrate, asn1Object.componentType.tagMapUnique,
-                tagSet, length, state, **options
-            )
-
-        effectiveTagSet = component.effectiveTagSet
+        isTagged = asn1Object.tagSet == tagSet
 
         if LOG:
-            LOG('decoded component %s, effective tag set %s' % (component, effectiveTagSet))
+            LOG('decoding %s as %stagged CHOICE' % (
+                tagSet, isTagged and 'explicitly ' or 'un'))
 
-        asn1Object.setComponentByType(
-            effectiveTagSet, component,
-            verifyConstraints=False,
-            matchTags=False, matchConstraints=False,
-            innerFlag=False
-        )
+        while True:
 
-        return asn1Object
+            if isTagged:
+                iterator = decodeFun(
+                    substrate, asn1Object.componentType.tagMapUnique,
+                    **dict(options, allowEoo=True))
+
+            else:
+                iterator = decodeFun(
+                    substrate, asn1Object.componentType.tagMapUnique,
+                    tagSet, length, state, **dict(options, allowEoo=True))
+
+            for component in iterator:
+
+                if isinstance(component, SubstrateUnderrunError):
+                    yield component
+
+                if component is eoo.endOfOctets:
+                    break
+
+                effectiveTagSet = component.effectiveTagSet
+
+                if LOG:
+                    LOG('decoded component %s, effective tag set '
+                        '%s' % (component, effectiveTagSet))
+
+                asn1Object.setComponentByType(
+                    effectiveTagSet, component,
+                    verifyConstraints=False,
+                    matchTags=False, matchConstraints=False,
+                    innerFlag=False
+                )
+
+                if not isTagged:
+                    break
+
+            if not isTagged or component is eoo.endOfOctets:
+                break
+
+        yield asn1Object
 
 
-class AnyDecoder(AbstractSimpleDecoder):
+class AnyPayloadDecoder(AbstractSimplePayloadDecoder):
     protoComponent = univ.Any()
 
     def valueDecoder(self, substrate, asn1Spec,
@@ -1256,22 +1249,32 @@ class AnyDecoder(AbstractSimpleDecoder):
             isUntagged = tagSet != asn1Spec.tagSet
 
         if isUntagged:
-            fullPosition = substrate._markedPosition
+            fullPosition = substrate.markedPosition
             currentPosition = substrate.tell()
 
             substrate.seek(fullPosition, os.SEEK_SET)
-            length += (currentPosition - fullPosition)
+            length += currentPosition - fullPosition
 
             if LOG:
-                LOG('decoding as untagged ANY, substrate %s' % debug.hexdump(_peek(substrate, length)))
+                for chunk in peekIntoStream(substrate, length):
+                    if isinstance(chunk, SubstrateUnderrunError):
+                        yield chunk
+                LOG('decoding as untagged ANY, substrate '
+                    '%s' % debug.hexdump(chunk))
 
         if substrateFun:
-            return substrateFun(self._createComponent(asn1Spec, tagSet, noValue, **options),
-                                substrate, length)
+            for chunk in substrateFun(
+                    self._createComponent(asn1Spec, tagSet, noValue, **options),
+                    substrate, length, options):
+                yield chunk
 
-        head = substrate.read(length)
+            return
 
-        return self._createComponent(asn1Spec, tagSet, head, **options)
+        for chunk in readFromStream(substrate, length, options):
+            if isinstance(chunk, SubstrateUnderrunError):
+                yield chunk
+
+        yield self._createComponent(asn1Spec, tagSet, chunk, **options)
 
     def indefLenValueDecoder(self, substrate, asn1Spec,
                              tagSet=None, length=None, state=None,
@@ -1288,28 +1291,36 @@ class AnyDecoder(AbstractSimpleDecoder):
 
         if isTagged:
             # tagged Any type -- consume header substrate
-            header = null
+            chunk = null
 
             if LOG:
                 LOG('decoding as tagged ANY')
 
         else:
             # TODO: Seems not to be tested
-            fullPosition = substrate._markedPosition
+            fullPosition = substrate.markedPosition
             currentPosition = substrate.tell()
 
             substrate.seek(fullPosition, os.SEEK_SET)
-            header = substrate.read(currentPosition - fullPosition)
+            for chunk in readFromStream(substrate, currentPosition - fullPosition, options):
+                if isinstance(chunk, SubstrateUnderrunError):
+                    yield chunk
 
             if LOG:
-                LOG('decoding as untagged ANY, header substrate %s' % debug.hexdump(header))
+                LOG('decoding as untagged ANY, header substrate %s' % debug.hexdump(chunk))
 
         # Any components do not inherit initial tag
         asn1Spec = self.protoComponent
 
         if substrateFun and substrateFun is not self.substrateCollector:
-            asn1Object = self._createComponent(asn1Spec, tagSet, noValue, **options)
-            return substrateFun(asn1Object, header + substrate, length + len(header))
+            asn1Object = self._createComponent(
+                asn1Spec, tagSet, noValue, **options)
+
+            for chunk in substrateFun(
+                    asn1Object, chunk + substrate, length + len(chunk), options):
+                yield chunk
+
+            return
 
         if LOG:
             LOG('assembling constructed serialization')
@@ -1317,130 +1328,134 @@ class AnyDecoder(AbstractSimpleDecoder):
         # All inner fragments are of the same type, treat them as octet string
         substrateFun = self.substrateCollector
 
-        while True:
-            component = decodeFun(substrate, asn1Spec,
-                                             substrateFun=substrateFun,
-                                             allowEoo=True, **options)
+        while True:  # loop over fragments
+
+            for component in decodeFun(
+                    substrate, asn1Spec, substrateFun=substrateFun,
+                    allowEoo=True, **options):
+
+                if isinstance(component, SubstrateUnderrunError):
+                    yield component
+
+                if component is eoo.endOfOctets:
+                    break
+
             if component is eoo.endOfOctets:
                 break
-            if not component:
-                raise error.SubstrateUnderrunError(
-                    'No EOO seen before substrate ends'
-                )
 
-            header += component
+            chunk += component
 
         if substrateFun:
-            return header  # TODO: Weird
+            yield chunk  # TODO: Weird
 
         else:
-            return self._createComponent(asn1Spec, tagSet, header, **options)
+            yield self._createComponent(asn1Spec, tagSet, chunk, **options)
 
 
 # character string types
-class UTF8StringDecoder(OctetStringDecoder):
+class UTF8StringPayloadDecoder(OctetStringPayloadDecoder):
     protoComponent = char.UTF8String()
 
 
-class NumericStringDecoder(OctetStringDecoder):
+class NumericStringPayloadDecoder(OctetStringPayloadDecoder):
     protoComponent = char.NumericString()
 
 
-class PrintableStringDecoder(OctetStringDecoder):
+class PrintableStringPayloadDecoder(OctetStringPayloadDecoder):
     protoComponent = char.PrintableString()
 
 
-class TeletexStringDecoder(OctetStringDecoder):
+class TeletexStringPayloadDecoder(OctetStringPayloadDecoder):
     protoComponent = char.TeletexString()
 
 
-class VideotexStringDecoder(OctetStringDecoder):
+class VideotexStringPayloadDecoder(OctetStringPayloadDecoder):
     protoComponent = char.VideotexString()
 
 
-class IA5StringDecoder(OctetStringDecoder):
+class IA5StringPayloadDecoder(OctetStringPayloadDecoder):
     protoComponent = char.IA5String()
 
 
-class GraphicStringDecoder(OctetStringDecoder):
+class GraphicStringPayloadDecoder(OctetStringPayloadDecoder):
     protoComponent = char.GraphicString()
 
 
-class VisibleStringDecoder(OctetStringDecoder):
+class VisibleStringPayloadDecoder(OctetStringPayloadDecoder):
     protoComponent = char.VisibleString()
 
 
-class GeneralStringDecoder(OctetStringDecoder):
+class GeneralStringPayloadDecoder(OctetStringPayloadDecoder):
     protoComponent = char.GeneralString()
 
 
-class UniversalStringDecoder(OctetStringDecoder):
+class UniversalStringPayloadDecoder(OctetStringPayloadDecoder):
     protoComponent = char.UniversalString()
 
 
-class BMPStringDecoder(OctetStringDecoder):
+class BMPStringPayloadDecoder(OctetStringPayloadDecoder):
     protoComponent = char.BMPString()
 
 
 # "useful" types
-class ObjectDescriptorDecoder(OctetStringDecoder):
+class ObjectDescriptorPayloadDecoder(OctetStringPayloadDecoder):
     protoComponent = useful.ObjectDescriptor()
 
 
-class GeneralizedTimeDecoder(OctetStringDecoder):
+class GeneralizedTimePayloadDecoder(OctetStringPayloadDecoder):
     protoComponent = useful.GeneralizedTime()
 
 
-class UTCTimeDecoder(OctetStringDecoder):
+class UTCTimePayloadDecoder(OctetStringPayloadDecoder):
     protoComponent = useful.UTCTime()
 
 
-tagMap = {
-    univ.Integer.tagSet: IntegerDecoder(),
-    univ.Boolean.tagSet: BooleanDecoder(),
-    univ.BitString.tagSet: BitStringDecoder(),
-    univ.OctetString.tagSet: OctetStringDecoder(),
-    univ.Null.tagSet: NullDecoder(),
-    univ.ObjectIdentifier.tagSet: ObjectIdentifierDecoder(),
-    univ.Enumerated.tagSet: IntegerDecoder(),
-    univ.Real.tagSet: RealDecoder(),
-    univ.Sequence.tagSet: SequenceOrSequenceOfDecoder(),  # conflicts with SequenceOf
-    univ.Set.tagSet: SetOrSetOfDecoder(),  # conflicts with SetOf
-    univ.Choice.tagSet: ChoiceDecoder(),  # conflicts with Any
+TAG_MAP = {
+    univ.Integer.tagSet: IntegerPayloadDecoder(),
+    univ.Boolean.tagSet: BooleanPayloadDecoder(),
+    univ.BitString.tagSet: BitStringPayloadDecoder(),
+    univ.OctetString.tagSet: OctetStringPayloadDecoder(),
+    univ.Null.tagSet: NullPayloadDecoder(),
+    univ.ObjectIdentifier.tagSet: ObjectIdentifierPayloadDecoder(),
+    univ.Enumerated.tagSet: IntegerPayloadDecoder(),
+    univ.Real.tagSet: RealPayloadDecoder(),
+    univ.Sequence.tagSet: SequenceOrSequenceOfPayloadDecoder(),  # conflicts with SequenceOf
+    univ.Set.tagSet: SetOrSetOfPayloadDecoder(),  # conflicts with SetOf
+    univ.Choice.tagSet: ChoicePayloadDecoder(),  # conflicts with Any
     # character string types
-    char.UTF8String.tagSet: UTF8StringDecoder(),
-    char.NumericString.tagSet: NumericStringDecoder(),
-    char.PrintableString.tagSet: PrintableStringDecoder(),
-    char.TeletexString.tagSet: TeletexStringDecoder(),
-    char.VideotexString.tagSet: VideotexStringDecoder(),
-    char.IA5String.tagSet: IA5StringDecoder(),
-    char.GraphicString.tagSet: GraphicStringDecoder(),
-    char.VisibleString.tagSet: VisibleStringDecoder(),
-    char.GeneralString.tagSet: GeneralStringDecoder(),
-    char.UniversalString.tagSet: UniversalStringDecoder(),
-    char.BMPString.tagSet: BMPStringDecoder(),
+    char.UTF8String.tagSet: UTF8StringPayloadDecoder(),
+    char.NumericString.tagSet: NumericStringPayloadDecoder(),
+    char.PrintableString.tagSet: PrintableStringPayloadDecoder(),
+    char.TeletexString.tagSet: TeletexStringPayloadDecoder(),
+    char.VideotexString.tagSet: VideotexStringPayloadDecoder(),
+    char.IA5String.tagSet: IA5StringPayloadDecoder(),
+    char.GraphicString.tagSet: GraphicStringPayloadDecoder(),
+    char.VisibleString.tagSet: VisibleStringPayloadDecoder(),
+    char.GeneralString.tagSet: GeneralStringPayloadDecoder(),
+    char.UniversalString.tagSet: UniversalStringPayloadDecoder(),
+    char.BMPString.tagSet: BMPStringPayloadDecoder(),
     # useful types
-    useful.ObjectDescriptor.tagSet: ObjectDescriptorDecoder(),
-    useful.GeneralizedTime.tagSet: GeneralizedTimeDecoder(),
-    useful.UTCTime.tagSet: UTCTimeDecoder()
+    useful.ObjectDescriptor.tagSet: ObjectDescriptorPayloadDecoder(),
+    useful.GeneralizedTime.tagSet: GeneralizedTimePayloadDecoder(),
+    useful.UTCTime.tagSet: UTCTimePayloadDecoder()
 }
 
 # Type-to-codec map for ambiguous ASN.1 types
-typeMap = {
-    univ.Set.typeId: SetDecoder(),
-    univ.SetOf.typeId: SetOfDecoder(),
-    univ.Sequence.typeId: SequenceDecoder(),
-    univ.SequenceOf.typeId: SequenceOfDecoder(),
-    univ.Choice.typeId: ChoiceDecoder(),
-    univ.Any.typeId: AnyDecoder()
+TYPE_MAP = {
+    univ.Set.typeId: SetPayloadDecoder(),
+    univ.SetOf.typeId: SetOfPayloadDecoder(),
+    univ.Sequence.typeId: SequencePayloadDecoder(),
+    univ.SequenceOf.typeId: SequenceOfPayloadDecoder(),
+    univ.Choice.typeId: ChoicePayloadDecoder(),
+    univ.Any.typeId: AnyPayloadDecoder()
 }
 
 # Put in non-ambiguous types for faster codec lookup
-for typeDecoder in tagMap.values():
+for typeDecoder in TAG_MAP.values():
     if typeDecoder.protoComponent is not None:
         typeId = typeDecoder.protoComponent.__class__.typeId
-        if typeId is not None and typeId not in typeMap:
-            typeMap[typeId] = typeDecoder
+        if typeId is not None and typeId not in TYPE_MAP:
+            TYPE_MAP[typeId] = typeDecoder
 
 
 (stDecodeTag,
@@ -1455,49 +1470,63 @@ for typeDecoder in tagMap.values():
  stStop) = [x for x in range(10)]
 
 
-class Decoder(object):
+EOO_SENTINEL = ints2octs((0, 0))
+
+
+class SingleItemDecoder(object):
     defaultErrorState = stErrorCondition
     #defaultErrorState = stDumpRawValue
-    defaultRawDecoder = AnyDecoder()
+    defaultRawDecoder = AnyPayloadDecoder()
+
     supportIndefLength = True
 
-    # noinspection PyDefaultArgument
-    def __init__(self, tagMap, typeMap={}):
-        self.__tagMap = tagMap
-        self.__typeMap = typeMap
+    TAG_MAP = TAG_MAP
+    TYPE_MAP = TYPE_MAP
+
+    def __init__(self, **options):
+        self._tagMap = options.get('tagMap', self.TAG_MAP)
+        self._typeMap = options.get('typeMap', self.TYPE_MAP)
+
         # Tag & TagSet objects caches
-        self.__tagCache = {}
-        self.__tagSetCache = {}
-        self.__eooSentinel = ints2octs((0, 0))
+        self._tagCache = {}
+        self._tagSetCache = {}
 
     def __call__(self, substrate, asn1Spec=None,
                  tagSet=None, length=None, state=stDecodeTag,
                  decodeFun=None, substrateFun=None,
                  **options):
 
-        if LOG:
-            LOG('decoder called at scope %s with state %d, working with up to %s octets of substrate: %s' % (debug.scope, state, length, substrate))
-
         allowEoo = options.pop('allowEoo', False)
+
+        if LOG:
+            LOG('decoder called at scope %s with state %d, working with up '
+                'to %s octets of substrate: '
+                '%s' % (debug.scope, state, length, substrate))
 
         # Look for end-of-octets sentinel
         if allowEoo and self.supportIndefLength:
-            eoo_candidate = substrate.read(2)
-            if eoo_candidate == self.__eooSentinel:
+
+            for eoo_candidate in readFromStream(substrate, 2, options):
+                if isinstance(eoo_candidate, SubstrateUnderrunError):
+                    yield eoo_candidate
+
+            if eoo_candidate == EOO_SENTINEL:
                 if LOG:
                     LOG('end-of-octets sentinel found')
-                return eoo.endOfOctets
+                yield eoo.endOfOctets
+                return
+
             else:
                 substrate.seek(-2, os.SEEK_CUR)
 
+        tagMap = self._tagMap
+        typeMap = self._typeMap
+        tagCache = self._tagCache
+        tagSetCache = self._tagSetCache
+
         value = noValue
 
-        tagMap = self.__tagMap
-        typeMap = self.__typeMap
-        tagCache = self.__tagCache
-        tagSetCache = self.__tagSetCache
-
-        substrate._markedPosition = substrate.tell()
+        substrate.markedPosition = substrate.tell()
 
         while state is not stStop:
 
@@ -1505,9 +1534,9 @@ class Decoder(object):
                 # Decode tag
                 isShortTag = True
 
-                firstByte = substrate.read(1)
-                if not firstByte:
-                    return None
+                for firstByte in readFromStream(substrate, 1, options):
+                    if isinstance(firstByte, SubstrateUnderrunError):
+                        yield firstByte
 
                 firstOctet = ord(firstByte)
 
@@ -1526,15 +1555,20 @@ class Decoder(object):
                         tagId = 0
 
                         while True:
-                            integerByte = substrate.read(1)
+                            for integerByte in readFromStream(substrate, 1, options):
+                                if isinstance(integerByte, SubstrateUnderrunError):
+                                    yield integerByte
+
                             if not integerByte:
                                 raise error.SubstrateUnderrunError(
                                     'Short octet stream on long tag decoding'
                                 )
+
                             integerTag = ord(integerByte)
                             lengthOctetIdx += 1
                             tagId <<= 7
                             tagId |= (integerTag & 0x7F)
+
                             if not integerTag & 0x80:
                                 break
 
@@ -1568,12 +1602,11 @@ class Decoder(object):
 
             if state is stDecodeLength:
                 # Decode length
-                try:
-                    firstOctet = ord(substrate.read(1))
-                except:
-                    raise error.SubstrateUnderrunError(
-                        'Short octet stream on length decoding'
-                    )
+                for firstOctet in readFromStream(substrate, 1, options):
+                    if isinstance(firstOctet, SubstrateUnderrunError):
+                        yield firstOctet
+
+                firstOctet = ord(firstOctet)
 
                 if firstOctet < 128:
                     length = firstOctet
@@ -1581,7 +1614,10 @@ class Decoder(object):
                 elif firstOctet > 128:
                     size = firstOctet & 0x7F
                     # encoded in size bytes
-                    encodedLength = list(substrate.read(size))
+                    for encodedLength in readFromStream(substrate, size, options):
+                        if isinstance(encodedLength, SubstrateUnderrunError):
+                            yield encodedLength
+                    encodedLength = list(encodedLength)
                     # missing check on maximum size, which shouldn't be a
                     # problem, we can handle more than is possible
                     if len(encodedLength) != size:
@@ -1726,25 +1762,30 @@ class Decoder(object):
                 original_position = substrate.tell()
 
                 if length == -1:  # indef length
-                    value = concreteDecoder.indefLenValueDecoder(
-                        substrate, asn1Spec,
-                        tagSet, length, stGetValueDecoder,
-                        self, substrateFun,
-                        **options
-                    )
+                    for value in concreteDecoder.indefLenValueDecoder(
+                            substrate, asn1Spec,
+                            tagSet, length, stGetValueDecoder,
+                            self, substrateFun, **options):
+                        if isinstance(value, SubstrateUnderrunError):
+                            yield value
+
                 else:
-                    value = concreteDecoder.valueDecoder(
-                        substrate, asn1Spec,
-                        tagSet, length, stGetValueDecoder,
-                        self, substrateFun,
-                        **options
-                    )
-                    bytes_read = substrate.tell() - original_position
-                    if bytes_read != length:
-                        raise PyAsn1Error("Read %s bytes instead of expected %s." % (bytes_read, length))
+                    for value in concreteDecoder.valueDecoder(
+                            substrate, asn1Spec,
+                            tagSet, length, stGetValueDecoder,
+                            self, substrateFun, **options):
+                        if isinstance(value, SubstrateUnderrunError):
+                            yield value
+
+                    bytesRead = substrate.tell() - original_position
+                    if bytesRead != length:
+                        raise PyAsn1Error(
+                            "Read %s bytes instead of expected %s." % (bytesRead, length))
 
                 if LOG:
-                   LOG('codec %s yields type %s, value:\n%s\n...' % (concreteDecoder.__class__.__name__, value.__class__.__name__, isinstance(value, base.Asn1Item) and value.prettyPrint() or value))
+                   LOG('codec %s yields type %s, value:\n%s\n...' % (
+                       concreteDecoder.__class__.__name__, value.__class__.__name__,
+                       isinstance(value, base.Asn1Item) and value.prettyPrint() or value))
 
                 state = stStop
                 break
@@ -1754,7 +1795,7 @@ class Decoder(object):
                         tagSet[0].tagFormat == tag.tagFormatConstructed and
                         tagSet[0].tagClass != tag.tagClassUniversal):
                     # Assume explicit tagging
-                    concreteDecoder = explicitTagDecoder
+                    concreteDecoder = rawPayloadDecoder
                     state = stDecodeValue
 
                 else:
@@ -1781,25 +1822,190 @@ class Decoder(object):
             debug.scope.pop()
             LOG('decoder left scope %s, call completed' % debug.scope)
 
-        return value
+        yield value
 
 
-_decode = Decoder(tagMap, typeMap)
+class StreamingDecoder(object):
+    """Create an iterator that turns BER/CER/DER byte stream into ASN.1 objects.
+
+    On each iteration, consume whatever BER/CER/DER serialization is
+    available in the `substrate` stream-like object and turns it into
+    one or more, possibly nested, ASN.1 objects.
+
+    Parameters
+    ----------
+    substrate: :py:class:`file`, :py:class:`io.BytesIO`
+        BER/CER/DER serialization in form of a byte stream
+
+    Keyword Args
+    ------------
+    asn1Spec: :py:class:`~pyasn1.type.base.PyAsn1Item`
+        A pyasn1 type object to act as a template guiding the decoder.
+        Depending on the ASN.1 structure being decoded, `asn1Spec` may
+        or may not be required. One of the reasons why `asn1Spec` may
+        me required is that ASN.1 structure is encoded in the *IMPLICIT*
+        tagging mode.
+
+    Yields
+    ------
+    : :py:class:`~pyasn1.type.base.PyAsn1Item`, :py:class:`~pyasn1.error.SubstrateUnderrunError`
+        Decoded ASN.1 object (possibly, nested) or
+        :py:class:`~pyasn1.error.SubstrateUnderrunError` object indicating
+        insufficient BER/CER/DER serialization on input to fully recover ASN.1
+        objects from it.
+        
+        In the latter case the caller is advised to ensure some more data in
+        the input stream, then call the iterator again. The decoder will resume
+        the decoding process using the newly arrived data.
+
+        The `context` property of :py:class:`~pyasn1.error.SubstrateUnderrunError`
+        object might hold a reference to the partially populated ASN.1 object
+        being reconstructed.
+
+    Raises
+    ------
+    ~pyasn1.error.PyAsn1Error, ~pyasn1.error.EndOfStreamError
+        `PyAsn1Error` on deserialization error, `EndOfStreamError` on
+         premature stream closure.
+
+    Examples
+    --------
+    Decode BER serialisation without ASN.1 schema
+
+    .. code-block:: pycon
+
+        >>> stream = io.BytesIO(
+        ...    b'0\t\x02\x01\x01\x02\x01\x02\x02\x01\x03')
+        >>>
+        >>> for asn1Object in StreamingDecoder(stream):
+        ...     print(asn1Object)
+        >>>
+        SequenceOf:
+         1 2 3
+
+    Decode BER serialisation with ASN.1 schema
+
+    .. code-block:: pycon
+
+        >>> stream = io.BytesIO(
+        ...    b'0\t\x02\x01\x01\x02\x01\x02\x02\x01\x03')
+        >>>
+        >>> schema = SequenceOf(componentType=Integer())
+        >>>
+        >>> decoder = StreamingDecoder(stream, asn1Spec=schema)
+        >>> for asn1Object in decoder:
+        ...     print(asn1Object)
+        >>>
+        SequenceOf:
+         1 2 3
+    """
+
+    SINGLE_ITEM_DECODER = SingleItemDecoder
+
+    def __init__(self, substrate, asn1Spec=None, **options):
+        self._singleItemDecoder = self.SINGLE_ITEM_DECODER(**options)
+        self._substrate = asSeekableStream(substrate)
+        self._asn1Spec = asn1Spec
+        self._options = options
+
+    def __iter__(self):
+        while True:
+            for asn1Object in self._singleItemDecoder(
+                    self._substrate, self._asn1Spec, **self._options):
+                yield asn1Object
+
+            for chunk in isEndOfStream(self._substrate):
+                if isinstance(chunk, SubstrateUnderrunError):
+                    yield
+
+                break
+
+            if chunk:
+                break
 
 
-def decodeStream(substrate, asn1Spec=None, **kwargs):
-    """Iterator of objects in a substrate."""
-    # TODO: This should become `decode` after API-breaking approved
-    try:
-        substrate = _asSeekableStream(substrate)
-    except TypeError:
-        raise PyAsn1Error
-    while True:
-        result = _decode(substrate, asn1Spec, **kwargs)
-        if result is None:
-            break
-        yield result
-        # TODO: Check about eoo.endOfOctets?
+class Decoder(object):
+    """Create a BER decoder object.
+
+    Parse BER/CER/DER octet-stream into one, possibly nested, ASN.1 object.
+    """
+    STREAMING_DECODER = StreamingDecoder
+
+    @classmethod
+    def __call__(cls, substrate, asn1Spec=None, **options):
+        """Turns BER/CER/DER octet stream into an ASN.1 object.
+
+        Takes BER/CER/DER octet-stream in form of :py:class:`bytes` (Python 3)
+        or :py:class:`str` (Python 2) and decode it into an ASN.1 object
+        (e.g. :py:class:`~pyasn1.type.base.PyAsn1Item` derivative) which
+        may be a scalar or an arbitrary nested structure.
+
+        Parameters
+        ----------
+        substrate: :py:class:`bytes` (Python 3) or :py:class:`str` (Python 2)
+            BER/CER/DER octet-stream to parse
+
+        Keyword Args
+        ------------
+        asn1Spec: :py:class:`~pyasn1.type.base.PyAsn1Item`
+            A pyasn1 type object (:py:class:`~pyasn1.type.base.PyAsn1Item`
+            derivative) to act as a template guiding the decoder.
+            Depending on the ASN.1 structure being decoded, `asn1Spec` may or
+            may not be required. Most common reason for it to require is that
+            ASN.1 structure is encoded in *IMPLICIT* tagging mode.
+
+        Returns
+        -------
+        : :py:class:`tuple`
+            A tuple of :py:class:`~pyasn1.type.base.PyAsn1Item` object
+            recovered from BER/CER/DER substrate and the unprocessed trailing
+            portion of the `substrate` (may be empty)
+
+        Raises
+        ------
+        : :py:class:`~pyasn1.error.PyAsn1Error`
+            :py:class:`~pyasn1.error.SubstrateUnderrunError` on insufficient
+            input or :py:class:`~pyasn1.error.PyAsn1Error` on decoding error.
+
+        Examples
+        --------
+        Decode BER/CER/DER serialisation without ASN.1 schema
+
+        .. code-block:: pycon
+
+           >>> s, unprocessed = decode(b'0\t\x02\x01\x01\x02\x01\x02\x02\x01\x03')
+           >>> str(s)
+           SequenceOf:
+            1 2 3
+
+        Decode BER/CER/DER serialisation with ASN.1 schema
+
+        .. code-block:: pycon
+
+           >>> seq = SequenceOf(componentType=Integer())
+           >>> s, unprocessed = decode(
+                b'0\t\x02\x01\x01\x02\x01\x02\x02\x01\x03', asn1Spec=seq)
+           >>> str(s)
+           SequenceOf:
+            1 2 3
+
+        """
+        substrate = asSeekableStream(substrate)
+
+        streamingDecoder = cls.STREAMING_DECODER(
+            substrate, asn1Spec, **options)
+
+        for asn1Object in streamingDecoder:
+            if isinstance(asn1Object, SubstrateUnderrunError):
+                raise error.SubstrateUnderrunError('Short substrate on input')
+
+            try:
+                tail = next(readFromStream(substrate))
+
+            except error.EndOfStreamError:
+                tail = null
+
+            return asn1Object, tail
 
 
 #: Turns BER octet stream into an ASN.1 object.
@@ -1831,6 +2037,11 @@ def decodeStream(substrate, asn1Spec=None, **kwargs):
 #: ~pyasn1.error.PyAsn1Error, ~pyasn1.error.SubstrateUnderrunError
 #:     On decoding errors
 #:
+#: Notes
+#: -----
+#: This function is deprecated. Please use :py:class:`Decoder` or
+#: :py:class:`StreamingDecoder` class instance.
+#:
 #: Examples
 #: --------
 #: Decode BER serialisation without ASN.1 schema
@@ -1852,13 +2063,4 @@ def decodeStream(substrate, asn1Spec=None, **kwargs):
 #:    SequenceOf:
 #:     1 2 3
 #:
-def decode(substrate, asn1Spec=None, **kwargs):
-    # TODO: Temporary solution before merging with upstream
-    #   It preserves the original API
-    substrate = _asSeekableStream(substrate)
-    value = _decode(substrate, asn1Spec=asn1Spec, **kwargs)
-    return value, substrate.read()
-
-
-# XXX
-# non-recursive decoding; return position rather than substrate
+decode = Decoder()
