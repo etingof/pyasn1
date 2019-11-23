@@ -377,19 +377,19 @@ class RealEncoderTestCase(BaseTestCase):
 
     def testBin3(self):
         # change binEncBase in the RealEncoder instance => for all further Real
-        binEncBase, encoder.typeMap[univ.Real.typeId].binEncBase = encoder.typeMap[univ.Real.typeId].binEncBase, 16
+        binEncBase, encoder.TYPE_MAP[univ.Real.typeId].binEncBase = encoder.TYPE_MAP[univ.Real.typeId].binEncBase, 16
         assert encoder.encode(
             univ.Real((0.00390625, 2, 0))  # check encbase = 16
         ) == ints2octs((9, 3, 160, 254, 1))
-        encoder.typeMap[univ.Real.typeId].binEncBase = binEncBase
+        encoder.TYPE_MAP[univ.Real.typeId].binEncBase = binEncBase
 
     def testBin4(self):
         # choose binEncBase automatically for all further Real (testBin[4-7])
-        binEncBase, encoder.typeMap[univ.Real.typeId].binEncBase = encoder.typeMap[univ.Real.typeId].binEncBase, None
+        binEncBase, encoder.TYPE_MAP[univ.Real.typeId].binEncBase = encoder.TYPE_MAP[univ.Real.typeId].binEncBase, None
         assert encoder.encode(
             univ.Real((1, 2, 0))  # check exponent = 0
         ) == ints2octs((9, 3, 128, 0, 1))
-        encoder.typeMap[univ.Real.typeId].binEncBase = binEncBase
+        encoder.TYPE_MAP[univ.Real.typeId].binEncBase = binEncBase
 
     def testBin5(self):
         assert encoder.encode(

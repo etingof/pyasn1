@@ -103,7 +103,7 @@ class AnyEncoder(AbstractItemEncoder):
         return value.asOctets()
 
 
-tagMap = {
+TAG_MAP = {
     univ.Boolean.tagSet: BooleanEncoder(),
     univ.Integer.tagSet: IntegerEncoder(),
     univ.BitString.tagSet: BitStringEncoder(),
@@ -136,7 +136,7 @@ tagMap = {
 
 
 # Put in ambiguous & non-ambiguous types for faster codec lookup
-typeMap = {
+TYPE_MAP = {
     univ.Boolean.typeId: BooleanEncoder(),
     univ.Integer.typeId: IntegerEncoder(),
     univ.BitString.typeId: BitStringEncoder(),
@@ -171,46 +171,64 @@ typeMap = {
 }
 
 
-class Encoder(object):
+class SingleItemEncoder(object):
 
-    # noinspection PyDefaultArgument
-    def __init__(self, tagMap, typeMap={}):
-        self.__tagMap = tagMap
-        self.__typeMap = typeMap
+    TAG_MAP = TAG_MAP
+    TYPE_MAP = TYPE_MAP
+
+    def __init__(self, **options):
+        self._tagMap = options.get('tagMap', self.TAG_MAP)
+        self._typeMap = options.get('typeMap', self.TYPE_MAP)
 
     def __call__(self, value, **options):
         if not isinstance(value, base.Asn1Item):
-            raise error.PyAsn1Error('value is not valid (should be an instance of an ASN.1 Item)')
+            raise error.PyAsn1Error(
+                'value is not valid (should be an instance of an ASN.1 Item)')
 
         if LOG:
             debug.scope.push(type(value).__name__)
-            LOG('encoder called for type %s <%s>' % (type(value).__name__, value.prettyPrint()))
+            LOG('encoder called for type %s '
+                '<%s>' % (type(value).__name__, value.prettyPrint()))
 
         tagSet = value.tagSet
 
         try:
-            concreteEncoder = self.__typeMap[value.typeId]
+            concreteEncoder = self._typeMap[value.typeId]
 
         except KeyError:
             # use base type for codec lookup to recover untagged types
-            baseTagSet = tag.TagSet(value.tagSet.baseTag, value.tagSet.baseTag)
+            baseTagSet = tag.TagSet(
+                value.tagSet.baseTag, value.tagSet.baseTag)
 
             try:
-                concreteEncoder = self.__tagMap[baseTagSet]
+                concreteEncoder = self._tagMap[baseTagSet]
 
             except KeyError:
                 raise error.PyAsn1Error('No encoder for %s' % (value,))
 
         if LOG:
-            LOG('using value codec %s chosen by %s' % (concreteEncoder.__class__.__name__, tagSet))
+            LOG('using value codec %s chosen by '
+                '%s' % (concreteEncoder.__class__.__name__, tagSet))
 
         pyObject = concreteEncoder.encode(value, self, **options)
 
         if LOG:
-            LOG('encoder %s produced: %s' % (type(concreteEncoder).__name__, repr(pyObject)))
+            LOG('encoder %s produced: '
+                '%s' % (type(concreteEncoder).__name__, repr(pyObject)))
             debug.scope.pop()
 
         return pyObject
+
+
+class Encoder(object):
+    SINGLE_ITEM_ENCODER = SingleItemEncoder
+
+    def __init__(self, **options):
+        self._singleItemEncoder = self.SINGLE_ITEM_ENCODER(**options)
+
+    def __call__(self, pyObject, asn1Spec=None, **options):
+        return self._singleItemEncoder(
+            pyObject, asn1Spec=asn1Spec, **options)
 
 
 #: Turns ASN.1 object into a Python built-in type object(s).
@@ -248,4 +266,4 @@ class Encoder(object):
 #:    >>> encode(seq)
 #:    [1, 2, 3]
 #:
-encode = Encoder(tagMap, typeMap)
+encode = SingleItemEncoder()

@@ -1,4 +1,27 @@
 
+Revision 0.5.0, released XX-09-2019
+-----------------------------------
+
+- Make BER/CER/DER decodersstreaming and suspendible
+
+  The goal of this change is to make the decoder yielding on input
+  data starvation and resuming from where it stopped whenever the
+  caller decides to try again (hopefully making sure that some more
+  input becomes available).
+
+  This change makes it possible for the decoder to operate on streams
+  of data (meaning that the entire DER blob might not be immediately
+  available on input).
+
+  On top of that, the decoder yields partially reconstructed ASN.1
+  object on input starvation making it possible for the caller to
+  inspect what has been decoded so far and possibly consume partial
+  ASN.1 data.
+
+  All these new feature are natively available through
+  `StreamingDecoder` class. Previously published API is implemented
+  as a thin wrapper on top of that ensuring backward compatibility.
+
 Revision 0.4.9, released XX-11-2019
 -----------------------------------
 

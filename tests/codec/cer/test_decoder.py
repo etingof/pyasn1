@@ -37,6 +37,7 @@ class BooleanDecoderTestCase(BaseTestCase):
         except PyAsn1Error:
             pass
 
+
 class BitStringDecoderTestCase(BaseTestCase):
     def testShortMode(self):
         assert decoder.decode(

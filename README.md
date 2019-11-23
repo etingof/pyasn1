@@ -18,6 +18,7 @@ Features
 
 * Generic implementation of ASN.1 types (X.208)
 * Standards compliant BER/CER/DER codecs
+* Can operate on streams of serialized data
 * Dumps/loads ASN.1 structures from Python types
 * 100% Python, works with Python 2.7 and 3.5+
 * MT-safe
