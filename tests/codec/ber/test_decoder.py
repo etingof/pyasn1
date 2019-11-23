@@ -12,123 +12,161 @@ import tempfile
 import unittest
 import zipfile
 
-from tests.base import BaseTestCase
-
-from pyasn1.type import tag
-from pyasn1.type import namedtype
-from pyasn1.type import opentype
-from pyasn1.type import univ
-from pyasn1.type import char
+from pyasn1 import error
 from pyasn1.codec import streaming
 from pyasn1.codec.ber import decoder
 from pyasn1.codec.ber import eoo
-from pyasn1.compat.octets import ints2octs, str2octs, null
-from pyasn1 import error
+from pyasn1.compat.octets import ints2octs
+from pyasn1.compat.octets import null
+from pyasn1.compat.octets import str2octs
+from pyasn1.type import char
+from pyasn1.type import namedtype
+from pyasn1.type import opentype
+from pyasn1.type import tag
+from pyasn1.type import univ
+from tests.base import BaseTestCase
 
 
 class LargeTagDecoderTestCase(BaseTestCase):
     def testLargeTag(self):
-        assert decoder.decode(ints2octs((127, 141, 245, 182, 253, 47, 3, 2, 1, 1))) == (1, null)
+        substrate = ints2octs((127, 141, 245, 182, 253, 47, 3, 2, 1, 1))
+        expected = (1, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testLongTag(self):
-        assert decoder.decode(ints2octs((0x1f, 2, 1, 0)))[0].tagSet == univ.Integer.tagSet
+        substrate = ints2octs((0x1f, 2, 1, 0))
+        expected = univ.Integer.tagSet
+
+        self.assertEqual(expected, decoder.decode(substrate)[0].tagSet)
 
     def testTagsEquivalence(self):
-        integer = univ.Integer(2).subtype(implicitTag=tag.Tag(tag.tagClassContext, 0, 0))
-        assert decoder.decode(ints2octs((0x9f, 0x80, 0x00, 0x02, 0x01, 0x02)), asn1Spec=integer) == decoder.decode(
-            ints2octs((0x9f, 0x00, 0x02, 0x01, 0x02)), asn1Spec=integer)
+        integer = univ.Integer(2).subtype(
+            implicitTag=tag.Tag(tag.tagClassContext, 0, 0))
+
+        substrate1 = ints2octs((0x9f, 0x80, 0x00, 0x02, 0x01, 0x02))
+        substrate2 = ints2octs((0x9f, 0x00, 0x02, 0x01, 0x02))
+
+        self.assertEqual(decoder.decode(substrate1, asn1Spec=integer),
+                         decoder.decode(substrate2, asn1Spec=integer))
 
 
 class DecoderCacheTestCase(BaseTestCase):
     def testCache(self):
-        assert decoder.decode(ints2octs((0x1f, 2, 1, 0))) == decoder.decode(ints2octs((0x1f, 2, 1, 0)))
+        substrate = ints2octs((0x1f, 2, 1, 0))
+
+        self.assertEqual(decoder.decode(substrate), decoder.decode(substrate))
 
 
 class IntegerDecoderTestCase(BaseTestCase):
     def testPosInt(self):
-        assert decoder.decode(ints2octs((2, 1, 12))) == (12, null)
+        substrate = ints2octs((2, 1, 12))
+        expected = (12, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testNegInt(self):
-        assert decoder.decode(ints2octs((2, 1, 244))) == (-12, null)
+        substrate = ints2octs((2, 1, 244))
+        expected = (-12, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testZero(self):
-        assert decoder.decode(ints2octs((2, 0))) == (0, null)
+        substrate = ints2octs((2, 0))
+        expected = (0, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testZeroLong(self):
-        assert decoder.decode(ints2octs((2, 1, 0))) == (0, null)
+        substrate = ints2octs((2, 1, 0))
+        expected = (0, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testMinusOne(self):
-        assert decoder.decode(ints2octs((2, 1, 255))) == (-1, null)
+        substrate = ints2octs((2, 1, 255))
+        expected = (-1, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testPosLong(self):
-        assert decoder.decode(
-            ints2octs((2, 9, 0, 255, 255, 255, 255, 255, 255, 255, 255))
-        ) == (0xffffffffffffffff, null)
+        substrate = ints2octs(
+            (2, 9, 0, 255, 255, 255, 255, 255, 255, 255, 255))
+        expected = (0xffffffffffffffff, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testNegLong(self):
-        assert decoder.decode(
-            ints2octs((2, 9, 255, 0, 0, 0, 0, 0, 0, 0, 1))
-        ) == (-0xffffffffffffffff, null)
+        substrate = ints2octs((2, 9, 255, 0, 0, 0, 0, 0, 0, 0, 1))
+        expected = (-0xffffffffffffffff, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testSpec(self):
-        try:
-            decoder.decode(
-                ints2octs((2, 1, 12)), asn1Spec=univ.Null()
-            ) == (12, null)
-        except error.PyAsn1Error:
-            pass
-        else:
-            assert 0, 'wrong asn1Spec worked out'
-        assert decoder.decode(
-            ints2octs((2, 1, 12)), asn1Spec=univ.Integer()
-        ) == (12, null)
+        substrate = ints2octs((2, 1, 12))
+        expected = (12, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=univ.Integer()))
+
+        self.assertRaises(
+            error.PyAsn1Error, decoder.decode, substrate, asn1Spec=univ.Null())
 
     def testTagFormat(self):
-        try:
-            decoder.decode(ints2octs((34, 1, 12)))
-        except error.PyAsn1Error:
-            pass
-        else:
-            assert 0, 'wrong tagFormat worked out'
+        substrate = ints2octs((34, 1, 12))
+
+        self.assertRaises(error.PyAsn1Error, decoder.decode, substrate)
 
 
 class BooleanDecoderTestCase(BaseTestCase):
     def testTrue(self):
-        assert decoder.decode(ints2octs((1, 1, 1))) == (1, null)
+        substrate = ints2octs((1, 1, 1))
+        expected = (1, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testTrueNeg(self):
-        assert decoder.decode(ints2octs((1, 1, 255))) == (1, null)
+        substrate = ints2octs((1, 1, 255))
+        expected = (1, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testExtraTrue(self):
-        assert decoder.decode(ints2octs((1, 1, 1, 0, 120, 50, 50))) == (1, ints2octs((0, 120, 50, 50)))
+        substrate = ints2octs((1, 1, 1, 0, 120, 50, 50))
+        expected = (1, ints2octs((0, 120, 50, 50)))
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testFalse(self):
-        assert decoder.decode(ints2octs((1, 1, 0))) == (0, null)
+        substrate = ints2octs((1, 1, 0))
+        expected = (0, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testTagFormat(self):
-        try:
-            decoder.decode(ints2octs((33, 1, 1)))
-        except error.PyAsn1Error:
-            pass
-        else:
-            assert 0, 'wrong tagFormat worked out'
+        substrate = ints2octs((33, 1, 1))
+
+        self.assertRaises(error.PyAsn1Error, decoder.decode, substrate)
 
 
 class BitStringDecoderTestCase(BaseTestCase):
     def testDefMode(self):
-        assert decoder.decode(
-            ints2octs((3, 3, 1, 169, 138))
-        ) == ((1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1), null)
+        substrate = ints2octs((3, 3, 1, 169, 138))
+        expected = ((1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testIndefMode(self):
-        assert decoder.decode(
-            ints2octs((3, 3, 1, 169, 138))
-        ) == ((1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1), null)
+        substrate =  ints2octs((3, 3, 1, 169, 138))
+        expected = ((1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testDefModeChunked(self):
-        assert decoder.decode(
-            ints2octs((35, 8, 3, 2, 0, 169, 3, 2, 1, 138))
-        ) == ((1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1), null)
+        substrate = ints2octs((35, 8, 3, 2, 0, 169, 3, 2, 1, 138))
+        expected = ((1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testIndefModeChunked(self):
         assert decoder.decode(
@@ -136,309 +174,351 @@ class BitStringDecoderTestCase(BaseTestCase):
         ) == ((1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1), null)
 
     def testDefModeChunkedSubst(self):
-        assert decoder.decode(
-            ints2octs((35, 8, 3, 2, 0, 169, 3, 2, 1, 138)),
-            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)
-        ) == (ints2octs((3, 2, 0, 169, 3, 2, 1, 138)), str2octs(''))
+        substrate = ints2octs((35, 8, 3, 2, 0, 169, 3, 2, 1, 138))
+        expected = (ints2octs((3, 2, 0, 169, 3, 2, 1, 138)), str2octs(''))
+
+        self.assertEqual(
+            expected, decoder.decode(
+                substrate,
+                substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)))
 
     def testIndefModeChunkedSubst(self):
-        assert decoder.decode(
-            ints2octs((35, 128, 3, 2, 0, 169, 3, 2, 1, 138, 0, 0)),
-            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)
-        ) == (ints2octs((3, 2, 0, 169, 3, 2, 1, 138, 0, 0)), str2octs(''))
+        substrate = ints2octs((35, 128, 3, 2, 0, 169, 3, 2, 1, 138, 0, 0))
+        expected = (ints2octs((3, 2, 0, 169, 3, 2, 1, 138, 0, 0)), str2octs(''))
+
+        self.assertEqual(
+            expected, decoder.decode(
+                substrate,
+                substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)))
 
     def testTypeChecking(self):
-        try:
-            decoder.decode(ints2octs((35, 4, 2, 2, 42, 42)))
-        except error.PyAsn1Error:
-            pass
-        else:
-            assert 0, 'accepted mis-encoded bit-string constructed out of an integer'
+        substrate = ints2octs((35, 4, 2, 2, 42, 42))
 
+        self.assertRaises(error.PyAsn1Error, decoder.decode, substrate)
 
 class OctetStringDecoderTestCase(BaseTestCase):
     def testDefMode(self):
-        assert decoder.decode(
-            ints2octs((4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120))
-        ) == (str2octs('Quick brown fox'), null)
+        substrate = ints2octs(
+            (4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111,
+             119, 110, 32, 102, 111, 120))
+        expected = (str2octs('Quick brown fox'), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testIndefMode(self):
-        assert decoder.decode(
-            ints2octs((36, 128, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120, 0, 0))
-        ) == (str2octs('Quick brown fox'), null)
+        substrate = ints2octs(
+            (36, 128, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119,
+             110, 32, 102, 111, 120, 0, 0))
+        expected = (str2octs('Quick brown fox'), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testDefModeChunked(self):
-        assert decoder.decode(
-            ints2octs(
-                (36, 23, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120))
-        ) == (str2octs('Quick brown fox'), null)
+        substrate =  ints2octs(
+                (36, 23, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4,
+                 4, 111, 119, 110, 32, 4, 3, 102, 111, 120))
+        expected = (str2octs('Quick brown fox'), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testIndefModeChunked(self):
-        assert decoder.decode(
-            ints2octs((36, 128, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120, 0, 0))
-        ) == (str2octs('Quick brown fox'), null)
+        substrate = ints2octs(
+            (36, 128, 4, 4, 81, 117, 105, 99, 4, 4, 107,32, 98, 114, 4, 4,
+             111, 119, 110, 32, 4, 3, 102, 111, 120, 0, 0))
+        expected = (str2octs('Quick brown fox'), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testDefModeChunkedSubst(self):
-        assert decoder.decode(
-            ints2octs(
-                (36, 23, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120)),
-            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)
-        ) == (ints2octs((4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120)), str2octs(''))
+        substrate = ints2octs(
+            (36, 23, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4,
+             111, 119, 110, 32, 4, 3, 102, 111, 120))
+        expected = (ints2octs(
+            (4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119,
+             110, 32, 4, 3, 102, 111, 120)), str2octs(''))
+
+        self.assertEqual(expected, decoder.decode(
+            substrate,
+            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)))
 
     def testIndefModeChunkedSubst(self):
-        assert decoder.decode(
-            ints2octs((36, 128, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111,
-                       120, 0, 0)),
-            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)
-        ) == (ints2octs(
-            (4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120, 0, 0)), str2octs(''))
+        substrate = ints2octs(
+            (36, 128, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4,
+             111, 119, 110, 32, 4, 3, 102, 111, 120, 0, 0))
+        expected = (ints2octs(
+            (4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119,
+             110, 32, 4, 3, 102, 111, 120, 0, 0)), str2octs(''))
+
+        self.assertEqual(expected, decoder.decode(
+            substrate,
+            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)))
 
 
 class ExpTaggedOctetStringDecoderTestCase(BaseTestCase):
     def setUp(self):
         BaseTestCase.setUp(self)
-        self.o = univ.OctetString(
-            'Quick brown fox',
-            tagSet=univ.OctetString.tagSet.tagExplicitly(
-                tag.Tag(tag.tagClassApplication, tag.tagFormatSimple, 5)
-            ))
+
+        tagSet = univ.OctetString.tagSet.tagExplicitly(
+            tag.Tag(tag.tagClassApplication, tag.tagFormatSimple, 5))
+
+        self.obj = univ.OctetString('Quick brown fox', tagSet=tagSet)
+
 
     def testDefMode(self):
-        o, r = decoder.decode(
-            ints2octs((101, 17, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120))
-        )
-        assert not r
-        assert self.o == o
-        assert self.o.tagSet == o.tagSet
-        assert self.o.isSameTypeWith(o)
+        substrate = ints2octs(
+            (101, 17, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119,
+             110, 32, 102, 111, 120))
+
+        obj, rest = decoder.decode(substrate)
+
+        self.assertFalse(rest)
+        self.assertEqual(self.obj, obj)
+        self.assertEqual(self.obj.tagSet, obj.tagSet)
+        self.assertTrue(self.obj.isSameTypeWith(obj))
 
     def testIndefMode(self):
-        o, r = decoder.decode(
-            ints2octs((101, 128, 36, 128, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120, 0, 0, 0, 0))
-        )
-        assert not r
-        assert self.o == o
-        assert self.o.tagSet == o.tagSet
-        assert self.o.isSameTypeWith(o)
+        substrate = ints2octs(
+            (101, 128, 36, 128, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114,
+             111, 119, 110, 32, 102, 111, 120, 0, 0, 0, 0))
+
+        obj, rest = decoder.decode(substrate)
+
+        self.assertFalse(rest)
+        self.assertEqual(self.obj, obj)
+        self.assertEqual(self.obj.tagSet, obj.tagSet)
+        self.assertTrue(self.obj.isSameTypeWith(obj))
 
     def testDefModeChunked(self):
-        o, r = decoder.decode(
-            ints2octs((101, 25, 36, 23, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120))
-        )
-        assert not r
-        assert self.o == o
-        assert self.o.tagSet == o.tagSet
-        assert self.o.isSameTypeWith(o)
+        substrate = ints2octs(
+            (101, 25, 36, 23, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114,
+             4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120))
+
+        obj, rest = decoder.decode(substrate)
+
+        self.assertFalse(rest)
+        self.assertEqual(self.obj, obj)
+        self.assertEqual(self.obj.tagSet, obj.tagSet)
+        self.assertTrue(self.obj.isSameTypeWith(obj))
 
     def testIndefModeChunked(self):
-        o, r = decoder.decode(
-            ints2octs((101, 128, 36, 128, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120, 0, 0, 0, 0))
-        )
-        assert not r
-        assert self.o == o
-        assert self.o.tagSet == o.tagSet
-        assert self.o.isSameTypeWith(o)
+        substrate = ints2octs(
+            (101, 128, 36, 128, 4, 4, 81, 117, 105, 99, 4, 4, 107, 32, 98, 114,
+             4, 4, 111, 119, 110, 32, 4, 3, 102, 111, 120, 0, 0, 0, 0))
+
+        obj, rest = decoder.decode(substrate)
+
+        self.assertFalse(rest)
+        self.assertEqual(self.obj, obj)
+        self.assertEqual(self.obj.tagSet, obj.tagSet)
+        self.assertTrue(self.obj.isSameTypeWith(obj))
 
     def testDefModeSubst(self):
-        assert decoder.decode(
-            ints2octs((101, 17, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120)),
-            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)
-        ) == (ints2octs((4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120)), str2octs(''))
+        substrate = ints2octs(
+            (101, 17, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110,
+             32, 102, 111, 120))
+        expected = (ints2octs(
+            (4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102,
+             111, 120)), str2octs(''))
+
+        self.assertEqual(expected, decoder.decode(
+            substrate,
+            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)))
 
     def testIndefModeSubst(self):
-        assert decoder.decode(
-            ints2octs((
-                      101, 128, 36, 128, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120, 0,
-                      0, 0, 0)),
-            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)
-        ) == (ints2octs(
-            (36, 128, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 32, 102, 111, 120, 0, 0, 0, 0)), str2octs(''))
+        substrate = ints2octs(
+            (101, 128, 36, 128, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111,
+             119, 110, 32, 102, 111, 120, 0, 0, 0, 0))
+        expected = (ints2octs(
+            (36, 128, 4, 15, 81, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110,
+             32, 102, 111, 120, 0, 0, 0, 0)), str2octs(''))
+
+        self.assertEqual(expected, decoder.decode(
+            substrate,
+            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)))
 
 
 class NullDecoderTestCase(BaseTestCase):
     def testNull(self):
-        assert decoder.decode(ints2octs((5, 0))) == (null, null)
+        substrate = ints2octs((5, 0))
+        expected = (null, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testTagFormat(self):
-        try:
-            decoder.decode(ints2octs((37, 0)))
-        except error.PyAsn1Error:
-            pass
-        else:
-            assert 0, 'wrong tagFormat worked out'
+        substrate = ints2octs((37, 0))
+
+        self.assertRaises(error.PyAsn1Error, decoder.decode, substrate)
 
 
 # Useful analysis of OID encoding issues could be found here:
 # https://misc.daniel-marschall.de/asn.1/oid_facts.html
 class ObjectIdentifierDecoderTestCase(BaseTestCase):
     def testOne(self):
-        assert decoder.decode(
-            ints2octs((6, 6, 43, 6, 0, 191, 255, 126))
-        ) == ((1, 3, 6, 0, 0xffffe), null)
+        substrate = ints2octs((6, 6, 43, 6, 0, 191, 255, 126))
+        expected = ((1, 3, 6, 0, 0xffffe), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testEdge1(self):
-        assert decoder.decode(
-            ints2octs((6, 1, 39))
-        ) == ((0, 39), null)
+        substrate = ints2octs((6, 1, 39))
+        expected = ((0, 39), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testEdge2(self):
-        assert decoder.decode(
-            ints2octs((6, 1, 79))
-        ) == ((1, 39), null)
+        substrate = ints2octs((6, 1, 79))
+        expected = ((1, 39), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testEdge3(self):
-        assert decoder.decode(
-            ints2octs((6, 1, 120))
-        ) == ((2, 40), null)
+        substrate = ints2octs((6, 1, 120))
+        expected = ((2, 40), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testEdge4(self):
-        assert decoder.decode(
-            ints2octs((6, 5, 0x90, 0x80, 0x80, 0x80, 0x4F))
-        ) == ((2, 0xffffffff), null)
+        substrate = ints2octs((6, 5, 0x90, 0x80, 0x80, 0x80, 0x4F))
+        expected = ((2, 0xffffffff), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testEdge5(self):
-        assert decoder.decode(
-            ints2octs((6, 1, 0x7F))
-        ) == ((2, 47), null)
+        substrate = ints2octs((6, 1, 0x7F))
+        expected = ((2, 47), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testEdge6(self):
-        assert decoder.decode(
-            ints2octs((6, 2, 0x81, 0x00))
-        ) == ((2, 48), null)
+        substrate = ints2octs((6, 2, 0x81, 0x00))
+        expected = ((2, 48), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testEdge7(self):
-        assert decoder.decode(
-            ints2octs((6, 3, 0x81, 0x34, 0x03))
-        ) == ((2, 100, 3), null)
+        substrate = ints2octs((6, 3, 0x81, 0x34, 0x03))
+        expected = ((2, 100, 3), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testEdge8(self):
-        assert decoder.decode(
-            ints2octs((6, 2, 133, 0))
-        ) == ((2, 560), null)
+        substrate = ints2octs((6, 2, 133, 0))
+        expected = ((2, 560), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testEdge9(self):
-        assert decoder.decode(
-            ints2octs((6, 4, 0x88, 0x84, 0x87, 0x02))
-        ) == ((2, 16843570), null)
+        substrate = ints2octs((6, 4, 0x88, 0x84, 0x87, 0x02))
+        expected = ((2, 16843570), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testNonLeading0x80(self):
-        assert decoder.decode(
-            ints2octs((6, 5, 85, 4, 129, 128, 0)),
-        ) == ((2, 5, 4, 16384), null)
+        substrate = ints2octs((6, 5, 85, 4, 129, 128, 0))
+        expected = ((2, 5, 4, 16384), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testLeading0x80Case1(self):
-        try:
-            decoder.decode(
-                ints2octs((6, 5, 85, 4, 128, 129, 0))
-            )
-        except error.PyAsn1Error:
-            pass
-        else:
-            assert 0, 'Leading 0x80 tolerated'
+        substrate = ints2octs((6, 5, 85, 4, 128, 129, 0))
+
+        self.assertRaises(error.PyAsn1Error, decoder.decode, substrate)
 
     def testLeading0x80Case2(self):
-        try:
-            decoder.decode(
-                ints2octs((6, 7, 1, 0x80, 0x80, 0x80, 0x80, 0x80, 0x7F))
-            )
-        except error.PyAsn1Error:
-            pass
-        else:
-            assert 0, 'Leading 0x80 tolerated'
+        substrate = ints2octs(
+            (6, 7, 1, 0x80, 0x80, 0x80, 0x80, 0x80, 0x7F))
+
+        self.assertRaises(error.PyAsn1Error, decoder.decode, substrate)
 
     def testLeading0x80Case3(self):
-        try:
-            decoder.decode(
-                ints2octs((6, 2, 0x80, 1))
-            )
-        except error.PyAsn1Error:
-            pass
-        else:
-            assert 0, 'Leading 0x80 tolerated'
+        substrate = ints2octs((6, 2, 0x80, 1))
+
+        self.assertRaises(error.PyAsn1Error, decoder.decode, substrate)
 
     def testLeading0x80Case4(self):
-        try:
-            decoder.decode(
-                ints2octs((6, 2, 0x80, 0x7F))
-            )
-        except error.PyAsn1Error:
-            pass
-        else:
-            assert 0, 'Leading 0x80 tolerated'
+        substrate = ints2octs((6, 2, 0x80, 0x7F))
+
+        self.assertRaises(error.PyAsn1Error, decoder.decode, substrate)
 
     def testTagFormat(self):
-        try:
-            decoder.decode(ints2octs((38, 1, 239)))
-        except error.PyAsn1Error:
-            pass
-        else:
-            assert 0, 'wrong tagFormat worked out'
+        substrate = ints2octs((38, 1, 239))
+
+        self.assertRaises(error.PyAsn1Error, decoder.decode, substrate)
 
     def testZeroLength(self):
-        try:
-            decoder.decode(ints2octs((6, 0, 0)))
-        except error.PyAsn1Error:
-            pass
-        else:
-            assert 0, 'zero length tolerated'
+        substrate = ints2octs((6, 0, 0))
+
+        self.assertRaises(error.PyAsn1Error, decoder.decode, substrate)
 
     def testIndefiniteLength(self):
-        try:
-            decoder.decode(ints2octs((6, 128, 0)))
-        except error.PyAsn1Error:
-            pass
-        else:
-            assert 0, 'indefinite length tolerated'
+        substrate = ints2octs((6, 128, 0))
+
+        self.assertRaises(error.PyAsn1Error, decoder.decode, substrate)
 
     def testReservedLength(self):
-        try:
-            decoder.decode(ints2octs((6, 255, 0)))
-        except error.PyAsn1Error:
-            pass
-        else:
-            assert 0, 'reserved length tolerated'
+        substrate = ints2octs((6, 255, 0))
+
+        self.assertRaises(error.PyAsn1Error, decoder.decode, substrate)
 
     def testLarge1(self):
-        assert decoder.decode(
-            ints2octs((0x06, 0x11, 0x83, 0xC6, 0xDF, 0xD4, 0xCC, 0xB3, 0xFF, 0xFF, 0xFE, 0xF0, 0xB8, 0xD6, 0xB8, 0xCB, 0xE2, 0xB7, 0x17))
-        ) == ((2, 18446744073709551535184467440737095), null)
+        substrate = ints2octs(
+            (0x06, 0x11, 0x83, 0xC6, 0xDF, 0xD4, 0xCC, 0xB3, 0xFF, 0xFF,
+             0xFE, 0xF0, 0xB8, 0xD6, 0xB8, 0xCB, 0xE2, 0xB7, 0x17))
+        expected = ((2, 18446744073709551535184467440737095), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testLarge2(self):
-        assert decoder.decode(
-            ints2octs((0x06, 0x13, 0x88, 0x37, 0x83, 0xC6, 0xDF, 0xD4, 0xCC, 0xB3, 0xFF, 0xFF, 0xFE, 0xF0, 0xB8, 0xD6, 0xB8, 0xCB, 0xE2, 0xB6, 0x47))
-        ) == ((2, 999, 18446744073709551535184467440737095), null)
+        substrate = ints2octs(
+            (0x06, 0x13, 0x88, 0x37, 0x83, 0xC6, 0xDF, 0xD4, 0xCC, 0xB3,
+             0xFF, 0xFF, 0xFE, 0xF0, 0xB8, 0xD6, 0xB8, 0xCB, 0xE2, 0xB6,
+             0x47))
+        expected = ((2, 999, 18446744073709551535184467440737095), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
 
 class RealDecoderTestCase(BaseTestCase):
     def testChar(self):
-        assert decoder.decode(
-            ints2octs((9, 7, 3, 49, 50, 51, 69, 49, 49))
-        ) == (univ.Real((123, 10, 11)), null)
+        substrate = ints2octs((9, 7, 3, 49, 50, 51, 69, 49, 49))
+        expected = (univ.Real((123, 10, 11)), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testBin1(self):  # check base = 2
-        assert decoder.decode(  # (0.5, 2, 0) encoded with base = 2
-            ints2octs((9, 3, 128, 255, 1))
-        ) == (univ.Real((1, 2, -1)), null)
+        #  (0.5, 2, 0) encoded with base = 2
+        substrate = ints2octs((9, 3, 128, 255, 1))
+        expected = (univ.Real((1, 2, -1)), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testBin2(self):  # check base = 2 and scale factor
-        assert decoder.decode(  # (3.25, 2, 0) encoded with base = 8
-            ints2octs((9, 3, 148, 255, 13))
-        ) == (univ.Real((26, 2, -3)), null)
+        #  (3.25, 2, 0) encoded with base = 8
+        substrate = ints2octs((9, 3, 148, 255, 13))
+        expected = (univ.Real((26, 2, -3)), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testBin3(self):  # check base = 16
-        assert decoder.decode(  # (0.00390625, 2, 0) encoded with base = 16
-            ints2octs((9, 3, 160, 254, 1))
-        ) == (univ.Real((1, 2, -8)), null)
+        #  (0.00390625, 2, 0) encoded with base = 16
+        substrate = ints2octs((9, 3, 160, 254, 1))
+        expected = (univ.Real((1, 2, -8)), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testBin4(self):  # check exponent = 0
-        assert decoder.decode(  # (1, 2, 0) encoded with base = 2
-            ints2octs((9, 3, 128, 0, 1))
-        ) == (univ.Real((1, 2, 0)), null)
+        #  (1, 2, 0) encoded with base = 2
+        substrate = ints2octs((9, 3, 128, 0, 1))
+        expected = (univ.Real((1, 2, 0)), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testBin5(self):  # case of 2 octs for exponent and negative exponent
-        assert decoder.decode(  # (3, 2, -1020) encoded with base = 16
-            ints2octs((9, 4, 161, 255, 1, 3))
-        ) == (univ.Real((3, 2, -1020)), null)
+        #  (3, 2, -1020) encoded with base = 16
+        substrate = ints2octs((9, 4, 161, 255, 1, 3))
+        expected = (univ.Real((3, 2, -1020)), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
 # TODO: this requires Real type comparison fix
 
@@ -453,386 +533,558 @@ class RealDecoderTestCase(BaseTestCase):
 #        ) == (univ.Real((-1, 2, 76354972)), null)
 
     def testPlusInf(self):
-        assert decoder.decode(
-            ints2octs((9, 1, 64))
-        ) == (univ.Real('inf'), null)
+        substrate = ints2octs((9, 1, 64))
+        expected = (univ.Real('inf'), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testMinusInf(self):
-        assert decoder.decode(
-            ints2octs((9, 1, 65))
-        ) == (univ.Real('-inf'), null)
+        substrate = ints2octs((9, 1, 65))
+        expected = (univ.Real('-inf'), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testEmpty(self):
-        assert decoder.decode(
-            ints2octs((9, 0))
-        ) == (univ.Real(0.0), null)
+        substrate = ints2octs((9, 0))
+        expected = (univ.Real(0.0), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testTagFormat(self):
-        try:
-            decoder.decode(ints2octs((41, 0)))
-        except error.PyAsn1Error:
-            pass
-        else:
-            assert 0, 'wrong tagFormat worked out'
+        substrate = ints2octs((41, 0))
+
+        self.assertRaises(error.PyAsn1Error, decoder.decode, substrate)
 
     def testShortEncoding(self):
-        try:
-            decoder.decode(ints2octs((9, 1, 131)))
-        except error.PyAsn1Error:
-            pass
-        else:
-            assert 0, 'accepted too-short real'
+        substrate = ints2octs((9, 1, 131))
+
+        self.assertRaises(error.PyAsn1Error, decoder.decode, substrate)
 
 
 class UniversalStringDecoderTestCase(BaseTestCase):
     def testDecoder(self):
-        assert decoder.decode(ints2octs((28, 12, 0, 0, 0, 97, 0, 0, 0, 98, 0, 0, 0, 99))) == (char.UniversalString(sys.version_info[0] >= 3 and 'abc' or unicode('abc')), null)
+        substrate = ints2octs((28, 12, 0, 0, 0, 97, 0, 0, 0, 98, 0, 0, 0, 99))
+        expected = (
+            char.UniversalString(
+                sys.version_info[0] >= 3 and 'abc' or unicode('abc')), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
 
 class BMPStringDecoderTestCase(BaseTestCase):
     def testDecoder(self):
-        assert decoder.decode(ints2octs((30, 6, 0, 97, 0, 98, 0, 99))) == (char.BMPString(sys.version_info[0] >= 3 and 'abc' or unicode('abc')), null)
+        substrate = ints2octs((30, 6, 0, 97, 0, 98, 0, 99))
+        expected = (
+            char.BMPString(
+                sys.version_info[0] >= 3 and 'abc' or unicode('abc')), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
 
 class UTF8StringDecoderTestCase(BaseTestCase):
     def testDecoder(self):
-        assert decoder.decode(ints2octs((12, 3, 97, 98, 99))) == (char.UTF8String(sys.version_info[0] >= 3 and 'abc' or unicode('abc')), null)
+        substrate = ints2octs((12, 3, 97, 98, 99))
+        expected = (
+            char.UTF8String(
+                sys.version_info[0] >= 3 and 'abc' or unicode('abc')), null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
 
 class SequenceOfDecoderTestCase(BaseTestCase):
     def setUp(self):
         BaseTestCase.setUp(self)
 
-        self.s = univ.SequenceOf(componentType=univ.OctetString())
-        self.s.setComponentByPosition(0, univ.OctetString('quick brown'))
+        self.seq = univ.SequenceOf(componentType=univ.OctetString())
+        self.seq.setComponentByPosition(0, univ.OctetString('quick brown'))
 
     def testDefMode(self):
-        assert decoder.decode(
-            ints2octs((48, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110))
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (48, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+             119, 110))
+        expected = (self.seq, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testIndefMode(self):
-        assert decoder.decode(
-            ints2octs((48, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0))
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (48, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+             119, 110, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testDefModeChunked(self):
-        assert decoder.decode(
-            ints2octs((48, 19, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110))
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (48, 19, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98,
+             114, 4, 3, 111, 119, 110))
+        expected = (self.seq, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testIndefModeChunked(self):
-        assert decoder.decode(
-            ints2octs((48, 128, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 0, 0))
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (48, 128, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98,
+             114, 4, 3, 111, 119, 110, 0, 0, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testSchemalessDecoder(self):
-        assert decoder.decode(
-            ints2octs((48, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=univ.SequenceOf()
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (48, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119,
+             110))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=univ.SequenceOf()))
 
 
 class ExpTaggedSequenceOfDecoderTestCase(BaseTestCase):
 
     def testWithSchema(self):
-        s = univ.SequenceOf().subtype(explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatConstructed, 3))
-        s2, r = decoder.decode(
-            ints2octs((163, 15, 48, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=s
-        )
-        assert not r
-        assert s2 == [str2octs('quick brown')]
-        assert s.tagSet == s2.tagSet
+        substrate = ints2octs(
+            (163, 15, 48, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114,
+             111, 119, 110))
+
+        seq1 = univ.SequenceOf().subtype(
+            explicitTag=tag.Tag(
+                tag.tagClassContext, tag.tagFormatConstructed, 3))
+
+        seq2, r = decoder.decode(substrate, asn1Spec=seq1)
+
+        self.assertFalse(r)
+        self.assertEqual([str2octs('quick brown')], seq2)
+        self.assertEqual(seq2.tagSet, seq1.tagSet)
 
     def testWithoutSchema(self):
-        s = univ.SequenceOf().subtype(explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatConstructed, 3))
-        s2, r = decoder.decode(
-            ints2octs((163, 15, 48, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110))
-        )
-        assert not r
-        assert s2 == [str2octs('quick brown')]
-        assert s.tagSet == s2.tagSet
+        substrate = ints2octs(
+            (163, 15, 48, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+             119, 110))
+
+        seq1 = univ.SequenceOf().subtype(
+            explicitTag=tag.Tag(
+                tag.tagClassContext, tag.tagFormatConstructed, 3))
+
+        seq2, r = decoder.decode(substrate)
+
+        self.assertFalse(r)
+        self.assertEqual([str2octs('quick brown')], seq2)
+        self.assertEqual(seq2.tagSet, seq1.tagSet)
 
 
 class SequenceOfDecoderWithSchemaTestCase(BaseTestCase):
     def setUp(self):
         BaseTestCase.setUp(self)
-        self.s = univ.SequenceOf(componentType=univ.OctetString())
-        self.s.setComponentByPosition(0, univ.OctetString('quick brown'))
+
+        self.seq = univ.SequenceOf(
+            componentType=univ.OctetString())
+        self.seq.setComponentByPosition(
+            0, univ.OctetString('quick brown'))
 
     def testDefMode(self):
-        assert decoder.decode(
-            ints2octs((48, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=self.s
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (48, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119,
+             110))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testIndefMode(self):
-        assert decoder.decode(
-            ints2octs((48, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (48, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119,
+             110, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testDefModeChunked(self):
-        assert decoder.decode(
-            ints2octs((48, 19, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110)), asn1Spec=self.s
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (48, 19, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114,
+             4, 3, 111, 119, 110))
+        expected = (self.seq, null)
+
+        self.assertEqual(expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testIndefModeChunked(self):
-        assert decoder.decode(
-            ints2octs((48, 128, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 0, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (48, 128, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114,
+             4, 3, 111, 119, 110, 0, 0, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
 
 class SetOfDecoderTestCase(BaseTestCase):
     def setUp(self):
         BaseTestCase.setUp(self)
-        self.s = univ.SetOf(componentType=univ.OctetString())
-        self.s.setComponentByPosition(0, univ.OctetString('quick brown'))
+
+        self.seq = univ.SetOf(
+            componentType=univ.OctetString())
+        self.seq.setComponentByPosition(
+            0, univ.OctetString('quick brown'))
 
     def testDefMode(self):
-        assert decoder.decode(
-            ints2octs((49, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110))
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (49, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+             119, 110))
+        expected = (self.seq, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testIndefMode(self):
-        assert decoder.decode(
-            ints2octs((49, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0))
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (49, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+             119, 110, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testDefModeChunked(self):
-        assert decoder.decode(
-            ints2octs((49, 19, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110))
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (49, 19, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98,
+             114, 4, 3, 111, 119, 110))
+        expected = (self.seq, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testIndefModeChunked(self):
-        assert decoder.decode(
-            ints2octs((49, 128, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 0, 0))
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (49, 128, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98,
+             114, 4, 3, 111, 119, 110, 0, 0, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testSchemalessDecoder(self):
-        assert decoder.decode(
-            ints2octs((49, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=univ.SetOf()
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (49, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119,
+             110))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=univ.SetOf()))
 
 
 class SetOfDecoderWithSchemaTestCase(BaseTestCase):
     def setUp(self):
         BaseTestCase.setUp(self)
-        self.s = univ.SetOf(componentType=univ.OctetString())
-        self.s.setComponentByPosition(0, univ.OctetString('quick brown'))
+
+        self.seq = univ.SetOf(
+            componentType=univ.OctetString())
+        self.seq.setComponentByPosition(
+            0, univ.OctetString('quick brown'))
 
     def testDefMode(self):
-        assert decoder.decode(
-            ints2octs((49, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=self.s
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (49, 13, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+             119, 110))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testIndefMode(self):
-        assert decoder.decode(
-            ints2octs((49, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (49, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+             119, 110, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testDefModeChunked(self):
-        assert decoder.decode(
-            ints2octs((49, 19, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110)), asn1Spec=self.s
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (49, 19, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98,
+             114, 4, 3, 111, 119, 110))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testIndefModeChunked(self):
-        assert decoder.decode(
-            ints2octs((49, 128, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 0, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (49, 128, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98,
+             114, 4, 3, 111, 119, 110, 0, 0, 0, 0))
+
+        expected = (self.seq, null)
+
+        self.assertEqual(expected, decoder.decode(substrate, asn1Spec=self.seq))
 
 
 class SequenceDecoderTestCase(BaseTestCase):
     def setUp(self):
         BaseTestCase.setUp(self)
-        self.s = univ.Sequence(
+
+        self.seq = univ.Sequence(
             componentType=namedtype.NamedTypes(
                 namedtype.NamedType('place-holder', univ.Null(null)),
                 namedtype.NamedType('first-name', univ.OctetString(null)),
                 namedtype.NamedType('age', univ.Integer(33))
             )
         )
-        self.s.setComponentByPosition(0, univ.Null(null))
-        self.s.setComponentByPosition(1, univ.OctetString('quick brown'))
-        self.s.setComponentByPosition(2, univ.Integer(1))
+
+        self.seq.setComponentByPosition(0, univ.Null(null))
+        self.seq.setComponentByPosition(1, univ.OctetString('quick brown'))
+        self.seq.setComponentByPosition(2, univ.Integer(1))
 
     def testWithOptionalAndDefaultedDefMode(self):
-        assert decoder.decode(
-            ints2octs((48, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1))
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (48, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+             119, 110, 2, 1, 1))
+        expected = (self.seq, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testWithOptionalAndDefaultedIndefMode(self):
-        assert decoder.decode(
-            ints2octs((48, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0))
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (48, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98,
+             114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testWithOptionalAndDefaultedDefModeChunked(self):
-        assert decoder.decode(
-            ints2octs(
-                (48, 24, 5, 0, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 2, 1, 1))
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (48, 24, 5, 0, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32,
+             98, 114, 4, 3, 111, 119, 110, 2, 1, 1))
+        expected = (self.seq, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testWithOptionalAndDefaultedIndefModeChunked(self):
-        assert decoder.decode(
-            ints2octs((48, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0))
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (48, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32,
+             98, 114, 4, 3, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testWithOptionalAndDefaultedDefModeSubst(self):
-        assert decoder.decode(
-            ints2octs((48, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1)),
-            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)
-        ) == (ints2octs((5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1)), str2octs(''))
+        substrate = ints2octs(
+            (48, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+             119, 110, 2, 1, 1))
+        expected = (
+            ints2octs((5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+                       119, 110, 2, 1, 1)), str2octs(''))
+
+        self.assertEqual(
+            expected, decoder.decode(
+                substrate,
+                substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)))
 
     def testWithOptionalAndDefaultedIndefModeSubst(self):
-        assert decoder.decode(
-            ints2octs((48, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)),
-            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)
-        ) == (ints2octs(
-            (5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)), str2octs(''))
+        substrate = ints2octs(
+            (48, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98,
+             114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0))
+        expected = (
+            ints2octs((5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98,
+                       114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)), str2octs(''))
+
+        self.assertEqual(
+            expected, decoder.decode(
+                substrate,
+                substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)))
 
     def testTagFormat(self):
-        try:
-            decoder.decode(
-                ints2octs((16, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1))
-            )
-        except error.PyAsn1Error:
-            pass
-        else:
-            assert 0, 'wrong tagFormat worked out'
+        substrate = ints2octs(
+            (16, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+             119, 110, 2, 1, 1))
+
+        self.assertRaises(error.PyAsn1Error, decoder.decode, substrate)
 
 
 class SequenceDecoderWithSchemaTestCase(BaseTestCase):
     def setUp(self):
         BaseTestCase.setUp(self)
-        self.s = univ.Sequence(
+
+        self.seq = univ.Sequence(
             componentType=namedtype.NamedTypes(
                 namedtype.NamedType('place-holder', univ.Null(null)),
                 namedtype.OptionalNamedType('first-name', univ.OctetString()),
-                namedtype.DefaultedNamedType('age', univ.Integer(33)),
-            )
-        )
+                namedtype.DefaultedNamedType('age', univ.Integer(33))))
 
-    def __init(self):
-        self.s.clear()
-        self.s.setComponentByPosition(0, univ.Null(null))
+    def _init(self):
+        self.seq.clear()
+        self.seq.setComponentByPosition(0, univ.Null(null))
 
-    def __initWithOptional(self):
-        self.s.clear()
-        self.s.setComponentByPosition(0, univ.Null(null))
-        self.s.setComponentByPosition(1, univ.OctetString('quick brown'))
+    def _initWithOptional(self):
+        self.seq.clear()
+        self.seq.setComponentByPosition(0, univ.Null(null))
+        self.seq.setComponentByPosition(1, univ.OctetString('quick brown'))
 
-    def __initWithDefaulted(self):
-        self.s.clear()
-        self.s.setComponentByPosition(0, univ.Null(null))
-        self.s.setComponentByPosition(2, univ.Integer(1))
+    def _initWithDefaulted(self):
+        self.seq.clear()
+        self.seq.setComponentByPosition(0, univ.Null(null))
+        self.seq.setComponentByPosition(2, univ.Integer(1))
 
-    def __initWithOptionalAndDefaulted(self):
-        self.s.clear()
-        self.s.setComponentByPosition(0, univ.Null(null))
-        self.s.setComponentByPosition(1, univ.OctetString('quick brown'))
-        self.s.setComponentByPosition(2, univ.Integer(1))
+    def _initWithOptionalAndDefaulted(self):
+        self.seq.clear()
+        self.seq.setComponentByPosition(0, univ.Null(null))
+        self.seq.setComponentByPosition(1, univ.OctetString('quick brown'))
+        self.seq.setComponentByPosition(2, univ.Integer(1))
 
     def testDefMode(self):
-        self.__init()
-        assert decoder.decode(
-            ints2octs((48, 2, 5, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._init()
+
+        substrate = ints2octs((48, 2, 5, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testIndefMode(self):
-        self.__init()
-        assert decoder.decode(
-            ints2octs((48, 128, 5, 0, 0, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._init()
+
+        substrate = ints2octs((48, 128, 5, 0, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testDefModeChunked(self):
-        self.__init()
-        assert decoder.decode(
-            ints2octs((48, 2, 5, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._init()
+
+        substrate = ints2octs((48, 2, 5, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testIndefModeChunked(self):
-        self.__init()
-        assert decoder.decode(
-            ints2octs((48, 128, 5, 0, 0, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._init()
+
+        substrate = ints2octs((48, 128, 5, 0, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithOptionalDefMode(self):
-        self.__initWithOptional()
-        assert decoder.decode(
-            ints2octs((48, 15, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithOptional()
+
+        substrate = ints2octs(
+            (48, 15, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+             119, 110))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithOptionaIndefMode(self):
-        self.__initWithOptional()
-        assert decoder.decode(
-            ints2octs((48, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 0, 0)),
-            asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithOptional()
+
+        substrate = ints2octs(
+            (48, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98,
+             114, 111, 119, 110, 0, 0, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithOptionalDefModeChunked(self):
-        self.__initWithOptional()
-        assert decoder.decode(
-            ints2octs((48, 21, 5, 0, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110)),
-            asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithOptional()
+
+        substrate = ints2octs(
+            (48, 21, 5, 0, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32,
+             98, 114, 4, 3, 111, 119, 110))
+
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithOptionalIndefModeChunked(self):
-        self.__initWithOptional()
-        assert decoder.decode(
-            ints2octs((48, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0,
-                       0, 0, 0)),
-            asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithOptional()
+
+        substrate = ints2octs(
+            (48, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32,
+             98, 114, 4, 3, 111, 119, 110, 0, 0, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithDefaultedDefMode(self):
-        self.__initWithDefaulted()
-        assert decoder.decode(
-            ints2octs((48, 5, 5, 0, 2, 1, 1)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithDefaulted()
+
+        substrate = ints2octs((48, 5, 5, 0, 2, 1, 1))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithDefaultedIndefMode(self):
-        self.__initWithDefaulted()
-        assert decoder.decode(
-            ints2octs((48, 128, 5, 0, 2, 1, 1, 0, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithDefaulted()
+
+        substrate = ints2octs((48, 128, 5, 0, 2, 1, 1, 0, 0))
+        expected = (self.seq, null)
 
     def testWithDefaultedDefModeChunked(self):
-        self.__initWithDefaulted()
-        assert decoder.decode(
-            ints2octs((48, 5, 5, 0, 2, 1, 1)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithDefaulted()
+
+        substrate = ints2octs((48, 5, 5, 0, 2, 1, 1))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithDefaultedIndefModeChunked(self):
-        self.__initWithDefaulted()
-        assert decoder.decode(
-            ints2octs((48, 128, 5, 0, 2, 1, 1, 0, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithDefaulted()
+
+        substrate = ints2octs((48, 128, 5, 0, 2, 1, 1, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithOptionalAndDefaultedDefMode(self):
-        self.__initWithOptionalAndDefaulted()
-        assert decoder.decode(
-            ints2octs((48, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1)),
-            asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithOptionalAndDefaulted()
+
+        substrate = ints2octs(
+            (48, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+             119, 110, 2, 1, 1))
+
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithOptionalAndDefaultedIndefMode(self):
-        self.__initWithOptionalAndDefaulted()
-        assert decoder.decode(
-            ints2octs((48, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1,
-                       0, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithOptionalAndDefaulted()
+
+        substrate = ints2octs(
+            (48, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98,
+             114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithOptionalAndDefaultedDefModeChunked(self):
-        self.__initWithOptionalAndDefaulted()
-        assert decoder.decode(
-            ints2octs(
-                (48, 24, 5, 0, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 2, 1, 1)),
-            asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithOptionalAndDefaulted()
+
+        substrate = ints2octs(
+                (48, 24, 5, 0, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32,
+                 98, 114, 4, 3, 111, 119, 110, 2, 1, 1))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithOptionalAndDefaultedIndefModeChunked(self):
-        self.__initWithOptionalAndDefaulted()
-        assert decoder.decode(
-            ints2octs((48, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0,
-                       0, 2, 1, 1, 0, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithOptionalAndDefaulted()
+
+        substrate = ints2octs(
+            (48, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32,
+             98, 114, 4, 3, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
 
 class SequenceDecoderWithUntaggedOpenTypesTestCase(BaseTestCase):
@@ -842,7 +1094,8 @@ class SequenceDecoderWithUntaggedOpenTypesTestCase(BaseTestCase):
             {1: univ.Integer(),
              2: univ.OctetString()}
         )
-        self.s = univ.Sequence(
+
+        self.seq = univ.Sequence(
             componentType=namedtype.NamedTypes(
                 namedtype.NamedType('id', univ.Integer()),
                 namedtype.NamedType('blob', univ.Any(), openType=openType)
@@ -850,60 +1103,65 @@ class SequenceDecoderWithUntaggedOpenTypesTestCase(BaseTestCase):
         )
 
     def testDecodeOpenTypesChoiceOne(self):
-        s, r = decoder.decode(
-            ints2octs((48, 6, 2, 1, 1, 2, 1, 12)), asn1Spec=self.s,
-            decodeOpenTypes=True
-        )
-        assert not r
-        assert s[0] == 1
-        assert s[1] == 12
+        substrate = ints2octs((48, 6, 2, 1, 1, 2, 1, 12))
+
+        seq, rest = decoder.decode(
+            substrate, asn1Spec=self.seq, decodeOpenTypes=True)
+
+        self.assertFalse(rest)
+        self.assertEqual(1, seq[0])
+        self.assertEqual(12, seq[1])
 
     def testDecodeOpenTypesChoiceTwo(self):
-        s, r = decoder.decode(
-            ints2octs((48, 16, 2, 1, 2, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=self.s,
-            decodeOpenTypes=True
-        )
-        assert not r
-        assert s[0] == 2
-        assert s[1] == univ.OctetString('quick brown')
+        substrate = ints2octs(
+            (48, 16, 2, 1, 2, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+             119, 110))
+
+        seq, rest = decoder.decode(
+            substrate, asn1Spec=self.seq, decodeOpenTypes=True)
+
+        self.assertFalse(rest)
+        self.assertEqual(2, seq[0])
+        self.assertEqual(univ.OctetString('quick brown'), seq[1])
 
     def testDecodeOpenTypesUnknownType(self):
-        try:
-            s, r = decoder.decode(
-                ints2octs((48, 6, 2, 1, 2, 6, 1, 39)), asn1Spec=self.s,
-                decodeOpenTypes=True
-            )
+        substrate = ints2octs((48, 6, 2, 1, 2, 6, 1, 39))
 
-        except error.PyAsn1Error:
-            pass
-
-        else:
-            assert False, 'unknown open type tolerated'
+        self.assertRaises(
+            error.PyAsn1Error, decoder.decode,
+            substrate, asn1Spec=self.seq, decodeOpenTypes=True)
 
     def testDecodeOpenTypesUnknownId(self):
-        s, r = decoder.decode(
-            ints2octs((48, 6, 2, 1, 3, 6, 1, 39)), asn1Spec=self.s,
-            decodeOpenTypes=True
-        )
-        assert not r
-        assert s[0] == 3
-        assert s[1] == univ.OctetString(hexValue='060127')
+        substrate = ints2octs((48, 6, 2, 1, 3, 6, 1, 39))
+
+        seq, rest = decoder.decode(
+            substrate, asn1Spec=self.seq, decodeOpenTypes=True)
+
+        self.assertFalse(rest)
+        self.assertEqual(3, seq[0])
+        self.assertEqual(univ.OctetString(hexValue='060127'), seq[1])
 
     def testDontDecodeOpenTypesChoiceOne(self):
-        s, r = decoder.decode(
-            ints2octs((48, 6, 2, 1, 1, 2, 1, 12)), asn1Spec=self.s
-        )
-        assert not r
-        assert s[0] == 1
-        assert s[1] == ints2octs((2, 1, 12))
+        substrate = ints2octs((48, 6, 2, 1, 1, 2, 1, 12))
+
+        seq, rest = decoder.decode(substrate, asn1Spec=self.seq)
+
+        self.assertFalse(rest)
+        self.assertEqual(1, seq[0])
+        self.assertEqual(ints2octs((2, 1, 12)), seq[1])
 
     def testDontDecodeOpenTypesChoiceTwo(self):
-        s, r = decoder.decode(
-            ints2octs((48, 16, 2, 1, 2, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=self.s
-        )
-        assert not r
-        assert s[0] == 2
-        assert s[1] == ints2octs((4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110))
+        substrate = ints2octs(
+            (48, 16, 2, 1, 2, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+             119, 110))
+
+        seq, rest = decoder.decode(substrate, asn1Spec=self.seq)
+
+        self.assertFalse(rest)
+        self.assertEqual(2, seq[0])
+        self.assertEqual(
+            ints2octs((4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+                       119, 110)), seq[1])
 
 
 class SequenceDecoderWithImplicitlyTaggedOpenTypesTestCase(BaseTestCase):
@@ -913,30 +1171,37 @@ class SequenceDecoderWithImplicitlyTaggedOpenTypesTestCase(BaseTestCase):
             {1: univ.Integer(),
              2: univ.OctetString()}
         )
-        self.s = univ.Sequence(
+        self.seq = univ.Sequence(
             componentType=namedtype.NamedTypes(
                 namedtype.NamedType('id', univ.Integer()),
                 namedtype.NamedType(
-                    'blob', univ.Any().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 3)), openType=openType
+                    'blob', univ.Any().subtype(
+                        implicitTag=tag.Tag(
+                            tag.tagClassContext, tag.tagFormatSimple, 3)),
+                    openType=openType
                 )
             )
         )
 
     def testDecodeOpenTypesChoiceOne(self):
-        s, r = decoder.decode(
-            ints2octs((48, 8, 2, 1, 1, 131, 3, 2, 1, 12)), asn1Spec=self.s, decodeOpenTypes=True
-        )
-        assert not r
-        assert s[0] == 1
-        assert s[1] == 12
+        substrate = ints2octs((48, 8, 2, 1, 1, 131, 3, 2, 1, 12))
+
+        seq, rest = decoder.decode(
+            substrate, asn1Spec=self.seq, decodeOpenTypes=True)
+
+        self.assertFalse(rest)
+        self.assertEqual(1, seq[0])
+        self.assertEqual(12, seq[1])
 
     def testDecodeOpenTypesUnknownId(self):
-        s, r = decoder.decode(
-            ints2octs((48, 8, 2, 1, 3, 131, 3, 2, 1, 12)), asn1Spec=self.s, decodeOpenTypes=True
-        )
-        assert not r
-        assert s[0] == 3
-        assert s[1] == univ.OctetString(hexValue='02010C')
+        substrate = ints2octs((48, 8, 2, 1, 3, 131, 3, 2, 1, 12))
+
+        seq, rest = decoder.decode(
+            substrate, asn1Spec=self.seq, decodeOpenTypes=True)
+
+        self.assertFalse(rest)
+        self.assertEqual(3, seq[0])
+        self.assertEqual(univ.OctetString(hexValue='02010C'), seq[1])
 
 
 class SequenceDecoderWithExplicitlyTaggedOpenTypesTestCase(BaseTestCase):
@@ -946,30 +1211,37 @@ class SequenceDecoderWithExplicitlyTaggedOpenTypesTestCase(BaseTestCase):
             {1: univ.Integer(),
              2: univ.OctetString()}
         )
-        self.s = univ.Sequence(
+        self.seq = univ.Sequence(
             componentType=namedtype.NamedTypes(
                 namedtype.NamedType('id', univ.Integer()),
                 namedtype.NamedType(
-                    'blob', univ.Any().subtype(explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 3)), openType=openType
+                    'blob', univ.Any().subtype(
+                        explicitTag=tag.Tag(
+                            tag.tagClassContext, tag.tagFormatSimple, 3)),
+                    openType=openType
                 )
             )
         )
 
     def testDecodeOpenTypesChoiceOne(self):
-        s, r = decoder.decode(
-            ints2octs((48, 8, 2, 1, 1, 163, 3, 2, 1, 12)), asn1Spec=self.s, decodeOpenTypes=True
-        )
-        assert not r
-        assert s[0] == 1
-        assert s[1] == 12
+        substrate = ints2octs((48, 8, 2, 1, 1, 163, 3, 2, 1, 12))
+
+        seq, rest = decoder.decode(
+            substrate, asn1Spec=self.seq, decodeOpenTypes=True)
+
+        self.assertFalse(rest)
+        self.assertEqual(1, seq[0])
+        self.assertEqual(12, seq[1])
 
     def testDecodeOpenTypesUnknownId(self):
-        s, r = decoder.decode(
-            ints2octs((48, 8, 2, 1, 3, 163, 3, 2, 1, 12)), asn1Spec=self.s, decodeOpenTypes=True
-        )
-        assert not r
-        assert s[0] == 3
-        assert s[1] == univ.OctetString(hexValue='02010C')
+        substrate = ints2octs((48, 8, 2, 1, 3, 163, 3, 2, 1, 12))
+
+        seq, rest = decoder.decode(
+            substrate, asn1Spec=self.seq, decodeOpenTypes=True)
+
+        self.assertFalse(rest)
+        self.assertEqual(3, seq[0])
+        self.assertEqual(univ.OctetString(hexValue='02010C'), seq[1])
 
 
 class SequenceDecoderWithUnaggedSetOfOpenTypesTestCase(BaseTestCase):
@@ -979,72 +1251,76 @@ class SequenceDecoderWithUnaggedSetOfOpenTypesTestCase(BaseTestCase):
             {1: univ.Integer(),
              2: univ.OctetString()}
         )
-        self.s = univ.Sequence(
+        self.seq = univ.Sequence(
             componentType=namedtype.NamedTypes(
                 namedtype.NamedType('id', univ.Integer()),
-                namedtype.NamedType('blob', univ.SetOf(componentType=univ.Any()),
-                                    openType=openType)
+                namedtype.NamedType(
+                    'blob', univ.SetOf(componentType=univ.Any()),
+                    openType=openType)
             )
         )
 
     def testDecodeOpenTypesChoiceOne(self):
-        s, r = decoder.decode(
-            ints2octs((48, 8, 2, 1, 1, 49, 3, 2, 1, 12)), asn1Spec=self.s,
-            decodeOpenTypes=True
-        )
-        assert not r
-        assert s[0] == 1
-        assert s[1][0] == 12
+        substrate = ints2octs((48, 8, 2, 1, 1, 49, 3, 2, 1, 12))
+
+        seq, rest = decoder.decode(
+            substrate, asn1Spec=self.seq, decodeOpenTypes=True)
+
+        self.assertFalse(rest)
+        self.assertEqual(1, seq[0])
+        self.assertEqual(12, seq[1][0])
 
     def testDecodeOpenTypesChoiceTwo(self):
-        s, r = decoder.decode(
-            ints2octs((48, 18, 2, 1, 2, 49, 13, 4, 11, 113, 117, 105, 99,
-                       107, 32, 98, 114, 111, 119, 110)), asn1Spec=self.s,
-            decodeOpenTypes=True
-        )
-        assert not r
-        assert s[0] == 2
-        assert s[1][0] == univ.OctetString('quick brown')
+        substrate = ints2octs(
+            (48, 18, 2, 1, 2, 49, 13, 4, 11, 113, 117, 105, 99,
+             107, 32, 98, 114, 111, 119, 110))
+
+        seq, rest = decoder.decode(
+            substrate, asn1Spec=self.seq, decodeOpenTypes=True)
+
+        self.assertFalse(rest)
+        self.assertEqual(2, seq[0])
+        self.assertEqual(univ.OctetString('quick brown'), seq[1][0])
 
     def testDecodeOpenTypesUnknownType(self):
-        try:
-            s, r = decoder.decode(
-                ints2octs((48, 6, 2, 1, 2, 6, 1, 39)), asn1Spec=self.s,
-                decodeOpenTypes=True
-            )
+        substrate = ints2octs((48, 6, 2, 1, 2, 6, 1, 39))
 
-        except error.PyAsn1Error:
-            pass
-
-        else:
-            assert False, 'unknown open type tolerated'
+        self.assertRaises(
+            error.PyAsn1Error, decoder.decode, substrate,
+            asn1Spec=self.seq, decodeOpenTypes=True)
 
     def testDecodeOpenTypesUnknownId(self):
-        s, r = decoder.decode(
-            ints2octs((48, 8, 2, 1, 3, 49, 3, 2, 1, 12)), asn1Spec=self.s,
-            decodeOpenTypes=True
-        )
-        assert not r
-        assert s[0] == 3
-        assert s[1][0] == univ.OctetString(hexValue='02010c')
+        substrate = ints2octs((48, 8, 2, 1, 3, 49, 3, 2, 1, 12))
+
+        seq, rest = decoder.decode(
+            substrate, asn1Spec=self.seq, decodeOpenTypes=True)
+
+        self.assertFalse(rest)
+        self.assertEqual(3, seq[0])
+        self.assertEqual(univ.OctetString(hexValue='02010c'), seq[1][0])
 
     def testDontDecodeOpenTypesChoiceOne(self):
-        s, r = decoder.decode(
-            ints2octs((48, 8, 2, 1, 1, 49, 3, 2, 1, 12)), asn1Spec=self.s
-        )
-        assert not r
-        assert s[0] == 1
-        assert s[1][0] == ints2octs((2, 1, 12))
+        substrate = ints2octs((48, 8, 2, 1, 1, 49, 3, 2, 1, 12))
+
+        seq, rest = decoder.decode(substrate, asn1Spec=self.seq)
+
+        self.assertFalse(rest)
+        self.assertEqual(1, seq[0])
+        self.assertEqual(ints2octs((2, 1, 12)), seq[1][0])
 
     def testDontDecodeOpenTypesChoiceTwo(self):
-        s, r = decoder.decode(
-            ints2octs((48, 18, 2, 1, 2, 49, 13, 4, 11, 113, 117, 105, 99,
-                       107, 32, 98, 114, 111, 119, 110)), asn1Spec=self.s
-        )
-        assert not r
-        assert s[0] == 2
-        assert s[1][0] == ints2octs((4, 11, 113, 117, 105, 99, 107, 32, 98, 114,
-                                     111, 119, 110))
+        substrate = ints2octs(
+            (48, 18, 2, 1, 2, 49, 13, 4, 11, 113, 117, 105, 99,
+            107, 32, 98, 114, 111, 119, 110))
+        expected = ints2octs(
+            (4, 11, 113, 117, 105, 99, 107, 32, 98, 114,
+             111, 119, 110))
+
+        seq, rest = decoder.decode(substrate, asn1Spec=self.seq)
+
+        self.assertFalse(rest)
+        self.assertEqual(2, seq[0])
+        self.assertEqual(expected, seq[1][0])
 
 
 class SequenceDecoderWithImplicitlyTaggedSetOfOpenTypesTestCase(BaseTestCase):
@@ -1054,7 +1330,7 @@ class SequenceDecoderWithImplicitlyTaggedSetOfOpenTypesTestCase(BaseTestCase):
             {1: univ.Integer(),
              2: univ.OctetString()}
         )
-        self.s = univ.Sequence(
+        self.seq = univ.Sequence(
             componentType=namedtype.NamedTypes(
                 namedtype.NamedType('id', univ.Integer()),
                 namedtype.NamedType(
@@ -1068,22 +1344,24 @@ class SequenceDecoderWithImplicitlyTaggedSetOfOpenTypesTestCase(BaseTestCase):
         )
 
     def testDecodeOpenTypesChoiceOne(self):
-        s, r = decoder.decode(
-            ints2octs((48, 10, 2, 1, 1, 49, 5, 131, 3, 2, 1, 12)),
-            asn1Spec=self.s, decodeOpenTypes=True
-        )
-        assert not r
-        assert s[0] == 1
-        assert s[1][0] == 12
+        substrate = ints2octs((48, 10, 2, 1, 1, 49, 5, 131, 3, 2, 1, 12))
+
+        seq, rest = decoder.decode(
+            substrate, asn1Spec=self.seq, decodeOpenTypes=True)
+
+        self.assertFalse(rest)
+        self.assertEqual(1, seq[0])
+        self.assertEqual(12, seq[1][0])
 
     def testDecodeOpenTypesUnknownId(self):
-        s, r = decoder.decode(
-            ints2octs((48, 10, 2, 1, 3, 49, 5, 131, 3, 2, 1, 12)),
-            asn1Spec=self.s, decodeOpenTypes=True
-        )
-        assert not r
-        assert s[0] == 3
-        assert s[1][0] == univ.OctetString(hexValue='02010C')
+        substrate = ints2octs((48, 10, 2, 1, 3, 49, 5, 131, 3, 2, 1, 12))
+
+        seq, rest = decoder.decode(
+            substrate, asn1Spec=self.seq, decodeOpenTypes=True)
+
+        self.assertFalse(rest)
+        self.assertEqual(3, seq[0])
+        self.assertEqual(univ.OctetString(hexValue='02010C'), seq[1][0])
 
 
 class SequenceDecoderWithExplicitlyTaggedSetOfOpenTypesTestCase(BaseTestCase):
@@ -1093,7 +1371,8 @@ class SequenceDecoderWithExplicitlyTaggedSetOfOpenTypesTestCase(BaseTestCase):
             {1: univ.Integer(),
              2: univ.OctetString()}
         )
-        self.s = univ.Sequence(
+
+        self.seq = univ.Sequence(
             componentType=namedtype.NamedTypes(
                 namedtype.NamedType('id', univ.Integer()),
                 namedtype.NamedType(
@@ -1107,87 +1386,114 @@ class SequenceDecoderWithExplicitlyTaggedSetOfOpenTypesTestCase(BaseTestCase):
         )
 
     def testDecodeOpenTypesChoiceOne(self):
-        s, r = decoder.decode(
-            ints2octs((48, 10, 2, 1, 1, 49, 5, 131, 3, 2, 1, 12)),
-            asn1Spec=self.s, decodeOpenTypes=True
-        )
-        assert not r
-        assert s[0] == 1
-        assert s[1][0] == 12
+        substrate = ints2octs(
+            (48, 10, 2, 1, 1, 49, 5, 131, 3, 2, 1, 12))
+
+        seq, rest = decoder.decode(
+            substrate, asn1Spec=self.seq, decodeOpenTypes=True)
+
+        self.assertFalse(rest)
+        self.assertEqual(1, seq[0])
+        self.assertEqual(12, seq[1][0])
 
     def testDecodeOpenTypesUnknownId(self):
-        s, r = decoder.decode(
-            ints2octs( (48, 10, 2, 1, 3, 49, 5, 131, 3, 2, 1, 12)),
-            asn1Spec=self.s, decodeOpenTypes=True
-        )
-        assert not r
-        assert s[0] == 3
-        assert s[1][0] == univ.OctetString(hexValue='02010C')
+        substrate =  ints2octs((48, 10, 2, 1, 3, 49, 5, 131, 3, 2, 1, 12))
+
+        seq, rest = decoder.decode(
+            substrate, asn1Spec=self.seq, decodeOpenTypes=True)
+
+        self.assertFalse(rest)
+        self.assertEqual(3, seq[0])
+        self.assertEqual(univ.OctetString(hexValue='02010C'), seq[1][0])
 
 
 class SetDecoderTestCase(BaseTestCase):
     def setUp(self):
         BaseTestCase.setUp(self)
-        self.s = univ.Set(
+
+        self.seq = univ.Set(
             componentType=namedtype.NamedTypes(
                 namedtype.NamedType('place-holder', univ.Null(null)),
                 namedtype.NamedType('first-name', univ.OctetString(null)),
                 namedtype.NamedType('age', univ.Integer(33))
             )
         )
-        self.s.setComponentByPosition(0, univ.Null(null))
-        self.s.setComponentByPosition(1, univ.OctetString('quick brown'))
-        self.s.setComponentByPosition(2, univ.Integer(1))
+
+        self.seq.setComponentByPosition(0, univ.Null(null))
+        self.seq.setComponentByPosition(1, univ.OctetString('quick brown'))
+        self.seq.setComponentByPosition(2, univ.Integer(1))
 
     def testWithOptionalAndDefaultedDefMode(self):
-        assert decoder.decode(
-            ints2octs((49, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1))
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (49, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+             119, 110, 2, 1, 1))
+        expected = (self.seq, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testWithOptionalAndDefaultedIndefMode(self):
-        assert decoder.decode(
-            ints2octs((49, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0))
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (49, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98,
+             114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testWithOptionalAndDefaultedDefModeChunked(self):
-        assert decoder.decode(
-            ints2octs(
-                (49, 24, 5, 0, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 2, 1, 1))
-        ) == (self.s, null)
+        substrate = ints2octs(
+                (49, 24, 5, 0, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32,
+                 98, 114, 4, 3, 111, 119, 110, 2, 1, 1))
+        expected = (self.seq, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testWithOptionalAndDefaultedIndefModeChunked(self):
-        assert decoder.decode(
-            ints2octs((49, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0))
-        ) == (self.s, null)
+        substrate = ints2octs(
+            (49, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32,
+             98, 114, 4, 3, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(expected, decoder.decode(substrate))
 
     def testWithOptionalAndDefaultedDefModeSubst(self):
-        assert decoder.decode(
-            ints2octs((49, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1)),
-            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)
-        ) == (ints2octs((5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1)), str2octs(''))
+        substrate = ints2octs(
+            (49, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+             119, 110, 2, 1, 1))
+        expected = (
+            ints2octs((5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+                       119, 110, 2, 1, 1)), str2octs(''))
+
+        self.assertEqual(
+            expected, decoder.decode(
+                substrate,
+                substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)))
 
     def testWithOptionalAndDefaultedIndefModeSubst(self):
-        assert decoder.decode(
-            ints2octs((49, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)),
-            substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)
-        ) == (ints2octs(
-            (5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)), str2octs(''))
+        substrate = ints2octs(
+            (49, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98,
+             114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0))
+        expected = (ints2octs(
+            (5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+             119, 110, 0, 0, 2, 1, 1, 0, 0)), str2octs(''))
+
+        self.assertEqual(
+            expected, decoder.decode(
+                substrate,
+                substrateFun=lambda a, b, c, d: streaming.readFromStream(b, c)))
 
     def testTagFormat(self):
-        try:
-            decoder.decode(
-                ints2octs((16, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1))
-            )
-        except error.PyAsn1Error:
-            pass
-        else:
-            assert 0, 'wrong tagFormat worked out'
+        substrate = ints2octs(
+            (16, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+             119, 110, 2, 1, 1))
+
+        self.assertRaises(error.PyAsn1Error, decoder.decode, substrate)
 
 
 class SetDecoderWithSchemaTestCase(BaseTestCase):
     def setUp(self):
         BaseTestCase.setUp(self)
-        self.s = univ.Set(
+
+        self.seq = univ.Set(
             componentType=namedtype.NamedTypes(
                 namedtype.NamedType('place-holder', univ.Null(null)),
                 namedtype.OptionalNamedType('first-name', univ.OctetString()),
@@ -1195,179 +1501,278 @@ class SetDecoderWithSchemaTestCase(BaseTestCase):
             )
         )
 
-    def __init(self):
-        self.s.clear()
-        self.s.setComponentByPosition(0, univ.Null(null))
+    def _init(self):
+        self.seq.clear()
+        self.seq.setComponentByPosition(0, univ.Null(null))
 
-    def __initWithOptional(self):
-        self.s.clear()
-        self.s.setComponentByPosition(0, univ.Null(null))
-        self.s.setComponentByPosition(1, univ.OctetString('quick brown'))
+    def _initWithOptional(self):
+        self.seq.clear()
+        self.seq.setComponentByPosition(0, univ.Null(null))
+        self.seq.setComponentByPosition(1, univ.OctetString('quick brown'))
 
-    def __initWithDefaulted(self):
-        self.s.clear()
-        self.s.setComponentByPosition(0, univ.Null(null))
-        self.s.setComponentByPosition(2, univ.Integer(1))
+    def _initWithDefaulted(self):
+        self.seq.clear()
+        self.seq.setComponentByPosition(0, univ.Null(null))
+        self.seq.setComponentByPosition(2, univ.Integer(1))
 
-    def __initWithOptionalAndDefaulted(self):
-        self.s.clear()
-        self.s.setComponentByPosition(0, univ.Null(null))
-        self.s.setComponentByPosition(1, univ.OctetString('quick brown'))
-        self.s.setComponentByPosition(2, univ.Integer(1))
+    def _initWithOptionalAndDefaulted(self):
+        self.seq.clear()
+        self.seq.setComponentByPosition(0, univ.Null(null))
+        self.seq.setComponentByPosition(1, univ.OctetString('quick brown'))
+        self.seq.setComponentByPosition(2, univ.Integer(1))
 
     def testDefMode(self):
-        self.__init()
-        assert decoder.decode(
-            ints2octs((49, 128, 5, 0, 0, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._init()
+
+        substrate = ints2octs((49, 128, 5, 0, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testIndefMode(self):
-        self.__init()
-        assert decoder.decode(
-            ints2octs((49, 128, 5, 0, 0, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._init()
+
+        substrate = ints2octs((49, 128, 5, 0, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testDefModeChunked(self):
-        self.__init()
-        assert decoder.decode(
-            ints2octs((49, 2, 5, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._init()
+
+        substrate = ints2octs((49, 2, 5, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testIndefModeChunked(self):
-        self.__init()
-        assert decoder.decode(
-            ints2octs((49, 128, 5, 0, 0, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._init()
+
+        substrate = ints2octs((49, 128, 5, 0, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithOptionalDefMode(self):
-        self.__initWithOptional()
-        assert decoder.decode(
-            ints2octs((49, 15, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithOptional()
+
+        substrate = ints2octs(
+            (49, 15, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+             119, 110))
+
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithOptionalIndefMode(self):
-        self.__initWithOptional()
-        assert decoder.decode(
-            ints2octs((49, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 0, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithOptional()
+
+        substrate = ints2octs(
+            (49, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98,
+             114, 111, 119, 110, 0, 0, 0, 0))
+
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithOptionalDefModeChunked(self):
-        self.__initWithOptional()
-        assert decoder.decode(
-            ints2octs((49, 21, 5, 0, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithOptional()
+
+        substrate = ints2octs(
+            (49, 21, 5, 0, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98,
+             114, 4, 3, 111, 119, 110))
+
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithOptionalIndefModeChunked(self):
-        self.__initWithOptional()
-        assert decoder.decode(
-            ints2octs((49, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 0, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithOptional()
+
+        substrate = ints2octs(
+            (49, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32,
+             98, 114, 4, 3, 111, 119, 110, 0, 0, 0, 0))
+
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithDefaultedDefMode(self):
-        self.__initWithDefaulted()
-        assert decoder.decode(
-            ints2octs((49, 5, 5, 0, 2, 1, 1)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithDefaulted()
+
+        substrate = ints2octs((49, 5, 5, 0, 2, 1, 1))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithDefaultedIndefMode(self):
-        self.__initWithDefaulted()
-        assert decoder.decode(
-            ints2octs((49, 128, 5, 0, 2, 1, 1, 0, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithDefaulted()
+
+        substrate = ints2octs((49, 128, 5, 0, 2, 1, 1, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithDefaultedDefModeChunked(self):
-        self.__initWithDefaulted()
-        assert decoder.decode(
-            ints2octs((49, 5, 5, 0, 2, 1, 1)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithDefaulted()
+
+        substrate = ints2octs((49, 5, 5, 0, 2, 1, 1))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithDefaultedIndefModeChunked(self):
-        self.__initWithDefaulted()
-        assert decoder.decode(
-            ints2octs((49, 128, 5, 0, 2, 1, 1, 0, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithDefaulted()
+
+        substrate = ints2octs((49, 128, 5, 0, 2, 1, 1, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithOptionalAndDefaultedDefMode(self):
-        self.__initWithOptionalAndDefaulted()
-        assert decoder.decode(
-            ints2octs((49, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 2, 1, 1)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithOptionalAndDefaulted()
+
+        substrate = ints2octs(
+            (49, 18, 5, 0, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+             119, 110, 2, 1, 1))
+
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithOptionalAndDefaultedDefModeReordered(self):
-        self.__initWithOptionalAndDefaulted()
-        assert decoder.decode(
-            ints2octs((49, 18, 2, 1, 1, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 5, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithOptionalAndDefaulted()
+
+        substrate = ints2octs(
+            (49, 18, 2, 1, 1, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111,
+             119, 110, 5, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithOptionalAndDefaultedIndefMode(self):
-        self.__initWithOptionalAndDefaulted()
-        assert decoder.decode(
-            ints2octs((49, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithOptionalAndDefaulted()
+
+        substrate = ints2octs(
+            (49, 128, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98,
+             114, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithOptionalAndDefaultedIndefModeReordered(self):
-        self.__initWithOptionalAndDefaulted()
-        assert decoder.decode(
-            ints2octs((49, 128, 2, 1, 1, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119, 110, 0, 0,  0, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithOptionalAndDefaulted()
+
+        substrate = ints2octs(
+            (49, 128, 2, 1, 1, 5, 0, 36, 128, 4, 11, 113, 117, 105, 99, 107,
+             32, 98, 114, 111, 119, 110, 0, 0,  0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithOptionalAndDefaultedDefModeChunked(self):
-        self.__initWithOptionalAndDefaulted()
-        assert decoder.decode(
-            ints2octs((49, 24, 5, 0, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 2, 1, 1)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithOptionalAndDefaulted()
+
+        substrate = ints2octs(
+            (49, 24, 5, 0, 36, 17, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98,
+             114, 4, 3, 111, 119, 110, 2, 1, 1))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
     def testWithOptionalAndDefaultedIndefModeChunked(self):
-        self.__initWithOptionalAndDefaulted()
-        assert decoder.decode(
-            ints2octs((49, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32, 98, 114, 4, 3, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0)), asn1Spec=self.s
-        ) == (self.s, null)
+        self._initWithOptionalAndDefaulted()
+
+        substrate = ints2octs(
+            (49, 128, 5, 0, 36, 128, 4, 4, 113, 117, 105, 99, 4, 4, 107, 32,
+             98, 114, 4, 3, 111, 119, 110, 0, 0, 2, 1, 1, 0, 0))
+        expected = (self.seq, null)
+
+        self.assertEqual(
+            expected, decoder.decode(substrate, asn1Spec=self.seq))
 
 
 class SequenceOfWithExpTaggedOctetStringDecoder(BaseTestCase):
     def setUp(self):
         BaseTestCase.setUp(self)
-        self.s = univ.SequenceOf(
-            componentType=univ.OctetString().subtype(explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 3))
+
+        self.seq = univ.SequenceOf(
+            componentType=univ.OctetString().subtype(
+                explicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 3))
         )
-        self.s.setComponentByPosition(0, 'q')
-        self.s2 = univ.SequenceOf()
+        self.seq.setComponentByPosition(0, 'q')
+        self.seq2 = univ.SequenceOf()
 
     def testDefModeSchema(self):
-        s, r = decoder.decode(ints2octs((48, 5, 163, 3, 4, 1, 113)), asn1Spec=self.s)
-        assert not r
-        assert s == self.s
-        assert s.tagSet == self.s.tagSet
+        substrate = ints2octs((48, 5, 163, 3, 4, 1, 113))
+
+        seq, rest = decoder.decode(substrate, asn1Spec=self.seq)
+
+        self.assertFalse(rest)
+        self.assertEqual(self.seq, seq)
+        self.assertEqual(self.seq.tagSet, seq.tagSet)
 
     def testIndefModeSchema(self):
-        s, r = decoder.decode(ints2octs((48, 128, 163, 128, 4, 1, 113, 0, 0, 0, 0)), asn1Spec=self.s)
-        assert not r
-        assert s == self.s
-        assert s.tagSet == self.s.tagSet
+        substrate = ints2octs((48, 128, 163, 128, 4, 1, 113, 0, 0, 0, 0))
+
+        seq, rest = decoder.decode(substrate, asn1Spec=self.seq)
+
+        self.assertFalse(rest)
+        self.assertEqual(self.seq, seq)
+        self.assertEqual(self.seq.tagSet, seq.tagSet)
 
     def testDefModeNoComponent(self):
-        s, r = decoder.decode(ints2octs((48, 5, 163, 3, 4, 1, 113)), asn1Spec=self.s2)
-        assert not r
-        assert s == self.s
-        assert s.tagSet == self.s.tagSet
+        substrate = ints2octs((48, 5, 163, 3, 4, 1, 113))
+
+        seq, rest = decoder.decode(substrate, asn1Spec=self.seq)
+
+        self.assertFalse(rest)
+        self.assertEqual(self.seq, seq)
+        self.assertEqual(self.seq.tagSet, seq.tagSet)
 
     def testIndefModeNoComponent(self):
-        s, r = decoder.decode(ints2octs((48, 128, 163, 128, 4, 1, 113, 0, 0, 0, 0)), asn1Spec=self.s2)
-        assert not r
-        assert s == self.s
-        assert s.tagSet == self.s.tagSet
+        substrate = ints2octs((48, 128, 163, 128, 4, 1, 113, 0, 0, 0, 0))
+
+        seq, rest = decoder.decode(substrate, asn1Spec=self.seq2)
+
+        self.assertFalse(rest)
+        self.assertEqual(self.seq, seq)
+        self.assertEqual(self.seq.tagSet, seq.tagSet)
 
     def testDefModeSchemaless(self):
-        s, r = decoder.decode(ints2octs((48, 5, 163, 3, 4, 1, 113)))
-        assert not r
-        assert s == self.s
-        assert s.tagSet == self.s.tagSet
+        substrate = ints2octs((48, 5, 163, 3, 4, 1, 113))
+
+        seq, rest = decoder.decode(substrate)
+
+        self.assertFalse(rest)
+        self.assertEqual(self.seq, seq)
+        self.assertEqual(self.seq.tagSet, seq.tagSet)
 
     def testIndefModeSchemaless(self):
-        s, r = decoder.decode(ints2octs((48, 128, 163, 128, 4, 1, 113, 0, 0, 0, 0)))
-        assert not r
-        assert s == self.s
-        assert s.tagSet == self.s.tagSet
+        substrate = ints2octs((48, 128, 163, 128, 4, 1, 113, 0, 0, 0, 0))
+
+        seq, rest = decoder.decode(substrate)
+
+        self.assertFalse(rest)
+        self.assertEqual(self.seq, seq)
+        self.assertEqual(self.seq.tagSet, seq.tagSet)
 
 
 class SequenceWithExpTaggedOctetStringDecoder(BaseTestCase):
