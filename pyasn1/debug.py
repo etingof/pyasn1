@@ -55,16 +55,6 @@ class Printer(object):
         return '<python logging>'
 
 
-if hasattr(logging, 'NullHandler'):
-    NullHandler = logging.NullHandler
-
-else:
-    # Python 2.6 and older
-    class NullHandler(logging.Handler):
-        def emit(self, record):
-            pass
-
-
 class Debug(object):
     defaultPrinter = Printer()
 
@@ -75,7 +65,7 @@ class Debug(object):
             # route our logs to parent logger
             self._printer = Printer(
                 logger=logging.getLogger(options['loggerName']),
-                handler=NullHandler()
+                handler=logging.NullHandler()
             )
 
         elif 'printer' in options:

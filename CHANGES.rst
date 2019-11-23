@@ -4,7 +4,7 @@ Revision 0.5.0, released XX-09-2019
 
 - Refactor BER/CER/DER decoder into a coroutine.
 
-  The goal of this change is to make the decoder stopping on input
+  The goal of this change is to make the decoder yielding on input
   data starvation and resuming from where it stopped whenever the
   caller decides to try again (hopefully making sure that some more
   input becomes available).
@@ -22,7 +22,13 @@ Revision 0.5.0, released XX-09-2019
   `StreamingDecoder` class. Previously published API is implemented
   as a thin wrapper on top of that ensuring backward compatibility.
 
-Revision 0.4.8, released XX-09-2019
+Revision 0.4.9, released XX-11-2019
+-----------------------------------
+
+- Added support for Python 3.8.
+- Removed support for EOL Pythons 2.4, 2.5, 2.6, 3.2, 3.3 and 3.4.
+
+Revision 0.4.8, released 16-11-2019
 -----------------------------------
 
 - Added ability of combining `SingleValueConstraint` and
