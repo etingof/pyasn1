@@ -2,7 +2,7 @@
 Revision 0.5.0, released XX-09-2019
 -----------------------------------
 
-- Refactor BER/CER/DER decoder into a coroutine.
+- Make BER/CER/DER decodersstreaming and suspendible
 
   The goal of this change is to make the decoder yielding on input
   data starvation and resuming from where it stopped whenever the
