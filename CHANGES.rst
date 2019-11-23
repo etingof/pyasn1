@@ -1,5 +1,5 @@
 
-Revision 0.5.0, released XX-11-2019
+Revision 0.4.9, released XX-11-2019
 -----------------------------------
 
 - Added support for Python 3.8.
