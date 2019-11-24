@@ -6,16 +6,10 @@
 #
 import io
 import sys
-
-try:
-    import unittest2 as unittest
-
-except ImportError:
-    import unittest
-
-from tests.base import BaseTestCase
+import unittest
 
 from pyasn1.codec import streaming
+from tests.base import BaseTestCase
 
 
 class CachingStreamWrapperTestCase(BaseTestCase):
@@ -29,44 +23,51 @@ class CachingStreamWrapperTestCase(BaseTestCase):
         wrapper = streaming.CachingStreamWrapper(self.shortStream)
         wrapper.read(6)
         wrapper.seek(3)
-        assert wrapper.read(1) == b"d"
-        assert wrapper.read(1) == b"e"
-        assert wrapper.tell() == 5
+
+        self.assertEqual(b'd', wrapper.read(1))
+        self.assertEqual(b'e', wrapper.read(1))
+        self.assertEqual(5, wrapper.tell())
 
     def testReadFromCacheAndStream(self):
         wrapper = streaming.CachingStreamWrapper(self.shortStream)
         wrapper.read(6)
         wrapper.seek(3)
-        assert wrapper.read(4) == b"defg"
-        assert wrapper.tell() == 7
+
+        self.assertEqual(b'defg', wrapper.read(4))
+        self.assertEqual(7, wrapper.tell())
 
     def testReadJustFromStream(self):
         wrapper = streaming.CachingStreamWrapper(self.shortStream)
-        assert wrapper.read(6) == b"abcdef"
-        assert wrapper.tell() == 6
+
+        self.assertEqual(b'abcdef', wrapper.read(6))
+        self.assertEqual(6, wrapper.tell())
 
     def testPeek(self):
         wrapper = streaming.CachingStreamWrapper(self.longStream)
         read_bytes = wrapper.peek(io.DEFAULT_BUFFER_SIZE + 73)
-        assert len(read_bytes) == io.DEFAULT_BUFFER_SIZE + 73
-        assert read_bytes.startswith(b"abcdefg")
-        assert wrapper.tell() == 0
-        assert wrapper.read(4) == b"abcd"
+
+        self.assertEqual(io.DEFAULT_BUFFER_SIZE + 73, len(read_bytes))
+        self.assertTrue(read_bytes.startswith(b'abcdefg'))
+        self.assertEqual(0, wrapper.tell())
+        self.assertEqual(b'abcd', wrapper.read(4))
 
     def testMarkedPositionResets(self):
         wrapper = streaming.CachingStreamWrapper(self.longStream)
         wrapper.read(10)
         wrapper.markedPosition = wrapper.tell()
-        assert wrapper.markedPosition == 10
+
+        self.assertEqual(10, wrapper.markedPosition)
 
         # Reach the maximum capacity of cache
         wrapper.read(io.DEFAULT_BUFFER_SIZE)
-        assert wrapper.tell() == 10 + io.DEFAULT_BUFFER_SIZE
+
+        self.assertEqual(10 + io.DEFAULT_BUFFER_SIZE, wrapper.tell())
 
         # The following should clear the cache
         wrapper.markedPosition = wrapper.tell()
-        assert wrapper.markedPosition == 0
-        assert len(wrapper._cache.getvalue()) == 0
+
+        self.assertEqual(0, wrapper.markedPosition)
+        self.assertEqual(0, len(wrapper._cache.getvalue()))
 
 
 suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])

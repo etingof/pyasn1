@@ -22,6 +22,9 @@ Revision 0.5.0, released XX-11-2019
   `StreamingDecoder` class. Previously published API is implemented
   as a thin wrapper on top of that ensuring backward compatibility.
 
+- Changed assertion in unit tests from Python built-in to `unittest`
+  provided
+
 Revision 0.4.9, released XX-11-2019
 -----------------------------------
 
