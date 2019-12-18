@@ -2033,8 +2033,8 @@ class SequenceOfAndSetOfBase(base.ConstructedAsn1Type):
         Default action is to verify |ASN.1| object against constraints imposed
         by `subtypeSpec`.
 
-        Raises
-        ------
+        Returns
+        -------
         :py:class:`~pyasn1.error.PyAsn1tError` on any inconsistencies found
         """
         if self.componentType is noValue or not self.subtypeSpec:
@@ -2061,6 +2061,17 @@ class SequenceOfAndSetOfBase(base.ConstructedAsn1Type):
             return exc
 
         return False
+
+    def checkConsistency(self):
+        """
+        Raises
+        ------
+        :py:class:`~pyasn1.error.PyAsn1tError` on any inconsistencies found
+        """
+        inconsistency = self.isInconsistent
+        if isinstance(inconsistency, Exception):
+            raise inconsistency
+
 
 class SequenceOf(SequenceOfAndSetOfBase):
     __doc__ = SequenceOfAndSetOfBase.__doc__
@@ -2663,8 +2674,8 @@ class SequenceAndSetBase(base.ConstructedAsn1Type):
         Default action is to verify |ASN.1| object against constraints imposed
         by `subtypeSpec`.
 
-        Raises
-        ------
+        Returns
+        -------
         :py:class:`~pyasn1.error.PyAsn1tError` on any inconsistencies found
         """
         if self.componentType is noValue or not self.subtypeSpec:
@@ -2693,6 +2704,16 @@ class SequenceAndSetBase(base.ConstructedAsn1Type):
             return exc
 
         return False
+
+    def checkConsistency(self):
+        """
+        Raises
+        ------
+        :py:class:`~pyasn1.error.PyAsn1tError` on any inconsistencies found
+        """
+        inconsistency = self.isInconsistent
+        if isinstance(inconsistency, Exception):
+            raise inconsistency
 
     def prettyPrint(self, scope=0):
         """Return an object representation string.

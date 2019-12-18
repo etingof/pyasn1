@@ -169,9 +169,7 @@ class SetEncoder(encoder.SequenceEncoder):
 
         if asn1Spec is None:
             # instance of ASN.1 schema
-            inconsistency = value.isInconsistent
-            if inconsistency:
-                raise inconsistency
+            value.checkConsistency()
 
             namedTypes = value.componentType
 
@@ -180,10 +178,10 @@ class SetEncoder(encoder.SequenceEncoder):
                     namedType = namedTypes[idx]
 
                     if namedType.isOptional and not component.isValue:
-                            continue
+                        continue
 
                     if namedType.isDefaulted and component == namedType.asn1Object:
-                            continue
+                        continue
 
                     compsMap[id(component)] = namedType
 

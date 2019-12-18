@@ -824,9 +824,7 @@ class ConstructedPayloadDecoderBase(AbstractConstructedPayloadDecoder):
                                 asn1Object.setComponentByPosition(idx, component)
 
             else:
-                inconsistency = asn1Object.isInconsistent
-                if inconsistency:
-                    raise inconsistency
+                asn1Object.checkConsistency()
 
         else:
             componentType = asn1Spec.componentType
@@ -1049,9 +1047,7 @@ class ConstructedPayloadDecoderBase(AbstractConstructedPayloadDecoder):
                                     asn1Object.setComponentByPosition(idx, component)
 
                 else:
-                    inconsistency = asn1Object.isInconsistent
-                    if inconsistency:
-                        raise inconsistency
+                    asn1Object.checkConsistency()
 
         else:
             componentType = asn1Spec.componentType
