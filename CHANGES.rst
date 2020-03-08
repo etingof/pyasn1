@@ -1,5 +1,5 @@
 
-Revision 0.5.0, released XX-11-2019
+Revision 0.5.0, released XX-03-2020
 -----------------------------------
 
 - Make BER/CER/DER decoders streaming and suspendible
@@ -22,11 +22,12 @@ Revision 0.5.0, released XX-11-2019
   `StreamingDecoder` class. Previously published API is implemented
   as a thin wrapper on top of that ensuring backward compatibility.
 
-Revision 0.4.9, released XX-11-2019
+Revision 0.4.9, released XX-03-2020
 -----------------------------------
 
 - Added support for Python 3.8.
 - Removed support for EOL Pythons 2.4, 2.5, 2.6, 3.2, 3.3 and 3.4.
+- Copyright notice extended to the year 2020
 
 Revision 0.4.8, released 16-11-2019
 -----------------------------------
