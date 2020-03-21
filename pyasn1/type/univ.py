@@ -551,7 +551,7 @@ class BitString(base.SimpleAsn1Type):
         return self.clone(SizedInteger(self._value >> count).setBitLength(max(0, len(self._value) - count)))
 
     def __int__(self):
-        return self._value
+        return int(self._value)
 
     def __float__(self):
         return float(self._value)
