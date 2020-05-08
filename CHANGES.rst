@@ -22,6 +22,8 @@ Revision 0.5.0, released XX-03-2020
   `StreamingDecoder` class. Previously published API is implemented
   as a thin wrapper on top of that ensuring backward compatibility.
 
+- Added support for previously missing `RELATIVE-OID` construct.
+
 Revision 0.4.9, released XX-03-2020
 -----------------------------------
 

@@ -350,6 +350,30 @@ class ObjectIdentifierEncoderTestCase(BaseTestCase):
                         0xB8, 0xCB, 0xE2, 0xB6, 0x47))
 
 
+class RelativeOIDEncoderTestCase(BaseTestCase):
+    def testOne(self):
+        assert encoder.encode(
+            univ.RelativeOID((39,))
+        ) == ints2octs((13, 1, 39))
+
+    def testTwo(self):
+        assert encoder.encode(
+            univ.RelativeOID((5, 6))
+        ) == ints2octs((13, 2, 5, 6))
+
+    def testThree(self):
+        assert encoder.encode(
+            univ.RelativeOID((5, 6, 7))
+        ) == ints2octs((13, 3, 5, 6, 7))
+
+    def testLarge(self):
+        assert encoder.encode(
+            univ.RelativeOID((1079, 18446744073709551535184467440737095))
+        ) == ints2octs((0x0D, 0x13, 0x88, 0x37, 0x83, 0xC6, 0xDF, 0xD4, 0xCC,
+                        0xB3, 0xFF, 0xFF, 0xFE, 0xF0, 0xB8, 0xD6, 0xB8, 0xCB,
+                        0xE2, 0xB6, 0x47))
+
+
 class ObjectIdentifierWithSchemaEncoderTestCase(BaseTestCase):
     def testOne(self):
         assert encoder.encode(

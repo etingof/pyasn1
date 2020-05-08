@@ -71,6 +71,7 @@ TAG_MAP = {
     univ.OctetString.tagSet: AbstractScalarPayloadDecoder(),
     univ.Null.tagSet: AbstractScalarPayloadDecoder(),
     univ.ObjectIdentifier.tagSet: AbstractScalarPayloadDecoder(),
+    univ.RelativeOID.tagSet: AbstractScalarPayloadDecoder(),
     univ.Enumerated.tagSet: AbstractScalarPayloadDecoder(),
     univ.Real.tagSet: AbstractScalarPayloadDecoder(),
     univ.Sequence.tagSet: SequenceOrSetPayloadDecoder(),  # conflicts with SequenceOf
@@ -102,6 +103,7 @@ TYPE_MAP = {
     univ.OctetString.typeId: AbstractScalarPayloadDecoder(),
     univ.Null.typeId: AbstractScalarPayloadDecoder(),
     univ.ObjectIdentifier.typeId: AbstractScalarPayloadDecoder(),
+    univ.RelativeOID.typeId: AbstractScalarPayloadDecoder(),
     univ.Enumerated.typeId: AbstractScalarPayloadDecoder(),
     univ.Real.typeId: AbstractScalarPayloadDecoder(),
     # ambiguous base types
