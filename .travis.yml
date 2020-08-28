@@ -10,7 +10,29 @@ matrix:
   - python: 'nightly'
   - python: 'pypy'
   - python: 'pypy3'
+  # PPC64LE
+  - arch: ppc64le
+    python: 2.7
+  - arch: ppc64le
+    python: '3.5'
+  - arch: ppc64le
+    python: '3.6'
+  - arch: ppc64le
+    python: '3.7'
+  - arch: ppc64le
+    python: '3.8'
+  - arch: ppc64le
+    python: 'nightly'
+#   - arch: ppc64le
+#     python: 'pypy'
+#   - arch: ppc64le
+#     python: 'pypy3'
+
 install:
+  - |
+    if [[ "${TRAVIS_CPU_ARCH}" == "ppc64le" ]]; then
+      sudo chown -Rvf $USER:$GROUP ~/.cache/pip/wheels
+    fi
   - pip install codecov
   - pip install -r requirements.txt -r devel-requirements.txt
   - pip install -e .
