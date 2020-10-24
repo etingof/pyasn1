@@ -409,6 +409,75 @@ class ObjectIdentifierDecoderTestCase(BaseTestCase):
         ) == ((2, 999, 18446744073709551535184467440737095), null)
 
 
+class RelativeOIDDecoderTestCase(BaseTestCase):
+    def testThree(self):
+        assert decoder.decode(
+            ints2octs((13, 3, 5, 6, 7))
+        ) == ((5, 6, 7), null)
+
+    def testTwo(self):
+        assert decoder.decode(
+            ints2octs((13, 2, 5, 6))
+        ) == ((5, 6), null)
+
+    def testOne(self):
+        obj, rest = decoder.decode(ints2octs((13, 1, 39)))
+        assert str(obj) == '39'
+        assert rest == null
+
+    def testNonLeading0x80(self):
+        assert decoder.decode(
+            ints2octs((13, 5, 85, 4, 129, 128, 0)),
+        ) == ((85, 4, 16384), null)
+
+    def testLeading0x80(self):
+        try:
+            decoder.decode(
+                ints2octs((13, 5, 85, 4, 128, 129, 0))
+            )
+        except error.PyAsn1Error:
+            pass
+        else:
+            assert 0, 'Leading 0x80 tolerated'
+
+    def testTagFormat(self):
+        try:
+            decoder.decode(ints2octs((38, 1, 239)))
+        except error.PyAsn1Error:
+            pass
+        else:
+            assert 0, 'wrong tagFormat worked out'
+
+    def testZeroLength(self):
+        try:
+            decoder.decode(ints2octs((13, 0, 0)))
+        except error.PyAsn1Error:
+            pass
+        else:
+            assert 0, 'zero length tolerated'
+
+    def testIndefiniteLength(self):
+        try:
+            decoder.decode(ints2octs((13, 128, 0)))
+        except error.PyAsn1Error:
+            pass
+        else:
+            assert 0, 'indefinite length tolerated'
+
+    def testReservedLength(self):
+        try:
+            decoder.decode(ints2octs((13, 255, 0)))
+        except error.PyAsn1Error:
+            pass
+        else:
+            assert 0, 'reserved length tolerated'
+
+    def testLarge(self):
+        assert decoder.decode(
+            ints2octs((0x0D, 0x13, 0x88, 0x37, 0x83, 0xC6, 0xDF, 0xD4, 0xCC, 0xB3, 0xFF, 0xFF, 0xFE, 0xF0, 0xB8, 0xD6, 0xB8, 0xCB, 0xE2, 0xB6, 0x47))
+        ) == ((1079, 18446744073709551535184467440737095), null)
+
+
 class RealDecoderTestCase(BaseTestCase):
     def testChar(self):
         assert decoder.decode(
