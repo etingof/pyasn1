@@ -425,7 +425,7 @@ Revision 0.1.8, released 22-06-2015
 - Constructed types now verify their consistency by invoking 
   isSameTypeWith(matchTags=True, matchConstraints=False) and
   isSuperTypeOf(matchTags=False, matchConstraints=True) for each of their
-  components rather than isSuperTypeOf() as it used to be. Constriants check 
+  components rather than isSuperTypeOf() as it used to be. Constraints check 
   could be enforced to isSameTypeWith() with the strictConstraints=True
   constructed classes attribute.
 - Constructed types can now be initialized with new .setComponents() method
@@ -449,7 +449,7 @@ Revision 0.1.8, released 22-06-2015
 - Float typed mantissa initializer to REAL type for base 2 added.
 - Encoding bases 8 and 16 support for REAL type binary encoder added.
 - More strict CER/DER encoders added for GeneralizedTime and UTCTime types.
-- Asn1Item.hasValue() added to easily distinguish initalized ASN.1 objects
+- Asn1Item.hasValue() added to easily distinguish initialized ASN.1 objects
   from uninitialized ones (e.g. pure types).
 - Fix to REAL type binary decoder to handle different bases and scale factor.
 - Fix to TagSet.repr() to include [obsolete] baseTag information.
@@ -508,7 +508,7 @@ Revision 0.1.4
 
 - Built-in codec debugging facility added
 - Added some more checks to ObjectIdentifier BER encoder catching
-  posible 2^8 overflow condition by two leading sub-OIDs
+  possible 2^8 overflow condition by two leading sub-OIDs
 - Implementations overriding the AbstractDecoder.valueDecoder method
   changed to return the rest of substrate behind the item being processed
   rather than the unprocessed substrate within the item (which is usually
@@ -548,7 +548,7 @@ Revision 0.1.2
 - Fix to quote initializer of OctetString.__repr__()
 - Minor fix towards ObjectIdentifier.prettyIn() reliability
 - ObjectIdentifier.__str__() is aliased to prettyPrint()
-- Exlicit repr() calls replaced with '%r'
+- Explicit repr() calls replaced with '%r'
 
 Revision 0.1.1
 --------------
@@ -560,7 +560,7 @@ Revision 0.1.1
 - Major overhawl for Python 2.4 -- 3.2 compatibility:
   + get rid of old-style types
   + drop string module usage
-  + switch to rich comparation
+  + switch to rich comparison
   + drop explicit long integer type use
   + map()/filter() replaced with list comprehension
   + apply() replaced with \*/\*\*args
@@ -684,7 +684,7 @@ Revision 0.0.6a
 
 - Make use of setuptools.
 - Constraints derivation verification (isSuperTypeOf()/isSubTypeOf()) fixed.
-- Fix to constraints comparation logic -- can't cmp() hash values as it
+- Fix to constraints comparison logic -- can't cmp() hash values as it
   may cause false positives due to hash conflicts.
 
 Revision 0.0.5a
@@ -710,7 +710,7 @@ Revision 0.0.5a
 - Bugix to the way to distinguish Set from SetOf at CER/DER SetOfEncoder
 - Adjustments to make it running on Python 1.5.
 - In tests, substrate constants converted from hex escaped literals into
-  octals to overcome indefinite hex width issue occuring in young Python.
+  octals to overcome indefinite hex width issue occurring in young Python.
 - Minor performance optimization of TagSet.isSuperTagSetOf() method
 - examples/sshkey.py added
 
