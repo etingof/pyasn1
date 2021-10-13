@@ -12,7 +12,7 @@ New codecs
 * OER
 * XER
 * LWER
-* JSON (alinged with existing experimental schemas)
+* JSON (aligned with existing experimental schemas)
 
 Lazy codecs
 -----------
@@ -66,7 +66,7 @@ Minor, housekeeping things
 
     * suspend codec on underrun error ?
     * present subtypes ?
-    * component presence check wont work at innertypeconst
+    * component presence check won't work at innertypeconst
     * type vs value, defaultValue
 
 * ber.encoder:
