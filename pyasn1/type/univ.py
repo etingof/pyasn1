@@ -703,7 +703,7 @@ class BitString(base.SimpleAsn1Type):
                 return self.fromBinaryString(value, internalFormat=True)
 
         elif isinstance(value, (tuple, list)):
-            return self.fromBinaryString(''.join([b and '1' or '0' for b in value]), internalFormat=True)
+            return self.fromBinaryString(''.join(b and '1' or '0' for b in value), internalFormat=True)
 
         elif isinstance(value, BitString):
             return SizedInteger(value).setBitLength(len(value))
@@ -839,7 +839,7 @@ class OctetString(base.SimpleAsn1Type):
 
             elif isinstance(value, (tuple, list)):
                 try:
-                    return ''.join([chr(x) for x in value])
+                    return ''.join(chr(x) for x in value)
 
                 except ValueError:
                     raise error.PyAsn1Error(
@@ -867,7 +867,7 @@ class OctetString(base.SimpleAsn1Type):
             return str(self._value)
 
         def asNumbers(self):
-            return tuple([ord(x) for x in self._value])
+            return tuple(ord(x) for x in self._value)
 
     else:
         def prettyIn(self, value):
@@ -1221,14 +1221,14 @@ class ObjectIdentifier(base.SimpleAsn1Type):
                     'Malformed Object ID %s at %s: %s' % (value, self.__class__.__name__, sys.exc_info()[1])
                 )
             try:
-                return tuple([int(subOid) for subOid in value.split('.') if subOid])
+                return tuple(int(subOid) for subOid in value.split('.') if subOid)
             except ValueError:
                 raise error.PyAsn1Error(
                     'Malformed Object ID %s at %s: %s' % (value, self.__class__.__name__, sys.exc_info()[1])
                 )
 
         try:
-            tupleOfInts = tuple([int(subOid) for subOid in value if subOid >= 0])
+            tupleOfInts = tuple(int(subOid) for subOid in value if subOid >= 0)
 
         except (ValueError, TypeError):
             raise error.PyAsn1Error(
@@ -1241,7 +1241,7 @@ class ObjectIdentifier(base.SimpleAsn1Type):
         raise error.PyAsn1Error('Malformed Object ID %s at %s' % (value, self.__class__.__name__))
 
     def prettyOut(self, value):
-        return '.'.join([str(x) for x in value])
+        return '.'.join(str(x) for x in value)
 
 
 class Real(base.SimpleAsn1Type):

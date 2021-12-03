@@ -9,7 +9,7 @@ from sys import version_info
 if version_info[0] <= 2:
     int2oct = chr
     # noinspection PyPep8
-    ints2octs = lambda s: ''.join([int2oct(x) for x in s])
+    ints2octs = lambda s: ''.join(int2oct(x) for x in s)
     null = ''
     oct2int = ord
     # TODO: refactor to return a sequence of ints

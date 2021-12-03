@@ -77,7 +77,7 @@ class AbstractCharacterString(univ.OctetString):
                 elif isinstance(value, str):
                     return value.decode(self.encoding)
                 elif isinstance(value, (tuple, list)):
-                    return self.prettyIn(''.join([chr(x) for x in value]))
+                    return self.prettyIn(''.join(chr(x) for x in value))
                 elif isinstance(value, univ.OctetString):
                     return value.asOctets().decode(self.encoding)
                 else:
@@ -94,7 +94,7 @@ class AbstractCharacterString(univ.OctetString):
             return str(self)
 
         def asNumbers(self, padding=True):
-            return tuple([ord(x) for x in str(self)])
+            return tuple(ord(x) for x in str(self))
 
     else:
         def __str__(self):
