@@ -104,7 +104,7 @@ class NamedValues(object):
                 number += 1
 
     def __repr__(self):
-        representation = ', '.join(['%s=%d' % x for x in self.items()])
+        representation = ', '.join('%s=%d' % x for x in self.items())
 
         if len(representation) > 64:
             representation = representation[:32] + '...' + representation[-32:]

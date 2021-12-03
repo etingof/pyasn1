@@ -194,8 +194,8 @@ class TagSet(object):
         self.__hash = hash(self.__superTagsClassId)
 
     def __repr__(self):
-        representation = '-'.join(['%s:%s:%s' % (x.tagClass, x.tagFormat, x.tagId)
-                                   for x in self.__superTags])
+        representation = '-'.join('%s:%s:%s' % (x.tagClass, x.tagFormat, x.tagId)
+                                  for x in self.__superTags)
         if representation:
             representation = 'tags ' + representation
         else:
