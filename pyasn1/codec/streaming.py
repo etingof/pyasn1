@@ -109,6 +109,7 @@ def asSeekableStream(substrate):
 
     try:
         # Special case: impossible to set attributes on `file` built-in
+        # XXX: broken, BufferedReader expects a "readable" attribute.
         if _PY2 and isinstance(substrate, file):
             return io.BufferedReader(substrate)
 

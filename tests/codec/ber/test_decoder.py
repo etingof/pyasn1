@@ -1628,6 +1628,7 @@ class ErrorOnDecodingTestCase(BaseTestCase):
             'Unexpected rest of substrate after raw dump %r' % rest)
 
 
+@unittest.skipIf(sys.version_info < (3,), "Unsupported on Python 2")
 class BinaryFileTestCase(BaseTestCase):
     """Assure that decode works on open binary files."""
     def testOneObject(self):
