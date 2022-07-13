@@ -20,5 +20,5 @@ You may also want to use `pyasn1-modules`:
    $ pip install pyasn1-modules
 
 Alternatively, you can download the latest release from
-`GitHub <https://github.com/etingof/pyasn1/releases>`_
+`GitHub <https://github.com/pyasn1/pyasn1/releases>`_
 or `PyPI <https://pypi.org/project/pyasn1>`_.

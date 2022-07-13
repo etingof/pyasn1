@@ -6,6 +6,7 @@
 #
 import math
 import pickle
+import platform
 import sys
 import unittest
 
@@ -141,6 +142,10 @@ class NoValueTestCase(BaseTestCase):
         else:
             assert False, 'boolean evaluation works for NoValue object'
     
+    @unittest.skipIf(
+        platform.python_implementation() == "PyPy",
+        "getsizeof() raises TypeError on PyPy"
+    )
     def testSizeOf(self):
         try:
             sys.getsizeof(univ.noValue)

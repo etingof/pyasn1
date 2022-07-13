@@ -12,7 +12,7 @@ from pyasn1.compat.octets import oct2int, null, ensureString
 
 implementation = platform.python_implementation()
 
-if sys.version_info[0] < 3 or implementation != 'CPython':
+if sys.version_info[0] < 3:
     from binascii import a2b_hex, b2a_hex
 
     def from_bytes(octets, signed=False):

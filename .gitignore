@@ -1,6 +1,8 @@
 # Python stuff
 *.pyc
 __pycache__
+.coverage
+.tox
 
 # vim swapfiles
 *.sw?
