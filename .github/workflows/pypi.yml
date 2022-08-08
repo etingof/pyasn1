@@ -22,7 +22,7 @@ on:
 
 jobs:
   tests:
-    uses: /.github/workflows/main.yml
+    uses: ./.github/workflows/main.yml
   pypi:
     name: Build and upload to PyPI
     runs-on: ubuntu-latest
@@ -31,7 +31,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ inputs.tag || github.ref }}
+          ref: ${{ inputs.tag }}
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
@@ -45,13 +45,13 @@ jobs:
       - name: "Run twine check"
         run: "python -m twine check dist/*"
       - name: Publish distribution to Test PyPI
-        uses: pypa/gh-action-pypi-publish@master
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
         if: inputs.testpypi || false
       - name: Publish distribution to PyPI
-        uses: pypa/gh-action-pypi-publish@master
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
         if: inputs.pypi || false
