@@ -23,6 +23,8 @@ on:
 jobs:
   tests:
     uses: ./.github/workflows/main.yml
+    with:
+      tag: ${{ inputs.tag }}
   pypi:
     name: Build and upload to PyPI
     runs-on: ubuntu-latest

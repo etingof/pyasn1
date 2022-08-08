@@ -7,7 +7,17 @@ on:
   pull_request:
     branches: [ "main", "v*" ]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: tag to build
+        required: false
+        type: string
   workflow_call:
+    inputs:
+      tag:
+        description: tag to build
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -35,6 +45,8 @@ jobs:
           - "pypy-3.9"
     steps:
       - uses: "actions/checkout@v3"
+        with:
+          ref: ${{ inputs.tag || github.ref }}
       - uses: "actions/setup-python@v4"
         with:
           python-version: "${{ matrix.python-version }}"
@@ -52,6 +64,8 @@ jobs:
     needs: tests
     steps:
       - uses: "actions/checkout@v3"
+        with:
+          ref: ${{ inputs.tag || github.ref }}
       - uses: "actions/setup-python@v4"
         with:
           python-version: "3.10"
