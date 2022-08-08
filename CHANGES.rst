@@ -1,6 +1,6 @@
 
-Revision 0.5.0, released XX-08-2022
------------------------------------
+Revision 0.5.0.rc1, released 08-08-2022
+---------------------------------------
 
 - Make BER/CER/DER decoders streaming and suspendible
 
@@ -28,6 +28,11 @@ Revision 0.5.0, released XX-08-2022
 - Modernized packaging and testing. pyasn1 now uses ``setup.cfg``,
   ``pyproject.toml``, [build](https://pypi.org/project/build/), and
   GitHub Actions.
+- PyPI package ownership for `pyasn` and `pyasn-module` has been
+  transfered to *Christian Heimes* and *Simon Pichugin* in
+  [PyPI support ticket #2090](https://github.com/pypa/pypi-support/issues/2090).
+- The upstream repositories for `pyasn1` and `pyasn1-modules` are now
+  in the GitHub organization https://github.com/pyasn1/.
 
 Revision 0.4.8, released 16-11-2019
 -----------------------------------
