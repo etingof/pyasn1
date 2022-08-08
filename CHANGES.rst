@@ -28,7 +28,7 @@ Revision 0.5.0.rc1, released 08-08-2022
 - Modernized packaging and testing. pyasn1 now uses ``setup.cfg``,
   ``pyproject.toml``, [build](https://pypi.org/project/build/), and
   GitHub Actions.
-- PyPI package ownership for `pyasn` and `pyasn-module` has been
+- PyPI package ownership for `pyasn1` and `pyasn1-module` has been
   transfered to *Christian Heimes* and *Simon Pichugin* in
   [PyPI support ticket #2090](https://github.com/pypa/pypi-support/issues/2090).
 - The upstream repositories for `pyasn1` and `pyasn1-modules` are now

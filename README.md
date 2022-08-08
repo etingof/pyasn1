@@ -13,6 +13,9 @@ protocol (SNMP) but then generalized to be suitable for a wide range
 of protocols based on
 [ASN.1 specification](https://www.itu.int/rec/dologin_pub.asp?lang=e&id=T-REC-X.208-198811-W!!PDF-E&type=items).
 
+**NOTE:** The package is now maintained by *Christian Heimes* and
+*Simon Pichugin* in project https://github.com/pyasn1/pyasn1.
+
 Features
 --------
 
