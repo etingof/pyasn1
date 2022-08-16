@@ -30,6 +30,10 @@ TAG_MAP.update(
 
 TYPE_MAP = decoder.TYPE_MAP.copy()
 
+# deprecated aliases, https://github.com/pyasn1/pyasn1/issues/9
+tagMap = TAG_MAP
+typeMap = TYPE_MAP
+
 # Put in non-ambiguous types for faster codec lookup
 for typeDecoder in TAG_MAP.values():
     if typeDecoder.protoComponent is not None:

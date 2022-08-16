@@ -260,6 +260,10 @@ TYPE_MAP.update({
     univ.SequenceOf.typeId: SequenceOfEncoder()
 })
 
+# deprecated aliases, https://github.com/pyasn1/pyasn1/issues/9
+tagMap = TAG_MAP
+typeMap = TYPE_MAP
+
 
 class SingleItemEncoder(encoder.SingleItemEncoder):
     fixedDefLengthMode = False
