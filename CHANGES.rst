@@ -1,5 +1,4 @@
-
-Revision 0.5.0.rc2, released ??-??-2022
+Revision 0.5.0.rc2, released 23-08-2022
 ---------------------------------------
 
 - Re-add ``tagMap`` and ``typeMap`` module level attributes to all
