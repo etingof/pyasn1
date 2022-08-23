@@ -8,6 +8,7 @@ from collections import OrderedDict
 
 from pyasn1 import debug
 from pyasn1 import error
+from pyasn1.compat import _MISSING
 from pyasn1.type import base
 from pyasn1.type import char
 from pyasn1.type import tag
@@ -180,9 +181,9 @@ class SingleItemEncoder(object):
     TAG_MAP = TAG_MAP
     TYPE_MAP = TYPE_MAP
 
-    def __init__(self, **options):
-        self._tagMap = options.get('tagMap', self.TAG_MAP)
-        self._typeMap = options.get('typeMap', self.TYPE_MAP)
+    def __init__(self, tagMap=_MISSING, typeMap=_MISSING, **ignored):
+        self._tagMap = tagMap if tagMap is not _MISSING else self.TAG_MAP
+        self._typeMap = typeMap if typeMap is not _MISSING else self.TYPE_MAP
 
     def __call__(self, value, **options):
         if not isinstance(value, base.Asn1Item):

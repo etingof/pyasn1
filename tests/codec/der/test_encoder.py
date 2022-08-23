@@ -639,6 +639,26 @@ class EmptyInnerFieldOfSequenceEncoderTestCase(BaseTestCase):
         assert encoder.encode(self.s) == ints2octs((48, 0))
 
 
+class ClassConstructorTestCase(BaseTestCase):
+    def testKeywords(self):
+        tagmap = {"tagmap": True}
+        typemap = {"typemap": True}
+
+        sie = encoder.Encoder()._singleItemEncoder
+        self.assertIs(sie._tagMap, encoder.TAG_MAP)
+        self.assertIs(sie._typeMap, encoder.TYPE_MAP)
+
+        sie = encoder.Encoder(
+            tagMap=tagmap, typeMap=typemap
+        )._singleItemEncoder
+        self.assertIs(sie._tagMap, tagmap)
+        self.assertIs(sie._typeMap, typemap)
+
+        sie = encoder.Encoder(tagmap, typemap)._singleItemEncoder
+        self.assertIs(sie._tagMap, tagmap)
+        self.assertIs(sie._typeMap, typemap)
+
+
 suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])
 
 if __name__ == '__main__':

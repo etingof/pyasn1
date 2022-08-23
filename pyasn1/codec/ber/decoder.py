@@ -13,6 +13,7 @@ from pyasn1.codec.streaming import asSeekableStream
 from pyasn1.codec.streaming import isEndOfStream
 from pyasn1.codec.streaming import peekIntoStream
 from pyasn1.codec.streaming import readFromStream
+from pyasn1.compat import _MISSING
 from pyasn1.compat.integer import from_bytes
 from pyasn1.compat.octets import oct2int, octs2ints, ints2octs, null
 from pyasn1.error import PyAsn1Error
@@ -1487,9 +1488,9 @@ class SingleItemDecoder(object):
     TAG_MAP = TAG_MAP
     TYPE_MAP = TYPE_MAP
 
-    def __init__(self, **options):
-        self._tagMap = options.get('tagMap', self.TAG_MAP)
-        self._typeMap = options.get('typeMap', self.TYPE_MAP)
+    def __init__(self, tagMap=_MISSING, typeMap=_MISSING, **ignored):
+        self._tagMap = tagMap if tagMap is not _MISSING else self.TAG_MAP
+        self._typeMap = typeMap if typeMap is not _MISSING else self.TYPE_MAP
 
         # Tag & TagSet objects caches
         self._tagCache = {}

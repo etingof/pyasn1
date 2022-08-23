@@ -9,6 +9,7 @@ import sys
 from pyasn1 import debug
 from pyasn1 import error
 from pyasn1.codec.ber import eoo
+from pyasn1.compat import _MISSING
 from pyasn1.compat.integer import to_bytes
 from pyasn1.compat.octets import (int2oct, oct2int, ints2octs, null,
                                   str2octs, isOctetsType)
@@ -785,9 +786,9 @@ class SingleItemEncoder(object):
     TAG_MAP = TAG_MAP
     TYPE_MAP = TYPE_MAP
 
-    def __init__(self, **options):
-        self._tagMap = options.get('tagMap', self.TAG_MAP)
-        self._typeMap = options.get('typeMap', self.TYPE_MAP)
+    def __init__(self, tagMap=_MISSING, typeMap=_MISSING, **ignored):
+        self._tagMap = tagMap if tagMap is not _MISSING else self.TAG_MAP
+        self._typeMap = typeMap if typeMap is not _MISSING else self.TYPE_MAP
 
     def __call__(self, value, asn1Spec=None, **options):
         try:
@@ -852,8 +853,10 @@ class SingleItemEncoder(object):
 class Encoder(object):
     SINGLE_ITEM_ENCODER = SingleItemEncoder
 
-    def __init__(self, **options):
-        self._singleItemEncoder = self.SINGLE_ITEM_ENCODER(**options)
+    def __init__(self, tagMap=_MISSING, typeMap=_MISSING, **options):
+        self._singleItemEncoder = self.SINGLE_ITEM_ENCODER(
+            tagMap=tagMap, typeMap=typeMap, **options
+        )
 
     def __call__(self, pyObject, asn1Spec=None, **options):
         return self._singleItemEncoder(

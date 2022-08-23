@@ -5,6 +5,9 @@ Revision 0.5.0.rc2, released ??-??-2022
 - Re-add ``tagMap`` and ``typeMap`` module level attributes to all
   encoder and decoder modules. They are aliases for ``TAG_MAP`` and
   ``TYPE_MAP``, [issue #9](https://github.com/pyasn1/pyasn1/issues/9).
+- Restore API for passing for ``tagMap`` and ``typeMap`` arguments
+  to ``Encoder`` and ``Decoder`` classes by name and position,
+  [issue #12](https://github.com/pyasn1/pyasn1/issues/12).
 
 Revision 0.5.0.rc1, released 08-08-2022
 ---------------------------------------
