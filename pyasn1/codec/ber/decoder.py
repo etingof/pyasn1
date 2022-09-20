@@ -18,6 +18,7 @@ from pyasn1.compat.octets import oct2int, octs2ints, ints2octs, null
 from pyasn1.error import PyAsn1Error
 from pyasn1.type import base
 from pyasn1.type import char
+from pyasn1.type import constraint
 from pyasn1.type import tag
 from pyasn1.type import tagmap
 from pyasn1.type import univ
@@ -132,6 +133,14 @@ class IntegerPayloadDecoder(AbstractSimplePayloadDecoder):
                      decodeFun=None, substrateFun=None,
                      **options):
 
+        def get_spec_signed(spec):
+            map_constraint = spec.getSubtypeSpec().getValueMap()
+            if len(map_constraint) == 1:
+                constr = next(iter(map_constraint))
+                if isinstance(constr, constraint.ValueRangeConstraint) and constr.start == 0:
+                    return False
+            return True
+
         if tagSet[0].tagFormat != tag.tagFormatSimple:
             raise error.PyAsn1Error('Simple tag format expected')
 
@@ -140,8 +149,7 @@ class IntegerPayloadDecoder(AbstractSimplePayloadDecoder):
                 yield chunk
 
         if chunk:
-            value = from_bytes(chunk, signed=True)
-
+            value = from_bytes(chunk, signed=get_spec_signed(asn1Spec))
         else:
             value = 0
 
