@@ -354,7 +354,7 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
 
 
 class RealEncoder(AbstractItemEncoder):
-    supportIndefLenMode = 0
+    supportIndefLenMode = False
     binEncBase = 2  # set to None to choose encoding base automatically
 
     @staticmethod
