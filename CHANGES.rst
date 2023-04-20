@@ -1,16 +1,25 @@
-Revision 0.5.0.rc2, released 23-08-2022
+Revision 0.5.0, released 19-04-2023
 ---------------------------------------
 
+- Change `RealEncoder.supportIndefLenMode` type to a boolean
+  [pr #21](https://github.com/pyasn1/pyasn1/pull/21/)
+- Fix CI for py39 test environment
+  [pr #25](https://github.com/pyasn1/pyasn1/pull/25/)
+- Replace all snmplabs.com links
+  [issue #4](https://github.com/pyasn1/pyasn1/issues/4)
+- Use correct SPDX identifier for the license
+  [pr #16](https://github.com/pyasn1/pyasn1/pull/16)
 - Re-add ``tagMap`` and ``typeMap`` module level attributes to all
   encoder and decoder modules. They are aliases for ``TAG_MAP`` and
   ``TYPE_MAP``, [issue #9](https://github.com/pyasn1/pyasn1/issues/9).
 - Restore API for passing for ``tagMap`` and ``typeMap`` arguments
   to ``Encoder`` and ``Decoder`` classes by name and position,
   [issue #12](https://github.com/pyasn1/pyasn1/issues/12).
-
-Revision 0.5.0.rc1, released 08-08-2022
----------------------------------------
-
+- Re-add ``tagMap`` and ``typeMap`` module level attributes to all
+  encoder and decoder modules. They are aliases for ``TAG_MAP`` and
+  ``TYPE_MAP``, [issue #9](https://github.com/pyasn1/pyasn1/issues/9).
+- Restore API for passing for ``tagMap`` and ``typeMap`` arguments
+  to ``Encoder`` and ``Decoder`` classes by name and position,
 - Make BER/CER/DER decoders streaming and suspendible
 
   The goal of this change is to make the decoder yielding on input
@@ -30,7 +39,6 @@ Revision 0.5.0.rc1, released 08-08-2022
   All these new feature are natively available through
   `StreamingDecoder` class. Previously published API is implemented
   as a thin wrapper on top of that ensuring backward compatibility.
-
 - Added support for Python 3.8, 3.9, 3.10, 3.11
 - Removed support for EOL Pythons 2.4, 2.5, 2.6, 3.2, 3.3, 3.4, 3.5
 - Added support for PyPy 3.7, 3.8, 3.9
