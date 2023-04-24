@@ -1762,7 +1762,7 @@ class SingleItemDecoder(object):
 
             if state is stDecodeValue:
                 if not options.get('recursiveFlag', True) and not substrateFun:  # deprecate this
-                    substrateFun = lambda a, b, c: (a, b[:c])
+                    substrateFun = lambda a, b, c, d: readFromStream(b, c)
 
                 original_position = substrate.tell()
 
