@@ -1783,9 +1783,13 @@ class SingleItemDecoder(object):
                             yield value
 
                     bytesRead = substrate.tell() - original_position
-                    if bytesRead != length:
+                    if not substrateFun and bytesRead != length:
                         raise PyAsn1Error(
                             "Read %s bytes instead of expected %s." % (bytesRead, length))
+                    elif substrateFun and bytesRead > length:
+                        # custom substrateFun may be used for partial decoding, reading less is expected there
+                        raise PyAsn1Error(
+                            "Read %s bytes are more than expected %s." % (bytesRead, length))
 
                 if LOG:
                    LOG('codec %s yields type %s, value:\n%s\n...' % (
