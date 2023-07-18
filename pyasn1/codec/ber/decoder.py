@@ -1765,7 +1765,14 @@ class SingleItemDecoder(object):
 
             if state is stDecodeValue:
                 if not options.get('recursiveFlag', True) and not substrateFun:  # deprecate this
-                    substrateFun = lambda a, b, c, d: readFromStream(b, c)
+                    def substrateFun(asn1Object, _substrate, _length, _options):
+                        """Legacy hack to keep the recursiveFlag=False option supported.
+
+                        The decode(..., substrateFun=userCallback) option was introduced in 0.1.4 as a generalization
+                        of the old recursiveFlag=False option. Users should pass their callback instead of using
+                        recursiveFlag.
+                        """
+                        yield asn1Object
 
                 original_position = substrate.tell()
 
