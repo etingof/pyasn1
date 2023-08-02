@@ -3,7 +3,7 @@ Download & Install
 ==================
 
 The *pyasn1* library is a pure-Python package with no external
-dependencies. It works with Python 2.7 and 3.4+.
+dependencies. It works with Python 3.8+.
 
 The best way to obtain PyASN1 is by running `pip`:
 
