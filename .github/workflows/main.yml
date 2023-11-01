@@ -22,19 +22,29 @@ on:
 permissions:
   contents: read
 
+env:
+  FORCE_COLOR: 1
+
 jobs:
   tests:
     name: "Python ${{ matrix.python-version }}"
-    runs-on: "ubuntu-22.04"
+    # 20.04 because https://github.com/actions/python-versions
+    # does not have 2.7 and 3.6 binaries for 22.04.
+    runs-on: "ubuntu-20.04"
     strategy:
       fail-fast: false
       matrix:
         python-version:
+          - "2.7"
+          - "3.6"
+          - "3.7"
           - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
           - "3.12-dev"
+          - "pypy-2.7"
+          - "pypy-3.7"
           - "pypy-3.8"
           - "pypy-3.9"
           - "pypy-3.10"
@@ -45,6 +55,7 @@ jobs:
       - uses: "actions/setup-python@v4"
         with:
           python-version: "${{ matrix.python-version }}"
+          allow-prereleases: true
           cache: "pip"
       - name: "Update pip"
         run: python -m pip install --upgrade pip setuptools wheel
@@ -63,7 +74,7 @@ jobs:
           ref: ${{ inputs.tag || github.ref }}
       - uses: "actions/setup-python@v4"
         with:
-          python-version: "3.11"
+          python-version: "3.x"
           cache: "pip"
       - name: "Update pip"
         run: python -m pip install --upgrade pip setuptools wheel
