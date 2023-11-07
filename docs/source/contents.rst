@@ -1,3 +1,4 @@
+.. _Start Content:
 
 ASN.1 library for Python
 ========================
@@ -159,3 +160,9 @@ On the other end of the readability spectrum, here is a quick and sweet write up
 If you are working with ASN.1, we'd highly recommend reading a proper
 book on the subject.
 
+
+.. hidden toctree to include `index.rst` for RTD
+.. toctree::
+   :hidden:
+
+   /index
