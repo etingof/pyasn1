@@ -1,7 +1,22 @@
-Revision 0.5.1, released xx-08-2023
+Revision 0.5.1, released 20-11-2023
 ---------------------------------------
 
 - Added support for PyPy 3.10 and Python 3.12
+  [pr #32](https://github.com/pyasn1/pyasn1/pull/32/)
+- Updated RTD configuration to include a dummy index.rst
+  redirecting to contents.html, ensuring compatibility with
+  third-party documentation and search indexes.
+  [pr #47](https://github.com/pyasn1/pyasn1/pull/47/)
+- Fixed the API breakage wih decoder.decode(substrateFun=...).
+
+  A substrateFun passed to ``decoder.decode()`` can now be either
+  v0.4 Non-Streaming or v0.5 Streaming. pyasn1 will detect and
+  handle both cases transparently.
+
+  A substrateFun passed to one of the new streaming decoders is
+  still expected to be v0.5 Streaming only.
+  [pr #30](https://github.com/pyasn1/pyasn1/pull/30/)
+  [pr #39](https://github.com/pyasn1/pyasn1/pull/39/)
 
 Revision 0.5.0, released 19-04-2023
 ---------------------------------------
