@@ -154,7 +154,7 @@ Here you can get the official standards which is hard to read:
 
 On the other end of the readability spectrum, here is a quick and sweet write up:
 
-* `A Layman's Guide to a Subset of ASN.1, BER, and DER <ftp://ftp.rsasecurity.com/pub/pkcs/ascii/layman.asc>`_ by Burton S. Kaliski
+* `A Layman's Guide to a Subset of ASN.1, BER, and DER <https://www.researchgate.net/publication/2820226_A_Layman's_Guide_to_a_Subset_of_ASN1_BER_and_DER>`_ by Burton S. Kaliski
 
 If you are working with ASN.1, we'd highly recommend reading a proper
 book on the subject.
