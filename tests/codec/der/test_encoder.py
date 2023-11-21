@@ -2,7 +2,7 @@
 # This file is part of pyasn1 software.
 #
 # Copyright (c) 2005-2020, Ilya Etingof <etingof@gmail.com>
-# License: http://snmplabs.com/pyasn1/license.html
+# License: https://pyasn1.readthedocs.io/en/latest/license.html
 #
 import sys
 import unittest
@@ -637,6 +637,26 @@ class EmptyInnerFieldOfSequenceEncoderTestCase(BaseTestCase):
         self.s.clear()
         self.s[0] = ''
         assert encoder.encode(self.s) == ints2octs((48, 0))
+
+
+class ClassConstructorTestCase(BaseTestCase):
+    def testKeywords(self):
+        tagmap = {"tagmap": True}
+        typemap = {"typemap": True}
+
+        sie = encoder.Encoder()._singleItemEncoder
+        self.assertIs(sie._tagMap, encoder.TAG_MAP)
+        self.assertIs(sie._typeMap, encoder.TYPE_MAP)
+
+        sie = encoder.Encoder(
+            tagMap=tagmap, typeMap=typemap
+        )._singleItemEncoder
+        self.assertIs(sie._tagMap, tagmap)
+        self.assertIs(sie._typeMap, typemap)
+
+        sie = encoder.Encoder(tagmap, typemap)._singleItemEncoder
+        self.assertIs(sie._tagMap, tagmap)
+        self.assertIs(sie._typeMap, typemap)
 
 
 suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])

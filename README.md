@@ -3,15 +3,18 @@ ASN.1 library for Python
 ------------------------
 [![PyPI](https://img.shields.io/pypi/v/pyasn1.svg?maxAge=2592000)](https://pypi.org/project/pyasn1)
 [![Python Versions](https://img.shields.io/pypi/pyversions/pyasn1.svg)](https://pypi.org/project/pyasn1/)
-[![Build status](https://travis-ci.org/etingof/pyasn1.svg?branch=master)](https://secure.travis-ci.org/etingof/pyasn1)
-[![Coverage Status](https://img.shields.io/codecov/c/github/etingof/pyasn1.svg)](https://codecov.io/github/etingof/pyasn1)
-[![GitHub license](https://img.shields.io/badge/license-BSD-blue.svg)](https://raw.githubusercontent.com/etingof/pyasn1/master/LICENSE.txt)
+[![Build status](https://github.com/pyasn1/pyasn1/actions/workflows/main.yml/badge.svg)](https://github.com/pyasn1/pyasn1/actions/workflows/main.yml)
+[![Coverage Status](https://img.shields.io/codecov/c/github/pyasn1/pyasn1.svg)](https://codecov.io/github/pyasn1/pyasn1)
+[![GitHub license](https://img.shields.io/badge/license-BSD-blue.svg)](https://raw.githubusercontent.com/pyasn1/pyasn1/master/LICENSE.txt)
 
 This is a free and open source implementation of ASN.1 types and codecs
 as a Python package. It has been first written to support particular
 protocol (SNMP) but then generalized to be suitable for a wide range
 of protocols based on
 [ASN.1 specification](https://www.itu.int/rec/dologin_pub.asp?lang=e&id=T-REC-X.208-198811-W!!PDF-E&type=items).
+
+**NOTE:** The package is now maintained by *Christian Heimes* and
+*Simon Pichugin* in project https://github.com/pyasn1/pyasn1.
 
 Features
 --------
@@ -20,7 +23,7 @@ Features
 * Standards compliant BER/CER/DER codecs
 * Can operate on streams of serialized data
 * Dumps/loads ASN.1 structures from Python types
-* 100% Python, works with Python 2.7 and 3.5+
+* 100% Python, works with Python 2.7 and 3.6+
 * MT-safe
 * Contributed ASN.1 compiler [Asn1ate](https://github.com/kimgr/asn1ate)
 
@@ -161,22 +164,22 @@ Python built-ins codecs. The extremely compact PER encoding is expected
 to be introduced in the upcoming pyasn1 release.
 
 More information on pyasn1 APIs can be found in the
-[documentation](http://snmplabs.com/pyasn1/),
+[documentation](https://pyasn1.readthedocs.io/en/latest/pyasn1/contents.html),
 compiled ASN.1 modules for different protocols and file formats
 could be found in the pyasn1-modules 
-[repo](https://github.com/etingof/pyasn1-modules).
+[repo](https://github.com/pyasn1/pyasn1-modules).
 
 How to get pyasn1
 -----------------
 
 The pyasn1 package is distributed under terms and conditions of 2-clause
-BSD [license](http://snmplabs.com/pyasn1/license.html). Source code is freely
-available as a GitHub [repo](https://github.com/etingof/pyasn1).
+BSD [license](https://pyasn1.readthedocs.io/en/latest/license.html). Source code is freely
+available as a GitHub [repo](https://github.com/pyasn1/pyasn1).
 
 You could `pip install pyasn1` or download it from [PyPI](https://pypi.org/project/pyasn1).
 
 If something does not work as expected, 
-[open an issue](https://github.com/etingof/pyasn1/issues) at GitHub or
+[open an issue](https://github.com/epyasn1/pyasn1/issues) at GitHub or
 post your question [on Stack Overflow](https://stackoverflow.com/questions/ask)
 or try browsing pyasn1 
 [mailing list archives](https://sourceforge.net/p/pyasn1/mailman/pyasn1-users/).

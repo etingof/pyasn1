@@ -2,10 +2,11 @@
 # This file is part of pyasn1 software.
 #
 # Copyright (c) 2005-2020, Ilya Etingof <etingof@gmail.com>
-# License: http://snmplabs.com/pyasn1/license.html
+# License: https://pyasn1.readthedocs.io/en/latest/license.html
 #
 import math
 import pickle
+import platform
 import sys
 import unittest
 
@@ -141,6 +142,10 @@ class NoValueTestCase(BaseTestCase):
         else:
             assert False, 'boolean evaluation works for NoValue object'
     
+    @unittest.skipIf(
+        platform.python_implementation() == "PyPy",
+        "getsizeof() raises TypeError on PyPy"
+    )
     def testSizeOf(self):
         try:
             sys.getsizeof(univ.noValue)

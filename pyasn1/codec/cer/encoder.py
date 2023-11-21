@@ -2,7 +2,7 @@
 # This file is part of pyasn1 software.
 #
 # Copyright (c) 2005-2020, Ilya Etingof <etingof@gmail.com>
-# License: http://snmplabs.com/pyasn1/license.html
+# License: https://pyasn1.readthedocs.io/en/latest/license.html
 #
 from pyasn1 import error
 from pyasn1.codec.ber import encoder
@@ -259,6 +259,10 @@ TYPE_MAP.update({
     univ.Sequence.typeId: SequenceEncoder(),
     univ.SequenceOf.typeId: SequenceOfEncoder()
 })
+
+# deprecated aliases, https://github.com/pyasn1/pyasn1/issues/9
+tagMap = TAG_MAP
+typeMap = TYPE_MAP
 
 
 class SingleItemEncoder(encoder.SingleItemEncoder):

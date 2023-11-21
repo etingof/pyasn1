@@ -1,3 +1,4 @@
+.. _Start Content:
 
 ASN.1 library for Python
 ========================
@@ -131,8 +132,8 @@ The PyASN1 software is distributed under 2-clause BSD License.
 Getting help
 ------------
 
-Please, file your `issues <https://github.com/etingof/pyasn1/issues>`_
-and `PRs <https://github.com/etingof/pyasn1/pulls>`_ at GitHub.
+Please, file your `issues <https://github.com/pyasn1/pyasn1/issues>`_
+and `PRs <https://github.com/pyasn1/pyasn1/pulls>`_ at GitHub.
 Alternatively, you could ask for help at
 `Stack Overflow <http://stackoverflow.com/questions/tagged/pyasn1>`_
 or search
@@ -159,3 +160,9 @@ On the other end of the readability spectrum, here is a quick and sweet write up
 If you are working with ASN.1, we'd highly recommend reading a proper
 book on the subject.
 
+
+.. hidden toctree to include `index.rst` for RTD
+.. toctree::
+   :hidden:
+
+   /index

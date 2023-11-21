@@ -2,7 +2,7 @@
 # This file is part of pyasn1 software.
 #
 # Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>
-# License: http://snmplabs.com/pyasn1/license.html
+# License: https://pyasn1.readthedocs.io/en/latest/license.html
 #
 import io
 import os
@@ -109,6 +109,7 @@ def asSeekableStream(substrate):
 
     try:
         # Special case: impossible to set attributes on `file` built-in
+        # XXX: broken, BufferedReader expects a "readable" attribute.
         if _PY2 and isinstance(substrate, file):
             return io.BufferedReader(substrate)
 

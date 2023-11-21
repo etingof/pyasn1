@@ -2,10 +2,11 @@
 # This file is part of pyasn1 software.
 #
 # Copyright (c) 2005-2020, Ilya Etingof <etingof@gmail.com>
-# License: http://snmplabs.com/pyasn1/license.html
+# License: https://pyasn1.readthedocs.io/en/latest/license.html
 #
 from pyasn1 import debug
 from pyasn1 import error
+from pyasn1.compat import _MISSING
 from pyasn1.type import base
 from pyasn1.type import char
 from pyasn1.type import tag
@@ -129,15 +130,19 @@ TYPE_MAP = {
     useful.UTCTime.typeId: AbstractScalarPayloadDecoder()
 }
 
+# deprecated aliases, https://github.com/pyasn1/pyasn1/issues/9
+tagMap = TAG_MAP
+typeMap = TYPE_MAP
+
 
 class SingleItemDecoder(object):
 
     TAG_MAP = TAG_MAP
     TYPE_MAP = TYPE_MAP
 
-    def __init__(self, **options):
-        self._tagMap = options.get('tagMap', self.TAG_MAP)
-        self._typeMap = options.get('typeMap', self.TYPE_MAP)
+    def __init__(self, tagMap=_MISSING, typeMap=_MISSING, **ignored):
+        self._tagMap = tagMap if tagMap is not _MISSING else self.TAG_MAP
+        self._typeMap = typeMap if typeMap is not _MISSING else self.TYPE_MAP
 
     def __call__(self, pyObject, asn1Spec, **options):
 

@@ -2,7 +2,7 @@
 # This file is part of pyasn1 software.
 #
 # Copyright (c) 2005-2020, Ilya Etingof <etingof@gmail.com>
-# License: http://snmplabs.com/pyasn1/license.html
+# License: https://pyasn1.readthedocs.io/en/latest/license.html
 #
 import sys
 import platform
@@ -12,7 +12,7 @@ from pyasn1.compat.octets import oct2int, null, ensureString
 
 implementation = platform.python_implementation()
 
-if sys.version_info[0] < 3 or implementation != 'CPython':
+if sys.version_info[0] < 3:
     from binascii import a2b_hex, b2a_hex
 
     def from_bytes(octets, signed=False):

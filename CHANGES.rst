@@ -1,7 +1,45 @@
+Revision 0.5.1, released 20-11-2023
+---------------------------------------
 
-Revision 0.5.0, released XX-03-2020
------------------------------------
+- Added support for PyPy 3.10 and Python 3.12
+  [pr #32](https://github.com/pyasn1/pyasn1/pull/32/)
+- Updated RTD configuration to include a dummy index.rst
+  redirecting to contents.html, ensuring compatibility with
+  third-party documentation and search indexes.
+  [pr #47](https://github.com/pyasn1/pyasn1/pull/47/)
+- Fixed the API breakage wih decoder.decode(substrateFun=...).
 
+  A substrateFun passed to ``decoder.decode()`` can now be either
+  v0.4 Non-Streaming or v0.5 Streaming. pyasn1 will detect and
+  handle both cases transparently.
+
+  A substrateFun passed to one of the new streaming decoders is
+  still expected to be v0.5 Streaming only.
+  [pr #30](https://github.com/pyasn1/pyasn1/pull/30/)
+  [pr #39](https://github.com/pyasn1/pyasn1/pull/39/)
+
+Revision 0.5.0, released 19-04-2023
+---------------------------------------
+
+- Change `RealEncoder.supportIndefLenMode` type to a boolean
+  [pr #21](https://github.com/pyasn1/pyasn1/pull/21/)
+- Fix CI for py39 test environment
+  [pr #25](https://github.com/pyasn1/pyasn1/pull/25/)
+- Replace all snmplabs.com links
+  [issue #4](https://github.com/pyasn1/pyasn1/issues/4)
+- Use correct SPDX identifier for the license
+  [pr #16](https://github.com/pyasn1/pyasn1/pull/16)
+- Re-add ``tagMap`` and ``typeMap`` module level attributes to all
+  encoder and decoder modules. They are aliases for ``TAG_MAP`` and
+  ``TYPE_MAP``, [issue #9](https://github.com/pyasn1/pyasn1/issues/9).
+- Restore API for passing for ``tagMap`` and ``typeMap`` arguments
+  to ``Encoder`` and ``Decoder`` classes by name and position,
+  [issue #12](https://github.com/pyasn1/pyasn1/issues/12).
+- Re-add ``tagMap`` and ``typeMap`` module level attributes to all
+  encoder and decoder modules. They are aliases for ``TAG_MAP`` and
+  ``TYPE_MAP``, [issue #9](https://github.com/pyasn1/pyasn1/issues/9).
+- Restore API for passing for ``tagMap`` and ``typeMap`` arguments
+  to ``Encoder`` and ``Decoder`` classes by name and position,
 - Make BER/CER/DER decoders streaming and suspendible
 
   The goal of this change is to make the decoder yielding on input
@@ -21,13 +59,17 @@ Revision 0.5.0, released XX-03-2020
   All these new feature are natively available through
   `StreamingDecoder` class. Previously published API is implemented
   as a thin wrapper on top of that ensuring backward compatibility.
-
-Revision 0.4.9, released XX-03-2020
------------------------------------
-
-- Added support for Python 3.8.
-- Removed support for EOL Pythons 2.4, 2.5, 2.6, 3.2, 3.3 and 3.4.
-- Copyright notice extended to the year 2020
+- Added support for Python 3.8, 3.9, 3.10, 3.11
+- Removed support for EOL Pythons 2.4, 2.5, 2.6, 3.2, 3.3, 3.4, 3.5
+- Added support for PyPy 3.7, 3.8, 3.9
+- Modernized packaging and testing. pyasn1 now uses ``setup.cfg``,
+  ``pyproject.toml``, [build](https://pypi.org/project/build/), and
+  GitHub Actions.
+- PyPI package ownership for `pyasn1` and `pyasn1-module` has been
+  transfered to *Christian Heimes* and *Simon Pichugin* in
+  [PyPI support ticket #2090](https://github.com/pypa/pypi-support/issues/2090).
+- The upstream repositories for `pyasn1` and `pyasn1-modules` are now
+  in the GitHub organization https://github.com/pyasn1/.
 
 Revision 0.4.8, released 16-11-2019
 -----------------------------------

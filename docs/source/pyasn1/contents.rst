@@ -1,5 +1,5 @@
 
-.. _pyasn1:
+.. _pyasn1-library:
 
 Library documentation
 =====================
@@ -18,8 +18,8 @@ grammar parser paired to code generator capable of generating pyasn1
 code. So this is an alternative (or at least a good start) to manual
 implementation of pyasn1 classes from ASN.1 specification.
 
-Both `pyasn1 <https://github.com/etingof/pyasn1>`_ and
-`pyasn1-modules <https://github.com/etingof/pyasn1-modules>`_ libraries
+Both `pyasn1 <https://github.com/pyasn1/pyasn1>`_ and
+`pyasn1-modules <https://github.com/pyasn1/pyasn1-modules>`_ libraries
 can be used out-of-the-box with Python versions 2.7 and 3.4+.
 No external dependencies required.
 

@@ -2,13 +2,14 @@
 # This file is part of pyasn1 software.
 #
 # Copyright (c) 2005-2020, Ilya Etingof <etingof@gmail.com>
-# License: http://snmplabs.com/pyasn1/license.html
+# License: https://pyasn1.readthedocs.io/en/latest/license.html
 #
 import sys
 
 from pyasn1 import debug
 from pyasn1 import error
 from pyasn1.codec.ber import eoo
+from pyasn1.compat import _MISSING
 from pyasn1.compat.integer import to_bytes
 from pyasn1.compat.octets import (int2oct, oct2int, ints2octs, null,
                                   str2octs, isOctetsType)
@@ -353,7 +354,7 @@ class ObjectIdentifierEncoder(AbstractItemEncoder):
 
 
 class RealEncoder(AbstractItemEncoder):
-    supportIndefLenMode = 0
+    supportIndefLenMode = False
     binEncBase = 2  # set to None to choose encoding base automatically
 
     @staticmethod
@@ -773,6 +774,10 @@ TYPE_MAP = {
     useful.UTCTime.typeId: OctetStringEncoder()
 }
 
+# deprecated aliases, https://github.com/pyasn1/pyasn1/issues/9
+tagMap = TAG_MAP
+typeMap = TYPE_MAP
+
 
 class SingleItemEncoder(object):
     fixedDefLengthMode = None
@@ -781,9 +786,9 @@ class SingleItemEncoder(object):
     TAG_MAP = TAG_MAP
     TYPE_MAP = TYPE_MAP
 
-    def __init__(self, **options):
-        self._tagMap = options.get('tagMap', self.TAG_MAP)
-        self._typeMap = options.get('typeMap', self.TYPE_MAP)
+    def __init__(self, tagMap=_MISSING, typeMap=_MISSING, **ignored):
+        self._tagMap = tagMap if tagMap is not _MISSING else self.TAG_MAP
+        self._typeMap = typeMap if typeMap is not _MISSING else self.TYPE_MAP
 
     def __call__(self, value, asn1Spec=None, **options):
         try:
@@ -848,8 +853,10 @@ class SingleItemEncoder(object):
 class Encoder(object):
     SINGLE_ITEM_ENCODER = SingleItemEncoder
 
-    def __init__(self, **options):
-        self._singleItemEncoder = self.SINGLE_ITEM_ENCODER(**options)
+    def __init__(self, tagMap=_MISSING, typeMap=_MISSING, **options):
+        self._singleItemEncoder = self.SINGLE_ITEM_ENCODER(
+            tagMap=tagMap, typeMap=typeMap, **options
+        )
 
     def __call__(self, pyObject, asn1Spec=None, **options):
         return self._singleItemEncoder(
